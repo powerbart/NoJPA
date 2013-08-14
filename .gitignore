@@ -1,0 +1,9 @@
+.DS_Store
+.idea
+*.iws
+*.ipr
+*.iml
+target/
+*/target/
+reuuux_frontend/target/
+reuuux_backend/target/
