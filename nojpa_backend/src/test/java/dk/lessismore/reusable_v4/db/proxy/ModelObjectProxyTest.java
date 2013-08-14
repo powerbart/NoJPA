@@ -124,50 +124,50 @@ public class ModelObjectProxyTest {
         Person person2 = MQ.select(personMock).where(personMock.getName(), EQUAL, "King Kong").getFirst();
         assertEquals("King Kong", person2.getName());
     }
-
-    @Test
-    public void testCreation() {
-        Person[] employees = new Person[2];
-
-        employees[0] = ModelObjectProxy.create(Person.class);
-        employees[0].setName("Peter Naur");
-        employees[0].setAge(80);
-
-        employees[1] = ModelObjectProxy.create(Person.class);
-        employees[1].setName("Donald Knuth");
-        employees[1].setAge(71);
-
-        Company company = ModelObjectProxy.create(Company.class);
-        company.setName("Ajax");
-        company.setEmployees(employees);
-        assertNotNull(company.getEmployees());
-
-        ModelObjectService.save(company);
-
-        assertEquals("Ajax", company.getName());
-
-        Person mock = MQ.mock(Person.class);
-
-        Person person1 = MQ.select(mock).where(mock.getAge(), EQUAL, 80).getFirst();
-        assertEquals("Peter Naur", person1.getName());
-
-        Person person2 = MQ.select(mock).where(mock.getAge(), EQUAL, 71).getFirst();
-        assertEquals("Donald Knuth", person2.getName());
-
-        Company loadedCompany = MQ.select(Company.class).getFirst();
-        assertNotNull(loadedCompany);
-
-        Person[] persons = loadedCompany.getEmployees();
-        assertNotNull(persons);
-        assertEquals(2, persons.length);
-
-        if(persons[0].getAge() == 80) {
-            assertEquals("Peter Naur", persons[0].getName());
-            assertEquals("Donald Knuth", persons[1].getName());
-        } else {
-            assertEquals("Donald Knuth", persons[0].getName());
-            assertEquals("Peter Naur", persons[1].getName());
-        }
-    }
+//TODO: Add
+//    @Test
+//    public void testCreation() {
+//        Person[] employees = new Person[2];
+//
+//        employees[0] = ModelObjectProxy.create(Person.class);
+//        employees[0].setName("Peter Naur");
+//        employees[0].setAge(80);
+//
+//        employees[1] = ModelObjectProxy.create(Person.class);
+//        employees[1].setName("Donald Knuth");
+//        employees[1].setAge(71);
+//
+//        Company company = ModelObjectProxy.create(Company.class);
+//        company.setName("Ajax");
+//        company.setEmployees(employees);
+//        assertNotNull(company.getEmployees());
+//
+//        ModelObjectService.save(company);
+//
+//        assertEquals("Ajax", company.getName());
+//
+//        Person mock = MQ.mock(Person.class);
+//
+//        Person person1 = MQ.select(mock).where(mock.getAge(), EQUAL, 80).getFirst();
+//        assertEquals("Peter Naur", person1.getName());
+//
+//        Person person2 = MQ.select(mock).where(mock.getAge(), EQUAL, 71).getFirst();
+//        assertEquals("Donald Knuth", person2.getName());
+//
+//        Company loadedCompany = MQ.select(Company.class).getFirst();
+//        assertNotNull(loadedCompany);
+//
+//        Person[] persons = loadedCompany.getEmployees();
+//        assertNotNull(persons);
+//        assertEquals(2, persons.length);
+//
+//        if(persons[0].getAge() == 80) {
+//            assertEquals("Peter Naur", persons[0].getName());
+//            assertEquals("Donald Knuth", persons[1].getName());
+//        } else {
+//            assertEquals("Donald Knuth", persons[0].getName());
+//            assertEquals("Peter Naur", persons[1].getName());
+//        }
+//    }
 
 }

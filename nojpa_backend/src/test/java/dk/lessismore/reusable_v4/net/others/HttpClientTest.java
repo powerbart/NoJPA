@@ -30,27 +30,27 @@ public class HttpClientTest {
 //        String s = HttpClient.sendHttpGetRequest("http://www.dr.dk/");
 //        System.out.println("s = " + s);
 //    }
-
-    @Test
-    public void testSimpleCall() throws Exception {
-
-        for(int i = 0; i < 20; i++){
-            HttpClient httpclient = new DefaultHttpClient();
-            HttpGet httpget = new HttpGet("http://d2.less-is-more.dk/");
-            HttpResponse response = httpclient.execute(httpget);
-            HttpEntity entity = response.getEntity();
-            ByteArrayOutputStream ba = new ByteArrayOutputStream((int) entity.getContentLength());
-            entity.writeTo(ba);
-            String s = new String(ba.toByteArray(), 0, ba.size());
-            if(s.length() > 20){
-                s = s.substring(0,20).replaceAll("\n", "").replaceAll("\r", "").replaceAll("\t", "");
-            }
-            System.out.println("============================================================");
-            System.out.println("s("+ i +") = " + s);
-            System.out.println("============================================================");
-            Thread.sleep(1 * 100);
-        }
-    }
+//TODO
+//    @Test
+//    public void testSimpleCall() throws Exception {
+//
+//        for(int i = 0; i < 20; i++){
+//            HttpClient httpclient = new DefaultHttpClient();
+//            HttpGet httpget = new HttpGet("http://d2.less-is-more.dk/");
+//            HttpResponse response = httpclient.execute(httpget);
+//            HttpEntity entity = response.getEntity();
+//            ByteArrayOutputStream ba = new ByteArrayOutputStream((int) entity.getContentLength());
+//            entity.writeTo(ba);
+//            String s = new String(ba.toByteArray(), 0, ba.size());
+//            if(s.length() > 20){
+//                s = s.substring(0,20).replaceAll("\n", "").replaceAll("\r", "").replaceAll("\t", "");
+//            }
+//            System.out.println("============================================================");
+//            System.out.println("s("+ i +") = " + s);
+//            System.out.println("============================================================");
+//            Thread.sleep(1 * 100);
+//        }
+//    }
 
 
 
