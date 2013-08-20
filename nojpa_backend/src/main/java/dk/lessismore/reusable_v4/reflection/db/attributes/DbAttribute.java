@@ -47,6 +47,9 @@ public class DbAttribute implements Serializable {
      */
     private Attribute attribute = null;
 
+    private String tableName = null;
+
+
     /**
      * The datatype which this attribute is mapped to; in the database.
      */
@@ -74,6 +77,14 @@ public class DbAttribute implements Serializable {
     public DbAttribute() {
     }
 
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
 
     private int nrOfCharacters = 250;
     public void setNrOfCharacters(int nrOfCharacters) {
@@ -189,5 +200,41 @@ public class DbAttribute implements Serializable {
     public String toString() {
         return "DbAtt:" + attribute + " class=" + getClassName() + "\t\tisPrimaryKey=" + isPrimaryKey() + " isAssociation=" + isAssociation() + " isMultiAssociation=" + isMultiAssociation() + " DataType=" + getDataType();
     }
+
+    public String getSolrAttributeName(){
+        String solrAttributeName = getTableName() + "_" + getAttributeName() + "__" + toDefaultSolrType();
+        return solrAttributeName;
+    }
+
+//    <dynamicField name="*__INT"  type="int"  indexed="true"  stored="true"/>
+//    <dynamicField name="*__LONG" type="long"    indexed="true"  stored="true"/>
+//    <dynamicField name="*__DOUBLE" type="float"    indexed="true"  stored="true"/>
+//    <dynamicField name="*__DATE"  type="date"  indexed="true"  stored="true" />
+//    <dynamicField name="*__ID" type="string"  indexed="true"  stored="true"/>
+//    <dynamicField name="*__TXT" type="text_general"  indexed="true"  stored="true"/>
+//    <dynamicField name="*__BOOL" type="boolean"  indexed="true"  stored="true"/>
+//
+//    <dynamicField name="*__TXT_ARRAY" type="text_general"  indexed="true"  stored="true" multiValued="true"/>
+
+
+    public String toDefaultSolrType(){
+        if(isMultiAssociation()){
+            return "TXT_ARRAY";
+        } else {
+            switch(dbDataType.getType()) {
+                case DbDataType.DB_VARCHAR: return getNrOfCharacters() == 32 ? "ID" : "TXT";
+                case DbDataType.DB_CHAR: return getNrOfCharacters() == 32 ? "ID" : "TXT";
+                case DbDataType.DB_INT: return "INT";
+                case DbDataType.DB_DOUBLE: return "DOUBLE";
+                case DbDataType.DB_DATE: return "DATE";
+                case DbDataType.DB_BOOLEAN: return "BOOL";
+                case DbDataType.DB_CLOB: return "LONGTEXT";
+//            case DB_CLOB: return "CLOB("+ (dbAttribute != null ? dbAttribute.getNrOfCharacters() : 100000) +")";
+                default: return "";
+            }
+        }
+    }
+
+
 
 }

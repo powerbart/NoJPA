@@ -1,6 +1,8 @@
 package dk.lessismore.reusable_v4.reflection.db.model;
 
 
+import dk.lessismore.reusable_v4.reflection.db.annotations.SearchField;
+
 import javax.persistence.Column;
 import javax.xml.bind.annotation.XmlTransient;
 import java.util.Calendar;
@@ -14,6 +16,7 @@ public interface ModelObjectInterface {
     public String getObjectID();
     public void setObjectID(String value); // TODO: Consider removing this method
 
+    @SearchField
     Calendar getCreationDate();
     void setCreationDate(Calendar creationDate); // The set methods is needed for for the corresp 
 

@@ -127,6 +127,7 @@ public class DbAttributeContainer {
             if (attribute.isReadable() && attribute.isWritable()) {
                 //The attribute is writable and readbale; which is nessesary to proceed.
                 DbAttribute dbAttribute = new DbAttribute();
+                dbAttribute.setTableName(tableName);
                 dbAttribute.setAttribute(attribute);
                 boolean primaryKey = attribute.getAttributeName().equalsIgnoreCase(primaryKeyAttributeName);
                 if (primaryKey && !dbAttribute.isAssociation()) {

@@ -139,7 +139,7 @@ public class DbDataType implements Serializable {
                     }
                 }
                 return "VARCHAR("+ (dbAttribute != null ? dbAttribute.getNrOfCharacters() : 250)+")";
-            case DB_CHAR: return "CHAR("+(dbAttribute != null ? dbAttribute.getNrOfCharacters() : 40)+")";
+            case DB_CHAR: return "CHAR("+(dbAttribute != null ? dbAttribute.getNrOfCharacters() : 32)+")";
             case DB_INT: return "INT";
             case DB_DOUBLE: return "DOUBLE PRECISION";
             case DB_DATE: return "DATETIME";
@@ -149,5 +149,9 @@ public class DbDataType implements Serializable {
             default: return "";
         }
     }
+
+
+
+
 
 }

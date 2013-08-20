@@ -15,9 +15,11 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrInputDocument;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.TimeZone;
 
 /**
  * Created with IntelliJ IDEA.
@@ -33,6 +35,7 @@ public class ModelObjectSearchService {
 
     private static HashMap<String, SolrServer> servers = new HashMap<String, SolrServer>();
 
+    //TODO: Should be StreamingUpdateSolrServer
     public static void addSolrServer(Class className, SolrServer solrServer){
         servers.put(className.getSimpleName(), solrServer);
     }
@@ -68,6 +71,7 @@ public class ModelObjectSearchService {
         ModelObject modelObject = (ModelObject) object;
         DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(modelObject.getInterface());
         SolrInputDocument solrObj = new SolrInputDocument();
+        solrObj.addField("objectID", object.getObjectID());
         for (Iterator iterator = dbAttributeContainer.getDbAttributes().values().iterator(); iterator.hasNext();) {
             DbAttribute dbAttribute = (DbAttribute) iterator.next();
             String attributeName = dbAttribute.getAttributeName();
@@ -92,11 +96,11 @@ public class ModelObjectSearchService {
         }
     }
 
-    public DbObjectVisitor putAll(){
+    public static DbObjectVisitor putAll(){
         return putAll(INPUTS_BETWEEN_COMMITS_VISITOR);
     }
 
-    public DbObjectVisitor putAll(int inputsBetweenCommits){
+    public static DbObjectVisitor putAll(int inputsBetweenCommits){
         DbObjectVisitor dbObjectVisitor = new DbObjectVisitor() {
             int counter = 0;
 
@@ -151,8 +155,11 @@ public class ModelObjectSearchService {
 
     private static void addAttributeValueToStatement(DbAttribute dbAttribute, SolrInputDocument solrObj, Object value) {
         String attributeName = dbAttribute.getAttributeName();
+        String solrAttributeName = dbAttribute.getSolrAttributeName();
+        log.debug("Will add solrAttributeName("+ solrAttributeName +") with value("+ value +")");
         if (value != null) {
             //Convert the value to the equivalent data type.
+
             int type = dbAttribute.getDataType().getType();
             switch (type) {
                 case DbDataType.DB_CHAR:
@@ -175,27 +182,29 @@ public class ModelObjectSearchService {
                             valueStr = value.toString();
                         }
                     }
-                    solrObj.addField(attributeName, valueStr);
+                    solrObj.addField(solrAttributeName, valueStr);
                     break;
                 case DbDataType.DB_INT:
-                    solrObj.addField(attributeName, ((Integer) value).intValue());
+                    solrObj.addField(solrAttributeName, ((Integer) value).intValue());
                     break;
                 case DbDataType.DB_DOUBLE:
-                    solrObj.addField(attributeName, ((Double) value).doubleValue());
+                    solrObj.addField(solrAttributeName, ((Double) value).doubleValue());
                     break;
                 case DbDataType.DB_BOOLEAN:
-                    solrObj.addField(attributeName, ((Boolean) value).booleanValue() );
+                    solrObj.addField(solrAttributeName, ((Boolean) value).booleanValue() );
                     break;
                 case DbDataType.DB_DATE:
                     //log.debug("***TimeWrite: " + attributeName + " " + (value != null ? ((Calendar) value).getTime() : "null"));
-                    solrObj.addField(attributeName, ((Calendar) value).getTime());
+                    SimpleDateFormat xmlDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'"); //2011-11-28T18:30:30Z
+                    xmlDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                    solrObj.addField(solrAttributeName, xmlDateFormat.format(((Calendar) value).getTime()));
                     break;
             }
         } else {
             if (dbAttribute.getDataType().getType() == DbDataType.DB_DATE) {
-                solrObj.addField(attributeName, ((Calendar) value));
+                solrObj.addField(solrAttributeName, ((Calendar) value));
             } else {
-                solrObj.addField(attributeName, (String) null);
+                solrObj.addField(solrAttributeName, (String) null);
             }
         }
 
