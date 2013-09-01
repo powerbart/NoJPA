@@ -155,7 +155,7 @@ public class DbObjectSelector {
         //log.debug("selectObjectsFromDb:1.7");
         // ****************************************
 	    limSet = SQLStatementExecutor.doQuery(selectSqlStatement);
-        log.debug("selectObjectsFromDb:1.8 targetClass("+ targetClass +") limSet("+ limSet +") loadAll("+ loadAll +") intervalStart("+ intervalStart +") intervalEnd("+ intervalEnd +")");
+//        log.debug("selectObjectsFromDb:1.8 targetClass("+ targetClass +") limSet("+ limSet +") loadAll("+ loadAll +") intervalStart("+ intervalStart +") intervalEnd("+ intervalEnd +")");
         ResultSet resultSet = limSet != null ? limSet.getResultSet() : null;
 	    //log.debug("selectSqlStatement :: 2");
 	    if(resultSet != null) {
@@ -169,7 +169,7 @@ public class DbObjectSelector {
 //                        log.debug("selectObjectsFromDb:2.1: targetClass("+ targetClass +") objectId("+ objectId +")");
                         ModelObject modelObject = DbObjectReader.readObjectFromDb(objectId, targetClass, associationConstrain, limSet);
                         //log.debug("selectSqlStatement :: 5");
-                        log.debug("selectObjectsFromDb:2.2: targetClass("+ targetClass +") modelObject("+ modelObject +")");
+//                        log.debug("selectObjectsFromDb:2.2: targetClass("+ targetClass +") modelObject("+ modelObject +")");
                         if(modelObject != null){
                             selectedObjects.add(modelObject);
                         }
