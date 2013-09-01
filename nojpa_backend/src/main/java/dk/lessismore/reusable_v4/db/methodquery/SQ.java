@@ -1,7 +1,6 @@
 package dk.lessismore.reusable_v4.db.methodquery;
 
 import dk.lessismore.reusable_v4.db.statements.*;
-import dk.lessismore.reusable_v4.db.statements.mysql.MySqlUtil;
 import dk.lessismore.reusable_v4.reflection.db.DbClassReflector;
 import dk.lessismore.reusable_v4.reflection.db.attributes.DbAttribute;
 import dk.lessismore.reusable_v4.reflection.db.attributes.DbAttributeContainer;
@@ -19,6 +18,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -37,6 +37,18 @@ public class SQ {
         final int operator;
         SolrOperator(int i){
             this.operator = i;
+        }
+
+        public String toDebugString(){
+            return this.name();
+        }
+
+        public static String name(Integer condition) {
+            if(condition == 0){
+                return OR.name();
+            } else {
+                return AND.name();
+            }
         }
     };
 
@@ -91,6 +103,8 @@ public class SQ {
 //        private final SelectSolrStatementCreator creator;
         ArrayList<Constraint> rootConstraints;
         SolrQuery solrQuery;
+        int startLimit = -1;
+        int endLimit = -1;
 //        private final SelectSQLStatement statement;
         private boolean useCache = true;
 
@@ -181,6 +195,18 @@ public class SQ {
         }
 
         public SearchQuery<T> search(double mockValue, Comp comp, double value) {
+            rootConstraints.add(has(mockValue, comp, value));
+            return this;
+        }
+        public SearchQuery<T> search(long mockValue, Comp comp, long value) {
+            rootConstraints.add(has(mockValue, comp, value));
+            return this;
+        }
+        public SearchQuery<T> search(long mockValue, Comp comp, int value) {
+            rootConstraints.add(has(mockValue, comp, new Long(value).longValue()));
+            return this;
+        }
+        public SearchQuery<T> search(double mockValue, Comp comp, float value) {
             rootConstraints.add(has(mockValue, comp, value));
             return this;
         }
@@ -292,20 +318,21 @@ public class SQ {
 //        }
 
 
-//        /**
-//         * Set limit
-//         * @param start start
-//         * @param end end
-//         * @return this
-//         */
-//        public SearchQuery<T> limit(int start, int end) {
-//            creator.addLimit(start, end);
-//            return this;
-//        }
-//        public SearchQuery<T> limit(int count) {
-//            return limit(0, count);
-//        }
-//
+        /**
+         * Set limit
+         * @param start start
+         * @param end end
+         * @return this
+         */
+        public SearchQuery<T> limit(int start, int end) {
+            this.startLimit = start;
+            this.endLimit = end;
+            return this;
+        }
+        public SearchQuery<T> limit(int count) {
+            return limit(0, count);
+        }
+
 //
 //        /**
 //         * Return the number of results of the query
@@ -319,8 +346,8 @@ public class SQ {
          * Execute query
          * @return result list, possible empty, never null.
          */
-        public List<T> getList() {
-            List<T> list = selectObjectsFromDb();
+        public SList<T> getList() {
+            SList<T> list = selectObjectsFromDb();
             return list;
         }
 
@@ -378,38 +405,53 @@ public class SQ {
 //            return statement;
 //        }
 
-        private List<T> selectObjectsFromDb() {
+        @SuppressWarnings("unchecked")
+        private SList<T> selectObjectsFromDb() {
             List<T> toReturn = new ArrayList<T>();
             try {
                 StringBuilder builder = new StringBuilder();
                 solrQuery.setQuery("*:*");
                 for(int i = 0; i < rootConstraints.size(); i++){
-                    String subQuery = rootConstraints.get(i).getExpression().updateSolrQuery(solrQuery);
+                    Constraint constraint = rootConstraints.get(i);
+                    String subQuery = constraint.getExpression().updateSolrQuery(solrQuery);
                     if(subQuery != null){
                         builder.append(subQuery);
                     }
                 }
                 String query = builder.toString();
                 if(query == null || query.length() < 2){
-                    solrQuery.setQuery("*:*");
+                    query = "*:*";
                 }
                 log.debug("We will query = " + query);
                 solrQuery.setQuery(query);
+                if(startLimit != -1){
+                    solrQuery.setStart(startLimit);
+                    solrQuery.setRows(endLimit - startLimit);
+                }
                 SolrServer solrServer = ModelObjectSearchService.solrServer(selectClass);
                 QueryResponse queryResponse = solrServer.query(solrQuery);
                 log.debug("queryResponse = " + queryResponse.getResults().size());
                 log.debug("queryResponse = " + queryResponse.getResults().getNumFound());
+//                log.debug("queryResponse = " + queryResponse.getResults().);
                 int size = queryResponse.getResults().size();
                 for(int i = 0; i < size; i++){
                     SolrDocument entries = queryResponse.getResults().get(i);
                     String objectID = entries.get("objectID").toString();
                     T t = MQ.selectByID(selectClass, objectID);
+                    if(t == null){
+                        log.error("We have a problem with the sync between the DB & Solr ... Can't find objectID("+ objectID +") class("+ selectClass +")");
+                    }
                     toReturn.add(t);
                 }
+                return (SList<T>) Proxy.newProxyInstance(
+                        this.getClass().getClassLoader(),
+                        new Class[]{SList.class},
+                        new SListImpl(queryResponse, toReturn));
+
             } catch (SolrServerException e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
-            return toReturn;
+            return null;
         }
 
 //        private int selectCountFromDb() {
@@ -417,6 +459,31 @@ public class SQ {
 //            return DbObjectSelector.countObjectsFromDb(statement); // The cache arguments is ignored
 //        }
     }
+
+
+
+    private static class SListImpl implements InvocationHandler {
+
+        private final QueryResponse queryResponse;
+        private final List resultList;
+
+        public SListImpl(QueryResponse queryResponse, List resultList) {
+            this.queryResponse = queryResponse;
+            this.resultList = resultList;
+        }
+
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            log.debug("RListImpl::Calling " + method.getName() + "()");
+            String methodName = method.getName();
+            if (methodName.equals("getNumberFound")) {
+                return queryResponse.getResults().getNumFound();
+            }
+            return method.invoke(resultList, args);
+        }
+
+    }
+
+
 
 
     private interface MockExtra {
@@ -432,6 +499,7 @@ public class SQ {
         }
 
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+//            log.debug("MockInvocationHandler::Calling " + sourceClass.getSimpleName() + "." + method.getName() + "()");
             String methodName = method.getName();
             if (methodName.equals("mockExtra_getSourceClass")) {
                 return sourceClass;
@@ -544,13 +612,14 @@ public class SQ {
 
 
     public static String makeAttributeIdentifier(Pair<Class, String> pair) {
+        log.debug("makeAttributeIdentifier("+ pair.getFirst() + "," + pair.getSecond() +")");
         return makeAttributeIdentifier(pair.getFirst(), pair.getSecond());
     }
 
     public static String makeAttributeIdentifier(Class sourceClass, String attributeName) {
         DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(sourceClass);
         DbAttribute dbAttribute = dbAttributeContainer.getDbAttribute(attributeName);
-        return dbAttribute.getSolrAttributeName();
+        return dbAttribute.getSolrAttributeName("");  //TODO
     }
 
 
@@ -600,6 +669,14 @@ public class SQ {
     }
 
     public static Constraint has(double mockValue, Comp comp, double value) {
+        List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
+        Pair<Class, String> pair = getSourceAttributePair();
+        clearMockCallSequence();
+        SolrExpression expression = newLeafExpression().addConstrain(makeAttributeIdentifier(pair), comp, value);
+        return new SolrConstraint(expression, joints);
+    }
+
+    public static Constraint has(long mockValue, Comp comp, long value) {
         List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
         Pair<Class, String> pair = getSourceAttributePair();
         clearMockCallSequence();
@@ -667,8 +744,8 @@ public class SQ {
 
 
     public static class SolrContainerExpression implements UpdateSolrQueryAble{
-        List<UpdateSolrQueryAble> expressions = new LinkedList();
-        List<Integer> conditions = new LinkedList();
+        List<UpdateSolrQueryAble> expressions = new ArrayList<UpdateSolrQueryAble>();
+        List<Integer> conditions = new ArrayList<Integer>();
 
         public SolrContainerExpression addExpression(UpdateSolrQueryAble expression) {
             expressions.add(expression);
@@ -706,16 +783,24 @@ public class SQ {
 
 
         public String updateSolrQuery(SolrQuery solrQuery) {
-            Iterator iterator = expressions.iterator();
             StringBuilder builder = new StringBuilder();
-            while (iterator.hasNext()) {
-                UpdateSolrQueryAble expression = (UpdateSolrQueryAble) iterator.next();
+            for(int i = 0; i < expressions.size(); i++) {
+                UpdateSolrQueryAble expression = expressions.get(i);
+                Integer condition = conditions.get(i);
                 String subQuery = expression.updateSolrQuery(solrQuery);
+                log.debug("Will add subQuery("+ subQuery +") with " + SolrOperator.name(condition));
                 if(subQuery != null){
                     builder.append(subQuery);
+                    if(expressions.size() > 1 && i + 1 < expressions.size()){
+                        builder.append(" " + SolrOperator.name(condition) + " ");
+                    }
                 }
             }
-            return builder.toString();
+            if(builder.length() > 2){
+                return "(" + builder.toString() + ")";
+            } else {
+                return builder.toString();
+            }
         }
     }
 
@@ -794,6 +879,7 @@ public class SQ {
         String statement = "*:*";
         String attr = null;
         String value = null;
+        private List<Pair<Class, String>> joints;
 
 
         public SolrExpression addConstrain(String attributeName, Comp comparator, String value) {
@@ -804,18 +890,45 @@ public class SQ {
         }
 
         public SolrExpression addConstrain(String attributeName, Comp comparator, Calendar value) {
+            SimpleDateFormat xmlDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'"); //2011-11-28T18:30:30Z
+            xmlDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+            //solrObj.addField(solrAttributeName, xmlDateFormat.format(((Calendar) value).getTime()));
+
+            this.value = xmlDateFormat.format(value.getTime());
+            this.statement = "("+ attributeName +":("+ this.value +"))";
+            this.attr = attributeName;
             return this;
         }
 
         public SolrExpression addConstrain(String attributeName, Comp comparator, int value) {
+            log.debug("addConstrain:int("+ value +")");
+            this.statement = "("+ attributeName +":"+ value +")";
+            this.attr = attributeName;
+            this.value = "" + value;
             return this;
         }
 
         public SolrExpression addConstrain(String attributeName, Comp comparator, double value) {
+            log.debug("addConstrain:double("+ value +")");
+            this.statement = "("+ attributeName +":"+ value +")";
+            this.attr = attributeName;
+            this.value = "" + value;
             return this;
         }
 
         public SolrExpression addConstrain(String attributeName, Comp comparator, float value) {
+            log.debug("addConstrain:float("+ value +")");
+            this.statement = "("+ attributeName +":"+ value +")";
+            this.attr = attributeName;
+            this.value = "" + value;
+            return this;
+        }
+
+        public SolrExpression addConstrain(String attributeName, Comp comparator, long value) {
+            log.debug("addConstrain:long("+ value +")");
+            this.statement = "("+ attributeName +":"+ value +")";
+            this.attr = attributeName;
+            this.value = "" + value;
             return this;
         }
 
@@ -842,7 +955,24 @@ public class SQ {
 
         @Override
         public String updateSolrQuery(SolrQuery solrQuery) {
-            return " (" + attr + ":(" + value + "))";
+            if(joints == null || joints.isEmpty()){
+                return " (" + attr + ":(" + value + "))";
+            } else {
+                String attributeName = "";
+                for(int i = 0; i < joints.size(); i++){
+                    Pair<Class, String> classStringPair = joints.get(i);
+                    DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(classStringPair.getFirst());
+                    DbAttribute dbAttribute = dbAttributeContainer.getDbAttribute(classStringPair.getSecond());
+                    attributeName = dbAttribute.getSolrAttributeName(attributeName);
+                }
+                return " (" + attributeName + this.attr + (attributeName.contains("_ARRAY") ? "_ARRAY" : "") + ":(" + value + "))";
+            }
+        }
+        //_Post_shareCounter__ID_Counter_count__TXT
+        //_Post_shareCounter__ID_Counter_count__TXT
+
+        public void addJoints(List<Pair<Class, String>> joints) {
+            this.joints = joints;
         }
     }
 
@@ -896,6 +1026,7 @@ public class SQ {
         UpdateSolrQueryAble getExpression() {
             SolrContainerExpression container = new SolrContainerExpression();
             for (Constraint c: constraints) {
+                log.debug("getExpression() with operator.operator("+ operator.name() +")");
                 container.addExpression(operator.operator, c.getExpression());
             }
             return container;
@@ -917,6 +1048,7 @@ public class SQ {
 
         public SolrConstraint(SolrExpression expression, List<Pair<Class, String>> joints) {
             this.expression = expression;
+            expression.addJoints(joints);
             this.joints = joints;
         }
 

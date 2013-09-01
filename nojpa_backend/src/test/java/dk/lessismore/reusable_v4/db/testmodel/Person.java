@@ -29,6 +29,9 @@ public interface Person extends ModelObjectInterface {
     int getCountOfCars();
     void setCountOfCars(int countOfCars);
 
+    long getCountOfFriends();
+    void setCountOfFriends(long countOfFriends);
+
     String getDescription();
     @DbStrip (stripItSoft = true)
     void setDescription(String description);

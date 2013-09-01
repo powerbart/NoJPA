@@ -1,5 +1,6 @@
 package dk.lessismore.reusable_v4.db.methodquery;
 
+import dk.lessismore.reusable_v4.cache.ObjectCache;
 import dk.lessismore.reusable_v4.db.statements.ContainerExpression;
 import dk.lessismore.reusable_v4.db.statements.SQLStatementFactory;
 import dk.lessismore.reusable_v4.db.statements.SelectSQLStatement;
@@ -455,12 +456,19 @@ public class MQTest {
             InitTestDatabase.initPlanetExpress();
             Person p = ModelObjectService.create( Person.class );
             p.setName( "MyName" );
+            p.setCountOfFriends(Long.MAX_VALUE);
             Cpr c = ModelObjectService.create( Cpr.class );
-            c.setNumber("12345678");
+            String number = "12345678";
+            c.setNumber(number);
             p.setCpr(c);
             ModelObjectService.save( c );
             ModelObjectService.save( p );
             System.out.println("p.getCpr().getNumber() = " + p.getCpr().getNumber());
+            ObjectCacheFactory.getInstance().getObjectCache(Person.class).clear();
+            Person mock = MQ.mock(Person.class);
+            Person person = MQ.select(mock).where(mock.getCountOfFriends(), MQ.Comp.EQUAL_OR_GREATER, 8L).getFirst();
+            System.out.println("person = " + person);
+            System.out.println("person = " + person.getCountOfFriends());
 
         }
         assertEquals(true, true);

@@ -76,6 +76,13 @@ public class MySqlLeafExpression implements LeafExpression {
         return this;
     }
 
+    public LeafExpression addConstrain(String attributeName, int comparator, long value) {
+        statement = attributeName + " " + WhereSQLStatement.comparatorAsStr[comparator] + " " + MySqlUtil.convertToSql(value);
+        preparedStatement = attributeName + " " + WhereSQLStatement.comparatorAsStr[comparator] + " ?";
+        preparedValue = MySqlUtil.convertToPreparedSql(value);
+        return this;
+    }
+
     @Override
     public LeafExpression addConstrain(Class sourceClass, String attributeName, int comparator, String value) {
         return addConstrain(makeAttributeIdentifier(sourceClass, attributeName), comparator, value);

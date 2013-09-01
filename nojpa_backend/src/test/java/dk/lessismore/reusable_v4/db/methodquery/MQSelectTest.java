@@ -14,6 +14,7 @@ import dk.lessismore.reusable_v4.reflection.db.model.ModelObjectService;
 import static org.junit.Assert.*;
 
 import java.util.Calendar;
+import java.util.List;
 
 
 public class MQSelectTest {
@@ -146,6 +147,17 @@ public class MQSelectTest {
 //        employees = MQ.select(personMock).where(personMock.getCar().getObjectID(), EQUAL, ford.getObjectID()).orderBy(personMock.getName(), ASC).getArray();
 //        assertArrayEquals(new Person[] {a}, employees);
 //    }
+
+    @Test
+    public void testSelectANY2() throws Exception {
+        Company company = MQ.mock(Company.class);
+        List<Company> companies = MQ.select(company).where(company.getDescription(), Comp.EQUAL, "Hej").getList();
+        for(int i = 0; i < companies.size(); i++){
+            System.out.println("companies.get(i).getName() = " + companies.get(i).getName());
+        }
+    }
+
+
 
     @Test
     public void testSelectANY() throws Exception {

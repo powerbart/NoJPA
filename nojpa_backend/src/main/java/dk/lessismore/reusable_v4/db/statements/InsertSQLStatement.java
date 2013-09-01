@@ -18,6 +18,8 @@ public interface InsertSQLStatement extends SQLStatement {
 
     public void addAttributeValue(String attributeName, float value);
 
+    public void addAttributeValue(String attributeName, long value);
+
     public void addAttributeValue(String attributeName, boolean value);
 
     public void addAttributeValue(String attributeName, Calendar value);

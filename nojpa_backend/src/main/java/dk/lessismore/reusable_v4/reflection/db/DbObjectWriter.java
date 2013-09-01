@@ -44,7 +44,7 @@ public class DbObjectWriter {
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(DbObjectWriter.class);
 
     static {
-        log.debug("Reusable_version:4.1");
+        log.debug("NoJPA_version:0.1");
     }
 
 
@@ -205,13 +205,13 @@ public class DbObjectWriter {
             String attributeName = dbAttribute.getAttributeName();
             //If its not an association attribute.
             if (!dbAttribute.isAssociation()) {
-                //log.debug("saveAttributeValues: for " + dbAttribute.getAttributeName() + " on " + modelObject );
                 Object value = null;
                 if(attributeName.equals("lastModified")){
                     value = Calendar.getInstance();
                 } else {
                     value = dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
                 }
+//                log.debug("saveAttributeValues: for " + dbAttribute.getAttributeName() + "("+ value +") on " + modelObject );
                 addAttributeValueToStatement(dbAttribute, insertSQLStatement, value);
             }
             //If its an singel association we must save its id as a string
@@ -266,6 +266,9 @@ public class DbObjectWriter {
                     break;
                 case DbDataType.DB_DOUBLE:
                     insertSQLStatement.addAttributeValue(attributeName, ((Double) value).doubleValue());
+                    break;
+                case DbDataType.DB_LONG:
+                    insertSQLStatement.addAttributeValue(attributeName, ((Long) value).longValue());
                     break;
                 case DbDataType.DB_BOOLEAN:
                     insertSQLStatement.addAttributeValue(attributeName, ((Boolean) value).booleanValue() ? 1 : 0/*((Boolean)value).toString()*/);

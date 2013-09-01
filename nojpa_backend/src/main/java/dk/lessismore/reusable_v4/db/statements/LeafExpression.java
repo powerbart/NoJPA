@@ -27,6 +27,8 @@ public interface LeafExpression extends Expression {
 
     public LeafExpression addConstrain(String attributeName, int comparator, float value);
 
+    public LeafExpression addConstrain(String attributeName, int comparator, long value);
+
     public LeafExpression addConstrain(Class sourceClass, String attributeName, int comparator, String value);
 
     public LeafExpression addConstrain(Class sourceClass, String attributeName, int comparator, Calendar value);

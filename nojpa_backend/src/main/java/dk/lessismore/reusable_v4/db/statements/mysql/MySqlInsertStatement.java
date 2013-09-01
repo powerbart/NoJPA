@@ -35,6 +35,10 @@ public class MySqlInsertStatement extends MySqlStatement implements InsertSQLSta
         attributeValues.put(attributeName, MySqlUtil.convertToSql(value));
     }
 
+    public void addAttributeValue(String attributeName, long value) {
+        attributeValues.put(attributeName, MySqlUtil.convertToSql(value));
+    }
+
     public void addAttributeValue(String attributeName, boolean value) {
         attributeValues.put(attributeName, MySqlUtil.convertToSql(value));
     }

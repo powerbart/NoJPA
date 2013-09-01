@@ -26,6 +26,10 @@ public class MySqlUtil {
         return "" + value;
     }
 
+    public static String convertToSql(long value) {
+        return "" + value;
+    }
+
     public static String convertToSql(int value) {
         return "" + value;
     }

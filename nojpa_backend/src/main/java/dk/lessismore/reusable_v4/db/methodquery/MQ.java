@@ -182,6 +182,14 @@ public class MQ {
             rootConstraints.add(has(mockValue, comp, value));
             return this;
         }
+        public SelectQuery<T> where(long mockValue, Comp comp, long value) {
+            rootConstraints.add(has(mockValue, comp, value));
+            return this;
+        }
+        public SelectQuery<T> where(long mockValue, Comp comp, int value) {
+            rootConstraints.add(has(mockValue, comp, new Long(value).longValue()));
+            return this;
+        }
         public <M extends ModelObjectInterface> SelectQuery<T> where(M mockValue, Comp comp, M model) {
             rootConstraints.add(has(mockValue, comp, model));
             return this;
@@ -677,6 +685,14 @@ public class MQ {
     }
 
     public static Constraint has(double mockValue, Comp comp, double value) {
+        List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
+        Pair<Class, String> pair = getSourceAttributePair();
+        clearMockCallSequence();
+        Expression expression = newLeafExpression().addConstrain(makeAttributeIdentifier(pair), compToNum(comp), value);
+        return new ExpressionConstraint(expression, joints);
+    }
+
+    public static Constraint has(long mockValue, Comp comp, long value) {
         List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
         Pair<Class, String> pair = getSourceAttributePair();
         clearMockCallSequence();

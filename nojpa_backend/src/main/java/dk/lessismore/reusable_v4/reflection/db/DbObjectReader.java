@@ -291,6 +291,7 @@ public class DbObjectReader {
             //Read one attribute at a time from the result set.
             for (Iterator iterator = dbAttributeContainer.getDbAttributes().values().iterator(); iterator.hasNext();) {
                 DbAttribute dbAttribute = (DbAttribute) iterator.next();
+//                log.debug("Adding to object("+ objectToFillInto +")." + dbAttribute.getAttributeName());
                 //If this attribute is an singel association.
                 if (dbAttribute.isAssociation() && !dbAttribute.isMultiAssociation()) {
                     String attributeName = dbAttribute.getAttributeName();
@@ -313,8 +314,8 @@ public class DbObjectReader {
                 else if (!dbAttribute.isAssociation()) {
                     Object value = null;
                     String attributeName = dbAttribute.getAttributeName();
-
                     value = readObjectFromResultSet(dbAttribute, resultSet);
+//                    log.debug("Adding to object("+ objectToFillInto +")." + dbAttribute.getAttributeName() + "("+ value +")");
                     if (value != null && !("" + value).equals("null")) {
                         if (dbAttributeContainer.setAttributeValue(objectToFillInto, dbAttribute, value)) {
                             //log.debug("Read attribute="+attributeName);
@@ -354,6 +355,9 @@ public class DbObjectReader {
                     break;
                 case DbDataType.DB_INT:
                     value = new Integer(resultSet.getInt(name));
+                    break;
+                case DbDataType.DB_LONG:
+                    value = new Long(resultSet.getLong(name));
                     break;
                 case DbDataType.DB_DOUBLE:
                     value = new Double(resultSet.getDouble(name));

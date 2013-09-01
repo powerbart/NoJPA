@@ -201,8 +201,8 @@ public class DbAttribute implements Serializable {
         return "DbAtt:" + attribute + " class=" + getClassName() + "\t\tisPrimaryKey=" + isPrimaryKey() + " isAssociation=" + isAssociation() + " isMultiAssociation=" + isMultiAssociation() + " DataType=" + getDataType();
     }
 
-    public String getSolrAttributeName(){
-        String solrAttributeName = getTableName() + "_" + getAttributeName() + "__" + toDefaultSolrType();
+    public String getSolrAttributeName(String prefix){
+        String solrAttributeName = (prefix != null && prefix.length() > 0 ? prefix : "") + getTableName() + "_" + getAttributeName() + "__" + toDefaultSolrType();
         return solrAttributeName;
     }
 
@@ -229,6 +229,7 @@ public class DbAttribute implements Serializable {
                 case DbDataType.DB_DATE: return "DATE";
                 case DbDataType.DB_BOOLEAN: return "BOOL";
                 case DbDataType.DB_CLOB: return "LONGTEXT";
+                case DbDataType.DB_LONG: return "LONG";
 //            case DB_CLOB: return "CLOB("+ (dbAttribute != null ? dbAttribute.getNrOfCharacters() : 100000) +")";
                 default: return "";
             }

@@ -16,10 +16,7 @@ import org.apache.solr.common.SolrInputDocument;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.TimeZone;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -38,6 +35,25 @@ public class ModelObjectSearchService {
     //TODO: Should be StreamingUpdateSolrServer
     public static void addSolrServer(Class className, SolrServer solrServer){
         servers.put(className.getSimpleName(), solrServer);
+    }
+
+    public static <T extends ModelObjectInterface> void deleteAll(T object) {
+        ModelObject modelObject = (ModelObject) object;
+        deleteAll(modelObject.getInterface());
+
+    }
+
+    public static void deleteAll(Class aClass) {
+        try {
+            SolrServer solrServer = servers.get(aClass.getSimpleName());
+            solrServer.deleteByQuery("*:*");
+        } catch (SolrServerException e) {
+            log.error("Some ERROR-1 when deleting all: " + e, e);
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            log.error("Some ERROR-2 when deleting all: " + e, e);
+            throw new RuntimeException(e);
+        }
     }
 
     public static <T extends ModelObjectInterface> void delete(T object) {
@@ -65,28 +81,55 @@ public class ModelObjectSearchService {
     }
 
 
-
-
     public static <T extends ModelObjectInterface> void put(T object) {
         ModelObject modelObject = (ModelObject) object;
-        DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(modelObject.getInterface());
+        SolrServer solrServer = servers.get(modelObject.getInterface().getSimpleName());
         SolrInputDocument solrObj = new SolrInputDocument();
-        solrObj.addField("objectID", object.getObjectID());
+        put(object, "", new HashMap<String, String>(), solrServer, solrObj);
+    }
+
+    public static <T extends ModelObjectInterface> void put(T object, String prefix, HashMap<String, String> storedObjects, SolrServer solrServer, SolrInputDocument solrObj) {
+        ModelObject modelObject = (ModelObject) object;
+        DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(modelObject.getInterface());
+        String objectIDInSolr = (prefix.length() == 0 ? "" : prefix + "_") + "objectID" + (prefix.length() == 0 ? "" : "__ID");
+        solrObj.addField(objectIDInSolr, object.getObjectID());
         for (Iterator iterator = dbAttributeContainer.getDbAttributes().values().iterator(); iterator.hasNext();) {
             DbAttribute dbAttribute = (DbAttribute) iterator.next();
-            String attributeName = dbAttribute.getAttributeName();
             SearchField searchField = dbAttribute.getAttribute().getAnnotation(SearchField.class);
             if(searchField != null) {
                 if(!dbAttribute.isAssociation()) {
                     Object value = null;
                     value = dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
-                    addAttributeValueToStatement(dbAttribute, solrObj, value);
+                    addAttributeValueToStatement(dbAttribute, solrObj, value, prefix);
                 } else if (!dbAttribute.isMultiAssociation()) {
-                    solrObj.addField(attributeName, modelObject.getSingleAssociationID(attributeName));
+                    ModelObjectInterface value = (ModelObjectInterface) dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
+                    if(value != null && !storedObjects.containsKey(value.getObjectID())){
+                        put(value, dbAttribute.getSolrAttributeName(prefix), storedObjects, solrServer, solrObj);
+                    }
+//                    solrObj.addField(attributeName, modelObject.getSingleAssociationID(attributeName));
+                } else { //isMultiAssociation
+                    ModelObjectInterface[] vs = (ModelObjectInterface[]) dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
+                    HashMap<String, ArrayList<Object>> values = new HashMap<String, ArrayList<Object>>();
+                    for(int i = 0; vs != null && i < vs.length; i++){
+                        ModelObjectInterface value = vs[i];
+                        if(value != null && !storedObjects.containsKey(value.getObjectID())){
+                            storedObjects.put(value.getObjectID(), value.getObjectID());
+                            getSearchValues(value, dbAttribute.getSolrAttributeName(prefix), storedObjects, values);
+                        }
+                    }
+                    Iterator<String> nameIterator = values.keySet().iterator();
+                    for(int i = 0; nameIterator.hasNext(); i++){
+                        String name = nameIterator.next();
+                        ArrayList<Object> objects = values.get(name);
+                        String solrArrayName = name + "_ARRAY";
+                        log.debug("Adding " + solrArrayName + "("+ (objects != null ? objects.size() : -1) +")");
+                        solrObj.addField(solrArrayName, objects);
+                    }
+
+
                 }
             }
         }
-        SolrServer solrServer = servers.get(modelObject.getInterface().getSimpleName());
         try {
             solrServer.add(solrObj, AUTO_COMMIT_MS);
         } catch (SolrServerException e) {
@@ -96,7 +139,67 @@ public class ModelObjectSearchService {
         }
     }
 
-    public static DbObjectVisitor putAll(){
+    private static  <T extends ModelObjectInterface> void getSearchValues(T object, String prefix, HashMap<String, String> storedObjects, HashMap<String, ArrayList<Object>> values){
+        ModelObject modelObject = (ModelObject) object;
+        DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(modelObject.getInterface());
+        String objectIDInSolr = (prefix.length() == 0 ? "" : prefix + "_") + "objectID" + (prefix.length() == 0 ? "" : "__ID");
+        for (Iterator iterator = dbAttributeContainer.getDbAttributes().values().iterator(); iterator.hasNext();) {
+            DbAttribute dbAttribute = (DbAttribute) iterator.next();
+            String attributeName = dbAttribute.getAttributeName();
+            SearchField searchField = dbAttribute.getAttribute().getAnnotation(SearchField.class);
+            if(searchField != null) {
+                if(!dbAttribute.isAssociation()) {
+                    Object value = null;
+                    value = dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
+                    if(value != null){
+                        addAttributeValueToMap(dbAttribute, value, prefix, values);
+                    }
+                } else if (!dbAttribute.isMultiAssociation()) {
+                    ModelObjectInterface value = (ModelObjectInterface) dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
+                    if(value != null && !storedObjects.containsKey(value.getObjectID())){
+                        storedObjects.put(value.getObjectID(), value.getObjectID());
+                        getSearchValues(value, dbAttribute.getSolrAttributeName(prefix), storedObjects, values);
+                    }
+                } else {
+                    ModelObjectInterface[] vs = (ModelObjectInterface[]) dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
+                    for(int i = 0; vs != null && i < vs.length; i++){
+                        ModelObjectInterface value = vs[i];
+                        if(value != null && !storedObjects.containsKey(value.getObjectID())){
+                            storedObjects.put(value.getObjectID(), value.getObjectID());
+                            getSearchValues(value, dbAttribute.getSolrAttributeName(prefix), storedObjects, values);
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
+    private static  <T extends ModelObjectInterface> void addAttributeValueToMap(DbAttribute dbAttribute, Object value, String prefix, HashMap<String, ArrayList<Object>> values){
+        String solrAttributeName = dbAttribute.getSolrAttributeName(prefix);
+//        log.debug("Will add solrAttributeName("+ solrAttributeName +") with value("+ value +") to objectMap");
+        if (value != null) {
+            ArrayList<Object> objects = values.get(solrAttributeName);
+            if(objects == null){
+                objects = new ArrayList<Object>();
+                values.put(solrAttributeName, objects);
+            }
+            if(dbAttribute.getDataType().getType() == DbDataType.DB_DATE){
+                //log.debug("***TimeWrite: " + attributeName + " " + (value != null ? ((Calendar) value).getTime() : "null"));
+                SimpleDateFormat xmlDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'"); //2011-11-28T18:30:30Z
+                xmlDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                value = xmlDateFormat.format(((Calendar) value).getTime());
+            }
+
+            objects.add(value);
+        }
+    }
+
+
+
+
+
+        public static DbObjectVisitor putAll(){
         return putAll(INPUTS_BETWEEN_COMMITS_VISITOR);
     }
 
@@ -153,15 +256,18 @@ public class ModelObjectSearchService {
 
 
 
-    private static void addAttributeValueToStatement(DbAttribute dbAttribute, SolrInputDocument solrObj, Object value) {
+    private static void addAttributeValueToStatement(DbAttribute dbAttribute, SolrInputDocument solrObj, Object value, String prefix) {
         String attributeName = dbAttribute.getAttributeName();
-        String solrAttributeName = dbAttribute.getSolrAttributeName();
+        String solrAttributeName = dbAttribute.getSolrAttributeName(prefix);
         log.debug("Will add solrAttributeName("+ solrAttributeName +") with value("+ value +")");
         if (value != null) {
             //Convert the value to the equivalent data type.
 
             int type = dbAttribute.getDataType().getType();
             switch (type) {
+                case DbDataType.DB_LONG:
+                    solrObj.addField(solrAttributeName, ((Long) value).longValue());
+                    break;
                 case DbDataType.DB_CHAR:
                 case DbDataType.DB_VARCHAR:
                     String valueStr = null;
