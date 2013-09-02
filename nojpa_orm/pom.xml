@@ -8,10 +8,10 @@
             <version>0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <name>NoJPA backend project</name>
+    <name>NoJPA ORM project</name>
 
     <packaging>jar</packaging>
-    <artifactId>nojpa_backend</artifactId>
+    <artifactId>nojpa_orm</artifactId>
 
     <build>
         <plugins>

@@ -11,7 +11,7 @@
     <name>NoJPA project main pom package</name>
 
     <modules>
-        <module>nojpa_backend</module>
+        <module>nojpa_orm</module>
     </modules>
 
     <properties>

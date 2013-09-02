@@ -145,50 +145,6 @@ public class NQL {
             return this;
         }
 
-//        public SearchQuery<T>  whereIn(ModelObjectInterface mockValue, ModelObjectInterface[] values) {
-//            if(values == null) return this;
-//            ArrayList<String> strs = new ArrayList<String>();
-//            for(int i = 0; i < values.length; i++){
-//                if(values[i] != null){
-//                    strs.add(values[i].getObjectID());
-//                }
-//            }
-//            return whereIn(mockValue.getObjectID(), strs.toArray(new String[strs.size()]));
-//        }
-//
-//
-//        public SearchQuery<T>  whereIn(String mockValue, String ... values) {
-//            List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
-//            Pair<Class, String> pair = getSourceAttributePair();
-//            clearMockCallSequence();
-//            String attribute = makeAttributeIdentifier(pair);
-//            Constraint[] constraints = new Constraint[values.length];
-//            for(int i = 0; i < values.length; i++){
-//                Expression expression = newLeafExpression().addConstrain(attribute, Comp.EQUAL, values[i]);
-//                constraints[i] = new SolrConstraint(expression, i == 0 ? joints : new ArrayList<Pair<Class, String>>());
-//            }
-//            rootConstraints.add(new AnyConstraint(constraints));
-//            return this;
-//        }
-//
-//        public SearchQuery<T>  whereIn(Enum mockValue, Enum ... values) {
-//            if (values == null || values.length == 0) {
-//                return this;
-//            }
-//            List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
-//            Pair<Class, String> pair = getSourceAttributePair();
-//            clearMockCallSequence();
-//            String attribute = makeAttributeIdentifier(pair);
-//            Constraint[] constraints = new Constraint[values.length];
-//            for (int i = 0; i < values.length; i++) {
-//                //constraints[i] = has(mockValue, Comp.EQUAL, values[i]);
-//                Expression expression = newLeafExpression().addConstrain(attribute, Comp.EQUAL, values[i].toString());
-//                constraints[i] = new SolrConstraint(expression, joints);
-//            }
-//            rootConstraints.add(new AnyConstraint(constraints));
-//            return this;
-//        }
-
         public SearchQuery<T> search(Calendar mockValue, Comp comp, Calendar value) {
             rootConstraints.add(has(mockValue, comp, value));
             return this;

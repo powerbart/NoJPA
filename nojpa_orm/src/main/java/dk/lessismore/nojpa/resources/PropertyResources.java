@@ -138,6 +138,19 @@ public class PropertyResources extends Resources {
         return null;
     }
 
+    public static InputStream streamFileFromClassPath(String filename){
+        System.out.println("streamFileFromClassPath filename = " + filename);
+        return PropertyResources.class.getClassLoader().getResourceAsStream(filename);
+    }
+
+
+    public static void main(String[] args) {
+        String filename = "db";
+        System.out.println("PropertyResources.class.getClassLoader().getResourceAsStream(filename) = " + PropertyResources.class.getClassLoader().getResourceAsStream(filename));
+        System.out.println("PropertyResources.class.getClassLoader().getResourceAsStream(filename) = " + (new PropertyResources("asda", false)).getClass().getClassLoader().getResourceAsStream(filename));
+    }
+
+
     private boolean isReloadable() {
         return _reload;
     }
