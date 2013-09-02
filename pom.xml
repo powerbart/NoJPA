@@ -16,8 +16,6 @@
 
     <properties>
         <org.springframework.version>3.2.0.RELEASE</org.springframework.version>
-        <!--<org.springframework.mobile-version>1.0.1.RELEASE</org.springframework.mobile-version>-->
-        <!--<org.springframework.security-version>3.1.1.RELEASE</org.springframework.security-version>-->
         <solr.version>4.4.0</solr.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -194,7 +192,7 @@
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-            <version>1.6</version>
+            <version>1.7</version>
         </dependency>
 
         <dependency>
@@ -230,6 +228,20 @@
                     <target>1.6</target>
                     <encoding>UTF-8</encoding>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.2.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
