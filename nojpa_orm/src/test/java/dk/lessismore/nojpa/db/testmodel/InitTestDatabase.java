@@ -14,7 +14,7 @@ public class InitTestDatabase {
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(InitTestDatabase.class);
 
     public static void createTables() {
-        DatabaseCreator.createDatabase("dk.lessismore.reusable_v4.db.testmodel");
+        DatabaseCreator.createDatabase("dk.lessismore.nojpa.db.testmodel");
     }
 
 
