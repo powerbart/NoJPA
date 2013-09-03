@@ -41,26 +41,30 @@ public class Mailer {
         }
         if(smtpHost == null) log.error("No property smtpHost was found");
     }
-
-    private static class Authenticator extends javax.mail.Authenticator {
-        private PasswordAuthentication authentication;
-
-        public Authenticator() {
-            String username = smtpUser;
-            String password = smtpPass;
-            authentication = new PasswordAuthentication(username, password);
-        }
-
-        protected PasswordAuthentication getPasswordAuthentication() {
-            return authentication;
-        }
-    }
+//
+//    private static class Authenticator extends javax.mail.Authenticator {
+//        private PasswordAuthentication authentication;
+//
+//        public Authenticator() {
+//            String username = smtpUser;
+//            String password = smtpPass;
+//            authentication = new PasswordAuthentication(username, password);
+//        }
+//
+//        protected PasswordAuthentication getPasswordAuthentication() {
+//            return authentication;
+//        }
+//    }
 
 
     static void debug(String e){
         log.debug(e);
         System.out.println((new Date()) + ":" + e);
     }
+
+
+
+
 
     public static void send(boolean html, String subject, String body, String from, String[] recipents, String[] bccRecipients, File... attachments) {
         Properties prop = System.getProperties();
@@ -75,19 +79,25 @@ public class Mailer {
             prop.setProperty("mail.smtp.auth", "true");
             prop.setProperty("mail.smtp.host", "mail.example.com");
         }
-        if (smtpPort > 0) {
-            prop.setProperty("mail.smtp.port", Integer.toString(smtpPort));
-        } else {
-            prop.setProperty("mail.smtp.port", "25");
+        if (smtpPort == 25) {
+        } else if(smtpPort == 587){
+            log.debug("Going for SSL");
+            prop.put("mail.smtp.auth", "true");
+            prop.put("mail.smtp.starttls.enable", "true");
         }
 
+        prop.setProperty("mail.smtp.port", "" + smtpPort);
         prop.put("mail.smtp.host", smtpHost);
         prop.put("mail.smtp.connectiontimeout", "10000");
         prop.put("mail.smtp.timeout", "10000");
         debug("Sending mail to: " + Arrays.toString(recipents) + " via " + smtpHost);
 
         try {
-            Session session = Session.getInstance(prop, smtpUser == null ? null : new Authenticator());
+            Session session = Session.getDefaultInstance(prop, smtpUser == null || smtpPort == 587 ? null :  new javax.mail.Authenticator() {
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(smtpUser, smtpPass);
+                }
+            });
             MimeMessage msg = new MimeMessage(session);
 
             msg.setSentDate(new Date());
