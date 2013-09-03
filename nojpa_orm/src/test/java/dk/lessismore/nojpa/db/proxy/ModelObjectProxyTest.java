@@ -2,9 +2,7 @@ package dk.lessismore.nojpa.db.proxy;
 
 import dk.lessismore.nojpa.db.methodquery.MQL;
 import dk.lessismore.nojpa.db.model.MrRich;
-import dk.lessismore.nojpa.reflection.db.model.ModelObject;
-import dk.lessismore.nojpa.reflection.db.model.ModelObjectProxy;
-import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
+import dk.lessismore.nojpa.reflection.db.model.*;
 import dk.lessismore.nojpa.reflection.db.DatabaseCreator;
 
 import static dk.lessismore.nojpa.db.methodquery.MQL.Comp.*;
@@ -30,6 +28,12 @@ public class ModelObjectProxyTest {
     public void dummyTest() {
         assertTrue(true);
     }
+
+    private static void save(ModelObjectInterface o){
+        ModelObjectService.save(o);
+    }
+
+
 
 
     @BeforeClass
@@ -119,7 +123,7 @@ public class ModelObjectProxyTest {
         person.setName("King Kong");
         person.setAge(1958);
         assertEquals("King Kong", person.getName());
-        ModelObjectService.save(person);
+        save(person);
 
         Person personMock = MQL.mock(Person.class);
         Person person2 = MQL.select(personMock).where(personMock.getName(), EQUAL, "King Kong").getFirst();

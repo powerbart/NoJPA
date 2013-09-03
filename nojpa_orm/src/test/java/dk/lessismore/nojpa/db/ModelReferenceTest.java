@@ -4,6 +4,7 @@ import dk.lessismore.nojpa.db.methodquery.MQL;
 import dk.lessismore.nojpa.db.testmodel.Car;
 import dk.lessismore.nojpa.db.testmodel.Person;
 import dk.lessismore.nojpa.db.testmodel.InitTestDatabase;
+import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
 import org.junit.Test;
 import org.junit.BeforeClass;
@@ -16,7 +17,13 @@ public class ModelReferenceTest {
     public static void initDatabase() {
         InitTestDatabase.initPlanetExpress();
         InitTestDatabase.createTestData();
-    }    
+    }
+
+    private static void save(ModelObjectInterface o){
+        ModelObjectService.save(o);
+    }
+
+
 
     @Test
     public void getAfterSetTest() {
@@ -35,8 +42,8 @@ public class ModelReferenceTest {
         assertEquals(car, person.getCar());
         assertEquals(car.getBrand(), person.getCar().getBrand());
 
-        ModelObjectService.save(person);
-        ModelObjectService.save(car);
+        save(person);
+        save(car);
 
         Person person2 = MQL.selectByID(Person.class, person.getObjectID());
         person2.setCar(car);

@@ -32,6 +32,7 @@ public class ModelObjectSearchService {
 
     //TODO: Should be StreamingUpdateSolrServer
     public static void addSolrServer(Class className, SolrServer solrServer){
+        log.info("Adding solrServer("+ solrServer +") for class("+ className.getSimpleName() +")");
         servers.put(className.getSimpleName(), solrServer);
     }
 
@@ -82,6 +83,9 @@ public class ModelObjectSearchService {
     public static <T extends ModelObjectInterface> void put(T object) {
         ModelObject modelObject = (ModelObject) object;
         SolrServer solrServer = servers.get(modelObject.getInterface().getSimpleName());
+        if(solrServer == null){
+            log.fatal("Cant find a solrServer for class("+ modelObject.getInterface().getSimpleName() +")");
+        }
         SolrInputDocument solrObj = new SolrInputDocument();
         put(object, "", new HashMap<String, String>(), solrServer, solrObj);
     }

@@ -5,6 +5,7 @@ import dk.lessismore.nojpa.db.SQLStatementExecutor;
 import dk.lessismore.nojpa.db.methodquery.MQL;
 import dk.lessismore.nojpa.db.statements.SQLStatement;
 import dk.lessismore.nojpa.reflection.db.DatabaseCreator;
+import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
 import junit.framework.Assert;
 import org.junit.BeforeClass;
@@ -32,12 +33,16 @@ public class MethodListenedTest {
         }
     }
 
+    private static void save(ModelObjectInterface o){
+        ModelObjectService.save(o);
+    }
+
     @Test
     public void testInvocationWrite() {
 
         MethodListened methodListened = ModelObjectService.create(MethodListened.class);
         methodListened.setMyValue("Nasko");
-        ModelObjectService.save(methodListened);
+        save(methodListened);
 
         Assert.assertEquals("Nasko_", methodListened.getMyValue());
 
@@ -47,11 +52,11 @@ public class MethodListenedTest {
     public void testInvocationRead() {
         MethodListened methodListened = ModelObjectService.create(MethodListened.class);
         methodListened.setMyValue("Nasko3");
-        ModelObjectService.save(methodListened);
+        save(methodListened);
 
         Assert.assertEquals("Nasko3_", methodListened.getMyValue());
 
-        ModelObjectService.save(methodListened);
+        save(methodListened);
 
         ObjectCacheFactory.getInstance().getObjectCache(MethodListened.class).removeFromCache(methodListened.getObjectID());
 

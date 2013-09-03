@@ -30,7 +30,7 @@ import java.io.File;
 // Besides, this kind if custom quoting is not to be trusted.
 // This service MUST NOT be available externally.
 // It should be rewritten as plain reusable queries.
-public class CallLogServiceImpl implements CallLogService {
+public class CallLogServiceImpl  implements CallLogService {
 
     private final static Logger log = org.apache.log4j.Logger.getLogger(CallLogServiceImpl.class);
     // TODO: It used to be CallLogImpl - does this work?

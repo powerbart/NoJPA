@@ -3,6 +3,7 @@ package dk.lessismore.nojpa.db.simplemodel;
 import dk.lessismore.nojpa.cache.ObjectCacheFactory;
 import dk.lessismore.nojpa.db.methodquery.MQL;
 import dk.lessismore.nojpa.reflection.db.DatabaseCreator;
+import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
 import org.junit.Test;
 
@@ -13,6 +14,9 @@ import java.util.List;
  * User: seb
  */
 public class SimpleModelTest {
+    private static void save(ModelObjectInterface o){
+        ModelObjectService.save(o);
+    }
 
 
     @Test
@@ -22,7 +26,7 @@ public class SimpleModelTest {
         Phone phone = ModelObjectService.create(Phone.class);
         phone.setDescription("Some other name");
         phone.setLongDescription("Some long text");
-        ModelObjectService.save(phone);
+        save(phone);
 
         System.out.println("-------------------------------------- clean cache - start");
         ObjectCacheFactory.getInstance().getObjectCache(Phone.class).clear();

@@ -103,6 +103,8 @@ public class NQL {
 //        private final SelectSolrStatementCreator creator;
         ArrayList<Constraint> rootConstraints;
         SolrQuery solrQuery;
+        String orderByAttribute;
+        Order orderByORDER = Order.ASC;
         int startLimit = -1;
         int endLimit = -1;
 //        private final SelectSQLStatement statement;
@@ -191,33 +193,38 @@ public class NQL {
 //         * @param order ascending, descending.
 //         * @return this.
 //         */
-//        public SearchQuery<T> orderBy(int mockValue, Order order) {
-//            return orderBy(order);
-//        }
-//        public SearchQuery<T> orderBy(String mockValue, Order order) {
-//            return orderBy(order);
-//        }
-//        public SearchQuery<T> orderBy(Calendar mockValue, Order order) {
-//            return orderBy(order);
-//        }
-//        public SearchQuery<T> orderBy(double mockValue, Order order) {
-//            return orderBy(order);
-//        }
-//        public SearchQuery<T> orderBy(T mockValue, Order order) {
-//            return orderBy(order);
-//        }
-//        private SearchQuery<T> orderBy(Order order) {
-//            List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
-//            Pair<Class, String> pair = getSourceAttributePair();
-//            clearMockCallSequence();
+        public SearchQuery<T> orderBy(int mockValue, Order order) {
+            return orderBy(order);
+        }
+        public SearchQuery<T> orderBy(String mockValue, Order order) {
+            return orderBy(order);
+        }
+        public SearchQuery<T> orderBy(Calendar mockValue, Order order) {
+            return orderBy(order);
+        }
+        public SearchQuery<T> orderBy(double mockValue, Order order) {
+            return orderBy(order);
+        }
+        public SearchQuery<T> orderBy(T mockValue, Order order) {
+            return orderBy(order);
+        }
+        private SearchQuery<T> orderBy(Order order) {
+            List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
+            Pair<Class, String> pair = getSourceAttributePair();
+            String solrName = makeAttributeIdentifier(pair);
+            String sortByAttributeName = createFinalSolrAttributeName(joints, solrName);
+            this.orderByAttribute = sortByAttributeName;
+            this.orderByORDER = order;
+            clearMockCallSequence();
 //            String tableName = getTableName(pair.getFirst());
 //            String attributeName = pair.getSecond();
 //            for (Pair<Class, String> joint: joints) {
 //                joinOn(joint.getFirst(), joint.getSecond());
 //            }
 //            statement.setOrderBy(tableName, attributeName, orderToNum(order));
-//            return this;
-//        }
+
+            return this;
+        }
 //
 //        // Only needed for reflection and should not be public exposed
 //        public SearchQuery<T> orderByUnsafe(String attributeName, Order order) {
@@ -383,6 +390,10 @@ public class NQL {
                 if(startLimit != -1){
                     solrQuery.setStart(startLimit);
                     solrQuery.setRows(endLimit - startLimit);
+                }
+                if(this.orderByAttribute != null){
+                    log.debug("Will sort by " + orderByAttribute + " with " + this.orderByORDER);
+                    solrQuery.addSort(this.orderByAttribute, this.orderByORDER == Order.ASC ? SolrQuery.ORDER.asc : SolrQuery.ORDER.desc);
                 }
                 SolrServer solrServer = ModelObjectSearchService.solrServer(selectClass);
                 QueryResponse queryResponse = solrServer.query(solrQuery);
@@ -575,7 +586,7 @@ public class NQL {
     public static String makeAttributeIdentifier(Class sourceClass, String attributeName) {
         DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(sourceClass);
         DbAttribute dbAttribute = dbAttributeContainer.getDbAttribute(attributeName);
-        return dbAttribute.getSolrAttributeName("");  //TODO
+        return dbAttribute.getSolrAttributeName("");
     }
 
 
@@ -911,18 +922,7 @@ public class NQL {
 
         @Override
         public String updateSolrQuery(SolrQuery solrQuery) {
-            if(joints == null || joints.isEmpty()){
-                return " (" + attr + ":(" + value + "))";
-            } else {
-                String attributeName = "";
-                for(int i = 0; i < joints.size(); i++){
-                    Pair<Class, String> classStringPair = joints.get(i);
-                    DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(classStringPair.getFirst());
-                    DbAttribute dbAttribute = dbAttributeContainer.getDbAttribute(classStringPair.getSecond());
-                    attributeName = dbAttribute.getSolrAttributeName(attributeName);
-                }
-                return " (" + attributeName + this.attr + (attributeName.contains("_ARRAY") ? "_ARRAY" : "") + ":(" + value + "))";
-            }
+            return " (" + createFinalSolrAttributeName(joints, attr) + ":(" + value + "))";
         }
         //_Post_shareCounter__ID_Counter_count__TXT
         //_Post_shareCounter__ID_Counter_count__TXT
@@ -932,6 +932,23 @@ public class NQL {
         }
     }
 
+
+
+
+    private static String createFinalSolrAttributeName(List<Pair<Class, String>> joints, String attr){
+        if(joints == null || joints.isEmpty()){
+            return attr;
+        } else {
+            String attributeName = "";
+            for(int i = 0; i < joints.size(); i++){
+                Pair<Class, String> classStringPair = joints.get(i);
+                DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(classStringPair.getFirst());
+                DbAttribute dbAttribute = dbAttributeContainer.getDbAttribute(classStringPair.getSecond());
+                attributeName = dbAttribute.getSolrAttributeName(attributeName);
+            }
+            return attributeName + attr + (attributeName.contains("_ARRAY") ? "_ARRAY" : "");
+        }
+    }
 
 
 
@@ -1080,6 +1097,8 @@ public class NQL {
             throw new IllegalArgumentException("Get-method expected. Got method "+methodName);
         }
     }
+
+
 
 
 }

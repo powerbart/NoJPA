@@ -2,6 +2,7 @@ package dk.lessismore.nojpa.db.model;
 
 import dk.lessismore.nojpa.db.methodquery.MQL;
 import dk.lessismore.nojpa.reflection.db.DatabaseCreator;
+import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
 import org.junit.Test;
 
@@ -27,8 +28,13 @@ public class CompanyTest {
 
         Woman woman = ModelObjectService.create(Woman.class);
         woman.setName("Some other name");
-        ModelObjectService.save(woman);
+        save(woman);
     }
+
+    private static void save(ModelObjectInterface o){
+        ModelObjectService.save(o);
+    }
+
 
 
     @Test
@@ -44,7 +50,7 @@ public class CompanyTest {
         System.out.println("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD");
         System.out.println("company.getMyT() = " + company.getMyT());
         System.out.println("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD");
-        ModelObjectService.save(company);
+        save(company);
 
 
         Company mock = MQL.mock(Company.class);
@@ -60,7 +66,7 @@ public class CompanyTest {
 //        company.setName(company.getName() + " Sebastian");
 //        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXX " + company.getName());
 //
-//        ModelObjectService.save(company);
+//        save(company);
 //        ModelObjectService.delete(company);
 
 

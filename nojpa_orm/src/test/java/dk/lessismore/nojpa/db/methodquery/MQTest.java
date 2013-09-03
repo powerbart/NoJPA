@@ -59,7 +59,7 @@ public class MQTest {
 //            Person p = ModelObjectService.create( Person.class );
 //            String s = "asdada";
 //            p.setName( s );
-//            ModelObjectService.save( p );
+//            save( p );
 //        }
 //        {
 //            Person pMock = MQ.mock(Person.class);
@@ -82,7 +82,7 @@ public class MQTest {
 //            Person p = ModelObjectService.create( Person.class );
 //            String s = "asdada";
 //            p.setName( s );
-//            ModelObjectService.save( p );
+//            save( p );
 //        }
 //        {
 //            Person pMock = MQ.mock(Person.class);
@@ -111,7 +111,7 @@ public class MQTest {
 //            Person p = ModelObjectService.create( Person.class );
 //            String s = "asdada";
 //            p.setName( s );
-//            ModelObjectService.save( p );
+//            save( p );
 //        }
 //        {
 //            Person pMock = MQ.mock(Person.class);
@@ -140,7 +140,7 @@ public class MQTest {
 //            Person p = ModelObjectService.create( Person.class );
 //            String s = "asdada";
 //            p.setName( s );
-//            ModelObjectService.save( p );
+//            save( p );
 //        }
 //        {
 //            Person pMock = MQ.mock(Person.class);
@@ -163,7 +163,7 @@ public class MQTest {
 //            Person p = ModelObjectService.create( Person.class );
 //            String s = "asdada";
 //            p.setName( s );
-//            ModelObjectService.save( p );
+//            save( p );
 //        }
 //        {
 //            Person pMock = MQ.mock(Person.class);
@@ -188,7 +188,7 @@ public class MQTest {
 //            Person p = ModelObjectService.create( Person.class );
 //            String s = "asdada";
 //            p.setName( s );
-//            ModelObjectService.save( p );
+//            save( p );
 //        }
 //        {
 //            Person pMock = MQ.mock(Person.class);
@@ -216,7 +216,7 @@ public class MQTest {
 //            Person p = ModelObjectService.create( Person.class );
 //            String s = "asdada";
 //            p.setName( s );
-//            ModelObjectService.save( p );
+//            save( p );
 //        }
 //        {
 //            Person pMock = MQ.mock(Person.class);
@@ -247,15 +247,15 @@ public class MQTest {
 //                Person p = ModelObjectService.create( Person.class );
 //                String s = "asdada";
 //                p.setName( s );
-//                ModelObjectService.save( p );
+//                save( p );
 //            }
 //            {
 //
 //                a1.setStreet("Bellagade 111");
-//                ModelObjectService.save( a1 );
+//                save( a1 );
 //
 //                a2.setStreet("Bellagade 112");
-//                ModelObjectService.save( a2 );
+//                save( a2 );
 //
 //            }
 //        }
@@ -288,15 +288,15 @@ public class MQTest {
 //                Person p = ModelObjectService.create( Person.class );
 //                String s = "asdada";
 //                p.setName( s );
-//                ModelObjectService.save( p );
+//                save( p );
 //            }
 //            {
 //
 //                a1.setStreet("Bellagade 111");
-//                ModelObjectService.save( a1 );
+//                save( a1 );
 //
 //                a2.setStreet("Bellagade 112");
-//                ModelObjectService.save( a2 );
+//                save( a2 );
 //
 //            }
 //        }
@@ -328,15 +328,15 @@ public class MQTest {
 //                Person p = ModelObjectService.create( Person.class );
 //                String s = "asdada";
 //                p.setName( s );
-//                ModelObjectService.save( p );
+//                save( p );
 //            }
 //            {
 //
 //                a1.setStreet("Bellagade 111");
-//                ModelObjectService.save( a1 );
+//                save( a1 );
 //
 //                a2.setStreet("Bellagade 112");
-//                ModelObjectService.save( a2 );
+//                save( a2 );
 //
 //            }
 //        }
@@ -368,18 +368,18 @@ public class MQTest {
 //                Person p = ModelObjectService.create( Person.class );
 //                String s = "asdada";
 //                p.setName( s );
-//                ModelObjectService.save( p );
+//                save( p );
 //            }
 //            {
 //
 //                a1.setStreet("Bellagade 111");
-//                ModelObjectService.save( a1 );
+//                save( a1 );
 //
 //                a2.setStreet("Bellagade 112");
-//                ModelObjectService.save( a2 );
+//                save( a2 );
 //
 //                a3.setStreet("Bellagade 333");
-//                ModelObjectService.save( a3 );
+//                save( a3 );
 //
 //            }
 //        }
@@ -410,7 +410,7 @@ public class MQTest {
             for(int i = 0; i < 30; i++){
                 Person p = ModelObjectService.create(Person.class);
                 p.setName("Tester" + i);
-                ModelObjectService.save( p );
+                save( p );
             }
 
 
@@ -422,7 +422,7 @@ public class MQTest {
 
                         for(int i = 0; i < 100; i++){
 //                            Person person = MQ.selectByID(Person.class, p.getObjectID());
-//                            ModelObjectService.save(person);
+//                            save(person);
 
                             Company mock = MQL.mock(Company.class);
                             long sum = MQL.select(mock).where(mock.getCfo().getName(), MQL.Comp.LIKE, "%e%").getSum(mock.getCeo().getCountOfCars());
@@ -441,6 +441,10 @@ public class MQTest {
         Thread.sleep(1000 * 30);
         assertEquals(true, true);
     }
+    private static void save(ModelObjectInterface o){
+        ModelObjectService.save(o);
+    }
+
 
 
 
@@ -456,8 +460,8 @@ public class MQTest {
             String number = "12345678";
             c.setNumber(number);
             p.setCpr(c);
-            ModelObjectService.save( c );
-            ModelObjectService.save( p );
+            save( c );
+            save( p );
             System.out.println("p.getCpr().getNumber() = " + p.getCpr().getNumber());
             ObjectCacheFactory.getInstance().getObjectCache(Person.class).clear();
             Person mock = MQL.mock(Person.class);
@@ -478,8 +482,8 @@ public class MQTest {
             Cpr c = ModelObjectService.create( Cpr.class );
             c.setNumber("12345678");
             p.setCpr(c);
-            ModelObjectService.save( c );
-            ModelObjectService.save( p );
+            save( c );
+            save( p );
         }
         SelectSqlStatementCreator creator = new SelectSqlStatementCreator();
         creator.setSource(Person.class);
@@ -530,17 +534,17 @@ public class MQTest {
             {
                 Person pp = ModelObjectService.create(Person.class);
                 pp.setDescription("pppp2");
-                ModelObjectService.save( pp );
+                save( pp );
             }
             Person pp = ModelObjectService.create(Person.class);
             pp.setDescription("pppp");
             Car c = ModelObjectService.create(Car.class);
-            ModelObjectService.save( c );
+            save( c );
             pp.setCar(c);
-            ModelObjectService.save( pp );
+            save( pp );
 
             pp.setCar(c);
-            ModelObjectService.save( pp );
+            save( pp );
 
             Person mPerson = MQL.mock(Person.class);
 
@@ -597,11 +601,11 @@ public class MQTest {
         for(int i = 0; i < 10; i++){
             Address a = ModelObjectService.create(Address.class);
             a.setStreet("MyStreet" + i);
-            ModelObjectService.save( a );
+            save( a );
             as[i] = a;
         }
         p.setAddresses( as );
-        ModelObjectService.save( p );
+        save( p );
 
         Person mPerson = MQL.mock(Person.class);
         Address[] addresses = Arrays.copyOfRange(as, 2, 5);
@@ -623,11 +627,11 @@ public class MQTest {
         for(int i = 0; i < 10; i++){
             Address a = ModelObjectService.create(Address.class);
             a.setStreet("MyStreet" + i);
-            ModelObjectService.save( a );
+            save( a );
             as[i] = a;
         }
         p.setAddresses( as );
-        ModelObjectService.save( p );
+        save( p );
 
         Person mPerson = MQL.mock(Person.class);
         Address[] addresses = Arrays.copyOfRange(as, 2, 5);
@@ -648,7 +652,7 @@ public class MQTest {
         car.setVolume(2f);
         p.setCar( car );
 
-        ModelObjectService.save( p );
+        save( p );
 
         System.out.println("MQ.select( Car.class ).getCount() = " + MQL.select(Car.class).getCount());
         System.out.println("MQ.select( Person.class ).getCount() = " + MQL.select(Person.class).getCount());
@@ -670,11 +674,11 @@ public class MQTest {
         for(int i = 0; i < 10; i++){
             Address a = ModelObjectService.create(Address.class);
             a.setStreet("MyStreet" + i);
-            ModelObjectService.save( a );
+            save( a );
             as[i] = a;
         }
         p.setAddresses( as );
-        ModelObjectService.save( p );
+        save( p );
 
 
         System.out.println("MQ.select( Car.class ).getCount() = " + MQL.select(Address.class).getCount());
@@ -692,7 +696,7 @@ public class MQTest {
         Person p = ModelObjectService.create(Person.class);
         p.setName("MyName");
         System.out.println("testCache_2() : " + p + " / " + p.getClass());
-        ModelObjectService.save( p );
+        save( p );
 
         System.out.println("MQ.select( Person.class ).getCount() = " + MQL.select(Person.class).getCount());
 
@@ -709,7 +713,7 @@ public class MQTest {
     @Test
     public void testObjEquals() throws Exception {
         Person person = ModelObjectService.create(Person.class);
-        ModelObjectService.save(person);
+        save(person);
 
         Person objID1 = MQL.selectByID(Person.class, person.getObjectID());
         Person objIDother = MQL.selectByID(Person.class, person.getObjectID());
@@ -751,7 +755,7 @@ public class MQTest {
             Car car = ModelObjectService.create(Car.class);
             car.setBrand("MyBrand" + i);
             car.setVolume(i + (((float) i) / 10f));
-            ModelObjectService.save( car );
+            save( car );
         }
         Car car = MQL.mock(Car.class);
 
@@ -768,7 +772,7 @@ public class MQTest {
             Car car = ModelObjectService.create(Car.class);
             car.setBrand("MyBrand" + i);
             car.setVolume(i + (((float) i) / 10f));
-            ModelObjectService.save( car );
+            save( car );
         }
         Car car = MQL.mock(Car.class);
         System.out.println("MQ.select( Car.class ).getCount() = " + MQL.select(Car.class).getList());
@@ -782,7 +786,7 @@ public class MQTest {
             Car car = ModelObjectService.create(Car.class);
             car.setBrand("MyBrand" + i);
             car.setVolume(i + (((float) i) / 10f));
-            ModelObjectService.save( car );
+            save( car );
         }
         Car car = MQL.mock(Car.class);
         System.out.println("MQ.select( Car.class ).getCount() = " + MQL.select(car).where(car.getBrand(), MQL.Comp.LIKE, "MyBrahh%").getSum( car.getVolume() ));
@@ -795,7 +799,7 @@ public class MQTest {
         for(int i = 0; i < names.length; i++){
             Person person = ModelObjectService.create(Person.class);
             person.setName(names[i]);
-            ModelObjectService.save(person);
+            save(person);
         }
         Person personMock = MQL.mock(Person.class);
 
@@ -814,7 +818,7 @@ public class MQTest {
         for(int i = 0; i < names.length; i++){
             Person person = ModelObjectService.create(Person.class);
             person.setName(names[i]);
-            ModelObjectService.save(person);
+            save(person);
         }
         Person personMock = MQL.mock(Person.class);
         List<Person> personList = MQL.select(personMock).whereIn(personMock.getName(), names).getList();
@@ -835,7 +839,7 @@ public class MQTest {
             cars.add(car);
             person.setCar(car);
             person.setName(names[i]);
-            ModelObjectService.save(person);
+            save(person);
         }
         Person personMock = MQL.mock(Person.class);
         List<Person> personList = MQL.select(personMock).whereIn(personMock.getCar(), cars.toArray(new Car[cars.size()])).getList();
@@ -866,7 +870,7 @@ public class MQTest {
             if(ps.size() > 0){
                 person.setChildren(ps.toArray(new Person[ps.size()]));
             }
-            ModelObjectService.save(person);
+            save(person);
             ps.add(person);
         }
         Person personMock = MQL.mock(Person.class);
@@ -882,7 +886,7 @@ public class MQTest {
         Person p = ModelObjectService.create( Person.class );
         String t = "as'/%/'dassda";
         p.setName( t );
-        ModelObjectService.save( p );
+        save( p );
         System.out.println("t = " + t);
     }
 
@@ -904,7 +908,7 @@ public class MQTest {
             String s = "asdada";
 //            p.setDescription(s);
             p.setName( s );
-            ModelObjectService.save( p );
+            save( p );
         }
         {
             Person pMock = MQL.mock(Person.class);

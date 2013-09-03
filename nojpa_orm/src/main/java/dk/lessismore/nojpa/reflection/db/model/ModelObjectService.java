@@ -10,6 +10,8 @@ public class ModelObjectService {
 
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(ModelObjectService.class);
 
+
+
     /** Copies the fields that aren't null from the second argument into the first. */
     public static <T extends ModelObjectInterface> void copyPresentFields(T target, T source) {
 //        ModelObject t = ((ModelObject) target).getProxyObject();
