@@ -447,6 +447,18 @@ public class MQTest {
 
 
 
+    @Test
+    public void testNull() throws Exception {
+        // TODO fun fun fun
+        InitTestDatabase.initPlanetExpress();
+        Person p = ModelObjectService.create( Person.class );
+        p.setName("null");
+        ModelObjectService.save(p);
+        Person person = MQL.mock(Person.class);
+        MQL.SelectQuery<Person> aNull1 = MQL.select(person).where(person.getName(), MQL.Comp.EQUAL, "null");
+        Person first = aNull1.getFirst();
+        System.out.println("first.getName() = " + first.getName());
+    }
 
 
     @Test
