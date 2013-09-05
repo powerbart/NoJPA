@@ -545,7 +545,7 @@ public class MQL {
         //log.debug("MQ.getSourceAttributePair:1");
         LinkedList<Pair<Object, Method>> mockSequence = threadMockCallSequenceMap.get(Thread.currentThread());
         if (mockSequence == null) {
-            throw new RuntimeException("Some mock calls are expected to have been made at this time Thread.currentThread().getId("+ Thread.currentThread().getId() +")");
+            throw new RuntimeException("Did you mix up MQL and NQL???? ... Or did you call 2 mock-methods in the same statement? .... Some mock calls are expected to have been made at this time Thread.currentThread().getId("+ Thread.currentThread().getId() +")");
         }
         Pair<Object, Method> pair = mockSequence.getLast();
         MockExtra proxy = (MockExtra) pair.getFirst();
@@ -573,7 +573,7 @@ public class MQL {
         //log.debug("MQ.getJoinsByMockCallSequence:1");
         LinkedList<Pair<Object, Method>> mockSequence = threadMockCallSequenceMap.get(Thread.currentThread());
         if (mockSequence == null) {
-            throw new RuntimeException("Some mock calls are expected to have been made at this time Thread.currentThread().getId("+ Thread.currentThread().getId() +")");
+            throw new RuntimeException("Did you mix up MQL and NQL???? ... Or did you call 2 mock-methods in the same statement? .... Some mock calls are expected to have been made at this time Thread.currentThread().getId("+ Thread.currentThread().getId() +")");
         }
         List<Pair<Class, String>> joints = new ArrayList<Pair<Class, String>>();
         for (Pair<Object, Method> pair: mockSequence) {

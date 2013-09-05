@@ -361,6 +361,9 @@ public class DbObjectReader {
                 case DbDataType.DB_DOUBLE:
                     value = new Double(resultSet.getDouble(name));
                     break;
+                case DbDataType.DB_FLOAT:
+                    value = new Float(resultSet.getDouble(name));
+                    break;
                 case DbDataType.DB_BOOLEAN:
                     value = new Boolean(resultSet.getInt(name) == 1);
                     break;

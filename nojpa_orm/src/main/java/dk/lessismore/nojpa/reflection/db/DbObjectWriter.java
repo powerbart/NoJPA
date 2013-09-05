@@ -264,6 +264,9 @@ public class DbObjectWriter {
                 case DbDataType.DB_DOUBLE:
                     insertSQLStatement.addAttributeValue(attributeName, ((Double) value).doubleValue());
                     break;
+                case DbDataType.DB_FLOAT:
+                    insertSQLStatement.addAttributeValue(attributeName, ((Float) value).doubleValue());
+                    break;
                 case DbDataType.DB_LONG:
                     insertSQLStatement.addAttributeValue(attributeName, ((Long) value).longValue());
                     break;

@@ -29,6 +29,9 @@ public interface Person extends ModelObjectInterface {
     int getCountOfCars();
     void setCountOfCars(int countOfCars);
 
+    float getSomeFloat();
+    void setSomeFloat(float countOfCars);
+
     long getCountOfFriends();
     void setCountOfFriends(long countOfFriends);
 

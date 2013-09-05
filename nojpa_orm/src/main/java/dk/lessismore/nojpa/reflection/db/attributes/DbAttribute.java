@@ -230,6 +230,7 @@ public class DbAttribute implements Serializable {
                 case DbDataType.DB_BOOLEAN: return "BOOL";
                 case DbDataType.DB_CLOB: return "LONGTEXT";
                 case DbDataType.DB_LONG: return "LONG";
+                case DbDataType.DB_FLOAT: return "DOUBLE";
 //            case DB_CLOB: return "CLOB("+ (dbAttribute != null ? dbAttribute.getNrOfCharacters() : 100000) +")";
                 default: return "";
             }

@@ -27,6 +27,7 @@ public class DbDataType implements Serializable {
     public static final int DB_DATE = 5;
     public static final int DB_CLOB = 6;
     public static final int DB_LONG = 7;
+    public static final int DB_FLOAT = 8;
 
 
     public static final int DB_MAX_VARCHAR_LENGTH = 25000;
@@ -101,6 +102,8 @@ public class DbDataType implements Serializable {
             type = DB_INT;
         else if(attributeClass.equals(Long.TYPE))
             type = DB_LONG;
+        else if(attributeClass.equals(Float.TYPE))
+            type = DB_FLOAT;
         else if(attributeClass.equals(Double.TYPE))
             type = DB_DOUBLE;
         else if(attributeClass.equals(Boolean.TYPE))
@@ -144,6 +147,7 @@ public class DbDataType implements Serializable {
             case DB_CHAR: return "CHAR("+(dbAttribute != null ? dbAttribute.getNrOfCharacters() : 32)+")";
             case DB_INT: return "INT";
             case DB_DOUBLE: return "DOUBLE PRECISION";
+            case DB_FLOAT: return "DOUBLE PRECISION";
             case DB_DATE: return "DATETIME";
             case DB_BOOLEAN: return "INT";
             case DB_LONG: return "BIGINT(64)";

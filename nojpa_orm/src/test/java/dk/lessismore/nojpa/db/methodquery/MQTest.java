@@ -457,7 +457,7 @@ public class MQTest {
         Person person = MQL.mock(Person.class);
         MQL.SelectQuery<Person> aNull1 = MQL.select(person).where(person.getName(), MQL.Comp.EQUAL, "null");
         Person first = aNull1.getFirst();
-        System.out.println("first.getName() = " + first.getName());
+//        System.out.println("first.getName() = " + first.getName());
     }
 
 
@@ -467,6 +467,7 @@ public class MQTest {
             InitTestDatabase.initPlanetExpress();
             Person p = ModelObjectService.create( Person.class );
             p.setName( "MyName" );
+            p.setSomeFloat(0.99999f);
             p.setCountOfFriends(Long.MAX_VALUE);
             Cpr c = ModelObjectService.create( Cpr.class );
             String number = "12345678";
@@ -480,6 +481,7 @@ public class MQTest {
             Person person = MQL.select(mock).where(mock.getCountOfFriends(), MQL.Comp.EQUAL_OR_GREATER, 8L).getFirst();
             System.out.println("person = " + person);
             System.out.println("person = " + person.getCountOfFriends());
+            System.out.println("person = " + person.getSomeFloat());
 
         }
         assertEquals(true, true);

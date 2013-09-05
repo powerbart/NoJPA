@@ -298,6 +298,9 @@ public class ModelObjectSearchService {
                 case DbDataType.DB_DOUBLE:
                     solrObj.addField(solrAttributeName, ((Double) value).doubleValue());
                     break;
+                case DbDataType.DB_FLOAT:
+                    solrObj.addField(solrAttributeName, ((Float) value).floatValue());
+                    break;
                 case DbDataType.DB_BOOLEAN:
                     solrObj.addField(solrAttributeName, ((Boolean) value).booleanValue() );
                     break;

@@ -29,7 +29,7 @@ public class NQL {
 
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(NQL.class);
 
-    public enum Comp {EQUAL, EQUAL_OR_GREATER, EQUAL_OR_LESS, GREATER, LESS, NOT_EQUAL, LIKE, NOT_LIKE}
+    public enum Comp {EQUAL, EQUAL_OR_GREATER, EQUAL_OR_LESS, NOT_EQUAL, LIKE}
     public enum Order {ASC, DESC}
     public static final int ANY = 0;
     public enum ReadOnly {RO, RW}
@@ -70,13 +70,13 @@ public class NQL {
         return new SearchQuery<T>(sourceClass);
     }
 
-    public static String asString(Object mockValue){
-        Pair<Class, String> pair = getSourceAttributePair();
-        clearMockCallSequence();
-        String attribute = makeAttributeIdentifier(pair);
-        attribute = attribute.replaceAll("_", "");
-        return attribute;
-    }
+//    public static String asString(Object mockValue){
+//        Pair<Class, String> pair = getSourceAttributePair();
+//        clearMockCallSequence();
+//        String attribute = makeAttributeIdentifier(pair);
+//        attribute = attribute.replaceAll("_", "");
+//        return attribute;
+//    }
 
 
     /**
@@ -120,13 +120,13 @@ public class NQL {
         }
 
 
-        /**
-         * Add where constraint
-         * @param mockValue a proxy instance
-         * @param comp comparator
-         * @param value compareWithNullLast value
-         * @return this
-         */
+
+        public SearchQuery<T> addFunction(SolrFunction solrMathFunction) {
+            rootConstraints.get(rootConstraints.size()-1).getExpression().addSolrFunction(solrMathFunction);
+            return this;
+        }
+
+
         public SearchQuery<T> search(int mockValue, Comp comp, int value) {
             rootConstraints.add(has(mockValue, comp, value));
             return this;
@@ -136,6 +136,7 @@ public class NQL {
             rootConstraints.add(has(mockValue, comp, value));
             return this;
         }
+
 
         public SearchQuery<T> search(String mockValue, Comp comp, String value) {
             rootConstraints.add(has(mockValue, comp, value));
@@ -396,6 +397,8 @@ public class NQL {
                     solrQuery.addSort(this.orderByAttribute, this.orderByORDER == Order.ASC ? SolrQuery.ORDER.asc : SolrQuery.ORDER.desc);
                 }
                 SolrServer solrServer = ModelObjectSearchService.solrServer(selectClass);
+                solrQuery.setFields("objectID", "score");
+//                solrQuery.setParam("bf", "sum(_Post_pageViewCounter__ID_Counter_count__LONG,8)");
                 QueryResponse queryResponse = solrServer.query(solrQuery);
                 log.debug("queryResponse = " + queryResponse.getResults().size());
                 log.debug("queryResponse = " + queryResponse.getResults().getNumFound());
@@ -403,7 +406,20 @@ public class NQL {
                 int size = queryResponse.getResults().size();
                 for(int i = 0; i < size; i++){
                     SolrDocument entries = queryResponse.getResults().get(i);
+                    if(i == 0){
+                        Iterator<String> iterator = entries.getFieldNames().iterator();
+                        for(; iterator.hasNext() ;){
+                            String next = iterator.next();
+                            log.debug("Fieldnames:" + next);
+                        }
+                    }
+
                     String objectID = entries.get("objectID").toString();
+                    if(entries.containsKey("score")){
+                        log.debug("objectID("+ objectID +") has score("+ entries.get("score")+")");
+                    }
+
+
                     T t = MQL.selectByID(selectClass, objectID);
                     if(t == null){
                         log.error("We have a problem with the sync between the DB & Solr ... Can't find objectID("+ objectID +") class("+ selectClass +")");
@@ -420,6 +436,7 @@ public class NQL {
             }
             return null;
         }
+
 
 //        private int selectCountFromDb() {
 //            statement.addExpression(getExpressionAddJoins());
@@ -440,7 +457,7 @@ public class NQL {
         }
 
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            log.debug("RListImpl::Calling " + method.getName() + "()");
+//            log.debug("RListImpl::Calling " + method.getName() + "()");
             String methodName = method.getName();
             if (methodName.equals("getNumberFound")) {
                 return queryResponse.getResults().getNumFound();
@@ -531,7 +548,7 @@ public class NQL {
         //log.debug("MQ.getSourceAttributePair:1");
         LinkedList<Pair<Object, Method>> mockSequence = threadMockCallSequenceMap.get(Thread.currentThread());
         if (mockSequence == null) {
-            throw new RuntimeException("Some mock calls are expected to have been made at this time Thread.currentThread().getId("+ Thread.currentThread().getId() +")");
+            throw new RuntimeException("Did you mix up MQL and NQL???? ... Or did you call 2 mock-methods in the same statement? .... Some mock calls are expected to have been made at this time Thread.currentThread().getId("+ Thread.currentThread().getId() +")");
         }
         Pair<Object, Method> pair = mockSequence.getLast();
         MockExtra proxy = (MockExtra) pair.getFirst();
@@ -559,7 +576,7 @@ public class NQL {
         //log.debug("MQ.getJoinsByMockCallSequence:1");
         LinkedList<Pair<Object, Method>> mockSequence = threadMockCallSequenceMap.get(Thread.currentThread());
         if (mockSequence == null) {
-            throw new RuntimeException("Some mock calls are expected to have been made at this time Thread.currentThread().getId("+ Thread.currentThread().getId() +")");
+            throw new RuntimeException("Did you mix up MQL and NQL???? ... Or did you call 2 mock-methods in the same statement? .... Some mock calls are expected to have been made at this time Thread.currentThread().getId("+ Thread.currentThread().getId() +")");
         }
         List<Pair<Class, String>> joints = new ArrayList<Pair<Class, String>>();
         for (Pair<Object, Method> pair: mockSequence) {
@@ -619,6 +636,7 @@ public class NQL {
     }
 
 
+
     public static Constraint has(Enum mockValue, Comp comp, Enum value) {
         List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
         Pair<Class, String> pair = getSourceAttributePair();
@@ -650,6 +668,7 @@ public class NQL {
         SolrExpression expression = newLeafExpression().addConstrain(makeAttributeIdentifier(pair), comp, value);
         return new SolrConstraint(expression, joints);
     }
+
 
     public static <M extends ModelObjectInterface> Constraint has(M mockValue, Comp comp, M model) {
         List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
@@ -713,6 +732,13 @@ public class NQL {
     public static class SolrContainerExpression implements UpdateSolrQueryAble{
         List<UpdateSolrQueryAble> expressions = new ArrayList<UpdateSolrQueryAble>();
         List<Integer> conditions = new ArrayList<Integer>();
+        ArrayList<SolrFunction> solrFunctions = new ArrayList<SolrFunction>();
+
+        //TODO: solrFunctions is not in use in the moment for Containers ...
+        public void addSolrFunction(SolrFunction solrFunction){
+            solrFunctions.add(solrFunction);
+        }
+
 
         public SolrContainerExpression addExpression(UpdateSolrQueryAble expression) {
             expressions.add(expression);
@@ -832,8 +858,8 @@ public class NQL {
     public interface UpdateSolrQueryAble {
 
 
-        public String updateSolrQuery(SolrQuery solrQuery);
-
+        String updateSolrQuery(SolrQuery solrQuery);
+        void addSolrFunction(SolrFunction solrFunction);
 
 
     }
@@ -847,12 +873,19 @@ public class NQL {
         String attr = null;
         String value = null;
         private List<Pair<Class, String>> joints;
+        Comp comparator;
+        ArrayList<SolrFunction> solrFunctions = new ArrayList<SolrFunction>();
 
+
+        public void addSolrFunction(SolrFunction solrFunction){
+            solrFunctions.add(solrFunction);
+        }
 
         public SolrExpression addConstrain(String attributeName, Comp comparator, String value) {
             this.statement = "("+ attributeName +":("+ createSearchString(value) +"))";
             this.attr = attributeName;
             this.value = value;
+            this.comparator = comparator;
             return this;
         }
 
@@ -864,6 +897,7 @@ public class NQL {
             this.value = xmlDateFormat.format(value.getTime());
             this.statement = "("+ attributeName +":("+ this.value +"))";
             this.attr = attributeName;
+            this.comparator = comparator;
             return this;
         }
 
@@ -872,6 +906,7 @@ public class NQL {
             this.statement = "("+ attributeName +":"+ value +")";
             this.attr = attributeName;
             this.value = "" + value;
+            this.comparator = comparator;
             return this;
         }
 
@@ -880,6 +915,7 @@ public class NQL {
             this.statement = "("+ attributeName +":"+ value +")";
             this.attr = attributeName;
             this.value = "" + value;
+            this.comparator = comparator;
             return this;
         }
 
@@ -888,6 +924,7 @@ public class NQL {
             this.statement = "("+ attributeName +":"+ value +")";
             this.attr = attributeName;
             this.value = "" + value;
+            this.comparator = comparator;
             return this;
         }
 
@@ -896,6 +933,7 @@ public class NQL {
             this.statement = "("+ attributeName +":"+ value +")";
             this.attr = attributeName;
             this.value = "" + value;
+            this.comparator = comparator;
             return this;
         }
 
@@ -922,7 +960,27 @@ public class NQL {
 
         @Override
         public String updateSolrQuery(SolrQuery solrQuery) {
-            return " (" + createFinalSolrAttributeName(joints, attr) + ":(" + value + "))";
+            String solrAttributeName = createFinalSolrAttributeName(joints, attr);
+            String boostQuery = "";
+            String otherFunctions = " ";
+            for(int i = 0; i < solrFunctions.size(); i++){
+                SolrFunction solrFunction = solrFunctions.get(i);
+                if(solrFunction instanceof Boost){
+                    boostQuery = "^" + ((Boost)solrFunction).boost;
+                } else {
+                    otherFunctions += " " + solrFunction;
+                }
+            }
+            if(this.comparator == Comp.EQUAL_OR_LESS){
+                return " (" + solrAttributeName + ":[* TO " + value + "]"+ boostQuery +")" + otherFunctions;
+            } else if(this.comparator == Comp.EQUAL_OR_GREATER){
+                return " (" + solrAttributeName + ":[" + value + " TO *]"+ boostQuery +")" + otherFunctions;
+            } else if(this.comparator == Comp.NOT_EQUAL){
+                return " (" + solrAttributeName + ":-(" + value + ")"+ boostQuery +")" + otherFunctions;
+            } else {
+                return " (" + solrAttributeName + ":(" + value + ")"+ boostQuery +")" + otherFunctions;
+            }
+
         }
         //_Post_shareCounter__ID_Counter_count__TXT
         //_Post_shareCounter__ID_Counter_count__TXT
@@ -932,6 +990,16 @@ public class NQL {
         }
     }
 
+
+    public static String asString(Object expression){
+        List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
+        Pair<Class, String> pair = getSourceAttributePair();
+        String attr = makeAttributeIdentifier(pair);
+        clearMockCallSequence();
+        String finalSolrAttributeName = createFinalSolrAttributeName(joints, attr);
+        log.debug("asString("+ finalSolrAttributeName +")");
+        return finalSolrAttributeName;
+    }
 
 
 
@@ -972,9 +1040,34 @@ public class NQL {
         return (Constraint[]) new ArrayList(constraints).toArray(new Constraint[constraints.size()]);
     }
 
-    /**
-     * Constraint AST with ANDs and ORs
-     */
+
+    public static abstract class SolrFunction {
+
+    }
+
+
+    public static class SolrMathFunction extends SolrFunction {
+
+        String expression = null;
+
+        public SolrMathFunction(String expression){
+            this.expression = expression;
+        }
+
+        @Override
+        public String toString() {
+            return expression;
+        }
+    }
+
+
+    public static class Boost extends SolrFunction {
+        int boost;
+        public Boost(int boost){
+            this.boost = boost;
+        }
+    }
+
 
     public static abstract class Constraint {
         abstract UpdateSolrQueryAble getExpression();
@@ -1016,8 +1109,8 @@ public class NQL {
 
     public static class SolrConstraint extends Constraint {
 
-        private final SolrExpression expression;
-        private final List<Pair<Class, String>> joints;
+        final SolrExpression expression;
+        final List<Pair<Class, String>> joints;
 
         public SolrConstraint(SolrExpression expression, List<Pair<Class, String>> joints) {
             this.expression = expression;
@@ -1081,7 +1174,7 @@ public class NQL {
             mockSequence = new LinkedList<Pair<Object, Method>>();
             threadMockCallSequenceMap.put(Thread.currentThread(), mockSequence);
         }
-//        log.debug("threadMockCallSequenceMap.addLast(" + method +") on " + Thread.currentThread().getId());
+        log.debug("threadMockCallSequenceMap.addLast(" + method +") on " + Thread.currentThread().getId());
         mockSequence.addLast(new Pair<Object, Method>(mock, method));
     }
 
