@@ -105,6 +105,7 @@ public class ModelObjectSearchService {
                     addAttributeValueToStatement(dbAttribute, solrObj, value, prefix);
                 } else if (!dbAttribute.isMultiAssociation()) {
                     ModelObjectInterface value = (ModelObjectInterface) dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
+                    addAttributeValueToStatement(dbAttribute, solrObj, value, prefix);
                     if(value != null && !storedObjects.containsKey(value.getObjectID())){
                         put(value, dbAttribute.getSolrAttributeName(prefix), storedObjects, solrServer, solrObj);
                     }
