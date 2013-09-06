@@ -367,7 +367,7 @@ public class NQL {
 //        public SelectSQLStatement getSelectSQLStatement(){
 //            statement.addExpression(getExpressionAddJoins());
 //            return statement;
-//        }
+//        }    efasdfasdfasdfadsfa asdf asdfasdf
 
         @SuppressWarnings("unchecked")
         private NList<T> selectObjectsFromDb() {
