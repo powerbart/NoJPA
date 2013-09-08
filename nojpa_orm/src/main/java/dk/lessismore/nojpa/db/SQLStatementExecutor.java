@@ -95,7 +95,7 @@ public class SQLStatementExecutor {
                 connection = (Connection) ConnectionPoolFactory.getPool().getFromPool();
                 long start = System.nanoTime();
                 statement = connection.createStatement();
-                log.debug("Will update with:" + sqlStatement.replaceAll("\n", " "));
+                log.debug("Will update with:::" + sqlStatement.replaceAll("\n", " "));
                 statement.execute(sqlStatement);
 
                 long end = System.nanoTime();

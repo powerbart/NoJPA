@@ -205,6 +205,7 @@ public class DbObjectWriter {
                 Object value = null;
                 if(attributeName.equals("lastModified")){
                     value = Calendar.getInstance();
+                    dbAttributeContainer.setAttributeValue(modelObject.getProxyObject(), dbAttribute, value);
                 } else {
                     value = dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
                 }
