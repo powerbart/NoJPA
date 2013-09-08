@@ -423,8 +423,9 @@ public class NQL {
                     T t = MQL.selectByID(selectClass, objectID);
                     if(t == null){
                         log.error("We have a problem with the sync between the DB & Solr ... Can't find objectID("+ objectID +") class("+ selectClass +")");
+                    } else {
+                        toReturn.add(t);
                     }
-                    toReturn.add(t);
                 }
                 return (NList<T>) Proxy.newProxyInstance(
                         this.getClass().getClassLoader(),
