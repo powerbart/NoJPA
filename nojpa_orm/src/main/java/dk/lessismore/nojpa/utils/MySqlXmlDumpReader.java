@@ -25,7 +25,7 @@ public class MySqlXmlDumpReader {
     }
 
 
-    public Row readRow() throws IOException {
+    public synchronized Row readRow() throws IOException {
 
         while (countOfRead != -1) {
             if(readContent.indexOf("</row>") == -1){
