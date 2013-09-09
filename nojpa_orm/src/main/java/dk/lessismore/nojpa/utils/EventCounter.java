@@ -11,8 +11,12 @@ import java.util.*;
  */
 public class EventCounter {
 
+    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(EventCounter.class);
+
+
     HashMap<String, Event> events = new HashMap<String, Event>();
     long totalCounter = 0;
+    long totalTime = 0;
 
     public EventCounter(){
 
@@ -57,6 +61,7 @@ public class EventCounter {
 
     public synchronized void newEvent(String  key, long time){
         totalCounter++;
+        totalTime += time;
         Event e = events.get(key);
         if(e == null){
             e = new Event();
@@ -67,6 +72,7 @@ public class EventCounter {
             e.countOfEvents++;
             e.totalTime += time;
         }
+        log.debug("**************** AVG-TIME("+ (totalTime / totalCounter) +") count("+ totalCounter +") totalTime("+ totalTime +") lastTime("+ time +")");
     }
 
     public synchronized List<Event> getStatus(){

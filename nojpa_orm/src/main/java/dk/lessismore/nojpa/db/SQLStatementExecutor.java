@@ -31,6 +31,10 @@ public class SQLStatementExecutor {
     public static boolean debugCpuMode = false; //true  = memory leak
     private static EventCounter eventCounter = new EventCounter();
 
+    static long totalCounter = 0;
+    static long totalTime = 0;
+
+
 
     static {
         PropertyResources websiteResources = PropertyService.getInstance().getPropertyResources(SQLStatementExecutor.class);
@@ -93,12 +97,17 @@ public class SQLStatementExecutor {
             Statement statement = null;
             try {
                 connection = (Connection) ConnectionPoolFactory.getPool().getFromPool();
+                log.debug("Will update with:::" + sqlStatement.replaceAll("\n", " "));
                 long start = System.nanoTime();
                 statement = connection.createStatement();
-                log.debug("Will update with:::" + sqlStatement.replaceAll("\n", " "));
                 statement.execute(sqlStatement);
-
                 long end = System.nanoTime();
+                long time = end - start;
+                totalTime = totalTime + time;
+                totalCounter++;
+                log.debug("**************** AVG-TIME("+ (totalTime / totalCounter) +") count("+ totalCounter +") totalTime("+ totalTime +") lastTime("+ time +")");
+
+
                 if(debugCpuMode) {
                     eventCounter.newEvent(sqlStatement.replaceAll("\n", " "), end - start);
                     eventCounter.newEvent("insert", end - start);
@@ -170,6 +179,12 @@ public class SQLStatementExecutor {
                 statement.execute(sqlStatement);
 
                 long end = System.nanoTime();
+                long time = end - start;
+                totalTime = totalTime + time;
+                totalCounter++;
+                log.debug("**************** AVG-TIME("+ (totalTime / totalCounter) +") count("+ totalCounter +") totalTime("+ totalTime +") lastTime("+ time +")");
+
+
                 if(debugCpuMode) {
                     eventCounter.newEvent(sqlStatement.replaceAll("\n", " "), end - start);
                     eventCounter.newEvent("insert", end - start);
@@ -213,8 +228,12 @@ public class SQLStatementExecutor {
                 statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
                 resultSet = statement.executeQuery(sqlStatement);
                 long end = System.nanoTime();
-                if(debugCpuMode) eventCounter.newEvent(sqlStatement.replaceAll("\n", " "), end - start);
+                long time = end - start;
+                totalTime = totalTime + time;
+                totalCounter++;
+                log.debug("**************** AVG-TIME("+ (totalTime / totalCounter) +") count("+ totalCounter +") totalTime("+ totalTime +") lastTime("+ time +")");
 
+                if(debugCpuMode) eventCounter.newEvent(sqlStatement.replaceAll("\n", " "), end - start);
                 LimResultSet toReturn = new LimResultSet(resultSet, statement, sqlStatement);
                 ConnectionPoolFactory.getPool().putBackInPool(connection);
                 return toReturn;
@@ -293,6 +312,11 @@ public class SQLStatementExecutor {
                 preSQLStatement.makeStatementReadyToExcute(statement);
                 resultSet = statement.executeQuery();
                 long end = System.nanoTime();
+                long time = end - start;
+                totalTime = totalTime + time;
+                totalCounter++;
+                log.debug("**************** AVG-TIME("+ (totalTime / totalCounter) +") count("+ totalCounter +") totalTime("+ totalTime +") lastTime("+ time +")");
+
                 if(debugCpuMode) eventCounter.newEvent(initStatement.replaceAll("\n", " "), end - start);
                 log.debug("Time("+ (end - start) +") for " + initStatement.replaceAll("\n", " "));
                 LimResultSet toReturn = new LimResultSet(resultSet, statement, initStatement);
