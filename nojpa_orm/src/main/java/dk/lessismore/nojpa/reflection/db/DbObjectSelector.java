@@ -41,12 +41,15 @@ public class DbObjectSelector {
         log.debug("Now running the REAL visitor :-) iterateObjectsFromDb(..., cache("+ cache +"), loadAll("+ loadAll +"), intervalStart("+ intervalStart +"), intervalEnd("+ intervalEnd +"), visitor("+ visitor.getClass().getSimpleName() +")) ");
         LimResultSet limSet = null;
         try {
+//            log.debug("iterateObjectsFromDb:1");
             if (!ModelObjectInterface.class.isAssignableFrom(targetClass)) {
                 log.fatal("This is not a model object. We can not continue.");
                 return;
             }
+//            log.debug("iterateObjectsFromDb:2");
             DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(targetClass);
             String sqlNameQuery = null;
+//            log.debug("iterateObjectsFromDb:3");
             if (dbAttributeContainer.getSqlNameQuery() == null) {
                 for (Iterator iterator = dbAttributeContainer.getDbAttributes().values().iterator(); iterator.hasNext();)
                 {
@@ -59,22 +62,25 @@ public class DbObjectSelector {
             } else {
                 sqlNameQuery = dbAttributeContainer.getSqlNameQuery();
             }
+//            log.debug("iterateObjectsFromDb:4");
             selectSqlStatement.addAttributeName(sqlNameQuery);
+//            log.debug("iterateObjectsFromDb:5");
             // ****************************************
             limSet = SQLStatementExecutor.doQuery(selectSqlStatement);
+//            log.debug("iterateObjectsFromDb:6");
             ResultSet resultSet = limSet != null ? limSet.getResultSet() : null;
-            log.debug("iterateObjectsFromDb :: 1");
+//            log.debug("iterateObjectsFromDb :: 1");
             if (resultSet != null) {
                 try {
-                    log.debug("iterateObjectsFromDb :: 2");
+//                    log.debug("iterateObjectsFromDb :: 2");
                     //Load each of the objects.
                     for (int i = 0; !visitor.getDone() && resultSet.next(); i++) {
-                        log.debug("iterateObjectsFromDb :: 3");
+//                        log.debug("iterateObjectsFromDb :: 3");
                         if (loadAll || (i >= intervalStart && i < intervalEnd)) {
                             String objectId = resultSet.getString(dbAttributeContainer.getPrimaryKeyAttribute().getAttributeName());
 
                             ModelObject modelObject = DbObjectReader.readObjectFromDb(objectId, targetClass, associationConstrain, limSet);
-                            log.debug("iterateObjectsFromDb :: 4");
+//                            log.debug("iterateObjectsFromDb :: 4");
                             if (modelObject != null){
                                 log.debug("Now calling the visitor.visit");
                                 visitor.visit(modelObject);

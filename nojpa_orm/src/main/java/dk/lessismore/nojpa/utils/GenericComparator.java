@@ -75,6 +75,8 @@ public class GenericComparator<T> implements Comparator<T> {
                 return (invertDirection ? -1 : 1) * (((Float) v1).intValue() < ((Float) v2).intValue() ? -1 : ((Float) v1).intValue() > ((Float) v2).intValue() ? 1 : 0);
             } else if (v1 instanceof Integer) {
                 return (invertDirection ? -1 : 1) * (((Integer) v1).intValue() < ((Integer) v2).intValue() ? -1 : ((Integer) v1).intValue() > ((Integer) v2).intValue() ? 1 : 0);
+            } else if (v1 instanceof Long) {
+                return (invertDirection ? -1 : 1) * (((Long) v1).longValue() < ((Long) v2).longValue() ? -1 : ((Long) v1).longValue() > ((Long) v2).longValue() ? 1 : 0);
             } else if (v1 instanceof Calendar) {
                 int i = (invertDirection ? -1 : 1) * (((Calendar) v1).before((Calendar) v2) ? -1 : ((Calendar) v1).after((Calendar) v2) ? 1 : 0);
 //		log.debug("-------------");

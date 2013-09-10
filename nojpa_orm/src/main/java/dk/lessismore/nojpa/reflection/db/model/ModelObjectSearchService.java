@@ -81,13 +81,24 @@ public class ModelObjectSearchService {
 
 
     public static <T extends ModelObjectInterface> void put(T object) {
-        ModelObject modelObject = (ModelObject) object;
-        SolrServer solrServer = servers.get(modelObject.getInterface().getSimpleName());
-        if(solrServer == null){
-            log.fatal("Cant find a solrServer for class("+ modelObject.getInterface().getSimpleName() +")");
+        try{
+//            log.debug("put_:1:start");
+            ModelObject modelObject = (ModelObject) object;
+            SolrServer solrServer = servers.get(modelObject.getInterface().getSimpleName());
+//            log.debug("put_:2");
+            if(solrServer == null){
+                log.fatal("Cant find a solrServer for class("+ modelObject.getInterface().getSimpleName() +")");
+            }
+//            log.debug("put_:3");
+            SolrInputDocument solrObj = new SolrInputDocument();
+            put(object, "", new HashMap<String, String>(), solrServer, solrObj);
+//            log.debug("put_:4:end");
+        } catch (Exception e){
+            log.error("put:_ Some error in put-1 " + e, e);
+            throw new RuntimeException(e);
+
         }
-        SolrInputDocument solrObj = new SolrInputDocument();
-        put(object, "", new HashMap<String, String>(), solrServer, solrObj);
+
     }
 
     public static <T extends ModelObjectInterface> void put(T object, String prefix, HashMap<String, String> storedObjects, SolrServer solrServer, SolrInputDocument solrObj) {
@@ -202,11 +213,12 @@ public class ModelObjectSearchService {
 
 
 
-        public static DbObjectVisitor putAll(){
+    public static DbObjectVisitor putAll(){
+        log.debug("************* putAll() *****************");
         return putAll(INPUTS_BETWEEN_COMMITS_VISITOR);
     }
 
-    public static DbObjectVisitor putAll(int inputsBetweenCommits){
+    public static DbObjectVisitor putAll(final int inputsBetweenCommits){
         DbObjectVisitor dbObjectVisitor = new DbObjectVisitor() {
             int counter = 0;
 
@@ -215,6 +227,9 @@ public class ModelObjectSearchService {
             @Override
             public void visit(ModelObjectInterface m) {
                 put(m);
+                if(counter++ % inputsBetweenCommits == 0){
+                    ModelObjectSearchService.commit(m);
+                }
             }
 
             @Override

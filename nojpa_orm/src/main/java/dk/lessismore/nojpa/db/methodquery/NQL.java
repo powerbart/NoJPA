@@ -979,7 +979,7 @@ public class NQL {
             } else if(this.comparator == Comp.NOT_EQUAL){
                 return " (" + solrAttributeName + ":-(" + value + ")"+ boostQuery +")" + otherFunctions;
             } else {
-                return " (" + solrAttributeName + ":(" + value + ")"+ boostQuery +")" + otherFunctions;
+                return " (" + solrAttributeName + ":(" + removeFunnyChars(value) + ")"+ boostQuery +")" + otherFunctions;
             }
 
         }
