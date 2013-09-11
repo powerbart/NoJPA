@@ -294,15 +294,15 @@ public class DatabaseCreator {
             }
         }
 
-
-        String[] indexs = getIndexFromClass(targetClass);
-        for(int i = 0; i < indexs.length; i++){
-            String tableName = "_" + targetClass.getSimpleName();
-            String index = indexs[i];
-            String indexName = (tableName + index).replaceAll(" |,", "");
-            SQLStatementExecutor.doUpdateAndIgnoreExceptions("CREATE INDEX " + indexName + " ON " + tableName + " ("+ index +")");
-        }
-
+        log.debug("WE are NOT recreating indexes .... Do this in the hand");
+//        String[] indexs = getIndexFromClass(targetClass);
+//        for(int i = 0; i < indexs.length; i++){
+//            String tableName = "_" + targetClass.getSimpleName();
+//            String index = indexs[i];
+//            String indexName = (tableName + index).replaceAll(" |,", "");
+//            SQLStatementExecutor.doUpdateAndIgnoreExceptions("CREATE INDEX " + indexName + " ON " + tableName + " ("+ index +")");
+//        }
+//
         limSet.close();
         limSet = null;
     }
