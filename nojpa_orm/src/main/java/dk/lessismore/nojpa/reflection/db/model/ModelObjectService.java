@@ -137,9 +137,9 @@ public class ModelObjectService {
 
     }
 
-    public static boolean isModelObjectInArray(
-            ModelObject[] modelObjects,
-            ModelObject modelObject) {
+    public static <T extends ModelObjectInterface> boolean isModelObjectInArray(
+            T[] modelObjects,
+            T modelObject) {
         for (int i = 0; modelObjects != null && i < modelObjects.length; i++) {
             if (modelObjects[i] != null
                     && modelObjects[i].equals(modelObject)) {
