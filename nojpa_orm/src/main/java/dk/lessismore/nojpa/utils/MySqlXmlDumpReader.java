@@ -36,7 +36,7 @@ public class MySqlXmlDumpReader {
                 if (countOfRead != -1) {
                     readContent.append(chars, 0, countOfRead);
                     sizeOfReadTotal = sizeOfReadTotal + countOfRead;
-                    log.debug("readRow("+ sizeOfReadTotal +" / "+ sizeInTotal +").... ~" + (((double) sizeOfReadTotal) / ((double) sizeInTotal)));
+                    log.debug("******************************************************************** *  *  *  *  *  *  *  * readRow("+ sizeOfReadTotal +" / "+ sizeInTotal +").... ~" + (((double) sizeOfReadTotal) / ((double) sizeInTotal)));
                 }
             } else {
                 countOfRead = 0;
