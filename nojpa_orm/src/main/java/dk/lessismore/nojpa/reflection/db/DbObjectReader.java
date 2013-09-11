@@ -502,7 +502,7 @@ public class DbObjectReader {
                     List associationObjects = new ArrayList();
                     while (associationResultSet.next()) {
                         String associationId = associationResultSet.getString(/*AssociationTable.TARGET*/targetDbAttributeContainer.getPrimaryKeyAttribute().getAttributeName());
-                        log.debug("getMultiAssociation::associationId = " + associationId + " associationId == null ? " + (associationId == null));
+//                        log.debug("getMultiAssociation::associationId = " + associationId + " associationId == null ? " + (associationId == null));
                         //Load the association. Recursive call.
                         Object association = DbObjectReader.readObjectFromDb(associationId, dbAttribute.getAttributeClass(), modelObjects, associationConstrain, attributePath, cache);
                         if (association != null) {

@@ -19,9 +19,12 @@ public class MySqlXmlDumpReader {
     char[] chars = new char[10 * 1024];
     int curLine = 0;
     int countOfRead = 0;
+    long sizeInTotal;
+    long sizeOfReadTotal = 0;
 
     public MySqlXmlDumpReader(File xmlFile) throws FileNotFoundException {
         fileReader = new FileReader(xmlFile);
+        sizeInTotal = xmlFile.length();
     }
 
 
@@ -32,6 +35,8 @@ public class MySqlXmlDumpReader {
                 countOfRead = fileReader.read(chars, 0, chars.length);
                 if (countOfRead != -1) {
                     readContent.append(chars, 0, countOfRead);
+                    sizeOfReadTotal = sizeOfReadTotal + countOfRead;
+                    log.debug("readRow("+ sizeOfReadTotal +" / "+ sizeInTotal +").... ~" + (((double) sizeOfReadTotal) / ((double) sizeInTotal)));
                 }
             } else {
                 countOfRead = 0;
