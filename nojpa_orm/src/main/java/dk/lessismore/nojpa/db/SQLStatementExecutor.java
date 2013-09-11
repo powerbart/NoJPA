@@ -105,7 +105,7 @@ public class SQLStatementExecutor {
                 long time = end - start;
                 totalTime = totalTime + time;
                 totalCounter++;
-                log.debug("**************** AVG-TIME("+ (totalTime / totalCounter) +") count("+ totalCounter +") totalTime("+ totalTime +") lastTime("+ time +")");
+//                log.debug("**************** AVG-TIME("+ (totalTime / totalCounter) +") count("+ totalCounter +") totalTime("+ totalTime +") lastTime("+ time +")");
 
 
                 if(debugCpuMode) {
@@ -182,7 +182,7 @@ public class SQLStatementExecutor {
                 long time = end - start;
                 totalTime = totalTime + time;
                 totalCounter++;
-                log.debug("**************** AVG-TIME("+ (totalTime / totalCounter) +") count("+ totalCounter +") totalTime("+ totalTime +") lastTime("+ time +")");
+//                log.debug("**************** AVG-TIME("+ (totalTime / totalCounter) +") count("+ totalCounter +") totalTime("+ totalTime +") lastTime("+ time +")");
 
 
                 if(debugCpuMode) {
@@ -231,7 +231,7 @@ public class SQLStatementExecutor {
                 long time = end - start;
                 totalTime = totalTime + time;
                 totalCounter++;
-                log.debug("**************** AVG-TIME("+ (totalTime / totalCounter) +") count("+ totalCounter +") totalTime("+ totalTime +") lastTime("+ time +")");
+//                log.debug("**************** AVG-TIME("+ (totalTime / totalCounter) +") count("+ totalCounter +") totalTime("+ totalTime +") lastTime("+ time +")");
 
                 if(debugCpuMode) eventCounter.newEvent(sqlStatement.replaceAll("\n", " "), end - start);
                 LimResultSet toReturn = new LimResultSet(resultSet, statement, sqlStatement);
@@ -315,7 +315,7 @@ public class SQLStatementExecutor {
                 long time = end - start;
                 totalTime = totalTime + time;
                 totalCounter++;
-                log.debug("**************** AVG-TIME("+ (totalTime / totalCounter) +") count("+ totalCounter +") totalTime("+ totalTime +") lastTime("+ time +")");
+//                log.debug("**************** AVG-TIME("+ (totalTime / totalCounter) +") count("+ totalCounter +") totalTime("+ totalTime +") lastTime("+ time +")");
 
                 if(debugCpuMode) eventCounter.newEvent(initStatement.replaceAll("\n", " "), end - start);
                 log.debug("Time("+ (end - start) +") for " + initStatement.replaceAll("\n", " "));
