@@ -104,7 +104,52 @@ public class DbObjectSelector {
     }
 
 
-    
+    public static LimResultSet getLimResultSet(Class targetClass, SelectSQLStatement selectSqlStatement) {
+        LimResultSet limSet  = null;
+        try{
+            DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(targetClass);
+            String sqlNameQuery = null;
+            if(dbAttributeContainer.getSqlNameQuery() == null){
+                for (Iterator iterator = dbAttributeContainer.getDbAttributes().values().iterator(); iterator.hasNext();) {
+                    DbAttribute dbAttribute = (DbAttribute) iterator.next();
+                    if(!dbAttribute.isMultiAssociation()){
+                        sqlNameQuery = (sqlNameQuery == null ? "" : sqlNameQuery + ", ") + (dbAttributeContainer.getTableName() + "." + dbAttribute.getAttributeName());
+                    }
+                }
+                dbAttributeContainer.setSqlNameQuery(sqlNameQuery);
+            } else {
+                sqlNameQuery = dbAttributeContainer.getSqlNameQuery();
+            }
+            selectSqlStatement.addAttributeName(sqlNameQuery);
+            limSet = SQLStatementExecutor.doQuery(selectSqlStatement);
+            return limSet;
+        } catch(Exception e){
+            log.error("Some error "+ e, e);
+            throw new RuntimeException(e);
+        } finally {
+            if(limSet != null) limSet.close();
+        }
+
+    }
+
+
+
+
+    public static LimResultSet getLimResultSet(Class targetClass, String rawSqlStatement) {
+        LimResultSet limSet  = null;
+        try{
+            limSet = SQLStatementExecutor.doQuery(rawSqlStatement);
+            return limSet;
+        } catch(Exception e){
+            log.error("Some error "+ e, e);
+            throw new RuntimeException(e);
+        }
+
+    }
+
+
+
+
     public static List selectObjectsFromDb(Class targetClass, SelectSQLStatement selectSqlStatement, int startInterval, int endInterval) {
         return selectObjectsFromDb(targetClass, selectSqlStatement, new AssociationConstrain(), true, false, startInterval, endInterval);
     }

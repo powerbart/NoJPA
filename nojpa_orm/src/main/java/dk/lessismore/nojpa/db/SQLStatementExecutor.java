@@ -236,6 +236,7 @@ public class SQLStatementExecutor {
                 if(debugCpuMode) eventCounter.newEvent(sqlStatement.replaceAll("\n", " "), end - start);
                 LimResultSet toReturn = new LimResultSet(resultSet, statement, sqlStatement);
                 ConnectionPoolFactory.getPool().putBackInPool(connection);
+                log.debug("ZZZZZZZZZZ toReturn("+ toReturn +"), resultSet("+ resultSet +"), toReturn("+ toReturn +"), toReturn.getResultSet("+ ( toReturn != null ? toReturn.getResultSet() : null ) +")");
                 return toReturn;
             } catch (Exception e) {
                 log.error("query sql execution failed \nstmt=" + sqlStatement, e);

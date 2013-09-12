@@ -1,5 +1,6 @@
 package dk.lessismore.nojpa.db.methodquery;
 
+import dk.lessismore.nojpa.db.LimResultSet;
 import dk.lessismore.nojpa.db.statements.*;
 import dk.lessismore.nojpa.reflection.db.DbClassReflector;
 import dk.lessismore.nojpa.reflection.db.DbObjectReader;
@@ -401,6 +402,17 @@ public class MQL {
             else return new ArrayList<T>();
         }
 
+        public LimResultSet getLimResultSet() {
+            statement.addExpression(getExpressionAddJoins());
+            return DbObjectSelector.getLimResultSet(selectClass, statement);
+        }
+
+        public LimResultSet getLimResultSet(String rawSQL) {
+            return DbObjectSelector.getLimResultSet(selectClass, rawSQL);
+        }
+
+
+
         /**
          * Execute query
          * @return result array, possible empty, never null.
@@ -458,13 +470,14 @@ public class MQL {
         // TODO consider: are joints potentially added multiple time?? does it matter ?
         private List<T> selectObjectsFromDb() {
             statement.addExpression(getExpressionAddJoins());
-            return (List<T>) DbObjectSelector.selectObjectsFromDb(selectClass, statement, useCache); // The cache arguments is ignored
+            return (List<T>) DbObjectSelector.selectObjectsFromDb(selectClass, statement); // The cache arguments is ignored
         }
 
         private int selectCountFromDb() {
             statement.addExpression(getExpressionAddJoins());
             return DbObjectSelector.countObjectsFromDb(statement); // The cache arguments is ignored
         }
+
     }
 
 

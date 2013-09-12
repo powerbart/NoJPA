@@ -803,7 +803,7 @@ public class NQL {
         if(s == null || s.equals("")){
             return s;
         } else {
-            return s.replace(" OR ", " ").replace(" AND ", " ").replace(" or ", " ").replace(" and ", " ").replaceAll("\"", " ").replaceAll("!", " ").replaceAll("'", " ").replaceAll("^", " ")
+            return s.replace(" NOT ", " ").replace(" not ", " ").replace(" OR ", " ").replace(" AND ", " ").replace(" or ", " ").replace(" and ", " ").replaceAll("\"", " ").replaceAll("!", " ").replaceAll("'", " ").replaceAll("^", " ")
                     .replaceAll("$", " ").replaceAll("§", " ").replaceAll("#", " ").replaceAll(":", " ").replaceAll("_", " ")
                     .replaceAll("/", " ").replaceAll(";", " ").replaceAll("€", " ").replaceAll("%", " ").replaceAll("/", " ")
                     .replaceAll("\\?", " ").replaceAll("\\(", " ").replaceAll("\\)", " ").replaceAll("\\{", " ").replaceAll("\\}", " ")
