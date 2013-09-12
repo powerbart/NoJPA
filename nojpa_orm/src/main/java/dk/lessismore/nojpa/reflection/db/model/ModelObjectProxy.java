@@ -179,7 +179,7 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
         this.interfaceClass = interfaceClass;
         objectArrayCache = ObjectCacheFactory.getInstance().getObjectArrayCache(this);
         objectCache = ObjectCacheFactory.getInstance().getObjectCache(this);
-        if(countOfObjects % 20 == 0){
+        if(countOfObjects % 50 == 0){
             log.debug("Creating new ModelObject("+ this.interfaceClass.getName() +")/" + countOfObjects);
         }
         countOfObjects++;
@@ -466,9 +466,13 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
                 DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(interfaceClass);
                 toReturn = DbObjectReader.getMultiAssociation(this, dbAttributeContainer, dbAttribute, new HashMap(), new AssociationConstrain(), "", true);
 //                log.debug("getAssociation("+ fieldName +") toReturn :: " + (toReturn != null ? ((Object[] )toReturn).length : -1));
-                putArrayInCache((ModelObjectInterface[]) toReturn, dbAttribute.getAttributeClass(), fieldName);
+                if(toReturn != null && ((ModelObjectInterface[]) toReturn).length == 0){
+                    toReturn = null;
+                } else if(toReturn != null) {
+                    putArrayInCache((ModelObjectInterface[]) toReturn, dbAttribute.getAttributeClass(), fieldName);
+                }
             }
-            if (toReturn == null) {
+            if (toReturn == null || ((ModelObjectInterface[]) toReturn).length == 0) {
                 multiAssociationsWithResultEqualToNull.put(fieldName, new Object());
             } else if (multiAssociationsWithResultEqualToNull.containsKey(fieldName)) {
                 multiAssociationsWithResultEqualToNull.remove(fieldName);

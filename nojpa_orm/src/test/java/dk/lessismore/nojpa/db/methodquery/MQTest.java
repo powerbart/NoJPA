@@ -488,6 +488,38 @@ public class MQTest {
     }
 
     @Test
+    public void testArrays() throws Exception {
+        {
+            String objectID = null;
+            InitTestDatabase.initPlanetExpress();
+            Person p = ModelObjectService.create( Person.class );
+            p.setObjectID("BC6834167A802FEE743BC37EE5C8814D");
+            objectID = p.getObjectID();
+//            Address[] ads = new Address[60];
+//            for(int i = 0; i < ads.length; i++){
+//                ads[i] = ModelObjectService.create(Address.class);
+//                ads[i].setCity("City-" + i);
+//                ModelObjectService.save(ads[i]);
+//            }
+//            p.setAddresses(ads);
+            p.setName("MyName");
+            p.setSomeFloat(0.99999f);
+            save(p);
+            ObjectCacheFactory.getInstance().getObjectCache(Person.class).clear();
+            ObjectCacheFactory.getInstance().getObjectCache(Address.class).clear();
+            Person person = MQL.selectByID(Person.class, objectID);
+            System.out.println("person = " + person.getAddresses());
+            System.out.println("person = " + person.getAddresses());
+            System.out.println("person = " + person.getAddresses());
+            System.out.println("person = " + person.getAddresses());
+            System.out.println("person = " + person.getAddresses());
+
+
+        }
+        assertEquals(true, true);
+    }
+
+    @Test
     public void testDbAttributeDirect() throws Exception {
         {
             InitTestDatabase.initPlanetExpress();
