@@ -803,7 +803,7 @@ public class NQL {
         if(s == null || s.equals("")){
             return s;
         } else {
-            return s.replaceAll("\"", " ").replaceAll("!", " ").replaceAll("'", " ").replaceAll("^", " ")
+            return s.replace(" OR ", " ").replace(" AND ", " ").replace(" or ", " ").replace(" and ", " ").replaceAll("\"", " ").replaceAll("!", " ").replaceAll("'", " ").replaceAll("^", " ")
                     .replaceAll("$", " ").replaceAll("§", " ").replaceAll("#", " ").replaceAll(":", " ").replaceAll("_", " ")
                     .replaceAll("/", " ").replaceAll(";", " ").replaceAll("€", " ").replaceAll("%", " ").replaceAll("/", " ")
                     .replaceAll("\\?", " ").replaceAll("\\(", " ").replaceAll("\\)", " ").replaceAll("\\{", " ").replaceAll("\\}", " ")
@@ -817,40 +817,40 @@ public class NQL {
 
     private static String createSearchString(String textQuery) {
         String cleanText = removeFunnyChars(textQuery);
-        if(!cleanText.equals("")){
-            StringTokenizer toks = new StringTokenizer(cleanText, " ");
-            String nString = "";
-            ArrayList<String> nt = new ArrayList<String>();
-            while (toks.hasMoreTokens()){
-                String s = toks.nextToken().toLowerCase();
-                if(s.equalsIgnoreCase("AND") || s.equalsIgnoreCase("OR")){
-                    nt.add(s);
-                } else if(s.indexOf("*") != -1) {
-                    String substring = s;
-                    if(substring.startsWith("*")){
-                        substring = substring.substring(1);
-                    }
-                    nt.add(substring);
-                } else if(s.indexOf("*") == -1){
-                    nt.add(s);
-                } else {
-                    nt.add("(" + s + ") ");
-                }
-            }
-            for(int i = 0; i < nt.size(); i++){
-                if(!nt.get(i).equalsIgnoreCase("AND") && !nt.get(i).equalsIgnoreCase("OR")){
-                    nString += "("+ nt.get(i) +")" + (i + 1 < nt.size() && !nt.get(i+1).equalsIgnoreCase("AND") && !nt.get(i+1).equalsIgnoreCase("OR") ? " AND " : " ");
-                } else {
-                    if(i + 1 < nt.size()){
-                        nString += nt.get(i).toUpperCase() + " ";
-                    } else {
-                        nString += "\""+ nt.get(i).toLowerCase() + "\"" + " ";
-                    }
-                }
-            }
-
-            return nString;
-        }
+//        if(!cleanText.equals("")){
+//            StringTokenizer toks = new StringTokenizer(cleanText, " ");
+//            String nString = "";
+//            ArrayList<String> nt = new ArrayList<String>();
+//            while (toks.hasMoreTokens()){
+//                String s = toks.nextToken().toLowerCase();
+//                if(s.equalsIgnoreCase("AND") || s.equalsIgnoreCase("OR")){
+//                    nt.add(s);
+//                } else if(s.indexOf("*") != -1) {
+//                    String substring = s;
+//                    if(substring.startsWith("*")){
+//                        substring = substring.substring(1);
+//                    }
+//                    nt.add(substring);
+//                } else if(s.indexOf("*") == -1){
+//                    nt.add(s);
+//                } else {
+//                    nt.add("(" + s + ") ");
+//                }
+//            }
+//            for(int i = 0; i < nt.size(); i++){
+//                if(!nt.get(i).equalsIgnoreCase("AND") && !nt.get(i).equalsIgnoreCase("OR")){
+//                    nString += "("+ nt.get(i) +")" + (i + 1 < nt.size() && !nt.get(i+1).equalsIgnoreCase("AND") && !nt.get(i+1).equalsIgnoreCase("OR") ? " AND " : " ");
+//                } else {
+//                    if(i + 1 < nt.size()){
+//                        nString += nt.get(i).toUpperCase() + " ";
+//                    } else {
+//                        nString += "\""+ nt.get(i).toLowerCase() + "\"" + " ";
+//                    }
+//                }
+//            }
+//
+//            return nString;
+//        }
         return cleanText;
     }
 
