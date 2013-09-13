@@ -9,7 +9,7 @@ import dk.lessismore.nojpa.guid.GuidFactory;
 import java.lang.reflect.Method;
 
 /**
- * Created by IntelliJ IDEA.
+ * Created : by IntelliJ IDEA.
  * User: seb
  */
 public class BeanExecutor extends Executor<NewRemoteBeanMessage, Object> {

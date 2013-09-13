@@ -8,7 +8,7 @@ import dk.lessismore.nojpa.utils.SuperIO;
 import java.util.Date;
 
 /**
- * Created by IntelliJ IDEA.
+ * Created : by IntelliJ IDEA.
  * User: seb
  * Date: 25-10-2010
  * Time: 12:18:44

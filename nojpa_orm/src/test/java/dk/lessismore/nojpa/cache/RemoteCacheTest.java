@@ -3,7 +3,7 @@ package dk.lessismore.nojpa.cache;
 import org.junit.Test;
 
 /**
- * Created by IntelliJ IDEA.
+ * Created : by IntelliJ IDEA.
  * User: seb
  * Date: 15/12/12
  */

@@ -10,7 +10,7 @@ import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
 import dk.lessismore.nojpa.db.testmodel.Person;
 
 /**
- * Created by IntelliJ IDEA.
+ * Created : by IntelliJ IDEA.
  * User: seb
  * Date: 07-03-2011
  * Time: 12:14:11

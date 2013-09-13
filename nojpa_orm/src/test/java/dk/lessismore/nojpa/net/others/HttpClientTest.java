@@ -3,7 +3,7 @@ package dk.lessismore.nojpa.net.others;
 import org.junit.Test;
 
 /**
- * Created by IntelliJ IDEA.
+ * Created : by IntelliJ IDEA.
  * User: seb
  * Date: 08-04-11
  * Time: 13:18

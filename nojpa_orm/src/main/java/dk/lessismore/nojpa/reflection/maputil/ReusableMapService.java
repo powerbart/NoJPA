@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 /**
- * Created by IntelliJ IDEA.
+ * Created : by IntelliJ IDEA.
  * User: seb
  * Date: 19-08-2010
  * Time: 15:40:56

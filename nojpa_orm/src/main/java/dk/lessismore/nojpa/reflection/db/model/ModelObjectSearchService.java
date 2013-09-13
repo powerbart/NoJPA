@@ -17,7 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- * Created with IntelliJ IDEA.
+ * Created : with IntelliJ IDEA.
  * User: seb
  */
 public class ModelObjectSearchService {

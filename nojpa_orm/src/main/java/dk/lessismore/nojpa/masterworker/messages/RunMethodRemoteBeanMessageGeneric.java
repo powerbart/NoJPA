@@ -4,7 +4,7 @@ import dk.lessismore.nojpa.guid.GuidFactory;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 
 /**
- * Created by IntelliJ IDEA.
+ * Created : by IntelliJ IDEA.
  * User: niakoi
  * Date: 1/19/11
  * Time: 12:15 PM

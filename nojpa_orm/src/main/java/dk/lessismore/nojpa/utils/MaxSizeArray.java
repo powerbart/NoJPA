@@ -3,7 +3,7 @@ package dk.lessismore.nojpa.utils;
 import java.util.Iterator;
 
 /**
- * Created by IntelliJ IDEA.
+ * Created : by IntelliJ IDEA.
  * User: seb
  * Date: 06-04-11
  * Time: 10:31

@@ -14,7 +14,7 @@ import java.util.Collection;
 import java.util.Date;
 
 /**
- * Created by IntelliJ IDEA.
+ * Created : by IntelliJ IDEA.
  * User: seb
  * Date: 28-01-2011
  * Time: 02:05:15

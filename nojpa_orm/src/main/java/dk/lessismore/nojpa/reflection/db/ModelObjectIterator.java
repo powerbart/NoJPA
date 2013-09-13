@@ -10,7 +10,7 @@ import java.util.Iterator;
 import java.util.Calendar;
 
 /**
- * Created by IntelliJ IDEA.
+ * Created : by IntelliJ IDEA.
  * User: bart
  * Date: 2007-04-06
  * Time: 01:59:45

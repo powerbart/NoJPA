@@ -1,7 +1,7 @@
 package dk.lessismore.nojpa.masterworker.messages;
 
 /**
- * Created by IntelliJ IDEA.
+ * Created : by IntelliJ IDEA.
  * User: Philip August Lerche
  * Date: 2007-06-16
  * Time: 01:38:07

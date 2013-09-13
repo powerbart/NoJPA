@@ -10,7 +10,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 
 /**
- * Created by IntelliJ IDEA.
+ * Created : by IntelliJ IDEA.
  * User: seb
  * Date: 26-03-11
  * Time: 16:52

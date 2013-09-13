@@ -1,7 +1,7 @@
 package dk.lessismore.nojpa.db.bankmodel;
 
 /**
- * Created with IntelliJ IDEA.
+ * Created : with IntelliJ IDEA.
  * User: seb
  */
 public enum Country {

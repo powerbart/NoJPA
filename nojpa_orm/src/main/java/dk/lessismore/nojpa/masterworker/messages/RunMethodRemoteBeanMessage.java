@@ -3,7 +3,7 @@ package dk.lessismore.nojpa.masterworker.messages;
 import dk.lessismore.nojpa.guid.GuidFactory;
 
 /**
- * Created by IntelliJ IDEA.
+ * Created : by IntelliJ IDEA.
  * User: seb
  * Date: 22-10-2010
  * Time: 12:22:16

@@ -7,7 +7,7 @@ import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
 import org.junit.Test;
 
 /**
- * Created by IntelliJ IDEA.
+ * Created : by IntelliJ IDEA.
  * User: seb
  * Date: 01-06-11
  * Time: 15:15

@@ -1,7 +1,7 @@
 package future_test.model;
 
 /**
- * Created with IntelliJ IDEA.
+ * Created : with IntelliJ IDEA.
  * User: seb
  */
 //@Searchable(impl = Person1Searcher.Indexer.class)

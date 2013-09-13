@@ -17,7 +17,7 @@ import java.io.*;
 import java.util.*;
 
 /**
- * Created with IntelliJ IDEA.
+ * Created : with IntelliJ IDEA.
  * User: seb
  */
 public class CpuInterceptor implements MethodInterceptor {

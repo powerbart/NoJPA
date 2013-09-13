@@ -6,7 +6,7 @@ import dk.lessismore.nojpa.properties.Default;
 import java.util.Calendar;
 
 /**
- * Created by IntelliJ IDEA.
+ * Created : by IntelliJ IDEA.
  * User: seb
  * Date: 02-03-2011
  * Time: 10:45:37

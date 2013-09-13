@@ -8,7 +8,7 @@ import org.aopalliance.intercept.MethodInvocation;
 import dk.lessismore.nojpa.webservicelog.CallerIdentifierLog;
 
 /**
- * Created by IntelliJ IDEA.
+ * Created : by IntelliJ IDEA.
  * User: Sebastian Berg, seb@exiqon.com
  * Date: 26-06-2008
  * Time: 03:33:36

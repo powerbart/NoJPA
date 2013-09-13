@@ -3,7 +3,7 @@ package dk.lessismore.nojpa.reflection.db;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 
 /**
- * Created by IntelliJ IDEA.
+ * Created : by IntelliJ IDEA.
  * User: bart
  * Date: 2007-04-08
  * Time: 15:39:32

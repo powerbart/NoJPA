@@ -1,7 +1,7 @@
 package dk.lessismore.nojpa.masterworker.bean;
 
 /**
- * Created by IntelliJ IDEA.
+ * Created : by IntelliJ IDEA.
  * User: seb
  * Date: 22-10-2010
  * Time: 16:04:19

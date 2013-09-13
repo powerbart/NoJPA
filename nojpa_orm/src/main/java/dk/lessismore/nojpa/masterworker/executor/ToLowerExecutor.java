@@ -1,7 +1,7 @@
 package dk.lessismore.nojpa.masterworker.executor;
 
 /**
- * Created by IntelliJ IDEA.
+ * Created : by IntelliJ IDEA.
  * User: seb
  * Date: 18-09-2009
  * Time: 16:27:58

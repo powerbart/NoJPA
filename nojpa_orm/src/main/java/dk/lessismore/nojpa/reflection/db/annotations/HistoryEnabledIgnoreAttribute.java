@@ -6,7 +6,7 @@ import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 
 /**
- * Created by IntelliJ IDEA.
+ * Created : by IntelliJ IDEA.
  * User: bart
  * Date: 28-01-2009
  * Time: 12:45:42

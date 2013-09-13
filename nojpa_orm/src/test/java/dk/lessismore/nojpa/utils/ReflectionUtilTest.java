@@ -10,7 +10,7 @@ import java.util.LinkedList;
 import java.util.ArrayList;
 
 /**
- * Created by IntelliJ IDEA.
+ * Created : by IntelliJ IDEA.
  * User: seb
  * Date: 19-04-2010
  * Time: 16:20:41

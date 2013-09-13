@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Created with IntelliJ IDEA.
+ * Created : with IntelliJ IDEA.
  * User: seb
  */
 @Target(ElementType.METHOD)

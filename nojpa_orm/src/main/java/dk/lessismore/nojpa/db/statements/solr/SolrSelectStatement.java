@@ -10,7 +10,7 @@
 //import java.util.List;
 //
 ///**
-// * Created with IntelliJ IDEA.
+// * Created : with IntelliJ IDEA.
 // * User: seb
 // */
 //public class SolrSelectStatement {

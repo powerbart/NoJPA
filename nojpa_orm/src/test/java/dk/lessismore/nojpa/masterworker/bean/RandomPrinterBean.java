@@ -3,7 +3,7 @@ package dk.lessismore.nojpa.masterworker.bean;
 import java.util.Calendar;
 
 /**
- * Created by IntelliJ IDEA.
+ * Created : by IntelliJ IDEA.
  * User: seb
  * Date: 21-10-2010
  * Time: 14:47:13

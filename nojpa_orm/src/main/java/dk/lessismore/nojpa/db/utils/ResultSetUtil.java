@@ -10,7 +10,7 @@ import java.sql.SQLException;
 import java.sql.ResultSetMetaData;
 
 /**
- * Created by IntelliJ IDEA.
+ * Created : by IntelliJ IDEA.
  * User: seb
  * Date: 22-02-2011
  * Time: 13:32:56

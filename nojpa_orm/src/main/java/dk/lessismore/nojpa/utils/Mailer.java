@@ -16,7 +16,7 @@ import java.util.Date;
 import java.util.Properties;
 
 /**
- * Created with IntelliJ IDEA.
+ * Created : with IntelliJ IDEA.
  * User: seb
  */
 

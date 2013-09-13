@@ -5,7 +5,7 @@ import dk.lessismore.nojpa.masterworker.bean.RandomPrinterBean;
 import dk.lessismore.nojpa.masterworker.bean.worker.BeanExecutor;
 
 /**
- * Created by IntelliJ IDEA.
+ * Created : by IntelliJ IDEA.
  * User: seb
  * Date: 21-10-2010
  * Time: 14:56:38

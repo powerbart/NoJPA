@@ -4,7 +4,7 @@ import dk.lessismore.nojpa.reflection.db.annotations.ModelObjectMethodListener;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 
 /**
- * Created with IntelliJ IDEA.
+ * Created : with IntelliJ IDEA.
  * User: niakoi
  * Date: 7/29/13
  * Time: 5:23 PM

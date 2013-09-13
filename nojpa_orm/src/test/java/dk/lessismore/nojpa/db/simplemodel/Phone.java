@@ -5,7 +5,7 @@ import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import javax.persistence.Column;
 
 /**
- * Created with IntelliJ IDEA.
+ * Created : with IntelliJ IDEA.
  * User: seb
  */
 public interface Phone extends ModelObjectInterface {

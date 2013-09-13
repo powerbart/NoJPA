@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.Calendar;
 
 /**
- * Created with IntelliJ IDEA.
+ * Created : with IntelliJ IDEA.
  * User: seb
  */
 public class MySqlXmlDumpReader {

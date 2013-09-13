@@ -3,7 +3,7 @@ package dk.lessismore.nojpa.utils;
 import java.util.*;
 
 /**
- * Created by IntelliJ IDEA.
+ * Created : by IntelliJ IDEA.
  * User: SEB
  * Date: 2007-02-28
  * Time: 12:40:54

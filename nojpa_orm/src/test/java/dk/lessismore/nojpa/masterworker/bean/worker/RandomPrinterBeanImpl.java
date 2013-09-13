@@ -5,7 +5,7 @@ import dk.lessismore.nojpa.masterworker.bean.RandomPrinterBean;
 import java.util.Calendar;
 
 /**
- * Created by IntelliJ IDEA.
+ * Created : by IntelliJ IDEA.
  * User: seb
  */
 public class RandomPrinterBeanImpl implements RandomPrinterBean {

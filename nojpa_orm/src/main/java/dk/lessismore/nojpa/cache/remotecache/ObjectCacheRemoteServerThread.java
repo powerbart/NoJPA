@@ -12,7 +12,7 @@ import java.util.Iterator;
 import java.util.StringTokenizer;
 
 /**
- * Created by IntelliJ IDEA.
+ * Created : by IntelliJ IDEA.
  * User: seb
  * Date: 08-04-11
  * Time: 15:30

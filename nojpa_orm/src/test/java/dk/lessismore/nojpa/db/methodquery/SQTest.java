@@ -10,7 +10,7 @@
 //import static org.junit.Assert.assertEquals;
 //
 ///**
-// * Created with IntelliJ IDEA.
+// * Created : with IntelliJ IDEA.
 // * User: seb
 // */
 //public class SQTest {

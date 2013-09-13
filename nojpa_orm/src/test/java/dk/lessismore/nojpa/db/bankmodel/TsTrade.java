@@ -3,7 +3,7 @@ package dk.lessismore.nojpa.db.bankmodel;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 
 /**
- * Created with IntelliJ IDEA.
+ * Created : with IntelliJ IDEA.
  * User: seb
  */
 public interface TsTrade extends ModelObjectInterface {
