@@ -99,7 +99,7 @@ public class MySqlCreateStatement extends MySqlStatement implements CreateSQLSta
                 }
             }
             //log.debug("makeStatement: indexName = " + indexName);
-            log.debug("makeStatement() : i = " + namesToIndex[i] + " with name: " + indexName);
+//            log.debug("makeStatement() : i = " + namesToIndex[i] + " with name: " + indexName);
 
             statement.append(", INDEX " + indexName + " ( " + namesToIndex[i] + ")");
 

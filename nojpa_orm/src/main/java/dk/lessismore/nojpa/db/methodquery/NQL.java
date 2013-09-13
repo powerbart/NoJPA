@@ -397,7 +397,7 @@ public class NQL {
                     solrQuery.addSort(this.orderByAttribute, this.orderByORDER == Order.ASC ? SolrQuery.ORDER.asc : SolrQuery.ORDER.desc);
                 }
                 SolrServer solrServer = ModelObjectSearchService.solrServer(selectClass);
-                solrQuery.setFields("objectID", "score");
+                solrQuery.setFields("*", "score");
 //                solrQuery.setParam("bf", "sum(_Post_pageViewCounter__ID_Counter_count__LONG,8)");
                 QueryResponse queryResponse = solrServer.query(solrQuery);
                 log.debug("queryResponse = " + queryResponse.getResults().size());
@@ -406,17 +406,36 @@ public class NQL {
                 int size = queryResponse.getResults().size();
                 for(int i = 0; i < size; i++){
                     SolrDocument entries = queryResponse.getResults().get(i);
-                    if(i == 0){
-                        Iterator<String> iterator = entries.getFieldNames().iterator();
-                        for(; iterator.hasNext() ;){
-                            String next = iterator.next();
-                            log.debug("Fieldnames:" + next);
-                        }
-                    }
+//                    if(i == 0){
+//                        Iterator<String> iterator = entries.getFieldNames().iterator();
+//                        for(; iterator.hasNext() ;){
+//                            String next = iterator.next();
+//                            log.debug("Fieldnames:" + next);
+//                        }
+//                    }
 
                     String objectID = entries.get("objectID").toString();
                     if(entries.containsKey("score")){
-                        log.debug("objectID("+ objectID +") has score("+ entries.get("score")+")");
+                        log.debug("objectID("+ objectID +") has score("+ entries.get("score")+")reward("+ entries.get("_Post_rewardLevelBoost__INT") +"),("+ entries.get("_Post_category__TXT_Category_dailyDecay__DOUBLE") +"), ("+ entries.get("_Post_pageViewCounter__TXT_Counter_count__LONG") +")");
+//                        2013-09-13 16:16:10,240 DEBUG dk.lessismore.nojpa.db.methodquery.NQL - Fieldnames:objectID                                                                                                                              _Post_pageViewCounter__TXT_Counter_count__LONG
+//                        2013-09-13 16:16:10,240 DEBUG dk.lessismore.nojpa.db.methodquery.NQL - Fieldnames:_Post_urlTitle__TXT
+//                        2013-09-13 16:16:10,240 DEBUG dk.lessismore.nojpa.db.methodquery.NQL - Fieldnames:_Post_isSticky__BOOL
+//                        2013-09-13 16:16:10,240 DEBUG dk.lessismore.nojpa.db.methodquery.NQL - Fieldnames:_Post_title__TXT
+//                        2013-09-13 16:16:10,240 DEBUG dk.lessismore.nojpa.db.methodquery.NQL - Fieldnames:_Post_description__TXT
+//                        2013-09-13 16:16:10,240 DEBUG dk.lessismore.nojpa.db.methodquery.NQL - Fieldnames:_Post_description__TXT_objectID__ID
+//                        2013-09-13 16:16:10,240 DEBUG dk.lessismore.nojpa.db.methodquery.NQL - Fieldnames:_Post_description__TXT_PostDescription_creationDate__DATE
+//                        2013-09-13 16:16:10,240 DEBUG dk.lessismore.nojpa.db.methodquery.NQL - Fieldnames:_Post_description__TXT_PostDescription_description__TXT
+//                        2013-09-13 16:16:10,240 DEBUG dk.lessismore.nojpa.db.methodquery.NQL - Fieldnames:_Post_lastModified__DATE
+//                        2013-09-13 16:16:10,241 DEBUG dk.lessismore.nojpa.db.methodquery.NQL - Fieldnames:_Post_rewardLevelBoost__INT
+//                        2013-09-13 16:16:10,241 DEBUG dk.lessismore.nojpa.db.methodquery.NQL - Fieldnames:_Post_creationDate__DATE
+//                        2013-09-13 16:16:10,241 DEBUG dk.lessismore.nojpa.db.methodquery.NQL - Fieldnames:_Post_category__TXT
+//                        2013-09-13 16:16:10,241 DEBUG dk.lessismore.nojpa.db.methodquery.NQL - Fieldnames:_Post_category__TXT_objectID__ID
+//                        2013-09-13 16:16:10,241 DEBUG dk.lessismore.nojpa.db.methodquery.NQL - Fieldnames:_Post_category__TXT_Category_creationDate__DATE
+//                        2013-09-13 16:16:10,241 DEBUG dk.lessismore.nojpa.db.methodquery.NQL - Fieldnames:_Post_category__TXT_Category_dailyDecay__DOUBLE
+//                        2013-09-13 16:16:10,241 DEBUG dk.lessismore.nojpa.db.methodquery.NQL - Fieldnames:_Post_sourceLink__TXT
+//                        2013-09-13 16:16:10,241 DEBUG dk.lessismore.nojpa.db.methodquery.NQL - Fieldnames:_version_
+
+
                     }
 
 
@@ -803,7 +822,20 @@ public class NQL {
         if(s == null || s.equals("")){
             return s;
         } else {
-            return s.replace(" NOT ", " ").replace(" not ", " ").replace(" OR ", " ").replace(" AND ", " ").replace(" or ", " ").replace(" and ", " ").replaceAll("\"", " ").replaceAll("!", " ").replaceAll("'", " ").replaceAll("^", " ")
+            String[] noWords = new String[]{"or", "and", "not"};
+            s = s.toLowerCase().trim();
+            for(int i = 0; i < noWords.length; i++){
+                if(s.endsWith(" " + noWords[i])){
+                    s = s.substring(0, s.length() - noWords[i].length() + 1);
+                }
+                if(s.startsWith(noWords[i] + " ")){
+                    s = s.substring(noWords[i].length() + 1);
+                }
+                s = s.replace(" " + noWords[i] + " ", " ");
+            }
+
+
+            return s.replaceAll("\"", " ").replaceAll("!", " ").replaceAll("'", " ").replaceAll("^", " ")
                     .replaceAll("$", " ").replaceAll("§", " ").replaceAll("#", " ").replaceAll(":", " ").replaceAll("_", " ")
                     .replaceAll("/", " ").replaceAll(";", " ").replaceAll("€", " ").replaceAll("%", " ").replaceAll("/", " ")
                     .replaceAll("\\?", " ").replaceAll("\\(", " ").replaceAll("\\)", " ").replaceAll("\\{", " ").replaceAll("\\}", " ")
