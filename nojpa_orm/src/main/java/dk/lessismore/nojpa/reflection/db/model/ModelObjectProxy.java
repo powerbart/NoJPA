@@ -142,6 +142,7 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
             setAssociation((Calendar) object, name);
         } else if(String.class.isAssignableFrom(parameterClass)) {
             DbStrip dbStrip = method.getAnnotation(DbStrip.class);
+            object = ((String) object).replaceAll("\\P{javaDefined}", "");
             if(dbStrip != null){
                 if(!dbStrip.stripItHard() && !dbStrip.stripItSoft()) {
                     setAssociationWithOutAnyFilters((String) object, name);

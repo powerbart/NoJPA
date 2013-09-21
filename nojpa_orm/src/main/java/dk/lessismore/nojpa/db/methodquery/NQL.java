@@ -416,7 +416,7 @@ public class NQL {
 
                     String objectID = entries.get("objectID").toString();
                     if(entries.containsKey("score")){
-                        log.debug("objectID("+ objectID +") has score("+ entries.get("score")+")reward("+ entries.get("_Post_rewardLevelBoost__INT") +"),("+ entries.get("_Post_category__TXT_Category_dailyDecay__DOUBLE") +"), ("+ entries.get("_Post_pageViewCounter__TXT_Counter_count__LONG") +")");
+                        log.debug("objectID("+ objectID +") has score("+ entries.get("score")+")reward("+ entries.get("_Post_rewardLevelBoost__INT") +"),("+ entries.get("_Post_category__ID_Category_dailyDecay__DOUBLE") +"), ("+ entries.get("_Post_pageViewCounter__ID_Counter_count__LONG") +")");
 //                        2013-09-13 16:16:10,240 DEBUG dk.lessismore.nojpa.db.methodquery.NQL - Fieldnames:objectID                                                                                                                              _Post_pageViewCounter__TXT_Counter_count__LONG
 //                        2013-09-13 16:16:10,240 DEBUG dk.lessismore.nojpa.db.methodquery.NQL - Fieldnames:_Post_urlTitle__TXT
 //                        2013-09-13 16:16:10,240 DEBUG dk.lessismore.nojpa.db.methodquery.NQL - Fieldnames:_Post_isSticky__BOOL
@@ -819,31 +819,46 @@ public class NQL {
 
 
     private static String removeFunnyChars(String s){
+        log.debug("START: removeFunnyChars: input ("+ s +")");
         if(s == null || s.equals("")){
             return s;
         } else {
-            String[] noWords = new String[]{"or", "and", "not"};
-            s = s.toLowerCase().trim();
-            for(int i = 0; i < noWords.length; i++){
-                if(s.endsWith(" " + noWords[i])){
-                    s = s.substring(0, s.length() - noWords[i].length() + 1);
-                }
-                if(s.startsWith(noWords[i] + " ")){
-                    s = s.substring(noWords[i].length() + 1);
-                }
-                s = s.replace(" " + noWords[i] + " ", " ");
-            }
-
-
-            return s.replaceAll("\"", " ").replaceAll("!", " ").replaceAll("'", " ").replaceAll("^", " ")
+            s = s.replaceAll("\"", " ").replaceAll("!", " ").replaceAll("'", " ").replaceAll("\\^", " ")
                     .replaceAll("$", " ").replaceAll("§", " ").replaceAll("#", " ").replaceAll(":", " ").replaceAll("_", " ")
                     .replaceAll("/", " ").replaceAll(";", " ").replaceAll("€", " ").replaceAll("%", " ").replaceAll("/", " ")
                     .replaceAll("\\?", " ").replaceAll("\\(", " ").replaceAll("\\)", " ").replaceAll("\\{", " ").replaceAll("\\}", " ")
                     .replaceAll("\\[", " ").replaceAll("\\]", " ")
                     .replaceAll("<", " ").replaceAll(">", " ").replaceAll("^", " ").replaceAll("~", " ").replaceAll("\\+", " ").replaceAll("-", " ")
                     .trim();
+            s = " " + s + " ";
+            String[] noWords = new String[]{"or", "and", "not"};
+            String[] ss = s.split(" ");
+            StringBuilder toReturn = new StringBuilder();
+            for(int j = 0; j < ss.length; j++){
+                boolean cleanWord = true;
+                for(int i = 0; cleanWord && i < noWords.length; i++){
+                    if(ss[j].equalsIgnoreCase(noWords[i])){
+                        cleanWord = false;
+                    }
+                }
+                if(cleanWord){
+                    toReturn.append(ss[j]);
+                    toReturn.append(' ');
+                }
+            }
+
+            s = toReturn.toString();
+            log.debug("END: removeFunnyChars: input ("+ s +")");
+            return s;
+
+
         }
 
+    }
+
+
+    public static void main(String[] args) {
+        System.out.println(removeFunnyChars("(zzz ^asdasd asd asd as d adsf!!!! ^not"));
     }
 
 

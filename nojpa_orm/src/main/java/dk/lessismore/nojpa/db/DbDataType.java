@@ -42,18 +42,23 @@ public class DbDataType implements Serializable {
     public DbDataType(int type) {
         this.type = type;
     }
-    public DbDataType(Class attributeClass) {
-        setType(attributeClass);
-    }
-
+//    public DbDataType(Class attributeClass) {
+//        setType(attributeClass);
+//    }
+//
     public void setDbAttribute(DbAttribute dbAttribute) {
         this.dbAttribute = dbAttribute;
-    }
+        Annotation[] as = dbAttribute.getAttribute().getDeclaredAnnotations();
+        if(as != null && as.length > 0){
+            for(int i = 0; i < as.length; i++){
+                if(as[i] instanceof Column){
+                    Column c = (Column) as[i];
+                    dbAttribute.setNrOfCharacters(c.length());
+                }
+            }
+        }
 
-    //    public DbDataType(int type, int nrOfCharacters) {
-//        this.type = type;
-//        this.nrOfCharacters = nrOfCharacters;
-//    }
+    }
 
     public DbDataType(DbAttribute dbAttribute) {
         if(dbAttribute == null) {
@@ -74,8 +79,8 @@ public class DbDataType implements Serializable {
               }
             }
         } else {
-            Annotation[] as = dbAttribute.getAttribute().getDeclaredAnnotations();
             this.dbAttribute = dbAttribute;
+            Annotation[] as = dbAttribute.getAttribute().getDeclaredAnnotations();
             if(as != null && as.length > 0){
               for(int i = 0; i < as.length; i++){
                   if(as[i] instanceof Column){

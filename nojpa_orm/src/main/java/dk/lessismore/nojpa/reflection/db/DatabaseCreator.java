@@ -156,7 +156,7 @@ public class DatabaseCreator {
 
                     DbDataType dbDataType = null;
                     if (dbAttribute.isPrimitivArrayAssociation()) {
-                        dbDataType = new DbDataType();
+                        dbDataType = new DbDataType(dbAttribute);
                         dbDataType.setType(DbDataType.DB_VARCHAR);
                     } else {
                         dbDataType = new DbDataType(dbAttribute);
@@ -210,7 +210,8 @@ public class DatabaseCreator {
                 //This is not an association.
 
                 String attributeName = dbAttribute.getAttributeName();
-                DbDataType dataType = new DbDataType(dbAttribute.getAttributeClass());
+//                DbDataType dataType = new DbDataType(dbAttribute.getAttributeClass());
+                DbDataType dataType = new DbDataType(dbAttribute);
 
                 log.debug("alterTableToThisClass : attributeName=" + attributeName);
                 log.debug("alterTableToThisClass : dataType=" + dataType);
@@ -256,7 +257,7 @@ public class DatabaseCreator {
 
                         associationTable.addAttribute(attributeContainer.getAttributeContainer().getClassName() + "_" + attributeContainer.getPrimaryKeyAttribute().getAttributeName(), new DbDataType(DbDataType.DB_VARCHAR), new int[]{CreateSQLStatement.PROPERTY_NOT_NULL});
 
-                        DbDataType dbDataType = new DbDataType();
+                        DbDataType dbDataType = new DbDataType(dbAttribute);
                         if (!dbAttribute.isPrimitivArrayAssociation()) {
                             dbDataType.setType(DbDataType.DB_VARCHAR);
                         } else {
