@@ -294,13 +294,20 @@ public class AttributeContainer {
             if(value == null){
                 attribute.setAttributeValuePlain(objectToSetOn, null);
             } else {
-                Object[] enumConstants = attribute.getAttributeClass().getEnumConstants();
-                for(int i = 0; enumConstants != null && i < enumConstants.length; i++){
-                    if(enumConstants[i].toString().equals("" + value)){
-                        attribute.setAttributeValuePlain(objectToSetOn, enumConstants[i]);
-                        return true;
-                    }
+                try {
+                    Enum anEnum = Enum.valueOf(attribute.getAttributeClass(), (String) value);
+                    attribute.setAttributeValuePlain(objectToSetOn, anEnum);
+                    return true;
+                } catch (Exception e) {
+                    log.error("can't get an enum value: " + e.getMessage(), e);
                 }
+//                Object[] enumConstants = attribute.getAttributeClass().getEnumConstants();
+//                for(int i = 0; enumConstants != null && i < enumConstants.length; i++){
+//                    if(enumConstants[i].toString().equals("" + value)){
+//                        attribute.setAttributeValuePlain(objectToSetOn, enumConstants[i]);
+//                        return true;
+//                    }
+//                }
             }
         }
 
