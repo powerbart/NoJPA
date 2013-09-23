@@ -6,12 +6,14 @@ import org.junit.Test;
 
 import static dk.lessismore.nojpa.db.methodquery.MQL.*;
 import static dk.lessismore.nojpa.db.methodquery.MQL.Comp.EQUAL;
+import static dk.lessismore.nojpa.db.methodquery.MQL.Comp.EQUAL_OR_GREATER;
 import static dk.lessismore.nojpa.db.methodquery.MQL.Comp.LIKE;
 import static dk.lessismore.nojpa.db.methodquery.MQL.Order.ASC;
 
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
 import static org.junit.Assert.*;
 
+import java.util.Calendar;
 import java.util.List;
 
 
@@ -98,6 +100,47 @@ public class MQSelectTest {
                 .orderBy(carMock.getBrand(), ASC)
                 .getArray();
         assertArrayEquals(new Car[] {ford}, cars);
+    }
+
+    @Test
+    public void testSumJoin() throws Exception {
+        Person personMock = MQL.mock(Person.class);
+        MQL.select(personMock).getSum(personMock.getCar().getVolume());
+    }
+
+    @Test
+    public void testSum() throws Exception {
+        Person personMock = MQL.mock(Person.class);
+        MQL.select(personMock).getSum(personMock.getCountOfCars());
+    }
+
+    @Test
+    public void testSumWithWhere() throws Exception {
+        Person personMock = MQL.mock(Person.class);
+        MQL.select(personMock).where(personMock.getCreationDate(), EQUAL_OR_GREATER, Calendar.getInstance()).getSum(personMock.getCountOfCars());
+    }
+
+    @Test
+    public void testSumWithJoinWhere() throws Exception {
+        Person personMock = MQL.mock(Person.class);
+        MQL.select(personMock).where(personMock.getCar().getCreationDate(), EQUAL_OR_GREATER, Calendar.getInstance()).getSum(personMock.getCountOfCars());
+    }
+
+    @Test
+    public void testSumWithJoinWhere2() throws Exception {
+        Person personMock = MQL.mock(Person.class);
+        MQL.select(personMock).where(personMock.getCar().getCreationDate(), EQUAL_OR_GREATER, Calendar.getInstance()).getSum(personMock.getCar().getVolume());
+    }
+
+    @Test
+    public void test2Joins() throws Exception {
+        Person personMock = MQL.mock(Person.class);
+        MQL.select(personMock)
+                .where(personMock.getCar().getCreationDate(), EQUAL_OR_GREATER, Calendar.getInstance())
+                .where(personMock.getCar().getBrand(), EQUAL, "Ford")
+                .where(personMock.getCar().getVolume(), EQUAL_OR_GREATER, 2d).getList();
+
+
     }
 
     //TODO: SEB

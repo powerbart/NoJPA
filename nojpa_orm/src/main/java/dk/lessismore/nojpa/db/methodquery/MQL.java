@@ -348,24 +348,67 @@ public class MQL {
         }
 
         public long getSum(long mock){
-            Pair<Class, String> sourceAttributePair = getSourceAttributePair();
-            String sumAtt = creator.makeAttributeIdentifier(sourceAttributePair.getFirst(), sourceAttributePair.getSecond());
+            List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
+            log.debug("************************ joints " + joints.size());
+
+            Pair<Class, String> pair = getSourceAttributePair();
+            String attribute = makeAttributeIdentifier(pair);
+            if(joints.size() > 0){
+                Expression expression = newLeafExpression();
+                rootConstraints.add(new ExpressionConstraint(expression, joints));
+            } else {
+
+            }
             statement.addExpression(getExpressionAddJoins());
+            String sumAtt = creator.makeAttributeIdentifier(pair.getFirst(), pair.getSecond());
             clearMockCallSequence();
             return DbObjectSelector.countSumFromDbAsLong(sumAtt, statement);
+//
+//
+//            Pair<Class, String> sourceAttributePair = getSourceAttributePair();
+//            String sumAtt = creator.makeAttributeIdentifier(sourceAttributePair.getFirst(), sourceAttributePair.getSecond());
+//            statement.addExpression(getExpressionAddJoins());
+//            clearMockCallSequence();
+//            return DbObjectSelector.countSumFromDbAsLong(sumAtt, statement);
         }
 
         public double getSum(double mock){
+            List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
+            log.debug("************************ joints " + joints.size());
+            Pair<Class, String> pair = getSourceAttributePair();
+            String attribute = makeAttributeIdentifier(pair);
+            if(joints.size() > 0){
+                Expression expression = newLeafExpression();
+                rootConstraints.add(new ExpressionConstraint(expression, joints));
+            } else {
+
+            }
+            statement.addExpression(getExpressionAddJoins());
+            String sumAtt = creator.makeAttributeIdentifier(pair.getFirst(), pair.getSecond());
+            clearMockCallSequence();
+            return DbObjectSelector.countSumFromDbAsDouble(sumAtt, statement);
+
+
+
+
+//            List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
+//            Pair<Class, String> pair = getSourceAttributePair();
+//            clearMockCallSequence();
+//            String attribute = makeAttributeIdentifier(pair);
+//            Expression expression = newLeafExpression().isNotNull(attribute);
+//            rootConstraints.add(new ExpressionConstraint(expression, joints));
+//            return this;
+
+
 //            List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
 //            Pair<Class, String> pair = getSourceAttributePair();
 //            clearMockCallSequence();
 //            Expression expression = newLeafExpression().addConstrain(makeAttributeIdentifier(pair), compToNum(comp), value);
-//            return new ExpressionConstraint(expression, joints);
-            Pair<Class, String> sourceAttributePair = getSourceAttributePair();
-            String sumAtt = creator.makeAttributeIdentifier(sourceAttributePair.getFirst(), sourceAttributePair.getSecond());
-            statement.addExpression(getExpressionAddJoins());
-            clearMockCallSequence();
-            return DbObjectSelector.countSumFromDbAsDouble(sumAtt, statement);
+//            Pair<Class, String> sourceAttributePair = getSourceAttributePair();
+//            String sumAtt = creator.makeAttributeIdentifier(sourceAttributePair.getFirst(), sourceAttributePair.getSecond());
+//            statement.addExpression(getExpressionAddJoins());
+//            clearMockCallSequence();
+//            return DbObjectSelector.countSumFromDbAsDouble(sumAtt, statement);
         }
 
 

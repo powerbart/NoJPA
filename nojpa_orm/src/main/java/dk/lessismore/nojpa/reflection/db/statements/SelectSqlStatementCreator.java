@@ -53,7 +53,7 @@ public class SelectSqlStatementCreator  {
                 getSelectSQLStatement().addTableName(targetTableName);
 
                 if(dbAttribute.isMultiAssociation()) {
-		        log.debug("addJoin ... is dbAttribute.isMultiAssociation = true");
+//		        log.debug("addJoin ... is dbAttribute.isMultiAssociation = true");
                     String associationTableName = AssociationTable.makeAssociationTableName(dbAttributeContainer, dbAttribute);
 
                     getSelectSQLStatement().addTableName(associationTableName);
@@ -61,7 +61,7 @@ public class SelectSqlStatementCreator  {
                     getSelectSQLStatement().addJoin(associationTableName, /*AssociationTable.TARGET*/targetPrimaryKey, targetTableName, targetPrimaryKey );
                 }
                 else {
-                    log.debug("addJoin ... is dbAttribute.isMultiAssociation = false");
+//                    log.debug("addJoin ... is dbAttribute.isMultiAssociation = false");
                     getSelectSQLStatement().addJoin(sourceTableName, dbAttribute.getAttributeName(), targetTableName, targetPrimaryKey);
                 }
                 return true;
