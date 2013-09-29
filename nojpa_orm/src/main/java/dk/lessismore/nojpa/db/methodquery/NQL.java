@@ -651,6 +651,7 @@ public class NQL {
         List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
         Pair<Class, String> pair = getSourceAttributePair();
         clearMockCallSequence();
+        value = (value == null || value.trim().equals("") ? "*" : value);
         SolrExpression expression = newLeafExpression().addConstrain(makeAttributeIdentifier(pair), comp, value);
         return new SolrConstraint(expression, joints);
     }
@@ -848,6 +849,7 @@ public class NQL {
             }
 
             s = toReturn.toString();
+            s = (s == null || s.trim().equals("") ? "*" : s);
             log.debug("END: removeFunnyChars: input ("+ s +")");
             return s;
 
