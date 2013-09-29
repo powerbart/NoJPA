@@ -82,7 +82,7 @@ public class DbObjectSelector {
                             ModelObject modelObject = DbObjectReader.readObjectFromDb(objectId, targetClass, associationConstrain, limSet);
 //                            log.debug("iterateObjectsFromDb :: 4");
                             if (modelObject != null){
-                                log.debug("Now calling the visitor.visit");
+                                log.debug("Now calling the visitor.visit ... visitor("+ visitor +") sql("+ selectSqlStatement +")");
                                 visitor.visit(modelObject);
 
                             }

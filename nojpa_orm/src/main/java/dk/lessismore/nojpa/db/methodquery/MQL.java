@@ -32,6 +32,19 @@ public class MQL {
         return (T) DbObjectReader.readObjectFromDb(objectID, aClass);
     }
     public static <T  extends ModelObjectInterface> T[] selectByIDs(Class<T> aClass, String[] objectIDs) {
+        if(objectIDs == null) return null;
+        if(objectIDs.length <= 20){
+            ArrayList<T> toReturn = new ArrayList<T>(objectIDs.length);
+            for(int i = 0; i < objectIDs.length; i++){
+                T t = selectByID(aClass, objectIDs[i]);
+                if(t != null){
+                    toReturn.add(t);
+                } else {
+                    log.fatal("You are calling selectByIDs("+ aClass.getSimpleName() +") with objectIDs["+ i +"] .. which does not exists!!!! ", new Exception() );
+                }
+            }
+            return toReturn.toArray((T[]) Array.newInstance(aClass, toReturn.size()));
+        }
         return MQL.select(aClass).whereIn(MQL.mock(aClass).getObjectID(), objectIDs).getArray();
     }
 
