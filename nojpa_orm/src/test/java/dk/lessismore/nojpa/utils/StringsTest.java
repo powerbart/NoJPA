@@ -15,10 +15,20 @@ public class StringsTest {
         assertEquals("", Strings.separateBy(Collections.emptyList(), ", "));
     }
 
-    public static void main(String[] args) {
-        System.out.println("Hej med dig\\asda".replaceAll("/|&|'|<|>|;|\\\\", ""));
 
-
+    private static String trimUrlTitle(String in){
+        return in.replaceAll("\\p{InCombiningDiacriticalMarks}+", "ø").toLowerCase().replaceAll("[^a-z0-9_\\- ]", "ø").trim();
     }
+
+    public static void main(String[] args) {
+        System.out.println(trimUrlTitle("bente-s�rensen"));
+    }
+
+
+//    public static void main(String[] args) {
+//        System.out.println("Hej med dig\\asda".replaceAll("/|&|'|<|>|;|\\\\", ""));
+//
+//
+//    }
 
 }
