@@ -824,7 +824,7 @@ public class NQL {
         if(s == null || s.equals("")){
             return s;
         } else {
-            s = s.replaceAll("\"", " ").replaceAll("!", " ").replaceAll("'", " ").replaceAll("\\^", " ")
+            s = s.replaceAll("\"", " ").replaceAll("!", " ").replaceAll("|", " ").replaceAll("'", " ").replaceAll("\\^", " ")
                     .replaceAll("$", " ").replaceAll("§", " ").replaceAll("#", " ").replaceAll(":", " ").replaceAll("_", " ")
                     .replaceAll("/", " ").replaceAll(";", " ").replaceAll("€", " ").replaceAll("%", " ").replaceAll("/", " ")
                     .replaceAll("\\?", " ").replaceAll("\\(", " ").replaceAll("\\)", " ").replaceAll("\\{", " ").replaceAll("\\}", " ")
