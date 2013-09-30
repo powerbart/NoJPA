@@ -284,6 +284,16 @@ public class MQL {
             return this;
         }
 
+        public SelectQuery<T> whereIsNotNull(Enum mockValue) {
+            List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
+            Pair<Class, String> pair = getSourceAttributePair();
+            clearMockCallSequence();
+            String attribute = makeAttributeIdentifier(pair);
+            Expression expression = newLeafExpression().isNotNull(attribute);
+            rootConstraints.add(new ExpressionConstraint(expression, joints));
+            return this;
+        }
+
         public SelectQuery<T> whereIsNotNull(long mockValue) {
             List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
             Pair<Class, String> pair = getSourceAttributePair();
