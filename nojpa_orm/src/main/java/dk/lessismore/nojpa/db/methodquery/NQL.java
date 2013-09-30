@@ -824,9 +824,9 @@ public class NQL {
         if(s == null || s.equals("")){
             return s;
         } else {
-            s = s.replaceAll("\"", " ").replaceAll("!", " ").replaceAll("|", " ").replaceAll("'", " ").replaceAll("\\^", " ")
+            s = s.replaceAll("\"", " ").replaceAll("!", " ").replaceAll("\\|", " ").replaceAll("'", " ").replaceAll("\\^", " ")
                     .replaceAll("$", " ").replaceAll("§", " ").replaceAll("#", " ").replaceAll(":", " ").replaceAll("_", " ")
-                    .replaceAll("/", " ").replaceAll(";", " ").replaceAll("€", " ").replaceAll("%", " ").replaceAll("/", " ").replaceAll("|", " ")
+                    .replaceAll("/", " ").replaceAll(";", " ").replaceAll("€", " ").replaceAll("%", " ").replaceAll("/", " ")
                     .replaceAll("\\?", " ").replaceAll("\\(", " ").replaceAll("\\)", " ").replaceAll("\\{", " ").replaceAll("\\}", " ")
                     .replaceAll("\\[", " ").replaceAll("\\]", " ")
                     .replaceAll("<", " ").replaceAll(">", " ").replaceAll("^", " ").replaceAll("~", " ").replaceAll("\\+", " ").replaceAll("-", " ")
@@ -860,7 +860,7 @@ public class NQL {
 
 
     public static void main(String[] args) {
-        System.out.println(removeFunnyChars("(zzz ^asdasd asd asd as d adsf!!!! ^not"));
+        System.out.println(removeFunnyChars("(zzz k||k ^asdasd asd asd as d adsf!!!! ^not"));
     }
 
 
