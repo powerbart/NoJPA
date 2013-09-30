@@ -826,7 +826,7 @@ public class NQL {
         } else {
             s = s.replaceAll("\"", " ").replaceAll("!", " ").replaceAll("|", " ").replaceAll("'", " ").replaceAll("\\^", " ")
                     .replaceAll("$", " ").replaceAll("§", " ").replaceAll("#", " ").replaceAll(":", " ").replaceAll("_", " ")
-                    .replaceAll("/", " ").replaceAll(";", " ").replaceAll("€", " ").replaceAll("%", " ").replaceAll("/", " ")
+                    .replaceAll("/", " ").replaceAll(";", " ").replaceAll("€", " ").replaceAll("%", " ").replaceAll("/", " ").replaceAll("|", " ")
                     .replaceAll("\\?", " ").replaceAll("\\(", " ").replaceAll("\\)", " ").replaceAll("\\{", " ").replaceAll("\\}", " ")
                     .replaceAll("\\[", " ").replaceAll("\\]", " ")
                     .replaceAll("<", " ").replaceAll(">", " ").replaceAll("^", " ").replaceAll("~", " ").replaceAll("\\+", " ").replaceAll("-", " ")
