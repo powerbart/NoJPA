@@ -1,10 +1,17 @@
 package dk.lessismore.nojpa.db.model;
 
+import dk.lessismore.nojpa.db.SQLStatementExecutor;
 import dk.lessismore.nojpa.db.methodquery.MQL;
+import dk.lessismore.nojpa.db.statements.SQLStatement;
 import dk.lessismore.nojpa.reflection.db.DatabaseCreator;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
+import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Created : by IntelliJ IDEA.
@@ -14,6 +21,24 @@ import org.junit.Test;
  * To change this template use File | Settings | File Templates.
  */
 public class CompanyTest {
+
+
+    @BeforeClass
+    public static void setUp() {
+        List<SQLStatement> tables = new LinkedList<SQLStatement>();
+
+        tables.addAll(DatabaseCreator.makeTableFromClass(Person.class));
+        tables.addAll(DatabaseCreator.makeTableFromClass(Woman.class));
+        tables.addAll(DatabaseCreator.makeTableFromClass(Company.class));
+        tables.addAll(DatabaseCreator.makeTableFromClass(MrRich.class));
+
+
+        for(SQLStatement sqlStatement: tables) {
+            String sql = sqlStatement.makeStatement();
+            SQLStatementExecutor.doUpdate(sql);
+        }
+    }
+
 //
 //    @Test
 //    public void someTest2(){
@@ -40,11 +65,19 @@ public class CompanyTest {
     @Test
     public void someTest(){
         Company company = ModelObjectService.create(Company.class);
-        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXX " + company.getName());
+        company.setName("The_Boss");
+        ArrayList<Person> ps = new ArrayList<Person>();
+        for(int i = 0; i < 10; i++){
+            Person person = ModelObjectService.create(Person.class);
+            ps.add(person);
+
+        }
+        company.setEmployees(ps.toArray(new Person[ps.size()]));
+        System.out.println("XXXXXXXXXXXXXXXXXXXXXXXX " + company.getNumberOfEmployees());
 
         company.setName("Some other name");
-        company.setMyT(Company.CompanyType.IT);
-        company.setMyT(Company.CompanyType.SALES);
+//        company.setMyT(Company.CompanyType.IT);
+//        company.setMyT(Company.CompanyType.SALES);
         System.out.println("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD");
         System.out.println("ModelObjectService.toDebugString(company) = " + ModelObjectService.toDebugString(company));
         System.out.println("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD");

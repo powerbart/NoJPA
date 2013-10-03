@@ -1,5 +1,6 @@
 package dk.lessismore.nojpa.reflection.db.annotations;
 
+import javax.persistence.Transient;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

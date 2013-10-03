@@ -107,7 +107,7 @@ public class DbAttributeContainer {
 
         ModelObject modelObject;
         try {
-            log.debug("setAttributeContainer :: class = " + attributeContainer.getTargetClass());
+//            log.debug("setAttributeContainer :: class = " + attributeContainer.getTargetClass());
             modelObject = (ModelObject) ModelObjectProxy.create(attributeContainer.getTargetClass());
 
             if (modelObject == null) {
@@ -144,7 +144,7 @@ public class DbAttributeContainer {
         //Check if hte
 
 
-        log.debug("setAttributeContainer :: returning true");
+//        log.debug("setAttributeContainer :: returning true");
         return true;
     }
 

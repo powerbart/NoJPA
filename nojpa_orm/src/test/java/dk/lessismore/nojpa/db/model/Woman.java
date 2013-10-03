@@ -4,7 +4,7 @@ import javax.persistence.Column;
 
 public interface Woman extends Person {
 
-    @Column(length = 25000)
+    @Column(length = 2000)
     public String getFavouriteColor();
     public void setFavouriteColor(String favouriteColor);
 
