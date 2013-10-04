@@ -597,7 +597,7 @@ public class NQL {
 
 
     public static String makeAttributeIdentifier(Pair<Class, String> pair) {
-        log.debug("makeAttributeIdentifier("+ pair.getFirst() + "," + pair.getSecond() +")");
+//        log.debug("makeAttributeIdentifier("+ pair.getFirst() + "," + pair.getSecond() +")");
         return makeAttributeIdentifier(pair.getFirst(), pair.getSecond());
     }
 
@@ -801,7 +801,7 @@ public class NQL {
 
 
     private static String removeFunnyChars(String s){
-        log.debug("START: removeFunnyChars: input ("+ s +")");
+//        log.debug("START: removeFunnyChars: input ("+ s +")");
         if(s == null || s.equals("")){
             return s;
         } else {
@@ -821,7 +821,7 @@ public class NQL {
                 for(int i = 0; cleanWord && i < noWords.length; i++){
                     if(ss[j].equalsIgnoreCase(noWords[i])){
                         cleanWord = false;
-                    }
+                   }
                 }
                 if(cleanWord){
                     toReturn.append(ss[j]);
@@ -831,7 +831,7 @@ public class NQL {
 
             s = toReturn.toString();
             s = (s == null || s.trim().equals("") ? "*" : s);
-            log.debug("END: removeFunnyChars: input ("+ s +")");
+            log.debug("END: removeFunnyChars returns input ("+ s +")");
             return s;
 
 
@@ -1028,7 +1028,7 @@ public class NQL {
         String attr = makeAttributeIdentifier(pair);
         clearMockCallSequence();
         String finalSolrAttributeName = createFinalSolrAttributeName(joints, attr);
-        log.debug("asString("+ finalSolrAttributeName +")");
+//        log.debug("asString("+ finalSolrAttributeName +")");
         return finalSolrAttributeName;
     }
 
@@ -1205,7 +1205,7 @@ public class NQL {
             mockSequence = new LinkedList<Pair<Object, Method>>();
             threadMockCallSequenceMap.put(Thread.currentThread(), mockSequence);
         }
-        log.debug("threadMockCallSequenceMap.addLast(" + method +") on " + Thread.currentThread().getId());
+//        log.debug("threadMockCallSequenceMap.addLast(" + method +") on " + Thread.currentThread().getId());
         mockSequence.addLast(new Pair<Object, Method>(mock, method));
     }
 

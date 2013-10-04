@@ -43,7 +43,7 @@ public class CpuInterceptor implements MethodInterceptor {
         } else {
             cpuUsage = new CpuAttribute(key, cpuUsage.getTotalTime() + total, cpuUsage.getNumberOfTimes() + 1);
         }
-        log.debug("cpuUsageMap::"+ className +"."+ methodName + " -> put("+ key +", "+ total +")");
+//        log.debug("cpuUsageMap::"+ className +"."+ methodName + " -> put("+ key +", "+ total +")");
         cpuUsageMap.put(key, cpuUsage);
         return proceed;
     }
