@@ -415,9 +415,9 @@ public class NQL {
 //                    }
 
                     String objectID = entries.get("objectID").toString();
-//                    if(entries.containsKey("score")){
-//                        log.debug("objectID("+ objectID +") has score("+ entries.get("score")+")reward("+ entries.get("_Post_rewardLevelBoost__INT") +"),("+ entries.get("_Post_category__ID_Category_dailyDecay__DOUBLE") +"), ("+ entries.get("_Post_pageViewCounter__ID_Counter_count__LONG") +")");
-//                    }
+                    if(entries.containsKey("score")){
+                        log.debug("objectID("+ objectID +") has score("+ entries.get("score")+")reward("+ entries.get("_Post_rewardLevelBoost__INT") +"),("+ entries.get("_Post_category__ID_Category_dailyDecay__DOUBLE") +"), ("+ entries.get("_Post_pageViewCounter__ID_Counter_count__LONG") +")");
+                    }
 
 
                     T t = MQL.selectByID(selectClass, objectID);
