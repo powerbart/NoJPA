@@ -427,6 +427,7 @@ public class NQL {
                         toReturn.add(t);
                     }
                 }
+                log.debug("Returns the size of Nlist.size() -> " + toReturn.size() + " .... size("+ size +")");
                 return (NList<T>) Proxy.newProxyInstance(
                         this.getClass().getClassLoader(),
                         new Class[]{NList.class},
