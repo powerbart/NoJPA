@@ -43,8 +43,10 @@ public class MySqlUtil {
         // I'm not sure how to escape a string, so I won't create an escaping function that may only provide
         // a false sense of security. I can't think of any other way than disabling dynamic queries altogether.
         // Maybe it doesn't matter since they're not used in release mode. (- ahnfelt)
+        // from Atanas: ESAPI seems a best-practice security framework, if we don't go with prep statements - this is the way to do it
         if(value == null || value.equals("null") || value.equals("Null")) return "NULL";
-        return '\'' + value + '\'';
+//        return '\'' + ESAPI.encoder().encodeForSQL(new MySQLCodec(MySQLCodec.Mode.STANDARD), value) + '\'';
+        return '\'' + value.replaceAll("'", "''") + '\'';
     }
 
     public static String convertToSql(String[] value) {

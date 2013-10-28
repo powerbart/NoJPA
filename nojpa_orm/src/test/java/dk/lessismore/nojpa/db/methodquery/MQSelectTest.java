@@ -1,6 +1,7 @@
 package dk.lessismore.nojpa.db.methodquery;
 
 import dk.lessismore.nojpa.db.testmodel.*;
+import junit.framework.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
