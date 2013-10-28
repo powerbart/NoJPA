@@ -8,6 +8,7 @@ import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectSearchService;
 import dk.lessismore.nojpa.utils.Pair;
 import dk.lessismore.nojpa.utils.Strings;
+import dk.lessismore.nojpa.utils.TimerWithPrinter;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -371,6 +372,8 @@ public class NQL {
 
         @SuppressWarnings("unchecked")
         private NList<T> selectObjectsFromDb() {
+//            TimerWithPrinter timer = new TimerWithPrinter("selectObjectsFromDb", "/tmp/luuux-timer-getPosts.log");
+
             List<T> toReturn = new ArrayList<T>();
             try {
                 StringBuilder builder = new StringBuilder();
@@ -396,14 +399,18 @@ public class NQL {
                     log.debug("Will sort by " + orderByAttribute + " with " + this.orderByORDER);
                     solrQuery.addSort(this.orderByAttribute, this.orderByORDER == Order.ASC ? SolrQuery.ORDER.asc : SolrQuery.ORDER.desc);
                 }
+//                timer.markLap("1");
                 SolrServer solrServer = ModelObjectSearchService.solrServer(selectClass);
-                solrQuery.setFields("*", "score");
+//                timer.markLap("2");
+                solrQuery.setFields("*");
 //                solrQuery.setParam("bf", "sum(_Post_pageViewCounter__ID_Counter_count__LONG,8)");
                 QueryResponse queryResponse = solrServer.query(solrQuery);
+//                timer.markLap("3");
 //                log.debug("queryResponse = " + queryResponse.getResults().size());
 //                log.debug("queryResponse = " + queryResponse.getResults().getNumFound());
 //                log.debug("queryResponse = " + queryResponse.getResults().);
                 int size = queryResponse.getResults().size();
+//                timer.markLap("4");
                 for(int i = 0; i < size; i++){
                     SolrDocument entries = queryResponse.getResults().get(i);
 //                    if(i == 0){
@@ -415,9 +422,9 @@ public class NQL {
 //                    }
 
                     String objectID = entries.get("objectID").toString();
-                    if(entries.containsKey("score")){
-                        log.debug("objectID("+ objectID +") has score("+ entries.get("score")+")rewardBoost("+ entries.get("_Post_rewardLevelBoost__INT") +"),("+ entries.get("_Post_pageViewCounter__ID_Counter_count__LONG") +"), ("+ entries.get("_Post_creationDate__DATE") +")");
-                    }
+//                    if(entries.containsKey("score")){
+//                        log.debug("objectID("+ objectID +") has score("+ entries.get("score")+")rewardBoost("+ entries.get("_Post_rewardLevelBoost__INT") +"),("+ entries.get("_Post_pageViewCounter__ID_Counter_count__LONG") +"), ("+ entries.get("_Post_creationDate__DATE") +")");
+//                    }
 
 
                     T t = MQL.selectByID(selectClass, objectID);
@@ -427,6 +434,7 @@ public class NQL {
                         toReturn.add(t);
                     }
                 }
+//                timer.markLap("5");
                 log.debug("Returns the size of Nlist.size() -> " + toReturn.size() + " .... size("+ size +")");
                 return (NList<T>) Proxy.newProxyInstance(
                         this.getClass().getClassLoader(),
