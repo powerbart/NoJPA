@@ -402,7 +402,7 @@ public class NQL {
 //                timer.markLap("1");
                 SolrServer solrServer = ModelObjectSearchService.solrServer(selectClass);
 //                timer.markLap("2");
-                solrQuery.setFields("*");
+                solrQuery.setFields("*, score, _explain_, _Post_pageViewCounter__ID_Counter_count__LONG,_Post_rewardLevelBoost__INT, _Post_creationDate__DATE");
 //                solrQuery.setParam("bf", "sum(_Post_pageViewCounter__ID_Counter_count__LONG,8)");
                 QueryResponse queryResponse = solrServer.query(solrQuery);
 //                timer.markLap("3");
@@ -425,6 +425,7 @@ public class NQL {
 //                    if(entries.containsKey("score")){
 //                        log.debug("objectID("+ objectID +") has score("+ entries.get("score")+")rewardBoost("+ entries.get("_Post_rewardLevelBoost__INT") +"),("+ entries.get("_Post_pageViewCounter__ID_Counter_count__LONG") +"), ("+ entries.get("_Post_creationDate__DATE") +")");
 //                    }
+                    //"product(add(_Post_pageViewCounter__ID_Counter_count__LONG,_Post_rewardLevelBoost__INT),pow(product(0.6,0.9999),div(ms(NOW,_Post_creationDate__DATE),86400000)))
 
 
                     T t = MQL.selectByID(selectClass, objectID);
