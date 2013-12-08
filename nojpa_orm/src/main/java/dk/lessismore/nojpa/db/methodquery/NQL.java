@@ -422,9 +422,14 @@ public class NQL {
 //                    }
 
                     String objectID = entries.get("objectID").toString();
-//                    if(entries.containsKey("score")){
-//                        log.debug("objectID("+ objectID +") has score("+ entries.get("score")+")rewardBoost("+ entries.get("_Post_rewardLevelBoost__INT") +"),("+ entries.get("_Post_pageViewCounter__ID_Counter_count__LONG") +"), ("+ entries.get("_Post_creationDate__DATE") +")");
-//                    }
+                    if(entries.containsKey("score")){
+                        //objectID(0000A460F7A42087E3ABA13176561FCA) has score(0.70710677)rewardBoost(20),(0), (Fri Aug 05 08:45:32 CEST 2011)
+                        log.debug("objectID("+ objectID +") has score("+ entries.get("score")+")rewardBoost("+ entries.get("_Post_rewardLevelBoost__INT") +"),("+ entries.get("_Post_pageViewCounter__ID_Counter_count__LONG") +"), ("+ entries.get("_Post_creationDate__DATE") +")");
+                    }
+                    if(entries.containsKey("_explain_")){
+                        //objectID(0000A460F7A42087E3ABA13176561FCA) has score(0.70710677)rewardBoost(20),(0), (Fri Aug 05 08:45:32 CEST 2011)
+                        log.debug("_explain_ :: ("+ entries.get("_explain_") +")");
+                    }
                     //"product(add(_Post_pageViewCounter__ID_Counter_count__LONG,_Post_rewardLevelBoost__INT),pow(product(0.6,0.9999),div(ms(NOW,_Post_creationDate__DATE),86400000)))
 
 
