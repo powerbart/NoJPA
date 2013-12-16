@@ -108,6 +108,7 @@ public class NQL {
         Order orderByORDER = Order.ASC;
         int startLimit = -1;
         int endLimit = -1;
+        String preBoost = null;
 //        private final SelectSQLStatement statement;
         private boolean useCache = true;
 
@@ -298,6 +299,12 @@ public class NQL {
             return limit(0, count);
         }
 
+
+        public SearchQuery<T> preBoost(String preBoost) {
+            this.preBoost = preBoost;
+            return this;
+        }
+
 //
 //        /**
 //         * Return the number of results of the query
@@ -388,6 +395,10 @@ public class NQL {
                 String query = builder.toString();
                 if(query == null || query.length() < 2){
                     query = "*:*";
+                } else {
+                    if(preBoost != null){
+                        query = preBoost + " " + query;
+                    }
                 }
                 log.debug("We will query = " + query);
                 solrQuery.setQuery(query);
