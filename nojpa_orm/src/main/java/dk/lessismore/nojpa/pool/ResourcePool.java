@@ -72,6 +72,7 @@ public class ResourcePool {
 
         //Fill the pool!
         for(int i = 0; i < _poolSize; i++) {
+            log.debug("createPool() making("+ i +" out of "+ poolSize +")");
             Object resource = _resourceFactory.makeResource();
             _pool.push(resource);
         }

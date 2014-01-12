@@ -29,7 +29,7 @@ public class ConnectionPoolFactory  {
             return nrOfPoolConnections;
     }
 
-    public static ResourcePool getPool() {
+    public static synchronized ResourcePool getPool() {
 
         if(connectionPool == null) {
             log.debug("making pool");
