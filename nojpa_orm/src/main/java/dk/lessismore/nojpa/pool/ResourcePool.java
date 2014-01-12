@@ -14,7 +14,7 @@ import dk.lessismore.nojpa.pool.factories.*;
  * create and instantiate a object of a desired kind. This could be database
  * factories forinstance. As the abstract factory design pattern describes
  * there is a common interface called 'ResourceFactory' which all factories must
- * implement, if you want this class to use the factory.
+ * implement, if you want this class to use the factory.   ..
  *
  * @author LESS-IS-MORE ApS
  * @version 1.0 14-01-02

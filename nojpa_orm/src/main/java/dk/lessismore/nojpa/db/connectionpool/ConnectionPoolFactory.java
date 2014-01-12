@@ -7,7 +7,7 @@ import dk.lessismore.nojpa.resources.*;
  * This class is a singelton containing a pool of connections to a given database. The database
  * properties is defined in the property file called "db". You can
  * specify the nr of pool connections in this file under the property
- * <tt>nrOfPoolConnections</tt>.
+ * <tt>nrOfPoolConnections</tt>...
  *
  * @author LESS-IS-MORE ApS
  * @version 1.0 25-7-02
