@@ -40,7 +40,7 @@ public class MaxSizeMaxTimeMap<E> {
 
 
     public synchronized int getNrOfObjectsInCache() {
-        return getNewBucket().size()+getOldBucket().size();
+        return getNewBucket().size() + getOldBucket().size();
     }
 
     public Map<String, TimeMapEntry<E>>[] getCachedObjects() {
@@ -106,6 +106,15 @@ public class MaxSizeMaxTimeMap<E> {
         } catch (Exception e) {
           e.printStackTrace();
           return null;
+        }
+    }
+
+    public synchronized void remove(String key) {
+        try {
+            getNewBucket().remove(key);
+            getOldBucket().remove(key);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
