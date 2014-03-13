@@ -122,7 +122,7 @@ public class MySqlCreateStatement extends MySqlStatement implements CreateSQLSta
 //            }
 //        }
         // TODO set charset and collation as parameter
-        statement.append("\n)");// CHARACTER SET utf8 COLLATE utf8_bin");
+        statement.append("\n) ENGINE=MyISAM");// CHARACTER SET utf8 COLLATE utf8_bin");
         return statement.toString();
     }
 
