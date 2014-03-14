@@ -14,10 +14,10 @@ import org.apache.log4j.Logger;
  */
 public class MySqlContainerExpression implements ContainerExpression {
 
-    private final static org.apache.log4j.Logger log = Logger.getLogger(MySqlContainerExpression.class);
+//    private final static org.apache.log4j.Logger log = Logger.getLogger(MySqlContainerExpression.class);
 
-    List expressions = new LinkedList();
-    List conditions = new LinkedList();
+    List<Expression> expressions = new LinkedList<Expression>();
+    List<String> conditions = new LinkedList<String>();
 
     public ContainerExpression addExpression(Expression expression) {
         expressions.add(expression);
@@ -41,9 +41,7 @@ public class MySqlContainerExpression implements ContainerExpression {
 //
     public int nrOfExpressions() {
         int n = 0;
-        Iterator iterator = expressions.iterator();
-        while (iterator.hasNext()) {
-            Expression expression = (Expression) iterator.next();
+        for (Object expression : expressions) {
             if (expression instanceof ContainerExpression) {
                 n += ((ContainerExpression) expression).nrOfExpressions();
             } else {
@@ -60,14 +58,12 @@ public class MySqlContainerExpression implements ContainerExpression {
             return "";
         }
 
-        List statements = new LinkedList();
+        List<String> statements = new LinkedList<String>();
         String statement = "";
-        Iterator expressionIterator = expressions.iterator();
-        while (expressionIterator.hasNext()) {
+        for (Expression expression : expressions) {
 
-            Expression expression = (Expression) expressionIterator.next();
             String s = expression.makeStatement().trim();
-            if(!s.equals("")){
+            if (!s.equals("")) {
                 statements.add(s);
             }
         }
@@ -77,7 +73,7 @@ public class MySqlContainerExpression implements ContainerExpression {
             if (i > 0) {
                 String condition = WhereSQLStatement.conditionAsStr[WhereSQLStatement.AND];
                 if ((i - 1) < conditions.size()) {
-                    condition = (String) conditions.get((i - 1));
+                    condition = conditions.get((i - 1));
                 }
                 statement = statement + " " + condition + "\n\t" + stmt;
 //                log.debug("tmp.1.statement = " + statement);
@@ -109,11 +105,9 @@ public class MySqlContainerExpression implements ContainerExpression {
             return "";
         }
 
-        List statements = new LinkedList();
+        List<String> statements = new LinkedList<String>();
         String statement = "";
-        Iterator expressionIterator = expressions.iterator();
-        while (expressionIterator.hasNext()) {
-            Expression expression = (Expression) expressionIterator.next();
+        for (Expression expression : expressions) {
             String s = expression.makePreparedStatement(preparedSQLStatement);
             //System.out.println("makePreparedStatement: adding " + s);
             statements.add(s);
@@ -124,7 +118,7 @@ public class MySqlContainerExpression implements ContainerExpression {
             if (i > 0) {
                 String condition = WhereSQLStatement.conditionAsStr[WhereSQLStatement.AND];
                 if ((i - 1) < conditions.size()) {
-                    condition = (String) conditions.get((i - 1));
+                    condition = conditions.get((i - 1));
                 }
                 statement = statement + " " + condition + "\n\t" + stmt;
                 //log.debug("tmp.1.statement = " + statement);
