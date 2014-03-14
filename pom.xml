@@ -213,8 +213,6 @@
             <version>2.4</version>
         </dependency>
 
-
-
         <!-- Unit testing -->
         <dependency>
             <groupId>junit</groupId>
@@ -229,6 +227,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>
@@ -252,6 +251,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
+                <version>2.6</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
                 </configuration>
@@ -267,7 +267,7 @@
     <distributionManagement>
         <repository>
             <id>internal.repo</id>
-            <name>MyCo Internal Repository</name>
+            <name>LIM Internal Repository</name>
             <url>file:////home//gitlab_ci_runner//public_maven_repo/</url>
         </repository>
     </distributionManagement>

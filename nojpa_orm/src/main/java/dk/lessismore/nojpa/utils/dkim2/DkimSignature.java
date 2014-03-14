@@ -8,9 +8,10 @@
  */
 package dk.lessismore.nojpa.utils.dkim2;
 
+import org.apache.commons.codec.binary.Base64;
+
 import java.util.Scanner;
 import java.util.regex.Pattern;
-import sun.misc.BASE64Encoder;
 
 
 /**
@@ -440,8 +441,7 @@ public class DkimSignature implements Cloneable {
 	 * @param data - byte array to be encoded to Base64.
 	 */
 	public void setBtag(byte[] data) {
-		BASE64Encoder bs = new BASE64Encoder();
-		sigBtag = bs.encode(data);
+		sigBtag = Base64.encodeBase64String(data);
 	}
 	
 	/**
@@ -465,8 +465,7 @@ public class DkimSignature implements Cloneable {
 	 * @param data - byte array to be encoded to Base64.
 	 */
 	public void setBHtag(byte[] data) {
-		BASE64Encoder bs = new BASE64Encoder();
-		sigBHtag = bs.encode(data);
+		sigBHtag = Base64.encodeBase64String(data);
 	}
 	
 	/**
@@ -630,7 +629,7 @@ public class DkimSignature implements Cloneable {
 	/**
 	 * Get the DNS record. The S tag (dot) _domainkey (dot) D tag.
 	 * @return the DNS record to lookup
-	 * @throws DkimException<br>If the Q tag doesn't specify DNS.
+	 * @throws DkimException If the Q tag doesn't specify DNS.
 	 */
 	public String getDnsRecord() throws DkimException {
 		if ( sigQtag.contains("dns"))

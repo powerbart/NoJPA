@@ -19,7 +19,7 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.util.Date;
 
-import sun.misc.BASE64Encoder;
+import org.apache.commons.codec.binary.Base64;
 
 
 /**
@@ -173,8 +173,7 @@ public class Signer {
 		
 		md.update(mailBody.getBytes());
 
-		BASE64Encoder bsenc = new BASE64Encoder();
-		String digest = bsenc.encode(md.digest());
+		String digest = Base64.encodeBase64String(md.digest());
 		
 		return digest;
 	}
@@ -379,8 +378,7 @@ public class Signer {
 		
 		try {
 			sig.update(mailHeaders.getBytes());
-			BASE64Encoder bsenc = new BASE64Encoder();
-			dks.setBtag(bsenc.encode(sig.sign()));
+			dks.setBtag(Base64.encodeBase64(sig.sign()));
 		} catch (SignatureException e) {
 			e.printStackTrace();
 		}

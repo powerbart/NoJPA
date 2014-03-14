@@ -12,7 +12,7 @@ import java.security.PublicKey;
 import java.util.Date;
 import java.util.Scanner;
 
-import sun.misc.BASE64Decoder;
+import org.apache.commons.codec.binary.Base64;
 import sun.security.rsa.RSAPublicKeyImpl;
 
 
@@ -79,10 +79,9 @@ public class NSKey {
 					return;
 				}
 
-				try{	
-					BASE64Decoder decoder = new BASE64Decoder();
-					byte[] decoded = decoder.decodeBuffer(tag[1]);				
-					key = new RSAPublicKeyImpl( decoded );
+				try{
+					byte[] decoded = Base64.decodeBase64(tag[1]);
+                    key = new RSAPublicKeyImpl( decoded );
 					
 				} catch (Exception e) {
 					dke = new DkimException(DkimError.KEYSYNTAX,"The Key seems to be invalid",e);

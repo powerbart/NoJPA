@@ -8,6 +8,7 @@
  */
 package dk.lessismore.nojpa.utils.dkim2;
 
+import org.apache.commons.codec.binary.Base64;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,9 +20,6 @@ import java.security.SignatureException;
 import java.util.Date;
 import java.util.Stack;
 import java.util.Vector;
-
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
 
 
 /**
@@ -206,7 +204,7 @@ public class Verifier {
 	 * digest matches the one found in the signature, then we will return true
 	 * 
 	 * @param dkimSig
-	 * @param Mail Body
+	 * @param mailBody
 	 * @throws DkimException if check fails
 	 */
 	private void checkBodyHash(DkimSignature dkimSig, String mailBody) throws DkimException {
@@ -223,9 +221,9 @@ public class Verifier {
 		}
 
 		md.update(mailBody.getBytes());
-		
-		BASE64Encoder bsenc = new BASE64Encoder();
-		String digest = bsenc.encode(md.digest());
+
+
+		String digest = Base64.encodeBase64String(md.digest());
 		
 		if ( ! digest.equals(dkimSig.getBodyHash())) {
 			throw new DkimException(DkimError.BODYHASH, "The body hash did not verify.");
@@ -533,8 +531,7 @@ public class Verifier {
 			checkBodyHash(dkimSig, mailBody);
 		}
 		
-		BASE64Decoder bs = new BASE64Decoder();
-		byte[] sigBuf = bs.decodeBuffer(dkimSig.getBtag());
+		byte[] sigBuf = Base64.decodeBase64(dkimSig.getBtag());
 		
 		try {
 			sig = Signature.getInstance(dkimSig.getJavaAlg());
