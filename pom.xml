@@ -264,4 +264,12 @@
         </resources>
     </build>
 
+    <distributionManagement>
+        <repository>
+            <id>internal.repo</id>
+            <name>MyCo Internal Repository</name>
+            <url>file:////home//gitlab_ci_runner//public_maven_repo/</url>
+        </repository>
+    </distributionManagement>
+
 </project>
