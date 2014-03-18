@@ -331,7 +331,7 @@ public class DatabaseCreator {
         createDatabase(subTypesList, ignores);
     }
 
-    private static ArrayList<Class> getSubtypes(String rootPackage) {
+    public static ArrayList<Class> getSubtypes(String rootPackage) {
         log.debug("------------ Getting all children of MOI from package: " + rootPackage);
         Reflections reflections = new Reflections(new ConfigurationBuilder()
                 .filterInputsBy(new FilterBuilder.Include(FilterBuilder.prefix(rootPackage)))
