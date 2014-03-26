@@ -1,6 +1,8 @@
 package dk.lessismore.nojpa.rest;
 
+
 import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.databind.module.SimpleDeserializers;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.module.SimpleSerializers;
 import com.fasterxml.jackson.databind.ser.std.CalendarSerializer;
@@ -16,13 +18,18 @@ import java.util.Calendar;
  */
 public class NoJpaModule extends SimpleModule {
 
+    public NoJpaModule() {
+        super("NoJpaModule");
+    }
+
     @Override
     public void setupModule(Module.SetupContext context) {
-        super.setupModule(context);
-        if (_serializers == null) {
-            _serializers = new SimpleSerializers();
-        }
-        _serializers.addSerializer(ModelObjectInterface.class, new NoJpaSerializer());
-        _serializers.addSerializer(Calendar.class, new CalendarSerializer());
+        SimpleSerializers serializers = new SimpleSerializers();
+        SimpleDeserializers deserializers = new SimpleDeserializers();
+
+        serializers.addSerializer(ModelObjectInterface.class, new NoJpaSerializer());
+        serializers.addSerializer(Calendar.class, new CalendarSerializer());
+        context.addSerializers(serializers);
+        context.addDeserializers(deserializers);
     }
 }
