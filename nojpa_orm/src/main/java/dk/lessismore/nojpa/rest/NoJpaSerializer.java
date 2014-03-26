@@ -36,7 +36,7 @@ public class NoJpaSerializer extends JsonSerializer<ModelObjectInterface> {
                     if (method.getReturnType().isArray()) {
                         jgen.writeArrayFieldStart(fieldName);
                         Object[] mois = (Object[]) method.invoke(value);
-                        for (int j = 0; j < mois.length && mois != null; j++) {
+                        for (int j = 0; mois != null && j < mois.length; j++) {
                             jgen.writeObject(mois[j]);
                         }
                         jgen.writeEndArray();
