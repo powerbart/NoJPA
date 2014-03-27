@@ -2,6 +2,7 @@ package dk.lessismore.nojpa.rest;
 
 import dk.lessismore.nojpa.db.methodquery.MQL;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.format.Formatter;
 
 import java.lang.annotation.Annotation;
@@ -24,31 +25,30 @@ public class NoJpaFormatter implements Formatter<ModelObjectInterface> {
 
     @Override
     public ModelObjectInterface parse(String text, Locale locale) throws ParseException {
-        for (Annotation annotation : clazz.getAnnotations()) {
-            if (annotation.annotationType().equals(Locator.class)) {
-                try {
-                    return ((Locator)annotation).locator().newInstance().get(text);
-                } catch (InstantiationException e) {
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
+        Locator locator = AnnotationUtils.getAnnotation(clazz, Locator.class);
+        if (locator != null) {
+            try {
+                return locator.locator().newInstance().get(text);
+            } catch (InstantiationException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
             }
         }
+
         return MQL.selectByID(clazz, text);
     }
 
     @Override
     public String print(ModelObjectInterface object, Locale locale) {
-        for (Annotation annotation : clazz.getAnnotations()) {
-            if (annotation.annotationType().equals(Printer.class)) {
-                try {
-                    return ((Printer)annotation).printer().newInstance().put(object);
-                } catch (InstantiationException e) {
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
+        Printer printer = AnnotationUtils.getAnnotation(clazz, Printer.class);
+        if (printer != null) {
+            try {
+                return printer.printer().newInstance().put(object);
+            } catch (InstantiationException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
             }
         }
         return object.getObjectID();
