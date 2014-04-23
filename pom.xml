@@ -22,9 +22,9 @@
 
     <repositories>
         <repository>
-            <id>reusableRepository</id>
-            <name>Reusable repository</name>
-            <url>http://home.less-is-more.dk/maven-repository</url>
+            <id>nojpaRepo</id>
+            <name>NoJPA Repository</name>
+            <url>http://maven.less-is-more.dk</url>
         </repository>
     </repositories>
 
@@ -168,17 +168,14 @@
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
-            <version>1.2.16</version>
+            <version>1.2.17</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.6.4</version>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-jdk14</artifactId>
-            <version>1.6.4</version>
+            <version>1.7.7</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- solrj dependencies -->
