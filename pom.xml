@@ -12,6 +12,7 @@
 
     <modules>
         <module>nojpa_orm</module>
+        <module>nojpa_spring</module>
     </modules>
 
     <properties>
