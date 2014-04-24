@@ -5,7 +5,6 @@ import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.format.Formatter;
 
-import java.lang.annotation.Annotation;
 import java.text.ParseException;
 import java.util.Locale;
 
