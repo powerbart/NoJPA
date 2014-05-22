@@ -1,6 +1,7 @@
 package dk.lessismore.nojpa.rest;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
@@ -30,34 +31,42 @@ public class NoJpaSerializer extends JsonSerializer<ModelObjectInterface> {
 
         Method[] methods = ((ModelObject) value).getInterface().getDeclaredMethods();
         for (Method method : methods) {
-            if (!method.getReturnType().equals(Void.TYPE) && (method.getParameterTypes().length == 0) && !method.isAnnotationPresent(JsonIgnore.class)) {
-                try {
-                    String fieldName = strategy.translate(method.getName().substring(3));
-                    if (method.getReturnType().isArray()) {
-                        jgen.writeArrayFieldStart(fieldName);
-                        Object[] mois = (Object[]) method.invoke(value);
-                        for (int j = 0; mois != null && j < mois.length; j++) {
-                            jgen.writeObject(mois[j]);
-                        }
-                        jgen.writeEndArray();
-                    } else {
-                        // prevent huge recursions in tightly coupled models
-                        if (ModelObjectInterface.class.isAssignableFrom(method.getReturnType())) {
-                            Object moiValue = method.invoke(value);
-                            if (moiValue != null) {
-                                jgen.writeObjectField(fieldName, moiValue.toString());
-                            } else {
-                                jgen.writeObjectField(fieldName, null);
-                            }
-                        } else {
-                            jgen.writeObjectField(fieldName, method.invoke(value));
-                        }
+            if (method.getReturnType().equals(Void.TYPE) || method.isAnnotationPresent(JsonIgnore.class)) {
+                continue;
+            }
+
+            String fieldName = strategy.translate(method.getName().substring(3));
+            jgen.writeFieldName(fieldName);
+            try {
+                if (method.getReturnType().isArray()) {
+                    Object[] mois = (Object[]) method.invoke(value);
+                    jgen.writeStartArray();
+                    for (int j = 0; mois != null && j < mois.length; j++) {
+                        jgen.writeObject(getObject(method.getReturnType().getComponentType(), mois[j]));
                     }
-                } catch (Exception e) {
-                    log.error("can't serialize field: " + method.getName(), e);
+                    jgen.writeEndArray();
+                } else {
+                    jgen.writeObject(getObject(method.getReturnType(), method.invoke(value)));
                 }
+            } catch (Exception e) {
+                log.error("can't serialize field: " + method.getName(), e);
             }
         }
         jgen.writeEndObject();
+    }
+
+    private static Object getObject(Class type, Object moi) {
+        if (moi == null) {
+            return null;
+        }
+        if (ModelObjectInterface.class.isAssignableFrom(type)) {
+            if (type.isAnnotationPresent(JsonInclude.class)) {
+                return moi;
+            } else {
+                return moi.toString();
+            }
+        } else {
+            return moi;
+        }
     }
 }
