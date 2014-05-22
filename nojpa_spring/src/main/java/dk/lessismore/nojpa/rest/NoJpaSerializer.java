@@ -42,11 +42,11 @@ public class NoJpaSerializer extends JsonSerializer<ModelObjectInterface> {
                     Object[] mois = (Object[]) method.invoke(value);
                     jgen.writeStartArray();
                     for (int j = 0; mois != null && j < mois.length; j++) {
-                        jgen.writeObject(getObject(method.getReturnType().getComponentType(), mois[j]));
+                        jgen.writeObject(getObject(method, method.getReturnType().getComponentType(), mois[j]));
                     }
                     jgen.writeEndArray();
                 } else {
-                    jgen.writeObject(getObject(method.getReturnType(), method.invoke(value)));
+                    jgen.writeObject(getObject(method, method.getReturnType(), method.invoke(value)));
                 }
             } catch (Exception e) {
                 log.error("can't serialize field: " + method.getName(), e);
@@ -55,12 +55,12 @@ public class NoJpaSerializer extends JsonSerializer<ModelObjectInterface> {
         jgen.writeEndObject();
     }
 
-    private static Object getObject(Class type, Object moi) {
+    private static Object getObject(Method method, Class type, Object moi) {
         if (moi == null) {
             return null;
         }
         if (ModelObjectInterface.class.isAssignableFrom(type)) {
-            if (type.isAnnotationPresent(JsonInclude.class)) {
+            if (type.isAnnotationPresent(JsonInclude.class) || method.isAnnotationPresent(JsonInclude.class)) {
                 return moi;
             } else {
                 return moi.toString();
