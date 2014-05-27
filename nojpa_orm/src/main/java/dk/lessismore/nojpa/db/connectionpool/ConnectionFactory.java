@@ -15,8 +15,8 @@ import org.apache.log4j.Logger;
  * <li>db: The database type/vendor (oracel, mysql etc)
  * <li>databaseName: The name of the database.
  * <li>driverName: The class path of the jdbc driver
- * <li>user: The database user name.
- * <li>password: The password of the database user.
+ * <li>dbuser: The database user name.
+ * <li>dbpasswd: The password of the database user.
  * </ul>
  *
  * @author LESS-IS-MORE ApS
@@ -71,8 +71,11 @@ public class ConnectionFactory implements ResourceFactory {
         this.user = user;
     }
     public String getUser() {
-        if(resources.gotResource("user"))
+        if(resources.gotResource("dbuser")) {
+            user = resources.getString("dbuser");
+        } else if (resources.gotResource("user")) {
             user = resources.getString("user");
+        }
         return user;
     }
 
@@ -80,8 +83,12 @@ public class ConnectionFactory implements ResourceFactory {
         this.password = password;
     }
     public String getPassword() {
-        if(resources.gotResource("password"))
+        if(resources.gotResource("dbpasswd")) {
+            password = resources.getString("dbpasswd");
+        } else if (resources.gotResource("password")) {
             password = resources.getString("password");
+
+        }
         return password;
     }
 
