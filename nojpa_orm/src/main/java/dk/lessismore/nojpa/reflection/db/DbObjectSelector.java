@@ -351,6 +351,34 @@ public class DbObjectSelector {
         }
     }
 
+    public static double maxFromDbAsDouble(String sumAttribute, SelectSQLStatement selectSqlStatement) {
+        LimResultSet limSet = null;
+        try{
+            String countAttribute = "max("+ sumAttribute +") as nr";
+            selectSqlStatement.addAttributeName(countAttribute);
+            limSet = SQLStatementExecutor.doQuery(selectSqlStatement);
+            ResultSet resultSet = limSet.getResultSet();
+            selectSqlStatement.removeAttributeName(countAttribute);
+            if(resultSet != null && resultSet.next()) {
+                try {
+                    return resultSet.getDouble("nr");
+                }catch(Exception e) {
+                    log.error("Count objects failed", e);
+                    return 0;
+                }
+            } else {
+                log.warn("Resultset was null");
+                return 0;
+            }
+        } catch(Exception e){
+            log.error("countSumFromDb: "+ e, e);
+            e.printStackTrace();
+            throw new RuntimeException("countSumFromDb:" +  e);
+        } finally {
+            if(limSet != null) limSet.close();
+        }
+    }
+
     public static long countSumFromDbAsLong(String sumAttribute, SelectSQLStatement selectSqlStatement) {
         LimResultSet limSet = null;
         try{
@@ -379,4 +407,31 @@ public class DbObjectSelector {
         }
     }
 
+    public static long maxFromDbAsLong(String sumAttribute, SelectSQLStatement selectSqlStatement) {
+        LimResultSet limSet = null;
+        try{
+            String countAttribute = "max("+ sumAttribute +") as nr";
+            selectSqlStatement.addAttributeName(countAttribute);
+            limSet = SQLStatementExecutor.doQuery(selectSqlStatement);
+            ResultSet resultSet = limSet.getResultSet();
+            selectSqlStatement.removeAttributeName(countAttribute);
+            if(resultSet != null && resultSet.next()) {
+                try {
+                    return resultSet.getLong("nr");
+                }catch(Exception e) {
+                    log.error("Count objects failed", e);
+                    return 0;
+                }
+            } else {
+                log.warn("Resultset was null");
+                return 0;
+            }
+        } catch(Exception e){
+            log.error("countSumFromDb: "+ e, e);
+            e.printStackTrace();
+            throw new RuntimeException("countSumFromDb:" +  e);
+        } finally {
+            if(limSet != null) limSet.close();
+        }
+    }
 }

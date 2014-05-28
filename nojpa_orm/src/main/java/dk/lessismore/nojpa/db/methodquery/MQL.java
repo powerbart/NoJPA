@@ -399,8 +399,6 @@ public class MQL {
             if(joints.size() > 0){
                 Expression expression = newLeafExpression();
                 rootConstraints.add(new ExpressionConstraint(expression, joints));
-            } else {
-
             }
             statement.addExpression(getExpressionAddJoins());
             String sumAtt = creator.makeAttributeIdentifier(pair.getFirst(), pair.getSecond());
@@ -414,6 +412,33 @@ public class MQL {
 //            clearMockCallSequence();
 //            return DbObjectSelector.countSumFromDbAsLong(sumAtt, statement);
         }
+
+        public long getMax(long mock){
+            List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
+            log.debug("************************ joints " + joints.size());
+
+            Pair<Class, String> pair = getSourceAttributePair();
+            String attribute = makeAttributeIdentifier(pair);
+            if(joints.size() > 0){
+                Expression expression = newLeafExpression();
+                rootConstraints.add(new ExpressionConstraint(expression, joints));
+            }
+            statement.addExpression(getExpressionAddJoins());
+            String sumAtt = creator.makeAttributeIdentifier(pair.getFirst(), pair.getSecond());
+            clearMockCallSequence();
+            return DbObjectSelector.maxFromDbAsLong(sumAtt, statement);
+        }
+
+        public int getMax(int mock){
+            return (int) getMax(0L);
+        }
+
+
+
+        public float getMax(float mock){
+            return (float) getMax(0d);
+        }
+
 
         public double getSum(double mock){
             List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
@@ -454,6 +479,21 @@ public class MQL {
 //            return DbObjectSelector.countSumFromDbAsDouble(sumAtt, statement);
         }
 
+        public double getMax(double mock){
+            List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
+            log.debug("************************ joints " + joints.size());
+            Pair<Class, String> pair = getSourceAttributePair();
+            String attribute = makeAttributeIdentifier(pair);
+            if(joints.size() > 0){
+                Expression expression = newLeafExpression();
+                rootConstraints.add(new ExpressionConstraint(expression, joints));
+            }
+            statement.addExpression(getExpressionAddJoins());
+            String sumAtt = creator.makeAttributeIdentifier(pair.getFirst(), pair.getSecond());
+            clearMockCallSequence();
+            return DbObjectSelector.maxFromDbAsDouble(sumAtt, statement);
+
+        }
 
         /**
          * Set limit

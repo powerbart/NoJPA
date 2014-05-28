@@ -134,6 +134,30 @@ public class MQSelectTest {
     }
 
     @Test
+    public void testMax() throws Exception {
+        Person personMock = MQL.mock(Person.class);
+        MQL.select(personMock).getMax(personMock.getCountOfCars());
+    }
+
+    @Test
+    public void testMaxWithWhere() throws Exception {
+        Person personMock = MQL.mock(Person.class);
+        MQL.select(personMock).where(personMock.getCreationDate(), EQUAL_OR_GREATER, Calendar.getInstance()).getMax(personMock.getCountOfCars());
+    }
+
+    @Test
+    public void testMaxWithJoinWhere() throws Exception {
+        Person personMock = MQL.mock(Person.class);
+        MQL.select(personMock).where(personMock.getCar().getCreationDate(), EQUAL_OR_GREATER, Calendar.getInstance()).getMax(personMock.getCountOfCars());
+    }
+
+    @Test
+    public void testMaxWithJoinWhere2() throws Exception {
+        Person personMock = MQL.mock(Person.class);
+        MQL.select(personMock).where(personMock.getCar().getCreationDate(), EQUAL_OR_GREATER, Calendar.getInstance()).getMax(personMock.getCar().getVolume());
+    }
+
+    @Test
     public void test2Joins() throws Exception {
         Person personMock = MQL.mock(Person.class);
         MQL.select(personMock)
