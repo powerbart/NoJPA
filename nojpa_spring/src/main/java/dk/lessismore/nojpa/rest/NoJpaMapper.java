@@ -14,6 +14,6 @@ public class NoJpaMapper extends ObjectMapper {
     public NoJpaMapper() {
         this.setPropertyNamingStrategy(PropertyNamingStrategy.CAMEL_CASE_TO_LOWER_CASE_WITH_UNDERSCORES);
         this.registerModule(new NoJpaModule());
-        this.registerModule(new Jackson2HalModule());
+//        this.registerModule(new Jackson2HalModule());
     }
 }
