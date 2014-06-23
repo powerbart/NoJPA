@@ -16,7 +16,7 @@ import java.util.Calendar;
  * Time: 01:59:45
  * To change this template use File | Settings | File Templates.
  */
-public class ModelObjectIterator<M extends ModelObject> implements Iterable, DbObjectVisitor {
+public class ModelObjectIterator<M extends ModelObjectInterface> implements Iterable, DbObjectVisitor {
 
     private static MaxSizeMap mapOfIterator = new MaxSizeMap(1000);
 
@@ -49,7 +49,7 @@ public class ModelObjectIterator<M extends ModelObject> implements Iterable, DbO
 
     public synchronized void add(M m){
         lastModified = Calendar.getInstance();
-        totalList.add(m.getPrimaryKeyValue());
+        totalList.add(m.getObjectID());
         log.debug("add(): current size = " + totalList.size() + " in "+ this);
     }
 
