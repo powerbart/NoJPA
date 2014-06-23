@@ -12,7 +12,7 @@ import java.util.*;
  */
 public abstract class MySqlStatement implements SQLStatement {
 
-    protected List tableNames = null;
+    protected List<String> tableNames = null;
 
     public void addTableName(String tableName) {
         if (!getTableNames().contains(tableName)) {
@@ -20,9 +20,9 @@ public abstract class MySqlStatement implements SQLStatement {
         }
     }
 
-    protected List getTableNames() {
+    protected List<String> getTableNames() {
         if (tableNames == null) {
-            tableNames = new LinkedList();
+            tableNames = new LinkedList<String>();
         }
         return tableNames;
     }
