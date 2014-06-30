@@ -1,8 +1,10 @@
 package dk.lessismore.nojpa.db.statements.mysql;
 
-import dk.lessismore.nojpa.db.statements.*;
+import dk.lessismore.nojpa.db.statements.SQLStatement;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Mysql statement implementation
