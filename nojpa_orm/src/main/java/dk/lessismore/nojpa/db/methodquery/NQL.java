@@ -176,6 +176,16 @@ public class NQL {
             return this;
         }
 
+        public <M extends ModelObjectInterface> SearchQuery<T> searchIsNull(M mockValue) {
+            rootConstraints.add(hasNull(mockValue));
+            return this;
+        }
+
+        public <M extends ModelObjectInterface> SearchQuery<T> searchNotNull(M mockValue) {
+            rootConstraints.add(hasNotNull(mockValue));
+            return this;
+        }
+
         public SearchQuery<T> search(Constraint constraint) {
             rootConstraints.add(constraint);
             return this;
@@ -711,6 +721,22 @@ public class NQL {
         return new SolrConstraint(expression, joints);
     }
 
+    public static <M extends ModelObjectInterface> Constraint hasNull(M mockValue) {
+        List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
+        Pair<Class, String> pair = getSourceAttributePair();
+        clearMockCallSequence();
+        SolrExpression expression = newLeafExpression().isNull(makeAttributeIdentifier(pair));
+        return new SolrConstraint(expression, joints);
+    }
+
+    public static <M extends ModelObjectInterface> Constraint hasNotNull(M mockValue) {
+        List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
+        Pair<Class, String> pair = getSourceAttributePair();
+        clearMockCallSequence();
+        SolrExpression expression = newLeafExpression().isNotNull(makeAttributeIdentifier(pair));
+        return new SolrConstraint(expression, joints);
+    }
+
 //
 //    public static <M extends ModelObjectInterface> Constraint hasIn(Enum mockValue, Enum ... values) {
 //        if (values == null || values.length == 0) {
@@ -994,6 +1020,20 @@ public class NQL {
             return this;
         }
 
+        public SolrExpression isNull(String attributeName) {
+            log.debug("isNull("+ attributeName +")");
+            this.statement = "(-"+ attributeName +":[\"\" TO *])";
+            this.attr = "-" + attributeName;
+            return this;
+        }
+
+        public SolrExpression isNotNull(String attributeName) {
+            log.debug("isNotNull("+ attributeName +")");
+            this.statement = "("+ attributeName +":[\"\" TO *])";
+            this.attr = attributeName;
+            return this;
+        }
+
         public SolrExpression addConstrain(Class sourceClass, String attributeName, Comp comparator, String value) {
             return addConstrain(makeAttributeIdentifier(sourceClass, attributeName), comparator, value);
         }
@@ -1028,15 +1068,18 @@ public class NQL {
                     otherFunctions += " " + solrFunction;
                 }
             }
+            if (this.value == null) {
+                return " (" + this.attr + ":[\"\" TO *]"+ boostQuery +")" + otherFunctions;
+            }
             if(this.comparator == Comp.EQUAL_OR_LESS){
                 return " (" + solrAttributeName + ":[* TO " + value + "]"+ boostQuery +")" + otherFunctions;
             } else if(this.comparator == Comp.EQUAL_OR_GREATER){
                 return " (" + solrAttributeName + ":[" + value + " TO *]"+ boostQuery +")" + otherFunctions;
             } else if(this.comparator == Comp.NOT_EQUAL){
                 return " (" + solrAttributeName + ":-(" + value + ")"+ boostQuery +")" + otherFunctions;
-            } else {
-                return " (" + solrAttributeName + ":(" + removeFunnyChars(value) + ")"+ boostQuery +")" + otherFunctions;
             }
+
+            return " (" + solrAttributeName + ":(" + removeFunnyChars(value) + ")"+ boostQuery +")" + otherFunctions;
 
         }
         //_Post_shareCounter__ID_Counter_count__TXT
