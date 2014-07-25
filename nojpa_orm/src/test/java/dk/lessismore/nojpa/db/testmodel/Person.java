@@ -3,6 +3,7 @@ package dk.lessismore.nojpa.db.testmodel;
 import dk.lessismore.nojpa.properties.Default;
 import dk.lessismore.nojpa.reflection.db.annotations.DbStrip;
 import dk.lessismore.nojpa.reflection.db.annotations.IndexField;
+import dk.lessismore.nojpa.reflection.db.annotations.SearchField;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.maputil.ReusableMap;
 
@@ -15,6 +16,7 @@ public interface Person extends ModelObjectInterface {
     @ReusableMap(mapNames = {"map1", "map2"})
     @Default (value = "MyName")
     @IndexField
+    @SearchField
     String getName();
     void setName(String name);
 
@@ -39,7 +41,9 @@ public interface Person extends ModelObjectInterface {
     @DbStrip (stripItSoft = true)
     void setDescription(String description);
 
+    @SearchField
     Car getCar();
+    @SearchField
     void setCar(Car car);
 
     @ReusableMap(mapNames = {"map3"})
