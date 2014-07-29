@@ -9,6 +9,7 @@ import dk.lessismore.nojpa.reflection.db.DatabaseCreator;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectSearchService;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
 import dk.lessismore.nojpa.reflection.db.model.SolrServiceImpl;
+import junit.framework.Assert;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.junit.Test;
@@ -40,25 +41,20 @@ public class NQLTest {
         solrService.commit();
 
         NList<Person> personsWithoutCar = NQL.search(mPerson).search(NQL.all(NQL.has(mPerson.getName(), NQL.Comp.EQUAL, "Person"), NQL.hasNull(mPerson.getCar()))).getList();
-        System.out.println("personsWithoutCar.getNumberFound() = " + personsWithoutCar.getNumberFound());
-        for (Person person : personsWithoutCar) {
-            System.out.println("WITHOUT person = " + person.getName());
-        }
+        Assert.assertEquals(personsWithoutCar.getNumberFound(), 3);
+
+        NList<Person> personsWithoutCar2 = NQL.search(mPerson).searchIsNull(mPerson.getCar()).getList();
+        Assert.assertEquals(personsWithoutCar2.getNumberFound(), 3);
 
         NList<Person> personsWithCar = NQL.search(mPerson).search(NQL.hasNotNull(mPerson.getCar())).getList();
-        System.out.println("personsWithCar.getNumberFound() = " + personsWithCar.getNumberFound());
-        for (Person person : personsWithCar) {
-            System.out.println("WITH person = " + person.getName());
-        }
+        Assert.assertEquals(personsWithCar.getNumberFound(), 7);
 
         NList<Person> persons = NQL.search(mPerson).getList();
-        System.out.println("persons.getNumberFound() = " + persons.getNumberFound());
-        for (Person person : persons) {
-            System.out.println("ALL person = " + person.getName());
-        }
+        Assert.assertEquals(persons.getNumberFound(), 10);
 
         QueryResponse response = solrService.query(new SolrQuery("( (_Person_name__TXT:( Person )) AND -(_Person_car__ID:[\"\" TO *]) )"));
-        System.out.println("response = " + response);
+        Assert.assertEquals(response.getResults().getNumFound(), 3);
+
 
 
     }
