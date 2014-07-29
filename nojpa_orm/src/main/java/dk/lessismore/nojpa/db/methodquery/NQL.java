@@ -1022,7 +1022,7 @@ public class NQL {
 
         public SolrExpression isNull(String attributeName) {
             log.debug("isNull("+ attributeName +")");
-            this.statement = "(-"+ attributeName +":[\"\" TO *])";
+            this.statement = "-("+ attributeName +":[\"\" TO *])";
             this.attr = "-" + attributeName;
             return this;
         }

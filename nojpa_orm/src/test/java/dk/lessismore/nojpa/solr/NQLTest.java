@@ -9,6 +9,8 @@ import dk.lessismore.nojpa.reflection.db.DatabaseCreator;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectSearchService;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
 import dk.lessismore.nojpa.reflection.db.model.SolrServiceImpl;
+import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.response.QueryResponse;
 import org.junit.Test;
 
 /**
@@ -27,7 +29,7 @@ public class NQLTest {
 
         for (int i = 0; i < 10; i++) {
             Person person = ModelObjectService.create(Person.class);
-            person.setName("person: " + i);
+            person.setName("person " + i);
             if (i < 7) {
                 Car car = ModelObjectService.create(Car.class);
                 person.setCar(car);
@@ -37,13 +39,13 @@ public class NQLTest {
         }
         solrService.commit();
 
-        NList<Person> personsWithoutCar = NQL.search(mPerson).searchIsNull(mPerson.getCar()).getList();
+        NList<Person> personsWithoutCar = NQL.search(mPerson).search(NQL.all(NQL.hasNull(mPerson.getCar()))).getList();
         System.out.println("personsWithoutCar.getNumberFound() = " + personsWithoutCar.getNumberFound());
         for (Person person : personsWithoutCar) {
             System.out.println("WITHOUT person = " + person.getName());
         }
 
-        NList<Person> personsWithCar = NQL.search(mPerson).searchNotNull(mPerson.getCar()).getList();
+        NList<Person> personsWithCar = NQL.search(mPerson).search(NQL.hasNotNull(mPerson.getCar())).getList();
         System.out.println("personsWithCar.getNumberFound() = " + personsWithCar.getNumberFound());
         for (Person person : personsWithCar) {
             System.out.println("WITH person = " + person.getName());
@@ -54,6 +56,9 @@ public class NQLTest {
         for (Person person : persons) {
             System.out.println("ALL person = " + person.getName());
         }
+
+        QueryResponse response = solrService.query(new SolrQuery("( (_Person_name__TXT:( Person )) AND -(_Person_car__ID:[\"\" TO *]) )"));
+        System.out.println("response = " + response);
 
 
     }
