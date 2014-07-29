@@ -39,7 +39,7 @@ public class NQLTest {
         }
         solrService.commit();
 
-        NList<Person> personsWithoutCar = NQL.search(mPerson).search(NQL.all(NQL.hasNull(mPerson.getCar()))).getList();
+        NList<Person> personsWithoutCar = NQL.search(mPerson).search(NQL.all(NQL.has(mPerson.getName(), NQL.Comp.EQUAL, "Person"), NQL.hasNull(mPerson.getCar()))).getList();
         System.out.println("personsWithoutCar.getNumberFound() = " + personsWithoutCar.getNumberFound());
         for (Person person : personsWithoutCar) {
             System.out.println("WITHOUT person = " + person.getName());

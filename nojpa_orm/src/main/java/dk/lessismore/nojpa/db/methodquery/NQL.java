@@ -1069,7 +1069,7 @@ public class NQL {
                 }
             }
             if (this.value == null) {
-                return " (" + this.attr + ":[\"\" TO *]"+ boostQuery +")" + otherFunctions;
+                return this.statement;
             }
             if(this.comparator == Comp.EQUAL_OR_LESS){
                 return " (" + solrAttributeName + ":[* TO " + value + "]"+ boostQuery +")" + otherFunctions;
