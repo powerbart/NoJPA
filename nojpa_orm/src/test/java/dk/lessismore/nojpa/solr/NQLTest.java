@@ -12,6 +12,7 @@ import dk.lessismore.nojpa.reflection.db.model.SolrServiceImpl;
 import junit.framework.Assert;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.params.FacetParams;
 import org.junit.Test;
 
 /**
@@ -30,7 +31,8 @@ public class NQLTest {
 
         for (int i = 0; i < 10; i++) {
             Person person = ModelObjectService.create(Person.class);
-            person.setName("person " + i);
+            person.setName("person " + (i % 4));
+            person.setSomeFloat((float) (20f * Math.random()));
             if (i < 7) {
                 Car car = ModelObjectService.create(Car.class);
                 person.setCar(car);
@@ -52,10 +54,25 @@ public class NQLTest {
         NList<Person> persons = NQL.search(mPerson).getList();
         Assert.assertEquals(persons.getNumberFound(), 10);
 
-        QueryResponse response = solrService.query(new SolrQuery("( (_Person_name__TXT:( Person )) AND -(_Person_car__ID:[\"\" TO *]) )"));
-        Assert.assertEquals(response.getResults().getNumFound(), 3);
+        {
+            QueryResponse response = solrService.query(new SolrQuery("( (_Person_name__TXT:( Person )) AND -(_Person_car__ID:[\"\" TO *]) )"));
+            Assert.assertEquals(response.getResults().getNumFound(), 3);
+        }
+
+        {
+            SolrQuery query = new SolrQuery();
+            query.setQuery("person");
+            query.setFacet(true);
+            query.addFacetField("_Person_name__TXT");
+            query.setFilterQueries("person");
+            query.setFacetLimit(12);
+            query.set(FacetParams.FACET_QUERY, "_Person_name__TXT:person");
+//            BoboRequestBuilder.applyFacetExpand(query, "color", true);
 
 
+            QueryResponse response = solrService.query(query);
+            System.out.println("response = " + response);
+        }
 
     }
 }

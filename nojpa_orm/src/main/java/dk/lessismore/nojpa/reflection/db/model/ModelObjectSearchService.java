@@ -136,7 +136,7 @@ public class ModelObjectSearchService {
                         String name = nameIterator.next();
                         ArrayList<Object> objects = values.get(name);
                         String solrArrayName = name + "_ARRAY";
-//                        log.debug("Adding " + solrArrayName + "("+ (objects != null ? objects.size() : -1) +")");
+                        log.debug("Adding " + solrArrayName + "("+ (objects != null ? objects.size() : -1) +")");
                         solrObj.addField(solrArrayName, objects);
                     }
 
