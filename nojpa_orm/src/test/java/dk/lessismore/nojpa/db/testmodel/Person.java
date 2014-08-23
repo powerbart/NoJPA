@@ -51,6 +51,10 @@ public interface Person extends ModelObjectInterface {
     Cpr getCpr();
     void setCpr(Cpr cpr);
 
+    @SearchField
+    PersonStatus getPersonStatus();
+    void setPersonStatus(PersonStatus personStatus);
+
     Address[] getAddresses();
     void setAddresses(Address[] addresses);
 

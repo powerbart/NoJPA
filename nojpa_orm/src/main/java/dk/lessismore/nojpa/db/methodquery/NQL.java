@@ -423,7 +423,7 @@ public class NQL {
 //                timer.markLap("1");
                 SolrServer solrServer = ModelObjectSearchService.solrServer(selectClass);
 //                timer.markLap("2");
-                solrQuery.setFields("*, score, _explain_, _Post_pageViewCounter__ID_Counter_count__LONG,_Post_rewardLevelBoost__INT, _Post_creationDate__DATE");
+//                solrQuery.setFields("*, score, _explain_, _Post_pageViewCounter__ID_Counter_count__LONG,_Post_rewardLevelBoost__INT, _Post_creationDate__DATE");
 //                solrQuery.setParam("bf", "sum(_Post_pageViewCounter__ID_Counter_count__LONG,8)");
                 QueryResponse queryResponse = solrServer.query(solrQuery);
 //                timer.markLap("3");
@@ -665,6 +665,7 @@ public class NQL {
     }
 
     public static Constraint has(String mockValue, Comp comp, String value) {
+        value = createSearchString(value);
         List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
         Pair<Class, String> pair = getSourceAttributePair();
         clearMockCallSequence();
@@ -679,7 +680,7 @@ public class NQL {
         List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
         Pair<Class, String> pair = getSourceAttributePair();
         clearMockCallSequence();
-        SolrExpression expression = newLeafExpression().addConstrain(makeAttributeIdentifier(pair), comp, "" + value);
+        SolrExpression expression = newLeafExpression().addConstrain(makeAttributeIdentifier(pair), comp, value);
         return new SolrConstraint(expression, joints);
     }
 
@@ -965,9 +966,17 @@ public class NQL {
         }
 
         public SolrExpression addConstrain(String attributeName, Comp comparator, String value) {
-            this.statement = "("+ attributeName +":("+ createSearchString(value) +"))";
+            this.statement = "("+ attributeName +":("+ value +"))";
             this.attr = attributeName;
             this.value = value;
+            this.comparator = comparator;
+            return this;
+        }
+
+        public SolrExpression addConstrain(String attributeName, Comp comparator, Enum value) {
+            this.statement = "("+ attributeName +":("+ value +"))";
+            this.attr = attributeName;
+            this.value = ""+ value;
             this.comparator = comparator;
             return this;
         }
@@ -1079,7 +1088,8 @@ public class NQL {
                 return " (" + solrAttributeName + ":-(" + value + ")"+ boostQuery +")" + otherFunctions;
             }
 
-            return " (" + solrAttributeName + ":(" + removeFunnyChars(value) + ")"+ boostQuery +")" + otherFunctions;
+//            return " (" + solrAttributeName + ":(" + removeFunnyChars(value) + ")"+ boostQuery +")" + otherFunctions;
+            return " (" + solrAttributeName + ":(" + (value) + ")"+ boostQuery +")" + otherFunctions;
 
         }
         //_Post_shareCounter__ID_Counter_count__TXT

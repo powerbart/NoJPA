@@ -307,6 +307,7 @@ public class ModelObjectSearchService {
                         }
                     }
                     solrObj.addField(solrAttributeName, valueStr);
+                    log.debug("solrObj.addField(" + solrAttributeName +", "+ valueStr +");");
                     break;
                 case DbDataType.DB_INT:
                     solrObj.addField(solrAttributeName, ((Integer) value).intValue());
