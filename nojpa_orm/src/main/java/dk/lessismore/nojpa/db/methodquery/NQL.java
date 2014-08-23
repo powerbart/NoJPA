@@ -901,7 +901,7 @@ public class NQL {
     private static String createSearchString(String textQuery) {
         String cleanText = removeFunnyChars(textQuery);
 //        if(!cleanText.equals("")){
-//            StringTokenizer toks = new StringTokenizer(cleanText, " ");
+//            StringTokenizer toks = n//ew StringTokenizer(cleanText, " ");
 //            String nString = "";
 //            ArrayList<String> nt = new ArrayList<String>();
 //            while (toks.hasMoreTokens()){
