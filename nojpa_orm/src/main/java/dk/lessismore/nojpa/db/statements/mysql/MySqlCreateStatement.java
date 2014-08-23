@@ -17,13 +17,13 @@ public class MySqlCreateStatement extends MySqlStatement implements CreateSQLSta
 
     private final static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(MySqlCreateStatement.class);
 
-    private List attributes = null;
-    private List primaryKeys = null;
+    private List<String> attributes = null;
+    private List<String> primaryKeys = null;
     private String[] namesToIndex = null;
 
-    public List getAttributes() {
+    public List<String> getAttributes() {
         if (attributes == null) {
-            attributes = new LinkedList();
+            attributes = new LinkedList<String>();
         }
         return attributes;
     }
@@ -32,9 +32,9 @@ public class MySqlCreateStatement extends MySqlStatement implements CreateSQLSta
         this.namesToIndex = namesToIndex;
     }
 
-    public List getPrimaryKeys() {
+    public List<String> getPrimaryKeys() {
         if (primaryKeys == null) {
-            primaryKeys = new LinkedList();
+            primaryKeys = new LinkedList<String>();
         }
         return primaryKeys;
     }
