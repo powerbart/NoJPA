@@ -31,6 +31,7 @@ public interface Person extends ModelObjectInterface {
     int getCountOfCars();
     void setCountOfCars(int countOfCars);
 
+    @SearchField
     float getSomeFloat();
     void setSomeFloat(float countOfCars);
 

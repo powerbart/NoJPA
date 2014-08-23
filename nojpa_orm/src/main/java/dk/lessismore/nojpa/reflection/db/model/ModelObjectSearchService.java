@@ -277,7 +277,7 @@ public class ModelObjectSearchService {
     private static void addAttributeValueToStatement(DbAttribute dbAttribute, SolrInputDocument solrObj, Object value, String prefix) {
         String attributeName = dbAttribute.getAttributeName();
         String solrAttributeName = dbAttribute.getSolrAttributeName(prefix);
-//        log.debug("Will add solrAttributeName("+ solrAttributeName +") with value("+ value +")");
+        log.debug("Will add solrAttributeName("+ solrAttributeName +") with value("+ value +")");
         if (value != null) {
             //Convert the value to the equivalent data type.
 

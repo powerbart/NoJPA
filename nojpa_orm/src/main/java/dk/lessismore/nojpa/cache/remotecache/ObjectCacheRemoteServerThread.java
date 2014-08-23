@@ -1,5 +1,6 @@
 package dk.lessismore.nojpa.cache.remotecache;
 
+import dk.lessismore.nojpa.cache.GlobalLockService;
 import dk.lessismore.nojpa.cache.ObjectCache;
 import dk.lessismore.nojpa.cache.ObjectCacheFactory;
 import dk.lessismore.nojpa.cache.ObjectCacheRemote;
@@ -73,7 +74,6 @@ public class ObjectCacheRemoteServerThread  extends Thread {
             byte[] dataBytes = new byte[256];
             int byteLength = 0;
             StringTokenizer tok = null;
-            String curCommand;
             input = client.getInputStream();
             String preline = null;
             while (run) {
@@ -95,8 +95,8 @@ public class ObjectCacheRemoteServerThread  extends Thread {
                     curLine = ((preline != null ? preline : "") + readLine.substring(0, indexOfN)).trim();
                     preline = readLine.substring(indexOfN);
                     tok = new StringTokenizer(curLine, " \n\r\t:");
-                    curCommand = tok.nextToken();
                     if (curLine.startsWith("r:")) { //remove
+                        String command = tok.nextToken();
                         String clazzName = tok.nextToken();
                         String objectID = tok.nextToken();
                         log.debug("Parameters: clazz("+ clazzName +") objectID("+ objectID +")");
@@ -106,6 +106,16 @@ public class ObjectCacheRemoteServerThread  extends Thread {
                             log.debug("Removing from cache: clazz("+ clazzName +") objectID("+ objectID +")");
                             objectCache.removeFromCache(objectID);
                         }
+                    } else if(curLine.startsWith("ll:")){
+                        String command = tok.nextToken();
+                        String clazz = tok.nextToken();
+                        String lockID = tok.nextToken();
+                        GlobalLockService.getInstance().lockFromRemote(lockID);
+                    } else if(curLine.startsWith("ul:")){
+                        String command = tok.nextToken();
+                        String clazz = tok.nextToken();
+                        String lockID = tok.nextToken();
+                        GlobalLockService.getInstance().unlockFromRemote(lockID);
                     } else {
                         log.error("Dont understand line: " + curLine);
     //                    write("-ERR Not implementet", output);

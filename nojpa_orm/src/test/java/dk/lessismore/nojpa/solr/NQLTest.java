@@ -11,9 +11,16 @@ import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
 import dk.lessismore.nojpa.reflection.db.model.SolrServiceImpl;
 import junit.framework.Assert;
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.response.FacetField;
+import org.apache.solr.client.solrj.response.PivotField;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.params.FacetParams;
+import org.apache.solr.common.util.NamedList;
 import org.junit.Test;
+
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by niakoi on 7/23/14.
@@ -60,18 +67,103 @@ public class NQLTest {
         }
 
         {
-            SolrQuery query = new SolrQuery();
-            query.setQuery("person");
-            query.setFacet(true);
-            query.addFacetField("_Person_name__TXT");
-            query.setFilterQueries("person");
-            query.setFacetLimit(12);
-            query.set(FacetParams.FACET_QUERY, "_Person_name__TXT:person");
+
+            String[] ss = new String[]{"Brian", "Das", "Mas", "Agne", "Carl", "Stefan", "Atanas", "Michael", "Camilla", "Sebastian"};
+            for (int i = 0; i < 100; i++) {
+                Person person = ModelObjectService.create(Person.class);
+                person.setName(ss[(int) (10f * Math.random())]);
+                person.setSomeFloat((float) (20f * Math.random()));
+                if (i < 7) {
+                    Car car = ModelObjectService.create(Car.class);
+                    person.setCar(car);
+                }
+                ModelObjectService.save(person);
+                ModelObjectSearchService.put(person);
+            }
+            solrService.commit();
+
+            {
+                SolrQuery query = new SolrQuery();
+                query.setQuery("*:*");
+                query.setFacet(true);
+                query.addFacetQuery("_Person_someFloat__DOUBLE:[* TO 5]");
+                query.addFacetQuery("_Person_someFloat__DOUBLE:[5 TO 15]");
+                query.addFacetQuery("_Person_someFloat__DOUBLE:[15 TO *]");
+                //query.addFacetField("_Person_name__TXT");
+//                query.addFacetField("_Person_someFloat__DOUBLE");
+                query.setFacetLimit(12);
+//            query.set(FacetParams.FACET_QUERY, "_Person_name__TXT:person");
 //            BoboRequestBuilder.applyFacetExpand(query, "color", true);
 
+                QueryResponse response = solrService.query(query);
 
-            QueryResponse response = solrService.query(query);
-            System.out.println("response = " + response);
+                System.out.println("response.getStatus() = " + response.getStatus());
+                System.out.println("response.getResults().getNumFound() = " + response.getResults().getNumFound());
+                System.out.println("response.getFacetQuery().size() = " + response.getFacetQuery().size());
+                System.out.println("response.getFacetQuery().size() = " + response.getFacetFields().size());
+
+
+
+                for(Iterator<String> iterator = response.getFacetQuery().keySet().iterator(); iterator.hasNext();  ){
+                    String next = iterator.next();
+                    System.out.println(next + " -> " + response.getFacetQuery().get(next));
+                }
+
+
+                for (int k = 0; k < response.getFacetFields().size(); k++) {
+                    FacetField facetField = response.getFacetFields().get(k);
+                    System.out.println("--------------------------- START");
+                    System.out.println("facetField.getGap = " + facetField.getGap());
+                    System.out.println("facetField.getName() = " + facetField.getName());
+                    System.out.println("facetField.getValueCount() = " + facetField.getValueCount());
+                    List<FacetField.Count> facetFieldValues = facetField.getValues();
+                    for (int h = 0; h < facetFieldValues.size(); h++) {
+                        FacetField.Count c = facetFieldValues.get(h);
+                        System.out.println("c.getName() = " + c.getName());
+                        System.out.println("c.getAsFilterQuery() = " + c.getAsFilterQuery());
+                        System.out.println("c.getCount() = " + c.getCount());
+                        System.out.println("c.getFacetField() = " + c.getFacetField());
+                    }
+                    System.out.println("facetField.getEnd() = " + facetField.getEnd());
+                    System.out.println("--------------------------- END");
+                }
+            }
+
+            {
+                SolrQuery query = new SolrQuery();
+                query.setQuery("*:*");
+                query.setFacet(true);
+                query.addFacetField("_Person_name__TXT");
+                query.setFacetLimit(12);
+//            query.set(FacetParams.FACET_QUERY, "_Person_name__TXT:person");
+//            BoboRequestBuilder.applyFacetExpand(query, "color", true);
+
+                QueryResponse response = solrService.query(query);
+
+                System.out.println("response.getStatus() = " + response.getStatus());
+                System.out.println("response.getResults().getNumFound() = " + response.getResults().getNumFound());
+                System.out.println("response.getFacetQuery().size() = " + response.getFacetQuery().size());
+                System.out.println("response.getFacetQuery().size() = " + response.getFacetFields().size());
+                for (int k = 0; k < response.getFacetFields().size(); k++) {
+                    FacetField facetField = response.getFacetFields().get(k);
+                    System.out.println("--------------------------- START");
+                    System.out.println("facetField.getGap = " + facetField.getGap());
+                    System.out.println("facetField.getName() = " + facetField.getName());
+                    System.out.println("facetField.getValueCount() = " + facetField.getValueCount());
+                    List<FacetField.Count> facetFieldValues = facetField.getValues();
+                    for (int h = 0; h < facetFieldValues.size(); h++) {
+                        FacetField.Count c = facetFieldValues.get(h);
+                        System.out.println("c.getName() = " + c.getName());
+                        System.out.println("c.getAsFilterQuery() = " + c.getAsFilterQuery());
+                        System.out.println("c.getCount() = " + c.getCount());
+                        System.out.println("c.getFacetField() = " + c.getFacetField());
+                    }
+                    System.out.println("facetField.getEnd() = " + facetField.getEnd());
+                    System.out.println("--------------------------- END");
+                }
+            }
+
+
         }
 
     }

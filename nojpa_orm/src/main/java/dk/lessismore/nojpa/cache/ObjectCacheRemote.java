@@ -54,6 +54,21 @@ public class ObjectCacheRemote implements ServletContextListener {
         }
     }
 
+    public static void takeLock(String lockID) {
+        for(int i = 0; postThreads != null && i < postThreads.length; i++){
+            log.debug("removeFromRemoteCache("+ i +"/"+ postThreads.length +")->" + postThreads[i]);
+            postThreads[i].takeLock(lockID);
+        }
+
+    }
+
+    public static void releaseLock(String lockID) {
+        for(int i = 0; postThreads != null && i < postThreads.length; i++){
+            log.debug("removeFromRemoteCache("+ i +"/"+ postThreads.length +")->" + postThreads[i]);
+            postThreads[i].releaseLock(lockID);
+        }
+
+    }
 
 
     static public class RemoteHost {
@@ -94,8 +109,8 @@ public class ObjectCacheRemote implements ServletContextListener {
                     } else {
                         hosts[i] = new RemoteHost(host, 6666);
                     }
-                    //postThreads[i] = new ObjectCacheRemotePostThread(hosts[i]);
-                    //postThreads[i].start();
+                    postThreads[i] = new ObjectCacheRemotePostThread(hosts[i]);
+                    postThreads[i].start();
                 }
                 log.debug("Will now start server listener ... ");
                 if(bindAddressStr != null && bindAddressStr.length() > 2){
@@ -123,6 +138,7 @@ public class ObjectCacheRemote implements ServletContextListener {
 
     public static void removeFromRemoteCache(ModelObjectInterface modelObject){
         for(int i = 0; postThreads != null && i < postThreads.length; i++){
+            log.debug("removeFromRemoteCache("+ i +"/"+ postThreads.length +")->" + postThreads[i]);
             postThreads[i].add(modelObject);
         }
     }
