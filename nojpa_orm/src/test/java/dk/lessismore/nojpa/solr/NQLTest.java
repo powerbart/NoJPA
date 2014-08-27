@@ -201,6 +201,11 @@ public class NQLTest {
         solrService.commit();
 
         NList<Person> personsWithoutCar = NQL.search(mPerson).search(NQL.all(NQL.has(mPerson.getPersonStatus(), NQL.Comp.EQUAL, PersonStatus.BETWEEN_RELATIONS), NQL.has(mPerson.getName(), NQL.Comp.EQUAL, "oasd_*+__asdads3cd& %%"), NQL.hasNull(mPerson.getCar()))).getList();
+
+        Person m2Person = NQL.mock(Person.class);
+        PersonStatus[] historyStatus = m2Person.getHistoryStatus();
+        System.out.println("historyStatus = " + historyStatus);
+        NList<Person> personsWithoutCar2 = NQL.search(m2Person).search(NQL.all(NQL.has(historyStatus[NQL.ANY], NQL.Comp.EQUAL, PersonStatus.BETWEEN_RELATIONS), NQL.has(m2Person.getName(), NQL.Comp.EQUAL, "oasd_*+__asdads3cd& %%"), NQL.hasNull(m2Person.getCar()))).getList();
         //Assert.assertEquals(personsWithoutCar.getNumberFound(), 3);
 
 
