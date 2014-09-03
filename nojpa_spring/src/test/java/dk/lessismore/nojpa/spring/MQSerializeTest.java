@@ -1,15 +1,9 @@
 package dk.lessismore.nojpa.spring;
 
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import dk.lessismore.nojpa.reflection.db.DatabaseCreator;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
 import dk.lessismore.nojpa.rest.NoJpaMapper;
-import dk.lessismore.nojpa.spring.model.Car;
-import dk.lessismore.nojpa.spring.model.Company;
-import dk.lessismore.nojpa.spring.model.Person;
-import org.junit.Test;
+import dk.lessismore.nojpa.spring.model.*;
 
 /**
  * Created by niakoi on 22/5/14.
@@ -18,8 +12,23 @@ public class MQSerializeTest {
 
     public static void main(String[] args) throws Exception {
         DatabaseCreator.createDatabase("dk.lessismore.nojpa.spring");
+
+        DisplayName displayName = ModelObjectService.create(DisplayName.class);
+        displayName.setName("gallery");
+        displayName.setDisplayType(DisplayType.GALLERY);
+
+        DisplayName displayName2 = ModelObjectService.create(DisplayName.class);
+        displayName2.setName("gallery");
+        displayName2.setDisplayType(DisplayType.GALLERY);
+
+        DisplayName displayName3 = ModelObjectService.create(DisplayName.class);
+        displayName3.setName("list");
+        displayName3.setDisplayType(DisplayType.LIST);
+
         Company company = ModelObjectService.create(Company.class);
         company.setName("lessismore");
+        company.setDisplayName(displayName);
+        company.setDisplays(new DisplayName[] {displayName2, displayName3});
 
         Person ceo = ModelObjectService.create(Person.class);
         ceo.setName("ceo");
