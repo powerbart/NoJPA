@@ -31,6 +31,7 @@ public interface Person extends ModelObjectInterface {
     int getCountOfCars();
     void setCountOfCars(int countOfCars);
 
+    @SearchField
     float getSomeFloat();
     void setSomeFloat(float countOfCars);
 
@@ -49,6 +50,10 @@ public interface Person extends ModelObjectInterface {
     @ReusableMap(mapNames = {"map3"})
     Cpr getCpr();
     void setCpr(Cpr cpr);
+
+    @SearchField
+    PersonStatus getPersonStatus();
+    void setPersonStatus(PersonStatus personStatus);
 
     Address[] getAddresses();
     void setAddresses(Address[] addresses);

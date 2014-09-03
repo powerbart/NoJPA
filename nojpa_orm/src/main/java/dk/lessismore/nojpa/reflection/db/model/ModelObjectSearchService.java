@@ -136,7 +136,7 @@ public class ModelObjectSearchService {
                         String name = nameIterator.next();
                         ArrayList<Object> objects = values.get(name);
                         String solrArrayName = name + "_ARRAY";
-//                        log.debug("Adding " + solrArrayName + "("+ (objects != null ? objects.size() : -1) +")");
+                        log.debug("Adding " + solrArrayName + "("+ (objects != null ? objects.size() : -1) +")");
                         solrObj.addField(solrArrayName, objects);
                     }
 
@@ -277,7 +277,7 @@ public class ModelObjectSearchService {
     private static void addAttributeValueToStatement(DbAttribute dbAttribute, SolrInputDocument solrObj, Object value, String prefix) {
         String attributeName = dbAttribute.getAttributeName();
         String solrAttributeName = dbAttribute.getSolrAttributeName(prefix);
-//        log.debug("Will add solrAttributeName("+ solrAttributeName +") with value("+ value +")");
+        log.debug("Will add solrAttributeName("+ solrAttributeName +") with value("+ value +")");
         if (value != null) {
             //Convert the value to the equivalent data type.
 
@@ -307,6 +307,7 @@ public class ModelObjectSearchService {
                         }
                     }
                     solrObj.addField(solrAttributeName, valueStr);
+                    log.debug("solrObj.addField(" + solrAttributeName +", "+ valueStr +");");
                     break;
                 case DbDataType.DB_INT:
                     solrObj.addField(solrAttributeName, ((Integer) value).intValue());

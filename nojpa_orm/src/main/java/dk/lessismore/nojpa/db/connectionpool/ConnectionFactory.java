@@ -127,10 +127,11 @@ public class ConnectionFactory implements ResourceFactory {
             conStr = "jdbc:"+getDb()+"://"+getIp()+"/"+getDbName();
             log.debug("Creating new DB-Connection " + conStr);
             return DriverManager.getConnection(conStr, getUser(), getPassword());
-        }catch(Exception e) {
-            log.error("Could not make db connection: "+conStr+" user="+getUser()+" pass="+getPassword(), e);
+        } catch(Exception ex) {
+            String msg = "Could not make db connection: "+conStr+" user="+getUser();
+            log.error(msg+" pass="+getPassword(), ex);
+            throw new RuntimeException(msg, ex);
         }
-        return null;
     }
 
     public void closeResource(Object resource) {

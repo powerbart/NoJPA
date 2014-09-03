@@ -13,7 +13,8 @@ public class MaxSizeArray<E> {
 
 
     private Object[] array;
-    private int current = 0;
+    private int popCounter = 0;
+    private int pullCounter = 0;
     private int maxSize = 0;
 
     public MaxSizeArray(int maxSize){
@@ -23,18 +24,29 @@ public class MaxSizeArray<E> {
 
 
     public void add(E e){
-        current = current % maxSize;
-        array[current++] = e;
+        popCounter = popCounter % maxSize;
+        array[popCounter++] = e;
     }
 
     public E pop(){
-        if(current == 0){
-            current = maxSize;
+        if(popCounter == 0){
+            popCounter = maxSize;
         }
 
-        if(array[current-1] != null){
-            E toReturn = (E) array[--current];
-            array[current] = null;
+        if(array[popCounter -1] != null){
+            E toReturn = (E) array[--popCounter];
+            array[popCounter] = null;
+            return toReturn;
+        } else {
+            return null;
+        }
+    }
+
+    public E pull(){
+        if(array[pullCounter] != null){
+            E toReturn = (E) array[pullCounter];
+            array[pullCounter] = null;
+            pullCounter = ++pullCounter % maxSize;
             return toReturn;
         } else {
             return null;
@@ -45,7 +57,7 @@ public class MaxSizeArray<E> {
     public Iterator<E> iterator(){
 
         Iterator<E> ite = new Iterator<E>() {
-            int now = maxSize + current -1;
+            int now = maxSize + popCounter -1;
             int counter = 0;
 
             public boolean hasNext() {
@@ -154,6 +166,42 @@ public class MaxSizeArray<E> {
             System.out.println("14="+ mx.pop());
             for(int i = 0; i < 10; i++){
                 System.out.println("x*null="+ mx.pop());
+            }
+        }
+
+        System.out.println("---------------KKKKKKKKKKKKKKKK------------------------------------");
+        {
+            MaxSizeArray<String> mx = new MaxSizeArray<String>(5);
+            mx.add("1");
+            System.out.println("1="+ mx.pull());
+            System.out.println("null="+ mx.pull());
+            System.out.println("null="+ mx.pull());
+            mx.add("2");
+            mx.add("3");
+            mx.add("4");
+            mx.add("5");
+            mx.add("6");
+            System.out.println("2="+ mx.pull());
+            mx.add("7");
+            System.out.println("3="+ mx.pull());
+            System.out.println("4="+ mx.pull());
+            System.out.println("5="+ mx.pull());
+            System.out.println("6="+ mx.pull());
+            System.out.println("7="+ mx.pull());
+            System.out.println("null="+ mx.pull());
+            System.out.println("null="+ mx.pull());
+            mx.add("8");
+            mx.add("9");
+            mx.add("10");
+            mx.add("11");
+            mx.add("12");
+            mx.add("13");
+            mx.add("14");
+            mx.add("15");
+            System.out.println("13="+ mx.pull());
+            System.out.println("14="+ mx.pull());
+            for(int i = 0; i < 10; i++){
+                System.out.println("x*null="+ mx.pull());
             }
         }
 

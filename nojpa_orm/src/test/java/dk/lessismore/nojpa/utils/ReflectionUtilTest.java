@@ -97,7 +97,7 @@ public class ReflectionUtilTest {
 
     @Test
      public void testList() throws Exception {
-        LinkedList list = new LinkedList();
+        LinkedList<String> list = new LinkedList<String>();
         for(int i = 0; i < 5; i++){
             list.add("" + i);
         }
