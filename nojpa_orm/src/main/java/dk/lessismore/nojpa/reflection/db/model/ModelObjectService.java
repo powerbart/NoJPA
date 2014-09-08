@@ -150,6 +150,19 @@ public class ModelObjectService {
     }
 
 
+    public static <T extends ModelObjectInterface> int indexOf(
+            T[] modelObjects,
+            T modelObject) {
+        for (int i = 0; modelObjects != null && i < modelObjects.length; i++) {
+            if (modelObjects[i] != null
+                    && modelObjects[i].equals(modelObject)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+
     public static <T extends ModelObjectInterface> T[] addObjectToArray(T[] objectArray, T objToAdd) {
 
 //      System.out.println("addObjectToArray making: " + objToAdd.getClass());
