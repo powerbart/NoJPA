@@ -18,4 +18,9 @@ public interface Company extends ModelObjectInterface {
     String getName();
     void setName(String name);
 
+    DisplayName getDisplayName();
+    void setDisplayName(DisplayName displayName);
+
+    DisplayName[] getDisplays();
+    void setDisplays(DisplayName[] displays);
 }

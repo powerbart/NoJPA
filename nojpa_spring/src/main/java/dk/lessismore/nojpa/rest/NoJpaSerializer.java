@@ -1,5 +1,6 @@
 package dk.lessismore.nojpa.rest;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -62,6 +63,18 @@ public class NoJpaSerializer extends JsonSerializer<ModelObjectInterface> {
         if (ModelObjectInterface.class.isAssignableFrom(type)) {
             if (type.isAnnotationPresent(JsonInclude.class) || method.isAnnotationPresent(JsonInclude.class)) {
                 return moi;
+            } else if (type.isAnnotationPresent(JsonFilter.class) || method.isAnnotationPresent(JsonFilter.class)) {
+                JsonFilter annotation = method.getAnnotation(JsonFilter.class);
+                if (annotation == null) {
+                    annotation = (JsonFilter)type.getAnnotation(JsonFilter.class);
+                }
+                String methodReferenceName = annotation.value();
+                try {
+                    Method methodCall = ((ModelObject) moi).getInterface().getMethod(methodReferenceName);
+                    return methodCall.invoke(moi);
+                } catch (Exception e) {
+                    return moi.toString();
+                }
             } else {
                 return moi.toString();
             }
