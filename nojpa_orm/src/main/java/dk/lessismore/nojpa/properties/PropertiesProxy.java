@@ -291,9 +291,9 @@ public class PropertiesProxy implements InvocationHandler {
         java.util.Properties newProperties;
         try {
             newProperties = new java.util.Properties();
-//            System.out.println("Loading properties: fileName = " + fileName);
+            System.out.println("Loading properties: fileName = " + fileName);
             URL url = Resources.class.getResource(fileName);
-//            System.out.println("Loading properties: url = " + url);
+            System.out.println("Loading properties: url = " + url);
             InputStream stream = url.openStream();
             newProperties.load(stream);
             stream.close();
