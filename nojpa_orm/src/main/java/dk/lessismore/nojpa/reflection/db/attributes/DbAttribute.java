@@ -223,8 +223,8 @@ public class DbAttribute implements Serializable {
             return "TXT_ARRAY";
         } else {
             switch(dbDataType.getType()) {
-                case DbDataType.DB_VARCHAR: return getNrOfCharacters() == 32 ? "ID" : "TXT";
-                case DbDataType.DB_CHAR: return getNrOfCharacters() == 32 ? "ID" : "TXT";
+                case DbDataType.DB_VARCHAR: return getNrOfCharacters() == 32 || getAttributeClass().isEnum() ? "ID" : "TXT";
+                case DbDataType.DB_CHAR: return getNrOfCharacters() == 32 || getAttributeClass().isEnum()  ? "ID" : "TXT";
 //                case DbDataType.DB_VARCHAR: return "TXT";
 //                case DbDataType.DB_CHAR: return "TXT";
                 case DbDataType.DB_INT: return "INT";

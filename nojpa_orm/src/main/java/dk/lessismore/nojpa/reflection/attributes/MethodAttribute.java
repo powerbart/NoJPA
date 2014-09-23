@@ -125,6 +125,9 @@ public class MethodAttribute extends Attribute {
         } catch (Exception e){
             System.out.println("getAttributeValue:ERROR: _fieldName = " + _fieldName);
             System.out.println("getAttributeValue:ERROR: objectToGetFrom = " + objectToGetFrom);
+            try{
+                System.out.println("getAttributeValue:ERROR: objectToGetFrom.getClass() = " + ((ModelObject) objectToGetFrom).getInterface());
+            } catch (Exception ex1){}
             if(objectToGetFrom != null){
                 System.out.println("getAttributeValue:ERROR: ((ModelObject) objectToGetFrom).getProxyObject() = " + ((ModelObject) objectToGetFrom).getProxyObject());
             }

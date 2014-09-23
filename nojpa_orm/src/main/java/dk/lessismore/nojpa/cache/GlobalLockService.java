@@ -1,8 +1,10 @@
 package dk.lessismore.nojpa.cache;
 
 import dk.lessismore.nojpa.cache.remotecache.ObjectCacheRemotePostThread;
+import dk.lessismore.nojpa.db.methodquery.MQL;
 import dk.lessismore.nojpa.reflection.db.model.ModelObject;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
+import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -24,17 +26,17 @@ public class GlobalLockService {
     public static GlobalLockService getInstance(){ return me; }
 
 
-    public static interface LockedExecutor {
-        void execute() throws Exception;
+    public static interface LockedExecutor <T extends ModelObjectInterface>{
+        void execute(T moi) throws Exception;
     }
 
 
     public void lockAndRun(ModelObjectInterface moi, LockedExecutor executor) throws Exception {
-        lock("" + ((ModelObject) moi).getInterface().getName() + ":" + moi, executor);
+        lock("" + ((ModelObject) moi).getInterface().getName() + ":" + moi, moi, executor);
     }
 
     public void lockAndRun(String lockID, LockedExecutor executor) throws Exception  {
-        lock(lockID, executor);
+        lock(lockID, null, executor);
     }
 
 
@@ -50,7 +52,7 @@ public class GlobalLockService {
 
     }
 
-    private void lock(String lockID, LockedExecutor executor) throws Exception {
+    private void lock(String lockID, ModelObjectInterface moi, LockedExecutor executor) throws Exception {
         log.debug("lock("+ lockID +")");
 
         LockObject lockObject = null;
@@ -86,7 +88,13 @@ public class GlobalLockService {
         synchronized (lockObject.lockID){
             try {
                 ObjectCacheRemote.takeLock(lockObject.lockID);
-                executor.execute();
+                if(moi != null) {
+                    ModelObjectInterface modelObjectInterface = MQL.selectByID(((ModelObject) moi).getInterface(), moi.getObjectID());
+                    executor.execute(modelObjectInterface);
+                } else {
+                    executor.execute(null);
+                }
+
             } catch (Exception e){
                 toThrow = e;
             } finally {

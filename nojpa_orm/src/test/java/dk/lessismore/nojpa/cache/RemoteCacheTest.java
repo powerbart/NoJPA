@@ -3,6 +3,7 @@ package dk.lessismore.nojpa.cache;
 import dk.lessismore.nojpa.db.methodquery.MQL;
 import dk.lessismore.nojpa.db.testmodel.InitTestDatabase;
 import dk.lessismore.nojpa.db.testmodel.Person;
+import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
 import dk.lessismore.nojpa.utils.MaxSizeArray;
 import org.junit.Assert;
@@ -144,12 +145,13 @@ public class RemoteCacheTest {
     }
 
 
-    public void saveWithLock(final Person p) throws Exception {
-        GlobalLockService.getInstance().lockAndRun(p, new GlobalLockService.LockedExecutor() {
+    public void saveWithLock(Person p) throws Exception {
+        GlobalLockService.getInstance().lockAndRun(p, new GlobalLockService.LockedExecutor<Person>() {
+
             @Override
-            public void execute() {
+            public void execute(Person ms) throws Exception {
                 log.debug("::::::::::::: EXECUTE - START");
-                ModelObjectService.save(p);
+                ModelObjectService.save(ms);
                 log.debug("::::::::::::: EXECUTE - END");
             }
         });

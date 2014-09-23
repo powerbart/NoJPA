@@ -563,6 +563,10 @@ public class NQL {
                 ModelObjectInterface mock = mock(compumentType);
                 array[ANY] = mock;
                 return array;
+            } else if (returnType.isArray() && returnType.getComponentType().isEnum()) {
+                Class compumentType = returnType.getComponentType();
+                Enum[] array = (Enum[]) Array.newInstance(compumentType, 1);
+                return array;
             } else {
                 if (ModelObjectInterface.class.isAssignableFrom(returnType)) {
                     ModelObjectInterface mock = mock(returnType);
@@ -582,7 +586,7 @@ public class NQL {
      * @return model class and attribute name wrapped in a pair
      */
     private static Pair<Class, String> getSourceAttributePair() {
-        //log.debug("MQ.getSourceAttributePair:1");
+//        log.debug("NQL.getSourceAttributePair:1");
         LinkedList<Pair<Object, Method>> mockSequence = threadMockCallSequenceMap.get(Thread.currentThread());
         if (mockSequence == null) {
             throw new RuntimeException("Did you mix up MQL and NQL???? ... Or did you call 2 mock-methods in the same statement? .... Some mock calls are expected to have been made at this time Thread.currentThread().getId("+ Thread.currentThread().getId() +")");
@@ -596,6 +600,8 @@ public class NQL {
             Class componentType = method.getReturnType().getComponentType();
             if (ModelObjectInterface.class.isAssignableFrom(componentType)) {
                 sourceClass = (Class<ModelObjectInterface>) componentType;
+            } else if (componentType.isEnum()) {
+                sourceClass = componentType;
             } else {
                 throw new RuntimeException(String.format(
                         "Return type of %s is an array but component type is not a model object.",
@@ -610,14 +616,15 @@ public class NQL {
     }
 
     private static List<Pair<Class, String>> getJoinsByMockCallSequence() {
-        //log.debug("MQ.getJoinsByMockCallSequence:1");
+//        log.debug("NQL.getJoinsByMockCallSequence:1");
         LinkedList<Pair<Object, Method>> mockSequence = threadMockCallSequenceMap.get(Thread.currentThread());
         if (mockSequence == null) {
             throw new RuntimeException("Did you mix up MQL and NQL???? ... Or did you call 2 mock-methods in the same statement? .... Some mock calls are expected to have been made at this time Thread.currentThread().getId("+ Thread.currentThread().getId() +")");
         }
+//        log.debug("NQL.getJoinsByMockCallSequence:mockSequence:: " + (mockSequence.size() > 0 ? ((mockSequence.size() > 1 ? mockSequence.get(0).getSecond().getName() + "." + mockSequence.get(1).getSecond().getName() : mockSequence.get(0).getSecond().getName())) : null) );
         List<Pair<Class, String>> joints = new ArrayList<Pair<Class, String>>();
         for (Pair<Object, Method> pair: mockSequence) {
-            //log.debug("MQ.getJoinsByMockCallSequence:2");
+            //log.debug("NQL.getJoinsByMockCallSequence:2");
             if (pair.equals(mockSequence.getLast()) && ! pair.getSecond().getReturnType().isArray()) break;
             Object mock = pair.getFirst();
             Method method = pair.getSecond();
@@ -638,6 +645,7 @@ public class NQL {
     }
 
     public static String makeAttributeIdentifier(Class sourceClass, String attributeName) {
+//        log.debug("makeAttributeIdentifier("+ sourceClass + "," + attributeName +")");
         DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(sourceClass);
         DbAttribute dbAttribute = dbAttributeContainer.getDbAttribute(attributeName);
         return dbAttribute.getSolrAttributeName("");
@@ -679,6 +687,11 @@ public class NQL {
     public static Constraint has(Enum mockValue, Comp comp, Enum value) {
         List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
         Pair<Class, String> pair = getSourceAttributePair();
+//        if(pair.getFirst().isEnum() && pair.getSecond().equals("objectID")){ //Enum-array
+//            Pair<Class, String> classStringPair = joints.get(joints.size() - 1);
+//            pair = new Pair<Class, String>(classStringPair.getFirst(), classStringPair.getSecond());
+////            joints.remove(joints.size() - 1);
+//        }
         clearMockCallSequence();
         SolrExpression expression = newLeafExpression().addConstrain(makeAttributeIdentifier(pair), comp, value);
         return new SolrConstraint(expression, joints);
@@ -1030,14 +1043,14 @@ public class NQL {
         }
 
         public SolrExpression isNull(String attributeName) {
-            log.debug("isNull("+ attributeName +")");
+//            log.warn("isNull ("+ attributeName +")");
             this.statement = "-("+ attributeName +":[\"\" TO *])";
             this.attr = "-" + attributeName;
             return this;
         }
 
         public SolrExpression isNotNull(String attributeName) {
-            log.debug("isNotNull("+ attributeName +")");
+//            log.debug("isNotNull("+ attributeName +")");
             this.statement = "("+ attributeName +":[\"\" TO *])";
             this.attr = attributeName;
             return this;
@@ -1202,7 +1215,7 @@ public class NQL {
         UpdateSolrQueryAble getExpression() {
             SolrContainerExpression container = new SolrContainerExpression();
             for (Constraint c: constraints) {
-                log.debug("getExpression() with operator.operator("+ operator.name() +")");
+//                log.debug("getExpression() with operator.operator("+ operator.name() +")");
                 container.addExpression(operator.operator, c.getExpression());
             }
             return container;

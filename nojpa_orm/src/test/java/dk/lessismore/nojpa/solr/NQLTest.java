@@ -188,6 +188,7 @@ public class NQLTest {
             Person person = ModelObjectService.create(Person.class);
             person.setName("person " + (i % 4));
             person.setPersonStatus(PersonStatus.BETWEEN_RELATIONS);
+//            person.setHistoryStatus(new PersonStatus[]{PersonStatus.BETWEEN_RELATIONS, PersonStatus.SINGLE});
             person.setSomeFloat((float) (20f * Math.random()));
             if (i < 7) {
                 Car car = ModelObjectService.create(Car.class);
@@ -203,9 +204,12 @@ public class NQLTest {
         NList<Person> personsWithoutCar = NQL.search(mPerson).search(NQL.all(NQL.has(mPerson.getPersonStatus(), NQL.Comp.EQUAL, PersonStatus.BETWEEN_RELATIONS), NQL.has(mPerson.getName(), NQL.Comp.EQUAL, "oasd_*+__asdads3cd& %%"), NQL.hasNull(mPerson.getCar()))).getList();
 
         Person m2Person = NQL.mock(Person.class);
-        PersonStatus[] historyStatus = m2Person.getHistoryStatus();
-        System.out.println("historyStatus = " + historyStatus);
-        NList<Person> personsWithoutCar2 = NQL.search(m2Person).search(NQL.all(NQL.has(historyStatus[NQL.ANY], NQL.Comp.EQUAL, PersonStatus.BETWEEN_RELATIONS), NQL.has(m2Person.getName(), NQL.Comp.EQUAL, "oasd_*+__asdads3cd& %%"), NQL.hasNull(m2Person.getCar()))).getList();
+//        NQL.Constraint A = NQL.has(m2Person.getHistoryStatus()[NQL.ANY], NQL.Comp.EQUAL, PersonStatus.BETWEEN_RELATIONS);
+        NQL.Constraint Z = NQL.has(mPerson.getPersonStatus(), NQL.Comp.EQUAL, PersonStatus.BETWEEN_RELATIONS);
+//        NQL.Constraint A = NQL.has(m2Person.getHistoryStatus()[NQL.ANY], NQL.Comp.EQUAL, PersonStatus.BETWEEN_RELATIONS);
+        NQL.Constraint B = NQL.has(m2Person.getName(), NQL.Comp.EQUAL, "oasd_*+__asdads3cd& %%");
+        NQL.Constraint C = NQL.hasNull(m2Person.getCar());
+        NList<Person> personsWithoutCar2 = NQL.search(m2Person).search(NQL.all(B, C)).getList();
         //Assert.assertEquals(personsWithoutCar.getNumberFound(), 3);
 
 

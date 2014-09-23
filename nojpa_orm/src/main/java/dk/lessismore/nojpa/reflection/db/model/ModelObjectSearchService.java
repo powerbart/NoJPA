@@ -122,25 +122,31 @@ public class ModelObjectSearchService {
                     }
 //                    solrObj.addField(attributeName, modelObject.getSingleAssociationID(attributeName));
                 } else { //isMultiAssociation
-                    ModelObjectInterface[] vs = (ModelObjectInterface[]) dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
-                    HashMap<String, ArrayList<Object>> values = new HashMap<String, ArrayList<Object>>();
-                    for(int i = 0; vs != null && i < vs.length; i++){
-                        ModelObjectInterface value = vs[i];
-                        if(value != null && !storedObjects.containsKey(value.getObjectID())){
-                            storedObjects.put(value.getObjectID(), value.getObjectID());
-                            getSearchValues(value, dbAttribute.getSolrAttributeName(prefix), storedObjects, values);
+                    if(dbAttribute.getAttributeClass().isEnum() || dbAttribute.getAttributeClass().isPrimitive()){
+                        Object objects = dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
+//                        String attributeName = dbAttribute.getAttributeName();
+                        String solrAttributeName = dbAttribute.getSolrAttributeName(prefix);
+                        solrObj.addField(solrAttributeName, objects);
+
+                    } else {
+                        ModelObjectInterface[] vs = (ModelObjectInterface[]) dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
+                        HashMap<String, ArrayList<Object>> values = new HashMap<String, ArrayList<Object>>();
+                        for(int i = 0; vs != null && i < vs.length; i++){
+                            ModelObjectInterface value = vs[i];
+                            if(value != null && !storedObjects.containsKey(value.getObjectID())){
+                                storedObjects.put(value.getObjectID(), value.getObjectID());
+                                getSearchValues(value, dbAttribute.getSolrAttributeName(prefix), storedObjects, values);
+                            }
+                        }
+                        Iterator<String> nameIterator = values.keySet().iterator();
+                        for(int i = 0; nameIterator.hasNext(); i++){
+                            String name = nameIterator.next();
+                            ArrayList<Object> objects = values.get(name);
+                            String solrArrayName = name + "_ARRAY";
+                            log.debug("Adding " + solrArrayName + "("+ (objects != null ? objects.size() : -1) +")");
+                            solrObj.addField(solrArrayName, objects);
                         }
                     }
-                    Iterator<String> nameIterator = values.keySet().iterator();
-                    for(int i = 0; nameIterator.hasNext(); i++){
-                        String name = nameIterator.next();
-                        ArrayList<Object> objects = values.get(name);
-                        String solrArrayName = name + "_ARRAY";
-                        log.debug("Adding " + solrArrayName + "("+ (objects != null ? objects.size() : -1) +")");
-                        solrObj.addField(solrArrayName, objects);
-                    }
-
-
                 }
             }
         }
