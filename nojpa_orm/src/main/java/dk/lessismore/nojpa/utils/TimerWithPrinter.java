@@ -16,24 +16,30 @@ public class TimerWithPrinter {
         public long avg = 0;
         public long count = 0;
         public long total = 0;
+        public long diffTotal = 0;
+        public long diffAvg = 0;
 
-        public Longs(long currentTime){
+        public Longs(long currentTime, long diff){
             avg = currentTime;
             total = currentTime;
+            diffTotal = diff;
+            diffAvg = diff;
             count = 1;
         }
 
-        public Longs newLap(long lapTime){
+        public Longs newLap(long lapTime, long diff){
             count++;
             total += lapTime;
+            diffTotal += diff;
             avg = total / count;
+            diffAvg = diffTotal / count;
             return this;
         }
 
 
         @Override
         public String toString() {
-            return "avg("+ avg +") count("+ count +") total("+ total +")";
+            return "avg("+ avg +") count("+ count +") total("+ total +")  ---- diffAvg("+ diffAvg +") diffTotal("+ diffTotal +")";
         }
     }
 
@@ -41,6 +47,7 @@ public class TimerWithPrinter {
 
     long start = System.currentTimeMillis();
     long end = System.currentTimeMillis();
+    long diff = System.currentTimeMillis();
 
     String prefix = null;
     String fileName = null;
@@ -59,12 +66,14 @@ public class TimerWithPrinter {
     }
 
     public void markLap(String lapID){
+        Long thisDiff = System.currentTimeMillis() - diff;
+        diff = System.currentTimeMillis();
         Long thisLap = System.currentTimeMillis() - start;
         Longs allLaps = laps.get(lapID);
         if(allLaps == null){
-            laps.put(lapID, new Longs(thisLap));
+            laps.put(lapID, new Longs(thisLap, thisDiff));
         } else {
-            laps.put(lapID, allLaps.newLap(thisLap));
+            laps.put(lapID, allLaps.newLap(thisLap, thisDiff));
         }
     }
 
@@ -97,13 +106,15 @@ public class TimerWithPrinter {
 
 
     public static void main(String[] args) throws Exception {
-        TimerWithPrinter t = new TimerWithPrinter("test", "/tmp/luuux-timer.log");
-        t.markLap("1");
-        Thread.sleep(200);
-        t.markLap("2");
-        Thread.sleep(100);
-        t.markLap("3");
-        t.printLapsInAlfaOrder();
+        TimerWithPrinter t = new TimerWithPrinter("test", "/tmp/timer.log");
+        for(int i = 0; i < 3; i++){
+            t.markLap("1");
+            Thread.sleep(200);
+            t.markLap("2");
+            Thread.sleep(100);
+            t.markLap("3");
+            t.printLapsInAlfaOrder();
+        }
 
 
     }

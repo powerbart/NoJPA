@@ -849,7 +849,7 @@ public class NQL {
                 UpdateSolrQueryAble expression = expressions.get(i);
                 Integer condition = conditions.get(i);
                 String subQuery = expression.updateSolrQuery(solrQuery);
-                log.debug("Will add subQuery("+ subQuery +") with " + SolrOperator.name(condition));
+//                log.debug("Will add subQuery("+ subQuery +") with " + SolrOperator.name(condition));
                 if(subQuery != null){
                     builder.append(subQuery);
                     if(expressions.size() > 1 && i + 1 < expressions.size()){
