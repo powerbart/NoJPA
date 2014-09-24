@@ -184,8 +184,15 @@ public class NQLTest {
         ModelObjectSearchService.addSolrServer(Person.class, solrService.getServer());
         Person mPerson = NQL.mock(Person.class);
 
+        Person prev = null;
         for (int i = 0; i < 10; i++) {
             Person person = ModelObjectService.create(Person.class);
+            if(i % 2 == 0){
+                prev = person;
+            } else {
+                prev.setGirlFriend(person);
+                person.setGirlFriend(prev);
+            }
             person.setName("person " + (i % 4));
             person.setPersonStatus(PersonStatus.BETWEEN_RELATIONS);
 //            person.setHistoryStatus(new PersonStatus[]{PersonStatus.BETWEEN_RELATIONS, PersonStatus.SINGLE});

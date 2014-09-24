@@ -118,6 +118,7 @@ public class ModelObjectSearchService {
                     ModelObjectInterface value = (ModelObjectInterface) dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
                     addAttributeValueToStatement(dbAttribute, solrObj, value, prefix);
                     if(value != null && !storedObjects.containsKey(value.getObjectID())){
+                        storedObjects.put(value.getObjectID(), value.getObjectID());
                         put(value, dbAttribute.getSolrAttributeName(prefix), storedObjects, solrServer, solrObj);
                     }
 //                    solrObj.addField(attributeName, modelObject.getSingleAssociationID(attributeName));

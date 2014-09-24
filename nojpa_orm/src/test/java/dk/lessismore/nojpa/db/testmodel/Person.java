@@ -24,6 +24,9 @@ public interface Person extends ModelObjectInterface {
 //    void setMyName(String[] myAlias);
 
 
+
+
+
     @ReusableMap(mapNames = {"map2"})
     boolean getIsSick();
     void setIsSick(boolean isSick);
@@ -54,6 +57,10 @@ public interface Person extends ModelObjectInterface {
     @SearchField
     PersonStatus getPersonStatus();
     void setPersonStatus(PersonStatus personStatus);
+
+    @SearchField
+    Person getGirlFriend();
+    void setGirlFriend(Person girlFriend);
 
 //    @SearchField
 //    PersonStatus[] getHistoryStatus();
