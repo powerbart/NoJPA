@@ -122,6 +122,7 @@ public class MySqlCreateStatement extends MySqlStatement implements CreateSQLSta
 //            }
 //        }
         // TODO set charset and collation as parameter
+        // TODO http://stackoverflow.com/questions/2876789/case-insensitive-for-sql-like-wildcard-statement
         statement.append("\n) ENGINE=MyISAM");// CHARACTER SET utf8 COLLATE utf8_bin");
         return statement.toString();
     }
