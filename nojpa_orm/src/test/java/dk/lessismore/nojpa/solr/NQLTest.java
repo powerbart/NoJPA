@@ -62,6 +62,9 @@ public class NQLTest {
         NList<Person> persons = NQL.search(mPerson).getList();
         Assert.assertEquals(persons.getNumberFound(), 10);
 
+        NList<Person> personsWithcarWithoutAddress = NQL.search(mPerson).searchIsNull(mPerson.getCar().getAddress()).getList();
+        Assert.assertEquals(personsWithcarWithoutAddress.getNumberFound(), 3);
+
         {
             QueryResponse response = solrService.query(new SolrQuery("( (_Person_name__TXT:( Person )) AND -(_Person_car__ID:[\"\" TO *]) )"));
             Assert.assertEquals(response.getResults().getNumFound(), 3);

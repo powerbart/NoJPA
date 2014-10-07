@@ -739,7 +739,7 @@ public class NQL {
         List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
         Pair<Class, String> pair = getSourceAttributePair();
         clearMockCallSequence();
-        SolrExpression expression = newLeafExpression().isNull(makeAttributeIdentifier(pair));
+        SolrExpression expression = newLeafExpression().isNull(makeAttributeIdentifier(pair), joints);
         return new SolrConstraint(expression, joints);
     }
 
@@ -747,7 +747,7 @@ public class NQL {
         List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
         Pair<Class, String> pair = getSourceAttributePair();
         clearMockCallSequence();
-        SolrExpression expression = newLeafExpression().isNotNull(makeAttributeIdentifier(pair));
+        SolrExpression expression = newLeafExpression().isNotNull(makeAttributeIdentifier(pair), joints);
         return new SolrConstraint(expression, joints);
     }
 
@@ -1042,15 +1042,17 @@ public class NQL {
             return this;
         }
 
-        public SolrExpression isNull(String attributeName) {
+        public SolrExpression isNull(String attributeName, List<Pair<Class, String>> joints) {
 //            log.warn("isNull ("+ attributeName +")");
+            attributeName = createFinalSolrAttributeName(joints, attributeName);
             this.statement = "-("+ attributeName +":[\"\" TO *])";
             this.attr = "-" + attributeName;
             return this;
         }
 
-        public SolrExpression isNotNull(String attributeName) {
+        public SolrExpression isNotNull(String attributeName, List<Pair<Class, String>> joints) {
 //            log.debug("isNotNull("+ attributeName +")");
+            attributeName = createFinalSolrAttributeName(joints, attributeName);
             this.statement = "("+ attributeName +":[\"\" TO *])";
             this.attr = attributeName;
             return this;

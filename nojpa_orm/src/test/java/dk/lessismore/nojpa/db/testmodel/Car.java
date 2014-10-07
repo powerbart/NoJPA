@@ -14,6 +14,9 @@ public interface Car extends ModelObjectInterface {
     FuelType getFuelType();
     void setFuelType(FuelType fuelType);
 
+    Address getAddress();
+    void setAddress(Address address);
+
     public static enum FuelType {
         LPG, DIESEL, PETROL, ELECTRIC
     }
