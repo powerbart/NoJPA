@@ -38,6 +38,10 @@ public class ConnectionFactory implements ResourceFactory {
     public ConnectionFactory() {
         init();
     }
+    public ConnectionFactory(Resources resources) {
+        ConnectionFactory.resources = resources;
+        init();
+    }
 
     public void setIp(String ip) {
         this.ip = ip;

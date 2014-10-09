@@ -3,6 +3,8 @@ package dk.lessismore.nojpa.db.connectionpool;
 import dk.lessismore.nojpa.pool.*;
 import dk.lessismore.nojpa.resources.*;
 
+import java.util.Properties;
+
 /**
  * This class is a singelton containing a pool of connections to a given database. The database
  * properties is defined in the property file called "db". You can
@@ -17,23 +19,17 @@ public class ConnectionPoolFactory  {
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(ConnectionPoolFactory.class);
 
     private static Resources resources = new PropertyResources("db");
-
     private static ResourcePool connectionPool = null;
 
-    private static int nrOfPoolConnections = 20;
-
-    public static int getNrOfPoolConnections() {
-        if(resources.isInt("nrOfPoolConnections"))
-            return resources.getInt("nrOfPoolConnections");
-        else
-            return nrOfPoolConnections;
+    public static void configure(Properties prop) {
+        resources = new SystemPropertyResources(prop);
     }
-
     public static synchronized ResourcePool getPool() {
 
         if(connectionPool == null) {
             log.debug("making pool");
-            connectionPool = new ResourcePool(new ConnectionFactory(), getNrOfPoolConnections());
+            int poolSize = resources.isInt("nrOfPoolConnections") ? resources.getInt("nrOfPoolConnections") : 20;
+            connectionPool = new ResourcePool(new ConnectionFactory(resources), poolSize);
         }
         return connectionPool;
     }
