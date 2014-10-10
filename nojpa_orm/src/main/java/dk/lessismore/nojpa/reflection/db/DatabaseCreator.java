@@ -40,11 +40,7 @@ public class DatabaseCreator {
 
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(DatabaseCreator.class);
 
-    private static Resources resources = new PropertyResources("db");
-
-    public DatabaseCreator() {
-
-    }
+    public DatabaseCreator() { }
 
 
     private static String[] getIndexFromClass(Class targetClass){

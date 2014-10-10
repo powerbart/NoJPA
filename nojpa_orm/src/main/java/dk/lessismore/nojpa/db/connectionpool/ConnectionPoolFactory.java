@@ -18,7 +18,7 @@ public class ConnectionPoolFactory  {
 
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(ConnectionPoolFactory.class);
 
-    private static Resources resources = new PropertyResources("db");
+    private static Resources resources;
     private static ResourcePool connectionPool = null;
 
     public static void configure(Properties prop) {
@@ -26,8 +26,11 @@ public class ConnectionPoolFactory  {
     }
     public static synchronized ResourcePool getPool() {
 
-        if(connectionPool == null) {
+        if (connectionPool == null) {
             log.debug("making pool");
+            if (resources == null) {
+                resources = new PropertyResources("db");
+            }
             int poolSize = resources.isInt("nrOfPoolConnections") ? resources.getInt("nrOfPoolConnections") : 20;
             connectionPool = new ResourcePool(new ConnectionFactory(resources), poolSize);
         }

@@ -25,7 +25,7 @@ import org.apache.log4j.Logger;
 public class ConnectionFactory implements ResourceFactory {
 
     private static org.apache.log4j.Logger log = Logger.getLogger(ConnectionFactory.class);
-    private static Resources resources = new PropertyResources("db");
+    private static Resources resources;
 
     private String ip = "localhost";
     private int port = 3306;
@@ -36,6 +36,7 @@ public class ConnectionFactory implements ResourceFactory {
     private String db = "mysql";
 
     public ConnectionFactory() {
+        ConnectionFactory.resources = new PropertyResources("db");
         init();
     }
     public ConnectionFactory(Resources resources) {

@@ -13,8 +13,6 @@ import dk.lessismore.nojpa.db.statements.mysql.*;
  */
 public class SQLStatementFactory {
 
-    private static Resources resources = new PropertyResources("db");
-
     public SQLStatementFactory() {
 
     }
