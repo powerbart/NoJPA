@@ -28,6 +28,7 @@ public interface Person extends ModelObjectInterface {
 
 
     @ReusableMap(mapNames = {"map2"})
+    @SearchField
     boolean getIsSick();
     void setIsSick(boolean isSick);
 

@@ -1,5 +1,6 @@
 package dk.lessismore.nojpa.masterworker.messages;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -41,4 +42,6 @@ public class HealthMessage {
     public void setDiskUsages(Map<String, Double> diskUsages) {
         this.diskUsages = diskUsages;
     }
+
+
 }

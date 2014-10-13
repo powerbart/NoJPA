@@ -1,5 +1,6 @@
 package dk.lessismore.nojpa.masterworker.worker;
 
+import dk.lessismore.nojpa.concurrency.WaitForValue;
 import dk.lessismore.nojpa.masterworker.executor.Executor;
 import dk.lessismore.nojpa.masterworker.master.MasterProperties;
 import dk.lessismore.nojpa.net.link.ClientLink;
@@ -25,11 +26,15 @@ public class Worker {
 
     private static final MasterProperties properties = PropertiesProxy.getInstance(MasterProperties.class);
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(Worker.class);
-    private static final long SEND_PROGRESS_INTERVAL = 1000;
-    private static final long SEND_HEALTH_INTERVAL = 8000;
+    private static final long SEND_PROGRESS_INTERVAL = 10 * 1000;
+    private static final long SEND_HEALTH_INTERVAL = 120 * 1000;
     private final List<? extends Class<? extends Executor>> supportedExecutors;
     private static final double CRITICAL_VM_MEMORY_USAGE = 0.95;
     private final Serializer serializer;
+
+    private final LinkAndThreads linkAndThreads = new LinkAndThreads();
+
+    private boolean stop = false;
 
     public Worker(Serializer serializer, List<? extends Class<? extends Executor>> supportedExecutors) {
         this.serializer = serializer;
@@ -59,160 +64,97 @@ public class Worker {
         String host = properties.getHost();
         int port = properties.getWorkerPort();
 
-        while(true) {
+        while(true && !stop) {
             log.debug("Trying to establish connection to Master on "+host+":"+port);
-            final ClientLink clientLink;
+            //final ClientLink clientLink;
 
-            try {
-                clientLink = new ClientLink(host, port);
-                clientLink.write(new RegistrationMessage(getSupportedExecutors()));
-            } catch (ConnectException e) {
-                throw new MasterUnreachableException("Failed to connect to Master on "+host+":"+port, e);
-            } catch (IOException e) {
-                throw new MasterUnreachableException("Failed to connect to Master on "+host+":"+port,e);
+            if(linkAndThreads.clientLink == null) {
+                try {
+                    linkAndThreads.clientLink = new ClientLink(host, port);
+                    linkAndThreads.clientLink.write(new RegistrationMessage(getSupportedExecutors()));
+                    linkAndThreads.startThreads();
+                } catch (ConnectException e) {
+                    throw new MasterUnreachableException("Failed to connect to Master on " + host + ":" + port, e);
+                } catch (IOException e) {
+                    throw new MasterUnreachableException("Failed to connect to Master on " + host + ":" + port, e);
+                }
             }
 
-            final Thread healthReporterThread = new Thread(new Runnable() {
-                public void run() {
-                    while(true) {
-                        try {
-                            HealthMessage healthMessage = new HealthMessage(SystemHealth.getSystemLoadAverage(),
-                                    SystemHealth.getVmMemoryUsage(), SystemHealth.getDiskUsages());
-                            clientLink.write(healthMessage);
-                            Thread.sleep(SEND_HEALTH_INTERVAL);
-                        } catch (IOException e) {
-                            log.debug("IOException - shutting down healthReporterThread");
-                            break;
-                        } catch (InterruptedException e) {
-                            log.debug("Health report thread interrupted");
-                        }
-                    }
-                }
-            });
-            healthReporterThread.setDaemon(true);
-            healthReporterThread.start();
 
             log.debug("Waiting for job");
-            final JobMessage jobMessage;
-            try {
-                jobMessage = (JobMessage) clientLink.read();
-            } catch (IOException e) {
-                log.error("IOException while reading job", e);
+            final JobMessage jobMessage = linkAndThreads.waitForValue.getValue();
+            if(jobMessage == null){
+                String message = "Exception .. jobMessage == null";
+                log.error(message, new Exception(message));
+                stop = true;
+                linkAndThreads.stopThreads();
                 break;
             }
-            final Executor executor = loadExecutor(jobMessage);
+            linkAndThreads.executor = loadExecutor(jobMessage);
             final Object input = serializer.unserialize(jobMessage.getSerializedJobData());
 
             final JobResultMessage<Object> resultMessage = new JobResultMessage<Object>(jobMessage.getJobID());
 
-            log.debug("Job received...");
+            log.debug("Job received... jobMessage.getJobID("+ jobMessage.getJobID() +")");
 
-            final Thread jobThread = new Thread(new Runnable() {
+            linkAndThreads.jobThread = new Thread(new Runnable() {
                 public void run() {
-                    runJob(executor, input, resultMessage);
+                    runJob(linkAndThreads.executor, input, resultMessage);
                 }
             });
-            jobThread.setDaemon(true);
-            jobThread.start();
+            linkAndThreads.jobThread.setDaemon(true);
+            linkAndThreads.jobThread.start();
 
             log.debug("Job running...");
 
-            Thread stopperThread = new Thread(new Runnable() {
-                public void run() {
-                    try {
-                        while(jobThread.isAlive()) { //TODO loop unnecassary
-                            Object o = clientLink.read();
-                            if(o instanceof StopMessage) {
-                                log.info("Stop message recieved from master - signal executer to stop nicely.");
-                                executor.stopNicely();
-                            } else if(o instanceof KillMessage) {
-                                log.info("Kill message recieved from master - shutting down.");
-                                System.exit(0);
-                            } else if(o instanceof RunMethodRemoteBeanMessage) {
-                                RunMethodRemoteBeanMessage runMethodRemoteBeanMessage = (RunMethodRemoteBeanMessage) o;
-                                BeanExecutor b = (BeanExecutor) executor;
-                                Object resultOfMethod = null;
-                                RunMethodRemoteResultMessage resultMessageOfMethod = new RunMethodRemoteResultMessage(jobMessage.getJobID());
-                                resultMessageOfMethod.setMethodID( runMethodRemoteBeanMessage.getMethodID() );
-                                resultMessageOfMethod.setMethodName( runMethodRemoteBeanMessage.getMethodName() );
-                                try{
-                                    resultOfMethod = b.runMethod(runMethodRemoteBeanMessage);
-                                    log.debug("Will set the of " + runMethodRemoteBeanMessage.getMethodName() + " -> result("+ resultOfMethod +") ");
-//                                    if(resultOfMethod != null){ // TODO ??? - should we return the null?
-
-                                        resultMessageOfMethod.setResult(resultOfMethod, serializer);
-                                        try{
-//                                            log.debug("Writing the result : " + resultMessageOfMethod);
-                                            clientLink.write(resultMessageOfMethod);
-                                        } catch (Exception e){
-                                            log.error("Some error when writing back result ... Have been executed .. " + e, e);
-                                        }
-//                                    }
-                                } catch(Exception t){
-                                    log.error("Some error when calling remoteMethod: " + t, t);
-                                    resultMessageOfMethod.setException( t , serializer);
-                                    try{
-                                        clientLink.write(resultMessageOfMethod);
-                                    } catch (Exception e){
-                                        log.error("Some error when writing back result ... Have been executed .. " + e, e);
-                                    }
-                                }
-                                System.out.println("We will now run RemoteMethod on executor :" + executor);
-                            } else {
-                                log.error("Did not understand message from master (stop or kill message expected): " + o);
-                            }
-                        }
-                    } catch(ClosedChannelException e) {
-                        log.debug("Connection closed - Stopping stopperThread");
-                    } catch(IOException e) {
-                        log.warn("Some error in stopper jobThread: ", e);
-                    }
-                }
-            });
-            stopperThread.setDaemon(true);
-            stopperThread.start();
 
             log.debug("Waiting for calculation to end...");
 
             double progress = -1.0;
-            while(jobThread.isAlive()) {
-                if(executor.getProgress() != progress) {
-                    progress = executor.getProgress();
+            while(linkAndThreads.jobThread.isAlive() && linkAndThreads.clientLink.isWorking()) {
+                if(linkAndThreads.executor.getProgress() != progress) {
+                    progress = linkAndThreads.executor.getProgress();
                     log.debug("Working: "+(progress*100) + "%");
                     try {
-                        clientLink.write(new JobProgressMessage(jobMessage.getJobID(), progress));
+                        linkAndThreads.clientLink.write(new JobProgressMessage(jobMessage.getJobID(), progress));
                     } catch (IOException e) {
                         log.error("IOException while writing back progress. Closing link",e);
-                        clientLink.close();
+                        linkAndThreads.clientLink.close();
                         break;
                     }
                 }
                 try {
-                    jobThread.join(SEND_PROGRESS_INTERVAL);
+                    linkAndThreads.jobThread.join(SEND_PROGRESS_INTERVAL);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
-            stopperThread.interrupt();
 
             log.debug("Writeting back result...");
             try {
-                clientLink.write(resultMessage);
+                linkAndThreads.clientLink.write(resultMessage);
             } catch(IOException e) {
                 log.error("Error when writing job result to master: ", e);
+                linkAndThreads.clientLink.close();
+                linkAndThreads.stopThreads();
                 break;
-            } finally {
-                clientLink.close();
-                healthReporterThread.interrupt();
             }
 
             if (SystemHealth.getVmMemoryUsage() > CRITICAL_VM_MEMORY_USAGE) {
                 log.warn("Worker has a critical high VM memory usage.");
+                stop = true;
+                linkAndThreads.clientLink.close();
+                linkAndThreads.stopThreads();
                 break; //exit
             }
+//            stop = true;
+//            break;
 
         } // end loop
-
+        try{
+            linkAndThreads.clientLink.close();
+            linkAndThreads.stopThreads();
+        } catch (Exception e){}
         log.debug("Exiting!");
     }
 
@@ -241,4 +183,124 @@ public class Worker {
     private List<? extends Class<? extends Executor>> getSupportedExecutors() {
         return supportedExecutors;
     }
+
+
+    protected class LinkAndThreads {
+
+        protected ClientLink clientLink = null;
+        protected Thread healthReporterThread = null;
+        protected Thread stopperThread = null;
+        protected WaitForValue<JobMessage> waitForValue = new WaitForValue<JobMessage>();
+        protected Thread jobThread = null;
+        protected Executor executor = null;
+        protected JobMessage maybeJob = null;
+
+
+        public void stopThreads(){
+            if(stopperThread != null){
+                try {
+                    stopperThread.interrupt();
+                } catch (Exception e){}
+            }
+            if(healthReporterThread != null){
+                try {
+                    healthReporterThread.interrupt();
+                } catch (Exception e){}
+            }
+        }
+
+        public void startThreads(){
+            healthReporterThread = new Thread(new Runnable() {
+                public void run() {
+                    while(!stop) {
+                        try {
+                            HealthMessage healthMessage = new HealthMessage(SystemHealth.getSystemLoadAverage(),
+                                    SystemHealth.getVmMemoryUsage(), SystemHealth.getDiskUsages());
+                            if(linkAndThreads.clientLink.isWorking()) {
+                                linkAndThreads.clientLink.write(healthMessage);
+                            }
+                            Thread.sleep(SEND_HEALTH_INTERVAL);
+                        } catch (IOException e) {
+                            log.debug("IOException - shutting down healthReporterThread");
+                            break;
+                        } catch (InterruptedException e) {
+//                            log.debug("Health report thread interrupted");
+                        }
+                    }
+                }
+            });
+            healthReporterThread.setDaemon(true);
+            healthReporterThread.start();
+
+
+
+            stopperThread = new Thread(new Runnable() {
+                public void run() {
+                    try {
+                        while(!stop && linkAndThreads.clientLink.isWorking()) { //TODO loop unnecassary
+                            Object o = linkAndThreads.clientLink.read();
+                            if(o instanceof JobMessage) {
+                                maybeJob = (JobMessage) o;
+                                waitForValue.setValue(maybeJob);
+                            } else if(o instanceof KillMessage) {
+                                stop = true;
+                                System.exit(0);
+                            } else if(o instanceof StopMessage) {
+                                log.info("Stop message recieved from master - signal executer to stop nicely.");
+                                executor.stopNicely();
+                            } else if(o instanceof KillMessage) {
+                                log.info("Kill message recieved from master - shutting down.");
+                                System.exit(0);
+                            } else if(o instanceof RunMethodRemoteBeanMessage) {
+                                RunMethodRemoteBeanMessage runMethodRemoteBeanMessage = (RunMethodRemoteBeanMessage) o;
+                                BeanExecutor b = (BeanExecutor) executor;
+                                Object resultOfMethod = null;
+                                RunMethodRemoteResultMessage resultMessageOfMethod = new RunMethodRemoteResultMessage(maybeJob.getJobID());
+                                resultMessageOfMethod.setMethodID( runMethodRemoteBeanMessage.getMethodID() );
+                                resultMessageOfMethod.setMethodName( runMethodRemoteBeanMessage.getMethodName() );
+                                try{
+                                    resultOfMethod = b.runMethod(runMethodRemoteBeanMessage);
+                                    log.debug("Will set the of " + runMethodRemoteBeanMessage.getMethodName() + " -> result("+ resultOfMethod +") ");
+//                                    if(resultOfMethod != null){ // TODO ??? - should we return the null?
+
+                                    resultMessageOfMethod.setResult(resultOfMethod, serializer);
+                                    try{
+//                                            log.debug("Writing the result : " + resultMessageOfMethod);
+                                        linkAndThreads.clientLink.write(resultMessageOfMethod);
+                                    } catch (Exception e){
+                                        log.error("Some error when writing back result ... Have been executed .. " + e, e);
+                                    }
+//                                    }
+                                } catch(Exception t){
+                                    log.error("Some error when calling remoteMethod: " + t, t);
+                                    resultMessageOfMethod.setException( t , serializer);
+                                    try{
+                                        linkAndThreads.clientLink.write(resultMessageOfMethod);
+                                    } catch (Exception e){
+                                        log.error("Some error when writing back result ... Have been executed .. " + e, e);
+                                    }
+                                }
+                                System.out.println("We will now run RemoteMethod on executor :" + executor);
+                            } else {
+                                log.error("Did not understand message from master (stop or kill message expected): " + o);
+                            }
+
+                        }
+                    } catch(ClosedChannelException e) {
+                        log.debug("Connection closed - Stopping stopperThread");
+                    } catch(IOException e) {
+                        log.warn("Some error in stopper jobThread: ", e);
+                    }
+                }
+            });
+            stopperThread.setDaemon(true);
+            stopperThread.start();
+
+
+        }
+
+
+    }
+
+
 }

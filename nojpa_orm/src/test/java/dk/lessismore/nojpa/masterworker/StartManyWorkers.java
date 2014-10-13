@@ -10,7 +10,7 @@ import java.util.*;
 
 public class StartManyWorkers {
 
-    private static int workerAmount = 20;
+    private static int workerAmount = 1;
     List<? extends Class<? extends Executor>> executorClasses = Arrays.asList(SumExecutor.class, ToUpperExecutor.class, ToLowerExecutor.class);
 
     public static void main(String[] args) {
@@ -36,14 +36,15 @@ public class StartManyWorkers {
     }
 
     synchronized private List<? extends Class<? extends Executor>> getSomeExecutorClasses() {
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
+//        try {
+//            Thread.sleep(100);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+//        }
         Collections.shuffle(executorClasses);
         int n = (int)(Math.random() * executorClasses.size()) +1;
-        return new ArrayList(executorClasses.subList(0,n));
+        //return new ArrayList(executorClasses.subList(0,n));
+        return new ArrayList(executorClasses);
     }
 
     private class TestWorker extends Worker {

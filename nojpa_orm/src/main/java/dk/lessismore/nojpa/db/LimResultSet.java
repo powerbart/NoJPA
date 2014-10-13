@@ -64,7 +64,7 @@ public class LimResultSet {
 
 
             synchronized (listOfUnclosedSets) {
-                if (numberOfSetUnclosed > 3) {
+                if (numberOfSetUnclosed > 10) {
                     Calendar min2 = Calendar.getInstance();
                     min2.add(Calendar.MINUTE, -1);
                     for (int j = listOfUnclosedSets.size() - 1; j >= 0; j--) {
@@ -75,17 +75,17 @@ public class LimResultSet {
                                 log.error("UNCLOSEDSETS("+ Thread.currentThread().getId() +") : " + stackTraceElements[i].getClassName() + "." + stackTraceElements[i].getMethodName() + ":" + stackTraceElements[i].getLineNumber());
 
                             }
-                            Calendar min10 = Calendar.getInstance();
-                            min10.add(Calendar.MINUTE, -10);
-                            if(limResultSet.creationDate.before(min10)){
-                                try{
-                                    log.error("Closing " + limResultSet.rawSqlStatement);
-                                    limResultSet.close();
-                                } catch(Exception e){
-                                    e.printStackTrace();
-                                    log.error("Some error " + e, e);
-                                }
-                            }
+//                            Calendar min10 = Calendar.getInstance();
+//                            min10.add(Calendar.MINUTE, -10);
+//                            if(limResultSet.creationDate.before(min10)){
+//                                try{
+//                                    log.error("Closing " + limResultSet.rawSqlStatement);
+//                                    limResultSet.close();
+//                                } catch(Exception e){
+//                                    e.printStackTrace();
+//                                    log.error("Some error " + e, e);
+//                                }
+//                            }
                         }
                     }
                 }

@@ -57,6 +57,14 @@ public class JobHandleToMasterProtocol<O> {
         }
     }
 
+    public void restartAllWorkers() {
+        try {
+            clientLink.write(new RestartAllWorkersMessage());
+        } catch (IOException e) {
+            throw new MasterUnreachableException(e);
+        }
+    }
+
     public void stopNicely() {
         try {
             clientLink.write(new StopMessage());

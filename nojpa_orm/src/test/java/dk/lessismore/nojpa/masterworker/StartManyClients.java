@@ -10,7 +10,7 @@ import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteResultMessage;
 
 public class StartManyClients {
 
-    private static int clientAmount = 20;
+    private static int clientAmount = 50;
 
     public static void main(String[] args) throws Exception {
         final StartManyClients startManyClients = new StartManyClients();
@@ -24,10 +24,13 @@ public class StartManyClients {
                 }
             }).start();
         }
+//        for(int i = 0; i < clientAmount; i++) {
+//            new StartManyClients().startSumClient(10 * i);
+//        }
     }
 
     private void startRandomClient(int n) {
-        int r = (int)Math.random() % 3;
+        int r = 0; //(int)(Math.random() * 10) % 3;
         switch (r) {
             case 0: startSumClient(n);
             case 1: startToUpperClient(n);

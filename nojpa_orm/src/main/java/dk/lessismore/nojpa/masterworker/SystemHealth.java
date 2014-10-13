@@ -76,9 +76,15 @@ public class SystemHealth {
             StringTokenizer diskTok = new StringTokenizer(str.substring(str.indexOf("\n")), "\n\t ");
             while (diskTok.hasMoreTokens()) {
                 String t = diskTok.nextToken();
-                if (t.indexOf("%") != -1) {
+//                log.debug("1: " + t);
+                if (t.indexOf("%") != -1 && !str.contains("Volumes")) {
                     String tStr = t.substring(0, t.indexOf("%"));
-                    int q = Integer.parseInt(tStr);
+                    int q = 0;
+                    try {
+                        q = Integer.parseInt(tStr);
+                    } catch (Exception e){
+                        System.out.println("When parsing disk usage in SystemHelth: " + e);
+                    }
                     maxQ = maxQ < q ? q : maxQ;
                     if (q > 50) {
                         String mountPoint = diskTok.nextToken();

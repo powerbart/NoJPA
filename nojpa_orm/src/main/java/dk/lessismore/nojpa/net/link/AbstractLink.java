@@ -24,6 +24,17 @@ public abstract class AbstractLink {
     private static final String SEPARATOR = "<~>";
     private Pinger pinger;
 
+    private long totalReadBytes = 0;
+    private long totalWriteBytes = 0;
+
+    private boolean hasErrors = false;
+
+    public boolean isWorking(){
+        return socket != null && socket.isConnected() && out != null && in != null && !hasErrors;
+    }
+
+
+
 
     protected AbstractLink(Serializer serializer) {
         if (serializer == null) {
@@ -44,7 +55,8 @@ public abstract class AbstractLink {
      */
     public synchronized void write(Object o) throws IOException {
         String serializedObject = serializer.serialize(o);
-        log.debug("Writing: " + o);
+        totalWriteBytes += serializedObject.length();
+        log.debug("Writing: " + o + " totalReadBytes("+ totalReadBytes +") totalWriteBytes("+ totalWriteBytes +")");
         out.write((serializedObject + SEPARATOR).getBytes());
         out.flush();
     }
@@ -134,6 +146,7 @@ public abstract class AbstractLink {
                     int byteLength = 0;
                     try {
                         byteLength = in.read(buffer);
+                        totalReadBytes += byteLength;
                     } catch (SocketException e) {
                         throw new ClosedChannelException();
                     }
@@ -237,7 +250,7 @@ public abstract class AbstractLink {
 //                    log.debug("Sending ping");
                     write(new Ping());
                     try{
-                        Thread.sleep(10 * 1000);
+                        Thread.sleep(30 * 1000);
                     } catch(InterruptedException e) {
                         log.debug("Sleep interupted - exiting pinger");
                         stopPinger();

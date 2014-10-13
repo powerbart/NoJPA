@@ -6,7 +6,7 @@ public class ObserverNotifierThread extends Thread {
 
     private static final Logger log = Logger.getLogger(ObserverNotifierThread.class);
     private final MasterServer masterServer;
-    private static final long NOTIFY_INTERVAL = 1000;
+    private static final long NOTIFY_INTERVAL = 10000;
     private boolean running = true;
 
     public ObserverNotifierThread(MasterServer masterServer) {
@@ -18,8 +18,8 @@ public class ObserverNotifierThread extends Thread {
     public void run() {
         while(running) {
             try {
-                Thread.sleep(NOTIFY_INTERVAL);
                 masterServer.notifyObservers();
+                Thread.sleep(NOTIFY_INTERVAL);
             } catch (InterruptedException e) {
                 log.debug("Observer notifier interrupted");
             }

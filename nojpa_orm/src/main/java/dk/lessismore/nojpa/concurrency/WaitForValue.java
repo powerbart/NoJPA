@@ -19,7 +19,10 @@ public class WaitForValue<V> {
         try {
             lock.lock();
             while (! hasValue) condition.awaitUninterruptibly();
-            return value;
+            hasValue = false;
+            V toReturn = value;
+            value = null;
+            return toReturn;
         } finally {
             lock.unlock();
         }

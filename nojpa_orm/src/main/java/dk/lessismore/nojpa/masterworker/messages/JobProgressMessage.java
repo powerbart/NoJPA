@@ -9,6 +9,8 @@ public class JobProgressMessage extends JobRelatedMessage {
         this.progress = progress;
     }
 
+    public JobProgressMessage(){}
+
     public double getProgress() {
         return progress;
     }

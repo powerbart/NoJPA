@@ -58,7 +58,7 @@ public class JobResultMessage<O> extends JobRelatedMessage {
 
 
     public String toString(){
-        int i = result != null ? -1 : result.length();
+        int i = result == null ? -1 : result.length();
         return super.toString() + " exception("+ exception +") result("+ (i > 100 ? result.substring(0, 100) : null) +")";
     }
 
