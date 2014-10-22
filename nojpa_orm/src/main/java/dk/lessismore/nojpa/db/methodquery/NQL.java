@@ -1195,7 +1195,7 @@ public class NQL {
 
 
     public static abstract class Constraint {
-        abstract UpdateSolrQueryAble getExpression();
+        abstract public UpdateSolrQueryAble getExpression();
         abstract public List<Pair<Class, String>> getJoints();
     }
 
@@ -1214,7 +1214,7 @@ public class NQL {
 
 
 
-        UpdateSolrQueryAble getExpression() {
+        public UpdateSolrQueryAble getExpression() {
             SolrContainerExpression container = new SolrContainerExpression();
             for (Constraint c: constraints) {
 //                log.debug("getExpression() with operator.operator("+ operator.name() +")");
@@ -1273,7 +1273,7 @@ public class NQL {
         }
 
         @Override
-        UpdateSolrQueryAble getExpression() {
+        public UpdateSolrQueryAble getExpression() {
             if (! hasConstraints()) {
                 return new SolrExpression();
             }
