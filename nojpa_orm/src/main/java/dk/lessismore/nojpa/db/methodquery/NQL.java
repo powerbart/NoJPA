@@ -1244,7 +1244,7 @@ public class NQL {
         }
 
         @Override
-        SolrExpression getExpression() {
+        public SolrExpression getExpression() {
             return expression;
         }
 
