@@ -75,7 +75,7 @@ public class JobPool {
     public void removeListener(ServerLink client) {
         String jobID = clientMap.get(client);
         if (jobID == null) {
-            log.error("No jobID found for client - cant remove listener");
+            log.info("No jobID found for client - cant remove listener");
             return;
         }
         clientMap.remove(client);

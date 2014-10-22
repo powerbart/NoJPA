@@ -1,5 +1,6 @@
 package dk.lessismore.nojpa.masterworker.master;
 
+import dk.lessismore.nojpa.masterworker.messages.RestartAllWorkersMessage;
 import dk.lessismore.nojpa.net.link.ServerLink;
 import dk.lessismore.nojpa.masterworker.messages.JobMessage;
 import dk.lessismore.nojpa.masterworker.messages.JobListenMessage;
@@ -36,6 +37,8 @@ public class MasterClientThread extends Thread {
                 } else if(clientRequest instanceof JobListenMessage) {
                     JobListenMessage jobListenMessage = (JobListenMessage) clientRequest;
                     masterServer.startListen(jobListenMessage.getJobID(), serverLink);
+                } else if(clientRequest instanceof RestartAllWorkersMessage) {
+                    masterServer.restartAllWorkers();
                 } else if(clientRequest instanceof RunMethodRemoteBeanMessage) {
                     RunMethodRemoteBeanMessage runMethodRemoteBeanMessage = (RunMethodRemoteBeanMessage) clientRequest;
                     masterServer.runMethodRemote(runMethodRemoteBeanMessage, serverLink);

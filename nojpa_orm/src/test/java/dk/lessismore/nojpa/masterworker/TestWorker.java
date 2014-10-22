@@ -1,5 +1,6 @@
 package dk.lessismore.nojpa.masterworker;
 
+import dk.lessismore.nojpa.masterworker.worker.FunWorker;
 import dk.lessismore.nojpa.masterworker.worker.Worker;
 import dk.lessismore.nojpa.masterworker.executor.ToUpperExecutor;
 import dk.lessismore.nojpa.masterworker.executor.SumExecutor;
@@ -10,7 +11,7 @@ import org.junit.Ignore;
 public class TestWorker extends Worker {
 
     public TestWorker() {
-        super(ToUpperExecutor.class, SumExecutor.class, BeanExecutor.class);
+        super(FunWorker.class, ToUpperExecutor.class, SumExecutor.class, BeanExecutor.class);
     }
 
     public static void main(String[] args) throws Exception {

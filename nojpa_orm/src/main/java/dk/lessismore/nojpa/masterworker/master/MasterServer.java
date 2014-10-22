@@ -36,6 +36,7 @@ public class MasterServer {
 
     public void runMethodRemote(RunMethodRemoteBeanMessage runMethodRemoteBeanMessage, ServerLink serverLink) throws IOException {
         jobPool.runMethodRemote(runMethodRemoteBeanMessage, serverLink);
+        notifyObservers();
     }
 
 
@@ -60,18 +61,18 @@ public class MasterServer {
                 });
             }
         }
-        //notifyObservers();
+        notifyObservers();
     }
 
     synchronized void stopListen(ServerLink client) {
         jobPool.removeListener(client);
-        //notifyObservers();
+        notifyObservers();
     }
 
     synchronized public void queueJob(JobMessage jobMessage) {
         jobPool.addJob(jobMessage);
         runJobIfNecessaryAndPossible();
-        //notifyObservers();
+        notifyObservers();
     }
 
 
@@ -79,11 +80,13 @@ public class MasterServer {
     synchronized public void registerWorker(String[] knownClasses, ServerLink serverLink) {
         workerPool.addWorker(knownClasses, serverLink);
         runJobIfNecessaryAndPossible();
+        notifyObservers();
     }
 
     synchronized public void unregisterWorker(ServerLink serverLink) {
         jobPool.requeueJobIfRunning(serverLink);
         workerPool.removeWorker(serverLink);
+        notifyObservers();
     }
 
     synchronized public void updateWorkerHealth(HealthMessage healthMessage, ServerLink serverLink) {
@@ -94,11 +97,12 @@ public class MasterServer {
             boolean applicableAfter = workerPool.applicable(serverLink);
             if (applicableAfter) runJobIfNecessaryAndPossible();
         }
+        //notifyObservers();
     }
 
     synchronized public void updateJobProgress(JobProgressMessage jobProgressMessage) {
         jobPool.updateJobProgress(jobProgressMessage.getJobID(), jobProgressMessage.getProgress());
-        //notifyObservers();
+        notifyObservers();
     }
 
 
@@ -106,13 +110,13 @@ public class MasterServer {
     synchronized public void setRunMethodRemoteResultMessage(RunMethodRemoteResultMessage runMethodRemoteResultMessage) {
         //storeResult(result); TODO
         jobPool.setRunMethodRemoteResultMessage(runMethodRemoteResultMessage);
-        //notifyObservers();
+        notifyObservers();
     }
 
     synchronized public void setResult(JobResultMessage result) {
         storeResult(result);
         jobPool.setResult(result);
-        //notifyObservers();
+        notifyObservers();
     }
 
 
@@ -134,7 +138,13 @@ public class MasterServer {
     }
 
 
+    long lastUpdate = System.currentTimeMillis();
     void notifyObservers() {
+        long now = System.currentTimeMillis();
+        if(now - lastUpdate < 1000 * 1){
+            return;
+        }
+        lastUpdate = now;
         if (observers == null || observers.isEmpty()) return;
         UpdateMessage updateMessage = new UpdateMessage();
         updateMessage.setObserverJobMessages(jobPool.getObserverJobMessageList());
@@ -162,6 +172,7 @@ public class MasterServer {
         if (serverLink != null) {
             new MasterClientThread(this, serverLink).start();
         }
+        notifyObservers();
     }
 
     public void acceptWorkerConnection(ServerSocket serverSocket) {
@@ -169,6 +180,7 @@ public class MasterServer {
         if (serverLink != null) {
             new MasterWorkerThread(this, serverLink).start();
         }
+        notifyObservers();
     }
 
     public void acceptObserverConnection(ServerSocket serverSocket) {
@@ -244,7 +256,7 @@ public class MasterServer {
         }
         log.debug("Fond worker to run job: "+ workerEntry);
         jobPool.jobTaken(jobEntry, workerEntry.serverLink);
-        //notifyObservers();
+
 
         MessageSender.send(jobEntry.jobMessage, workerEntry.serverLink, new MessageSender.FailureHandler() {
             public void onFailure(ServerLink client) {
@@ -252,6 +264,21 @@ public class MasterServer {
                 MasterServer.this.unregisterWorker(workerEntry.serverLink);
             }
         });
+        notifyObservers();
     }
 
+    public void restartAllWorkers() {
+        Map.Entry<ServerLink, WorkerPool.WorkerEntry>[] entries = workerPool.pool.entrySet().toArray(new Map.Entry[workerPool.pool.size()]);
+        for(int i = 0; i < entries.length; i++){
+            log.debug("restartAllWorkers("+ i +"/"+ entries.length +")");
+            Map.Entry<ServerLink, WorkerPool.WorkerEntry> entry = entries[i];
+            try {
+                entry.getKey().stopPinger();
+                entry.getKey().write(new KillMessage());
+            } catch (IOException e) {
+                log.warn("When restartAllWorkers we got from worker("+ entry.getValue().toString() +")  : "+ e, e);
+            }
+        }
+
+    }
 }

@@ -16,12 +16,12 @@ public class StdoutObserver extends AbstractObserver {
 
     @Override
     public void update(UpdateMessage updateMessage) {
-        System.out.println("-------------------------------------------------------------------------------------------");
+        System.out.println("--------------update update update START -----------------------------------------------------------------------------");
         for (ObserverJobMessage job: updateMessage.getObserverJobMessages()) {
             System.out.format("[JOB] JobID(%s) Status(%s) ClassName(%s) Progress(%s) Date(%s) SequenceNumber(%s) Status(%s) WorkerFailureCount(%s) Worker(%s)\n",
                     job.getJobID(),
                     job.getStatus(),
-                    job.getExecutorClassName(),
+                    job.getExecutorClassName().substring(job.getExecutorClassName().lastIndexOf(".") + 1),
                     job.getProgress(),
                     job.getDate().getTime(),
                     job.getSequenceNumber(),
@@ -39,6 +39,7 @@ public class StdoutObserver extends AbstractObserver {
                     formatClassesNames(worker.getKnownClasses()),
                     worker.getProblem());
         }
+        System.out.println("--------------update update update END -----------------------------------------------------------------------------");
     }
 
     @Override
