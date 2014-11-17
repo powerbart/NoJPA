@@ -143,7 +143,7 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
         } else if(String.class.isAssignableFrom(parameterClass)) {
             DbStrip dbStrip = method.getAnnotation(DbStrip.class);
             if (object != null) {
-                object = ((String) object).replaceAll("[^\\u0000-\\u00FF\\u0400-\\u04FF]", "");
+                object = ((String) object).replaceAll("[^\\u0000-\\u02B8\\u0390-\\u057F]", "");
             }
             if(dbStrip != null && object != null){
                 if(!dbStrip.stripItHard() && !dbStrip.stripItSoft()) {
