@@ -27,6 +27,13 @@ import java.util.Map;
  * Created by niakoi on 7/23/14.
  */
 public class NQLTest {
+
+    public static void main(String[] args) {
+        System.out.println("asdasda:ąčęėįšųūžæøå".replaceAll("[^\\u0000-\\u02B8\\u0390-\\u057F]", ""));
+    }
+
+
+
     @Test
     public void test01() {
         DatabaseCreator.createDatabase("dk.lessismore.nojpa.db.testmodel");
@@ -40,6 +47,8 @@ public class NQLTest {
         for (int i = 0; i < 10; i++) {
             Person person = ModelObjectService.create(Person.class);
             person.setName("person " + (i % 4));
+            person.setDescription("Hello:ąčęėįšųūž");
+
             person.setSomeFloat((float) (20f * Math.random()));
             if (i < 7) {
                 Car car = ModelObjectService.create(Car.class);
@@ -61,6 +70,13 @@ public class NQLTest {
 
         NList<Person> persons = NQL.search(mPerson).getList();
         Assert.assertEquals(persons.getNumberFound(), 10);
+
+        for(int i = 0; i < persons.size(); i++){
+            System.out.println("********************** " + persons.get(i).getDescription());
+        }
+
+
+
 
         NList<Person> personsWithcarWithoutAddress = NQL.search(mPerson).searchIsNull(mPerson.getCar().getAddress()).getList();
 //        Assert.assertEquals(personsWithcarWithoutAddress.getNumberFound(), 3);
@@ -230,4 +246,66 @@ public class NQLTest {
 
 
     }
+
+
+
+
+
+    @Test
+    public void testScore() {
+        String[] descs = new String[]{"Næste generation danske Formel 1-håb er allerede i støbeskeen", "12-årige Noah Watt", "gokart-juniormesterskaber i 2015, EM, VM", "person", "Det koster en hulens masse penge at køre det store program"};
+        DatabaseCreator.createDatabase("dk.lessismore.nojpa.db.testmodel");
+        SolrServiceImpl solrService = new SolrServiceImpl();
+        solrService.setCoreName("nojpa");
+        solrService.setCleanOnStartup(true);
+
+        ModelObjectSearchService.addSolrServer(Person.class, solrService.getServer());
+        Person mPerson = NQL.mock(Person.class);
+
+        Person prev = null;
+        for (int i = 0; i < 10; i++) {
+            Person person = ModelObjectService.create(Person.class);
+            if(i % 2 == 0){
+                prev = person;
+            } else {
+                prev.setGirlFriend(person);
+                person.setGirlFriend(prev);
+            }
+//            person.setName("person " + (i % 4) + );
+            person.setDescription(descs[i % descs.length]);
+            person.setIsSick(i % 2 == 0);
+
+            person.setPersonStatus(PersonStatus.BETWEEN_RELATIONS);
+//            person.setHistoryStatus(new PersonStatus[]{PersonStatus.BETWEEN_RELATIONS, PersonStatus.SINGLE});
+            person.setSomeFloat((float) (20f * Math.random()));
+            if (i < 7) {
+                Car car = ModelObjectService.create(Car.class);
+                person.setCar(car);
+            }
+            ModelObjectService.save(person);
+            System.out.println("---------------- PUT START -----------------------");
+            ModelObjectSearchService.put(person);
+            System.out.println("---------------- PUT END -----------------------");
+        }
+        solrService.commit();
+
+        NList<Person> personsWithoutCar = NQL.search(mPerson).search(mPerson.getName(), NQL.Comp.EQUAL, "person").search(mPerson.getDescription(), NQL.Comp.EQUAL, "person").getList();
+
+        Person m2Person = NQL.mock(Person.class);
+
+//        NQL.Constraint A = NQL.has(m2Person.getHistoryStatus()[NQL.ANY], NQL.Comp.EQUAL, PersonStatus.BETWEEN_RELATIONS);
+//        NQL.Constraint Z = NQL.has(mPerson.getPersonStatus(), NQL.Comp.EQUAL, PersonStatus.BETWEEN_RELATIONS);
+////        NQL.Constraint A = NQL.has(m2Person.getHistoryStatus()[NQL.ANY], NQL.Comp.EQUAL, PersonStatus.BETWEEN_RELATIONS);
+//        NQL.Constraint B = NQL.has(m2Person.getName(), NQL.Comp.EQUAL, "oasd_*+__asdads3cd& %%");
+//        NQL.Constraint C = NQL.hasNull(m2Person.getCar());
+//        NList<Person> personsWithoutCar2 = NQL.search(m2Person).search(NQL.all(B, C)).getList();
+//        //Assert.assertEquals(personsWithoutCar.getNumberFound(), 3);
+
+
+    }
+
+
+
+
+
 }
