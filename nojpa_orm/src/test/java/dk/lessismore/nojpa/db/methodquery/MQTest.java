@@ -402,6 +402,13 @@ public class MQTest {
 //    AccountLine mockAccountLine = MQ.mock(AccountLine.class);
 //    long sum = MQ.select(mockAccountLine).where(mockAccountLine.getAccount(), MQ.Comp.EQUAL, me).getSum(mockAccountLine.getAmount().getCents());
 
+    @Test
+    public void testJoints() throws Exception {
+        InitTestDatabase.initPlanetExpress();
+        Person mPerson = MQL.mock(Person.class);
+        MQL.select(mPerson).where(mPerson.getName(), MQL.Comp.LIKE, "SOME%").where(mPerson.getCar().getBrand(), MQL.Comp.LIKE, "br%").where(mPerson.getCar().getFuelType(), MQL.Comp.EQUAL, Car.FuelType.DIESEL).getList();
+
+    }
 
     @Test
     public void testGetByID() throws Exception {
