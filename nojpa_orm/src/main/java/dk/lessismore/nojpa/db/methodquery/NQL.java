@@ -12,8 +12,12 @@ import dk.lessismore.nojpa.utils.TimerWithPrinter;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.response.FacetField;
+import org.apache.solr.client.solrj.response.FieldStatsInfo;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.util.SimpleOrderedMap;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
@@ -238,61 +242,6 @@ public class NQL {
 
             return this;
         }
-//
-//        // Only needed for reflection and should not be public exposed
-//        public SearchQuery<T> orderByUnsafe(String attributeName, Order order) {
-//            statement.setOrderBy(attributeName, orderToNum(order));
-//            return this;
-//        }
-
-//        /**
-//         * Set group by
-//         * @param sourceInterface source class or interface
-//         * @param attributeName attribute name
-//         * @return this
-//         */
-//        public SearchQuery<T> groupBy(Class<? extends ModelObjectInterface> sourceInterface, String attributeName) {
-//            statement.setGroupBy(getTableName(sourceInterface), attributeName);
-//            return this;
-//        }
-//
-//
-//        /**
-//         * Set having
-//         * @param having sql having string
-//         * @return this
-//         */
-//        public SearchQuery<T> having(String having) {
-//            statement.setHaving(having);
-//            return this;
-//        }
-
-//        public int getSum(int mock){
-//            return (int) getSum(0L);
-//        }
-//
-//
-//
-//        public float getSum(float mock){
-//            return (float) getSum(0d);
-//        }
-//
-//        public long getSum(long mock){
-//            Pair<Class, String> sourceAttributePair = getSourceAttributePair();
-//            String sumAtt = creator.makeAttributeIdentifier(sourceAttributePair.getFirst(), sourceAttributePair.getSecond());
-//            statement.addExpression(getExpressionAddJoins());
-//            clearMockCallSequence();
-//            return DbObjectSelector.countSumFromDbAsLong(sumAtt, statement);
-//        }
-//
-//        public double getSum(double mock){
-//            Pair<Class, String> sourceAttributePair = getSourceAttributePair();
-//            String sumAtt = creator.makeAttributeIdentifier(sourceAttributePair.getFirst(), sourceAttributePair.getSecond());
-//            statement.addExpression(getExpressionAddJoins());
-//            clearMockCallSequence();
-//            return DbObjectSelector.countSumFromDbAsDouble(sumAtt, statement);
-//        }
-
 
         /**
          * Set limit
@@ -315,14 +264,6 @@ public class NQL {
             return this;
         }
 
-//
-//        /**
-//         * Return the number of results of the query
-//         * @return result count.
-//         */
-//        public int getCount() {
-//            return selectCountFromDb();
-//        }
 
         /**
          * Execute query
@@ -333,48 +274,104 @@ public class NQL {
             return list;
         }
 
-//        /**
-//         * Execute query
-//         * @return result array, possible empty, never null.
-//         */
-//        public T[] getArray() {
-//            List<T> list = getList();
-//            T[] array = (T[]) Array.newInstance(selectClass, list.size());
-//            return  list.toArray(array);
-//        }
-//
-//        /**
-//         * Execute query with limit 1
-//         * @return result if any, else null.
-//         */
-//        public T getFirst() {
-//            limit(1);
-//            List<T> list = getList();
-//            if (list.isEmpty()) return null;
-//            else return list.get(0);
-//        }
+        public <N> List<Pair<String, Long>> getFacet(N variable, int limit) {
+            List<Pair<String, Long>> toReturn = new ArrayList<Pair<String, Long>>();
+            try {
 
-//        /**
-//         * Add join on attribute.
-//         * This enables one to put constraint on the class of the join Attribute.
-//         * Remark that this does not change the type of the elements later fetched (as in SQL).
-//         * @param sourceClass source class
-//         * @param joinAttributeName attribute name
-//         * @return this
-//         */
-//        private SearchQuery<T> joinOn(Class sourceClass, String joinAttributeName) {
-//            creator.addJoin(sourceClass, joinAttributeName);
-//            return this;
-//        }
+                List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
+                Pair<Class, String> pair = getSourceAttributePair();
+                String attributeIdentifier = makeAttributeIdentifier(pair);
+                clearMockCallSequence();
 
-//        private Expression getExpressionAddJoins() {
-//            Constraint[] constraints = rootConstraints.toArray((Constraint[]) Array.newInstance(Constraint.class, rootConstraints.size()));
-//            AllConstraint allConstraint = new AllConstraint(constraints);
-//            for (Pair<Class, String> joint: allConstraint.getJoints()) {
-//                joinOn(joint.getFirst(), joint.getSecond());
-//            }
-//            return allConstraint.getExpression();
-//        }
+
+                buildQuery();
+                SolrServer solrServer = ModelObjectSearchService.solrServer(selectClass);
+
+                solrQuery.setFacet(true);
+                solrQuery.setFacetLimit(limit);
+                solrQuery.addFacetField(attributeIdentifier);
+
+                QueryResponse response = solrServer.query(solrQuery);
+                List<FacetField.Count> facets = response.getFacetFields().get(0).getValues();
+                for (FacetField.Count facet : facets) {
+                    toReturn.add(new Pair<String, Long>(facet.getName(), facet.getCount()));
+                }
+
+            } catch (Exception e){
+                log.error("Some error in getMax() : " + e, e);
+                throw new RuntimeException("getMax - error", e);
+            }
+
+            return toReturn;
+        }
+
+
+
+
+        public <N extends Number> NStats<N> getStats(N variable) {
+            NStats<N> nStats = new NStats<N>();
+            try {
+
+                List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
+                Pair<Class, String> pair = getSourceAttributePair();
+                String attributeIdentifier = makeAttributeIdentifier(pair);
+                clearMockCallSequence();
+
+
+                buildQuery();
+                SolrServer solrServer = ModelObjectSearchService.solrServer(selectClass);
+
+                solrQuery.setGetFieldStatistics(true);
+                solrQuery.setParam("stats.field", attributeIdentifier);
+                solrQuery.setParam("stats.facet", attributeIdentifier);
+
+                QueryResponse queryResponse = solrServer.query(solrQuery);
+
+                Map<String, FieldStatsInfo> fieldStatsInfo = queryResponse.getFieldStatsInfo();
+
+                FieldStatsInfo sInfo = fieldStatsInfo.get(attributeIdentifier);
+                if(sInfo == null){
+                    log.warn("Is attribute a @SearchField? ("+ attributeIdentifier +")... ");
+                }
+                nStats.min = (N) sInfo.getMin();
+                nStats.max = (N) sInfo.getMax();
+                nStats.sum = (N) sInfo.getSum();
+                nStats.count = sInfo.getCount();
+                nStats.mean = (N) sInfo.getMean();
+                nStats.stddev = (N) sInfo.getStddev();
+            } catch (Exception e){
+                log.error("Some error in getMax() : " + e, e);
+                throw new RuntimeException("getMax - error", e);
+            }
+
+            return nStats;
+        }
+
+
+        public List<String> suggest(String userInput){
+            ArrayList<String> tags = new ArrayList<String>();
+            try {
+                SolrQuery query = new SolrQuery();
+                query.setRequestHandler("/suggest");
+                query.setQuery(ClientUtils.escapeQueryChars(userInput));
+                SolrServer solrServer = ModelObjectSearchService.solrServer(selectClass);
+                QueryResponse response = solrServer.query(query);
+                Object solrSuggester = ((HashMap) response.getResponse().get("suggest")).get("default");
+                SimpleOrderedMap suggestionsList = ((SimpleOrderedMap<SimpleOrderedMap>)solrSuggester).getVal(0);
+                ArrayList<SimpleOrderedMap> suggestions = (ArrayList<SimpleOrderedMap>)suggestionsList.get("suggestions");
+
+                for(SimpleOrderedMap suggestion : suggestions) {
+                    tags.add((String)suggestion.get("term"));
+                }
+
+            } catch (Exception e) {
+                log.error("Some error when running suggest: " + e, e);
+            }
+            return tags;
+        }
+
+
+
 
 //        public void visit(DbObjectVisitor visitor){
 //            log.debug("Will run: DbObjectSelector.iterateObjectsFromDb(selectClass, statement, visitor)");
@@ -382,10 +379,40 @@ public class NQL {
 //            DbObjectSelector.iterateObjectsFromDb(selectClass, statement, visitor);
 //        }
 //
-//        public SelectSQLStatement getSelectSQLStatement(){
-//            statement.addExpression(getExpressionAddJoins());
-//            return statement;
-//        }    efasdfasdfasdfadsfa asdf asdfasdf
+
+
+        private void buildQuery(){
+            StringBuilder builder = new StringBuilder();
+            solrQuery.setQuery("*:*");
+            for (int i = 0; i < rootConstraints.size(); i++) {
+                Constraint constraint = rootConstraints.get(i);
+                String subQuery = constraint.getExpression().updateSolrQuery(solrQuery);
+                if (subQuery != null) {
+                    builder.append(subQuery);
+                }
+            }
+            String query = builder.toString();
+            if (query == null || query.length() < 2) {
+                query = "*:*";
+            } else {
+                if (preBoost != null) {
+                    query = preBoost + " " + query;
+                }
+            }
+            log.debug("We will query = " + query);
+            solrQuery.setQuery(query);
+            if (startLimit != -1) {
+                solrQuery.setStart(startLimit);
+                solrQuery.setRows(endLimit - startLimit);
+            }
+            if (this.orderByAttribute != null) {
+                log.debug("Will sort by " + orderByAttribute + " with " + this.orderByORDER);
+                solrQuery.addSort(this.orderByAttribute, this.orderByORDER == Order.ASC ? SolrQuery.ORDER.asc : SolrQuery.ORDER.desc);
+            }
+        }
+
+
+
 
         @SuppressWarnings("unchecked")
         private NList<T> selectObjectsFromDb() {
@@ -393,39 +420,16 @@ public class NQL {
 
             List<T> toReturn = new ArrayList<T>();
             try {
-                StringBuilder builder = new StringBuilder();
-                solrQuery.setQuery("*:*");
-                for(int i = 0; i < rootConstraints.size(); i++){
-                    Constraint constraint = rootConstraints.get(i);
-                    String subQuery = constraint.getExpression().updateSolrQuery(solrQuery);
-                    if(subQuery != null){
-                        builder.append(subQuery);
-                    }
-                }
-                String query = builder.toString();
-                if(query == null || query.length() < 2){
-                    query = "*:*";
-                } else {
-                    if(preBoost != null){
-                        query = preBoost + " " + query;
-                    }
-                }
-                log.debug("We will query = " + query);
-                solrQuery.setQuery(query);
-                if(startLimit != -1){
-                    solrQuery.setStart(startLimit);
-                    solrQuery.setRows(endLimit - startLimit);
-                }
-                if(this.orderByAttribute != null){
-                    log.debug("Will sort by " + orderByAttribute + " with " + this.orderByORDER);
-                    solrQuery.addSort(this.orderByAttribute, this.orderByORDER == Order.ASC ? SolrQuery.ORDER.asc : SolrQuery.ORDER.desc);
-                }
+
+                buildQuery();
+
 //                timer.markLap("1");
                 SolrServer solrServer = ModelObjectSearchService.solrServer(selectClass);
 //                timer.markLap("2");
-//                solrQuery.setFields("*, score, _explain_, _Post_pageViewCounter__ID_Counter_count__LONG,_Post_rewardLevelBoost__INT, _Post_creationDate__DATE");
+                solrQuery.setFields("*, score, _explain_");
 //                solrQuery.setParam("bf", "sum(_Post_pageViewCounter__ID_Counter_count__LONG,8)");
                 QueryResponse queryResponse = solrServer.query(solrQuery);
+
 //                timer.markLap("3");
 //                log.debug("queryResponse = " + queryResponse.getResults().size());
 //                log.debug("queryResponse = " + queryResponse.getResults().getNumFound());
@@ -445,7 +449,7 @@ public class NQL {
                     String objectID = entries.get("objectID").toString();
                     if(entries.containsKey("score")){
                         //objectID(0000A460F7A42087E3ABA13176561FCA) has score(0.70710677)rewardBoost(20),(0), (Fri Aug 05 08:45:32 CEST 2011)
-                        log.debug("objectID("+ objectID +") has score("+ entries.get("score")+")rewardBoost("+ entries.get("_Post_rewardLevelBoost__INT") +"),("+ entries.get("_Post_pageViewCounter__ID_Counter_count__LONG") +"), ("+ entries.get("_Post_creationDate__DATE") +")");
+                        log.debug("objectID("+ objectID +") has score("+ entries.get("score")+")");
                     }
                     if(entries.containsKey("_explain_")){
                         //objectID(0000A460F7A42087E3ABA13176561FCA) has score(0.70710677)rewardBoost(20),(0), (Fri Aug 05 08:45:32 CEST 2011)

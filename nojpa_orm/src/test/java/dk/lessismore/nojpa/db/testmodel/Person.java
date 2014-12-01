@@ -39,9 +39,15 @@ public interface Person extends ModelObjectInterface {
     float getSomeFloat();
     void setSomeFloat(float countOfCars);
 
+    @SearchField
+    double getSomeDouble();
+    void setSomeDouble(double someDouble);
+
+    @SearchField
     long getCountOfFriends();
     void setCountOfFriends(long countOfFriends);
 
+    @SearchField
     String getDescription();
     @DbStrip (stripItSoft = true)
     void setDescription(String description);
