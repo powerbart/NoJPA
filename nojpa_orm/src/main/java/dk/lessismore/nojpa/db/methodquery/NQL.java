@@ -274,7 +274,7 @@ public class NQL {
             return list;
         }
 
-        public <N> List<Pair<String, Long>> getFacet(N variable, int limit) {
+        public <N> List<Pair<String, Long>> getCloud(N variable, int limit) {
             List<Pair<String, Long>> toReturn = new ArrayList<Pair<String, Long>>();
             try {
 

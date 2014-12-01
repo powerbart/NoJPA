@@ -520,7 +520,7 @@ public class NQLTest {
         }
         solrService.commit();
 
-        List<Pair<String, Long>> ss = NQL.search(mPerson).search(mPerson.getName(), NQL.Comp.EQUAL, "person").getFacet(mPerson.getName(), 2);
+        List<Pair<String, Long>> ss = NQL.search(mPerson).search(mPerson.getName(), NQL.Comp.EQUAL, "person").getCloud(mPerson.getName(), 2);
 
 //        ArrayList<FacetField.Count> tags = new ArrayList<FacetField.Count>();
 //        try {
