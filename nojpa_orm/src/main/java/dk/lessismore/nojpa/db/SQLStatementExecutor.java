@@ -21,6 +21,17 @@ import java.util.List;
  */
 public class SQLStatementExecutor {
 
+    static {
+        try{
+            SQLStatementExecutor.doQuery("select 1+1;");
+        } catch (Exception e){
+            System.out.println("Some ERROR when warming up.... " + e);
+            e.printStackTrace();
+        }
+    }
+
+
+
     private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(SQLStatementExecutor.class);
     private static boolean updateSqlToFile = false;
     private static boolean selectSqlToFile = false;

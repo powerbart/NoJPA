@@ -29,7 +29,7 @@ public class ReflectionUtil {
 
     static {
         PropertyResources resources = PropertyService.getInstance().getPropertyResources("GenericHtmlAdmin");
-        Vector list = resources.getList("model_packages");
+        List list = resources.getList("model_packages");
         if(list != null){
             model_packages = (String[]) list.toArray(new String[list.size()]);
         }

@@ -372,6 +372,16 @@ public class DatabaseCreator {
 		return methodName.substring(3, 4).toLowerCase() + methodName.substring(4);
 	}
 
+    static {
+        try{
+            SQLStatementExecutor.doQuery("select 1+1;");
+        } catch (Exception e){
+            System.out.println("Some ERROR when warming up.... " + e);
+            e.printStackTrace();
+        }
+    }
+
+
     public static void main(String[] args) throws Exception {
         DatabaseCreator.checkDatabase(args[0]);
     }
