@@ -274,6 +274,18 @@ public class NQL {
             return list;
         }
 
+        public T getFirst() {
+            NList<T> list = limit(1).getList();
+            if (list.size() > 0) {
+                return list.get(0);
+            }
+            return null;
+        }
+
+        public long getCount() {
+            return limit(1).getList().getNumberFound();
+        }
+
         public <N> List<Pair<String, Long>> getCloud(N variable, int limit) {
             List<Pair<String, Long>> toReturn = new ArrayList<Pair<String, Long>>();
             try {
