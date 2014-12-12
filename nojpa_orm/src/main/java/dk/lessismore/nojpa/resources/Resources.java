@@ -204,13 +204,13 @@ abstract public class Resources {
      * elements will be read as a string and placed in a vector.
      * If the attribute is null; an empty list will be returned.
      */
-    public Vector<String> getList(String key, String separator) {
-        Vector<String> list = new Vector<String>(10);
+    public List<String> getList(String key, String separator) {
+        List<String> list = new ArrayList<String>(10);
         String listStr = getString(key);
         if(listStr != null) {
             StringTokenizer listTokens = new StringTokenizer(listStr, separator);
             while(listTokens.hasMoreTokens())
-                list.addElement(listTokens.nextToken().trim());
+                list.add(listTokens.nextToken().trim());
         }
         return list;
     }
@@ -218,7 +218,7 @@ abstract public class Resources {
     /**
      * Gets a list from the attribute where the elements are separated with commas.
      */
-    public Vector getList(String key) {
+    public List<String> getList(String key) {
         return getList(key, ",");
     }
 
@@ -235,14 +235,14 @@ abstract public class Resources {
      * the names which contains the given string.
      * The names which match (or partly match) will be returned in a vector list.
      */
-    public Vector getMatchingResourceNames(String match) {
-        Vector matches = new Vector(20);
+    public List getMatchingResourceNames(String match) {
+        List<String> matches = new ArrayList<String>(20);
         Enumeration es = getResourceNames();
         if(es != null) {
             while(es.hasMoreElements()) {
                 String resourceName = (String)es.nextElement();
                 if(resourceName.startsWith(match))
-                    matches.addElement(resourceName);
+                    matches.add(resourceName);
             }
         }
         return matches;

@@ -1,7 +1,9 @@
 package dk.lessismore.nojpa.db.connectionpool;
 
+import dk.lessismore.nojpa.db.statements.SQLStatementFactory;
 import dk.lessismore.nojpa.pool.factories.*;
 import java.sql.*;
+import java.util.Enumeration;
 
 import dk.lessismore.nojpa.resources.*;
 import org.apache.log4j.Logger;
@@ -32,8 +34,9 @@ public class ConnectionFactory implements ResourceFactory {
     private String dbName = "test";
     private String user = "";
     private String password = "";
-    private String driverName = "com.mysql.jdbc.Driver"; //  "org.gjt.mm.mysql.Driver"; "com.mysql.jdbc.Driver";
+    private String driverName = ""; //com.mysql.jdbc.Driver  "org.gjt.mm.mysql.Driver"; "com.mysql.jdbc.Driver";
     private String db = "mysql";
+    private String dn = "some";
 
     public ConnectionFactory() {
         ConnectionFactory.resources = new PropertyResources("db");
@@ -102,9 +105,10 @@ public class ConnectionFactory implements ResourceFactory {
     }
     public String getDriverName() {
         if(resources.gotResource("driverName"))
-            resources.getString("driverName");
+            driverName = resources.getString("driverName");
         return driverName;
     }
+
     public void setDb(String db) {
         this.db = db;
     }
@@ -127,11 +131,30 @@ public class ConnectionFactory implements ResourceFactory {
     public Object makeResource() {
         String conStr = null;
         try {
-            //log.debug("Making connection");
-            Class.forName(getDriverName()).newInstance();
-            conStr = "jdbc:"+getDb()+"://"+getIp()+"/"+getDbName();
-            log.debug("Creating new DB-Connection " + conStr);
-            return DriverManager.getConnection(conStr, getUser(), getPassword());
+//            log.debug("db.properties -- start -----");
+//            for(Enumeration names = resources.getResourceNames(); names.hasMoreElements(); ){
+//                String s = "" + names.nextElement();
+//                log.debug("db.properties : " + s + " = " + resources.getResource(s));
+//            }
+//            log.debug("db.properties -- end ----- ::: (" + getDriverName() + ") getUser("+ getUser() +") res.get("+ resources.getResource("driverName")+") ..... GotIt? " + resources.gotResource("driverName"));
+
+            SQLStatementFactory.setDriverName(getDriverName());
+
+            if(SQLStatementFactory.getDatabaseInstance() == SQLStatementFactory.DatabaseInstance.MYSQL){
+                Class.forName(getDriverName()).newInstance();
+                conStr = "jdbc:"+getDb()+"://"+getIp()+"/"+getDbName();
+                log.debug("Creating new MySQL-DB-Connection " + conStr);
+                return DriverManager.getConnection(conStr, getUser(), getPassword());
+            } else if(SQLStatementFactory.getDatabaseInstance() == SQLStatementFactory.DatabaseInstance.H2){
+                Class.forName(getDriverName()).newInstance();
+                conStr = "jdbc:"+getDb()+":"+getDbName();
+                log.debug("Creating new H2-DB-Connection " + conStr);
+                return DriverManager.getConnection(conStr, getUser(), getPassword());
+            } else if(SQLStatementFactory.getDatabaseInstance() == SQLStatementFactory.DatabaseInstance.ORACLE){
+                throw new RuntimeException("Unsupported database driver - Oracle");
+            } else {
+                throw new RuntimeException("Unsupported database driver ");
+            }
         } catch(Exception ex) {
             String msg = "Could not make db connection: "+conStr+" user="+getUser();
             log.error(msg+" pass="+getPassword(), ex);
