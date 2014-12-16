@@ -345,12 +345,12 @@ public class NQL {
                 if(sInfo == null){
                     log.warn("Is attribute a @SearchField? ("+ attributeIdentifier +")... ");
                 }
-                nStats.min = (N) sInfo.getMin();
-                nStats.max = (N) sInfo.getMax();
-                nStats.sum = (N) sInfo.getSum();
+                nStats.min = (Double) sInfo.getMin();
+                nStats.max = (Double) sInfo.getMax();
+                nStats.sum = (Double) sInfo.getSum();
                 nStats.count = sInfo.getCount();
-                nStats.mean = (N) sInfo.getMean();
-                nStats.stddev = (N) sInfo.getStddev();
+                nStats.mean = (Double) sInfo.getMean();
+                nStats.stddev = (Double) sInfo.getStddev();
             } catch (Exception e){
                 log.error("Some error in getMax() : " + e, e);
                 throw new RuntimeException("getMax - error", e);

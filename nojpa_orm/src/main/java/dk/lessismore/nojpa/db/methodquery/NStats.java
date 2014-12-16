@@ -6,23 +6,23 @@ package dk.lessismore.nojpa.db.methodquery;
  */
 public class NStats<N extends Number> {
 
-    N min;
-    N max;
-    N sum;
+    Double min;
+    Double max;
+    Double sum;
     Long count;
-    N mean;
+    Double mean;
     //N sumOfSquares;
-    N stddev;
+    Double stddev;
 
-    public N getMin() {
+    public Double getMin() {
         return min;
     }
 
-    public N getMax() {
+    public Double getMax() {
         return max;
     }
 
-    public N getSum() {
+    public Double getSum() {
         return sum;
     }
 
@@ -30,11 +30,11 @@ public class NStats<N extends Number> {
         return count;
     }
 
-    public N getMean() {
+    public Double getMean() {
         return mean;
     }
 
-    public N getStddev() {
+    public Double getStddev() {
         return stddev;
     }
 }

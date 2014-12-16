@@ -406,7 +406,19 @@ public class NQLTest {
 
         NStats<Long> stats = NQL.search(mPerson).search(mPerson.getName(), NQL.Comp.EQUAL, "person").getStats(mPerson.getCountOfFriends());
 
-        Person m2Person = NQL.mock(Person.class);
+
+        System.out.println("---------------- RESULTS STARTS -------------");
+        System.out.println("stats.getSum() = " + stats.getSum());
+        System.out.println("stats.getMax() = " + stats.getMax());
+        System.out.println("stats.getMax() = " + stats.getMin());
+        System.out.println("stats.getMax() = " + stats.getStddev());
+        System.out.println("stats.getMax() = " + stats.getMean());
+        Long count = stats.getCount();
+        System.out.println("stats.getMax() = " + count);
+        System.out.println("---------------- RESULTS ENDS -------------");
+
+
+
 
 //        NQL.Constraint A = NQL.has(m2Person.getHistoryStatus()[NQL.ANY], NQL.Comp.EQUAL, PersonStatus.BETWEEN_RELATIONS);
 //        NQL.Constraint Z = NQL.has(mPerson.getPersonStatus(), NQL.Comp.EQUAL, PersonStatus.BETWEEN_RELATIONS);
