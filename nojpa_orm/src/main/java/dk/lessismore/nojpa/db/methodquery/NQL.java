@@ -343,7 +343,7 @@ public class NQL {
 
                 FieldStatsInfo sInfo = fieldStatsInfo.get(attributeIdentifier);
                 if(sInfo == null){
-                    log.warn("Is attribute a @SearchField? ("+ attributeIdentifier +")... ");
+                    return nStats;
                 }
                 nStats.min = (Double) sInfo.getMin();
                 nStats.max = (Double) sInfo.getMax();

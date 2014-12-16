@@ -404,7 +404,7 @@ public class NQLTest {
         }
         solrService.commit();
 
-        NStats<Long> stats = NQL.search(mPerson).search(mPerson.getName(), NQL.Comp.EQUAL, "person").getStats(mPerson.getCountOfFriends());
+        NStats<Long> stats = NQL.search(mPerson).search(mPerson.getName(), NQL.Comp.EQUAL, "sebastian").getStats(mPerson.getCountOfFriends());
 
 
         System.out.println("---------------- RESULTS STARTS -------------");

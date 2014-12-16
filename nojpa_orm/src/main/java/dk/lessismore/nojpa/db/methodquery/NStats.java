@@ -6,13 +6,13 @@ package dk.lessismore.nojpa.db.methodquery;
  */
 public class NStats<N extends Number> {
 
-    Double min;
-    Double max;
-    Double sum;
-    Long count;
-    Double mean;
+    Double min = 0d;
+    Double max = 0d;
+    Double sum = 0d;
+    Long count = 0l;
+    Double mean = 0d;
     //N sumOfSquares;
-    Double stddev;
+    Double stddev = 0d;
 
     public Double getMin() {
         return min;
