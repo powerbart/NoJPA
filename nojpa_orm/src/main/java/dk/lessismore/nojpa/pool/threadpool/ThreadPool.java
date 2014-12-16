@@ -2,10 +2,10 @@ package dk.lessismore.nojpa.pool.threadpool;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
-import dk.lessismore.reusable_v3.guid.GuidFactory;
-import dk.lessismore.reusable_v3.log.Logger;
-import dk.lessismore.reusable_v3.log.LoggerFactory;
-import dk.lessismore.reusable_v3.utils.SuperIO;
+import dk.lessismore.nojpa.guid.GuidFactory;
+import dk.lessismore.nojpa.utils.SuperIO;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ import java.util.ArrayList;
  */
 public class ThreadPool {
 
-    private final static Logger log = LoggerFactory.getInstance(ThreadPool.class);
+    protected final static Log log = LogFactory.getLog(ThreadPool.class);
 
     private File storeJobDir = null;
     private int threadMaxSize = 10;
@@ -64,7 +64,6 @@ public class ThreadPool {
 
     protected class WorkerThread extends Thread {
 
-        private final Logger log = LoggerFactory.getInstance(WorkerThread.class);
 
         public void run(){
             while(running){

@@ -1,7 +1,8 @@
 package dk.lessismore.nojpa.pool.threadpool;
 
-import dk.lessismore.reusable_v3.log.Logger;
-import dk.lessismore.reusable_v3.log.LoggerFactory;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -14,7 +15,7 @@ import java.util.LinkedList;
  */
 public class MEMThreadPool<E extends ThreadPoolJob> {
 
-    private final static Logger log = LoggerFactory.getInstance(MEMThreadPool.class);
+    protected final static Log log = LogFactory.getLog(MEMThreadPool.class);
 
 
     Thread workers = null;
