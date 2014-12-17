@@ -142,7 +142,7 @@ public class ConnectionFactory implements ResourceFactory {
 
             if(SQLStatementFactory.getDatabaseInstance() == SQLStatementFactory.DatabaseInstance.MYSQL){
                 Class.forName(getDriverName()).newInstance();
-                conStr = "jdbc:"+getDb()+"://"+getIp()+"/"+getDbName();
+                conStr = "jdbc:"+getDb()+"://"+getIp()+":"+getPort()+"/"+getDbName();
                 log.debug("Creating new MySQL-DB-Connection " + conStr);
                 return DriverManager.getConnection(conStr, getUser(), getPassword());
             } else if(SQLStatementFactory.getDatabaseInstance() == SQLStatementFactory.DatabaseInstance.H2){
