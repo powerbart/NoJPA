@@ -33,7 +33,7 @@ import java.util.*;
  * This class can analyse an object and make a create sql statement that match the
  * object attributes.
  *
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  * @version 1.0 21-5-2
  */
 public class DatabaseCreator {
@@ -113,10 +113,18 @@ public class DatabaseCreator {
                 String attributeName = dbAttribute.getAttributeName();
                 DbDataType dataType = new DbDataType(dbAttribute);
                 if (!dbAttribute.isPrimaryKey()) {
-//                    log.debug("makeTableFromClass : targetClass = " + targetClass);
-//                    log.debug("makeTableFromClass : dbAttribute.getAttributeName() = " + dbAttribute.getAttributeName());
-//                    log.debug("makeTableFromClass : dbAttribute.getAttribute().getDeclaredAnnotations() = " + dbAttribute.getAttribute().getDeclaredAnnotations());
-                    statement.addAttribute(attributeName, dataType);
+                    log.debug("makeTableFromClass : targetClass = " + targetClass);
+                    log.debug("makeTableFromClass : dbAttribute.getAttributeName() = " + dbAttribute.getAttributeName());
+                    log.debug("makeTableFromClass : dbAttribute.getAttribute().getDeclaredAnnotations() = " + dbAttribute.getAttribute().getDeclaredAnnotations());
+                    if(dbAttribute.isTranslatedAssociation()){
+                        statement.addAttribute(attributeName + "Locale", new DbDataType(DbDataType.DB_CHAR, 2));
+                        statement.addAttribute(attributeName, dataType);
+                    } else {
+                        statement.addAttribute(attributeName, dataType);
+                    }
+
+
+
                 } else {
                     statement.addAttribute(attributeName, dataType, new int[]{CreateSQLStatement.PROPERTY_NOT_NULL});
                     statement.addPrimaryKey(attributeName);
@@ -372,14 +380,6 @@ public class DatabaseCreator {
 		return methodName.substring(3, 4).toLowerCase() + methodName.substring(4);
 	}
 
-    static {
-        try{
-            SQLStatementExecutor.doQuery("select 1+1;");
-        } catch (Exception e){
-            System.out.println("Some ERROR when warming up.... " + e);
-            e.printStackTrace();
-        }
-    }
 
 
     public static void main(String[] args) throws Exception {
