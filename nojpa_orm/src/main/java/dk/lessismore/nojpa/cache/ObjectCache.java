@@ -9,7 +9,7 @@ import java.util.*;
 import java.lang.reflect.Proxy;
 
 /**
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  * @version 1.0 21-5-2
  */
 public class ObjectCache implements ObjectCacheInterface {

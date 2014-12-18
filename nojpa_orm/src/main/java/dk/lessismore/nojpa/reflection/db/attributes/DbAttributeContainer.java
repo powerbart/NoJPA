@@ -16,7 +16,7 @@ import java.util.*;
  * dont; the analysation will go wrong. When you have made a new instance of this
  * class please initialize it by calling <tt>setAttributeContainer</tt>.
  *
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  * @version 1.0 21-5-2
  */
 public class DbAttributeContainer {

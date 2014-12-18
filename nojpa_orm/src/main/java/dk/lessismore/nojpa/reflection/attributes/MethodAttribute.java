@@ -16,7 +16,7 @@ import dk.lessismore.nojpa.utils.Strings;
  * This class can access an attribute in a class with get and set methods.
  *
  * @version 1.0 21-5-2
- * @author LESS-IS-MORE ApSs
+ * @author LESS-IS-MOREs
  */
 public class MethodAttribute extends Attribute {
 

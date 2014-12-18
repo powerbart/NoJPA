@@ -1,5 +1,6 @@
 package dk.lessismore.nojpa.reflection.db.model;
 
+import dk.lessismore.nojpa.reflection.translate.TranslateService;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServer;
@@ -13,6 +14,7 @@ import org.apache.solr.core.CoreContainer;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by niakoi on 7/23/14.
@@ -21,6 +23,10 @@ public class SolrServiceImpl implements SolrService {
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(SolrServiceImpl.class);
 
     private static CoreContainer coreContainer;
+
+    private static TranslateService translateService = null;
+    private static Locale[] locales = null;
+
 
     private SolrServer server;
     private String coreName = "";
@@ -35,6 +41,12 @@ public class SolrServiceImpl implements SolrService {
 
     public void setCleanOnStartup(boolean cleanOnStartup) {
         this.cleanOnStartup = cleanOnStartup;
+    }
+
+    @Override
+    public void addTranslateService(TranslateService translateService, Locale... locales) {
+        SolrServiceImpl.translateService = translateService;
+        SolrServiceImpl.locales = locales;
     }
 
     public SolrServer getServer() {

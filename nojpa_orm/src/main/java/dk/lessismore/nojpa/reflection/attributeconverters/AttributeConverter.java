@@ -10,7 +10,7 @@ import java.lang.reflect.*;
  * converts arrays of the given class type.
  *
  * @version 1.0 21-5-2
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  */
 public abstract class AttributeConverter {
 

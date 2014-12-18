@@ -10,7 +10,7 @@ import dk.lessismore.nojpa.reflection.util.*;
  * This class can access an attribute in a class by a public field in the class.
  *
  * @version 1.0 21-5-2
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  */
 public class FieldAttribute extends Attribute {
 

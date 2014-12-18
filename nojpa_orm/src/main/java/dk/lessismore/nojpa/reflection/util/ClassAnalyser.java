@@ -10,7 +10,7 @@ import java.lang.reflect.*;
  * to have when you are dealing with reflection.
  *
  * @version 1.0 21-5-2
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  */
 public class ClassAnalyser {
 
@@ -143,11 +143,14 @@ public class ClassAnalyser {
     public static boolean isValidGetMethod(Method method) {
         String name = method.getName();
 
-        final boolean result = name.startsWith("get") &&
-                method.getParameterTypes().length == 0 &&
+        final boolean result =
+                ((name.startsWith("get") && method.getParameterTypes().length == 0)
+                ||
+                 (name.startsWith("get") && method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(Locale.class)))
+                &&
                 !method.getReturnType().getName().equalsIgnoreCase("void") &&
                 !method.getName().equalsIgnoreCase("getClass");
-        //log.debug("ClassAnalyser.isValidGetMethod("+ method.getDeclaringClass().getSimpleName() +"." + name + ") = " + result);
+        log.debug("ClassAnalyser.isValidGetMethod("+ method.getDeclaringClass().getSimpleName() +"." + name + ") = " + result);
         return result;
     }
 
@@ -157,7 +160,10 @@ public class ClassAnalyser {
     public static boolean isValidSetMethod(Method method) {
         String name = method.getName();
         if(name.startsWith("set"))
-            return method.getParameterTypes().length == 1 && method.getReturnType().getName().equalsIgnoreCase("void");
+            return (method.getParameterTypes().length == 1 && method.getReturnType().getName().equalsIgnoreCase("void")) ||
+                    (method.getParameterTypes().length == 2 && method.getReturnType().getName().equalsIgnoreCase("void") && method.getParameterTypes()[1].equals(Locale.class))
+
+                    ;
         else
             return false;
 

@@ -16,7 +16,7 @@ import java.util.*;
  * there have been made a number of generic methods called <tt>makesDirty</tt>. This will automaticly determine if the
  * attribute is change (this is allso the case with arrays). adasd
  *
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  * @version 1.0 21-5-2
  */
 @XmlAccessorType(XmlAccessType.NONE)

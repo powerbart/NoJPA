@@ -13,5 +13,16 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface SearchField {
 
+    public static final String NULL = "";
+
+    public boolean translate() default false;
+    public boolean searchReverse() default false;
+    public float boostFactor() default 3f;
+    public float reverseBoostFactor() default 0.3f;
+    public String dynamicSolrPostName() default NULL;
+
+
+
+
 }
 

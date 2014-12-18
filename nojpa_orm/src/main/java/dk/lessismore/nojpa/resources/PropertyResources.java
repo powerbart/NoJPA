@@ -15,7 +15,7 @@ import java.io.*;
  * <br>NB: Remember that the property which this class should represent should be
  * in the classpath before execution of the program !
  *
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  * @version 1.0 25-7-02
  */
 public class PropertyResources extends Resources {

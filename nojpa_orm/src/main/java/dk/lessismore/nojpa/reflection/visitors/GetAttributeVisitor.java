@@ -8,7 +8,7 @@ import java.util.*;
  * desired attribute form an attribute path name.
  *
  * @version 1.0 21-5-2
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  */
 public class GetAttributeVisitor implements AttributeContainerVisitor {
 

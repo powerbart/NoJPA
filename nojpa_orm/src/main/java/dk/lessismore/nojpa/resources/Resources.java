@@ -11,7 +11,7 @@ import java.util.*;
  * <br>This class is declared abstract. So the specific code that works apon the different
  * resource origins, will be implementet in the sub class; and not in the super class.
  *
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  * @version 1.0 25-7-02
  */
 abstract public class Resources {

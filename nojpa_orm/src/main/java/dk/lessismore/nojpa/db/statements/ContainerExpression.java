@@ -6,7 +6,7 @@ package dk.lessismore.nojpa.db.statements;
  * (!exp1! and !exp2! and !exp2!). The expressions can either be Container
  * expressions or Leaf expressions.
  *
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  * @version 1.0 25-7-02
  */
 public interface ContainerExpression extends Expression {

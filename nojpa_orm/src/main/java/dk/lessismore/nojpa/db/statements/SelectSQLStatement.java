@@ -3,7 +3,7 @@ package dk.lessismore.nojpa.db.statements;
 /**
  * This interface defines the functionality of an select sql statement.
  *
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  * @version 1.0 25-7-02
  */
 public interface SelectSQLStatement extends WhereSQLStatement, SQLStatement {

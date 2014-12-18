@@ -15,7 +15,7 @@ package dk.lessismore.nojpa.db.statements;
  * string; or you forget an condition in the where statement. This takes a lot
  * of time to debug. This is what this is made to solve.
  *
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  * @version 1.0 25-7-02
  */
 public interface SQLStatement {

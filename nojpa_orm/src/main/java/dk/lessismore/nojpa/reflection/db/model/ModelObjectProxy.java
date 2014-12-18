@@ -122,6 +122,36 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
                 }
             }
             return null;
+        } else if(name.startsWith("set") && (objects != null && objects.length == 2)) {
+            ModelObjectMethodListener annotation = method.getAnnotation(ModelObjectMethodListener.class);
+            ModelObjectMethodListener.MethodListener methodListener = null;
+            if(annotation != null && annotation.methodListener() != null){
+                if(!methodListenerMap.containsKey(Thread.currentThread().getId() +":"+ method.getName())){
+                    methodListenerMap.put(Thread.currentThread().getId() +":"+ method.getName(), "1");
+                    try{
+                        methodListener = annotation.methodListener().newInstance();
+                        methodListener.preRun(object, method.getName(), objects);
+                    } catch (Exception e){
+                        log.error("Error when calling preRun " + annotation.methodListener().getCanonicalName() + " on " + interfaceClass.getCanonicalName() + ":" + method.getName() + " .... : " + e, e);
+                    }
+                    methodListenerMap.remove(Thread.currentThread().getId() +":"+ method.getName());
+                }
+            }
+            setAssociation(method, objects);
+
+            if(methodListener != null){
+                if(!methodListenerMap.containsKey(Thread.currentThread().getId() +":"+ method.getName())){
+                    methodListenerMap.put(Thread.currentThread().getId() +":"+ method.getName(), "1");
+                    try{
+                        methodListener = annotation.methodListener().newInstance();
+                        methodListener.postRun(object, method.getName(), null, objects);
+                    } catch (Exception e){
+                        log.error("Error when calling postRun " + annotation.methodListener().getCanonicalName() + " on " + interfaceClass.getCanonicalName() + ":" + method.getName() + " .... : " + e, e);
+                    }
+                    methodListenerMap.remove(Thread.currentThread().getId() +":"+ method.getName());
+                }
+            }
+            return null;
         } else {
             throw new RuntimeException("Unknown method: " + name);
         }
@@ -141,20 +171,30 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
         } else if(Calendar.class.isAssignableFrom(parameterClass)) {
             setAssociation((Calendar) object, name);
         } else if(String.class.isAssignableFrom(parameterClass)) {
+            String value = null;
+            String locale = null;
+            if(method.getParameterTypes().length == 1){
+                value = (String) object;
+            } else {
+                value = (String) ((Object[]) object)[0];
+                locale = "" +  (((Object[]) object)[1]);
+                primitiveAssociationsOfStrings.put(name + "Locale", locale);
+            }
+
             DbStrip dbStrip = method.getAnnotation(DbStrip.class);
-            if (object != null) {
-                object = ((String) object).replaceAll("[^\\u0000-\\u02B8\\u0390-\\u057F]", "");     //asd
+            if (value != null) {
+                value = ((String) value).replaceAll("[^\\u0000-\\u02B8\\u0390-\\u057F]", "");     //asd
             }
             if(dbStrip != null && object != null){
                 if(!dbStrip.stripItHard() && !dbStrip.stripItSoft()) {
-                    setAssociationWithOutAnyFilters((String) object, name);
+                    setAssociationWithOutAnyFilters((String) value, name);
                 } else if(dbStrip.stripItSoft()){
-                    setAssociationWithSoftFilter((String) object, name);
+                    setAssociationWithSoftFilter((String) value, name);
                 } else {
-                    setAssociation((String) object, name);
+                    setAssociation((String) value, name);
                 }
             } else {
-                setAssociation((String) object, name);
+                setAssociation((String) value, name);
             }
         } else if(Float.class.isAssignableFrom(parameterClass) || Float.TYPE.isAssignableFrom(parameterClass)) {
             setAssociation((Float) object, name);
@@ -428,6 +468,11 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
         }
     }
 
+
+
+    public Object getPrimitiveAssociationsOfStrings(String fieldName) {
+        return primitiveAssociationsOfStrings.get(fieldName);
+    }
     protected Object getAssociation(String fieldName) {
         return getAssociation(fieldName, (Method) null);
     }

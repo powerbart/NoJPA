@@ -7,7 +7,7 @@ package dk.lessismore.nojpa.pool.factories;
  * the close function is that often the objects (database or socket connections)
  * has to be closed proberly again.
  *
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  * @version 1.0 14-01-02
  */
 public interface ResourceFactory {

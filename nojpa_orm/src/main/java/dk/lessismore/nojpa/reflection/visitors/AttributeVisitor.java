@@ -8,7 +8,7 @@ import dk.lessismore.nojpa.reflection.attributes.*;
  * want to visit all attributes in a attribute container and recursivly down.
  *
  * @version 1.0 21-5-2
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  */
 public interface AttributeVisitor {
 

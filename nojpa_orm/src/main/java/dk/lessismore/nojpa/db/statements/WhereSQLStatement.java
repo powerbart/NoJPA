@@ -6,7 +6,7 @@ import java.util.*;
  * This interface defines the functionality of the where part of an
  * select or delete sql statement.
  *
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  * @version 1.0 25-7-02
  */
 public interface WhereSQLStatement {

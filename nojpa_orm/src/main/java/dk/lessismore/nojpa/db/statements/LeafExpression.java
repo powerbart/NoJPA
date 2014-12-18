@@ -6,7 +6,7 @@ import java.util.*;
  * This interface represents an singel expression. This could be
  * a=2... or forinstance a.primaryKey = b.primarykey.
  *
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  * @version 1.0 25-7-02
  */
 public interface LeafExpression extends Expression {

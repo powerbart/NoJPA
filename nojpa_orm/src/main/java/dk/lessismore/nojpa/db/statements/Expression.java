@@ -10,7 +10,7 @@ package dk.lessismore.nojpa.db.statements;
  * other expressions <tt>(ContainerExpression)</yy >or one one expression
  * <tt>(LeafExpression)</tt> like <tt>a = b</tt>.
  *
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  * @version 1.0 25-7-02
  */
 public interface Expression {

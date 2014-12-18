@@ -33,7 +33,7 @@ import dk.lessismore.nojpa.cache.*;
  * go in an eternal loop. And yes it can handle this and prevent the loop; by registrating
  * the objects which allready has been saved.
  *
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  * @version 1.0 21-5-2
  */
 public class DbObjectWriter {
@@ -202,15 +202,19 @@ public class DbObjectWriter {
             String attributeName = dbAttribute.getAttributeName();
             //If its not an association attribute.
             if (!dbAttribute.isAssociation()) {
-                Object value = null;
-                if(attributeName.equals("lastModified")){
-                    value = Calendar.getInstance();
-                    dbAttributeContainer.setAttributeValue(modelObject.getProxyObject(), dbAttribute, value);
-                } else {
-                    value = dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
-                }
+//TODO:                if(dbAttribute.isTranslatedAssociation()){
+//                    ((ModelObject) modelObject).getProxyObject().
+//                } else {
+                    Object value = null;
+                    if(attributeName.equals("lastModified")){
+                        value = Calendar.getInstance();
+                        dbAttributeContainer.setAttributeValue(modelObject.getProxyObject(), dbAttribute, value);
+                    } else {
+                        value = dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
+                    }
 //                log.debug("saveAttributeValues: for " + dbAttribute.getAttributeName() + "("+ value +") on " + modelObject );
-                addAttributeValueToStatement(dbAttribute, insertSQLStatement, value);
+                    addAttributeValueToStatement(dbAttribute, insertSQLStatement, value);
+//                }
             }
             //If its an singel association we must save its id as a string
             else if (!dbAttribute.isMultiAssociation()) {

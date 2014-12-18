@@ -13,11 +13,12 @@ import java.lang.annotation.Annotation;
  * be based on either an method access or an field access.
  *
  * @version 1.0 21-5-2
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  */
 public abstract class Attribute {
 
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(Attribute.class);
+    protected boolean translatedAssociation = false;
 
     public Attribute() {}
 
@@ -230,4 +231,11 @@ public abstract class Attribute {
     }
 
 
+    public boolean isTranslatedAssociation() {
+        return translatedAssociation;
+    }
+
+    public void setTranslatedAssociation(boolean translatedAssociation) {
+        this.translatedAssociation = translatedAssociation;
+    }
 }

@@ -16,7 +16,7 @@ import java.util.List;
  * If you want the sql statements can allso be redirected to an sql file, instead of
  * being executed.
  *
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  * @version 1.0 25-7-02
  */
 public class SQLStatementExecutor {

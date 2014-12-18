@@ -5,7 +5,7 @@ import dk.lessismore.nojpa.db.statements.DropSQLStatement;
 /**
  * Mysql statement implementation
  *
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  * @version 1.0 25-7-02
  */
 public class OracleDropStatement extends OracleStatement implements DropSQLStatement {
