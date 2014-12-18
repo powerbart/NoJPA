@@ -29,7 +29,7 @@ import java.lang.annotation.Annotation;
  * If the multiassociation is an array of primitives and not of modelobjects, the association
  * table; will consist of the primary key of the object; and the different array elements.
  *
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  * @version 1.0 21-5-2
  */
 public class DbAttribute implements Serializable {
@@ -241,5 +241,7 @@ public class DbAttribute implements Serializable {
     }
 
 
-
+    public boolean isTranslatedAssociation() {
+        return attribute.isTranslatedAssociation();
+    }
 }
