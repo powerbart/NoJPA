@@ -50,7 +50,7 @@ public class NoJpaSerializer extends JsonSerializer<ModelObjectInterface> {
                     jgen.writeObject(getObject(method, method.getReturnType(), method.invoke(value)));
                 }
             } catch (Exception e) {
-                log.error("can't serialize field: " + method.getName(), e);
+                log.error("can't serialize field: "+ ((ModelObject) value).getInterface().getSimpleName() +"["+ value.getObjectID() +"]." + method.getName(), e);
             }
         }
         jgen.writeEndObject();
