@@ -16,7 +16,7 @@ import org.apache.log4j.Logger;
  * the old bucket have been moved; the old bucket will be cleared, and now this will be the new bucket. </ul> In this way; we do not throw away valuable
  * objectArray which is offen requested.
  *
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  * @version 1.0 21-5-2
  */
 public class ObjectArrayCache implements Serializable {

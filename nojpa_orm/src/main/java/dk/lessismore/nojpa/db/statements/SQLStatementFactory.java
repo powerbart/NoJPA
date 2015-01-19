@@ -8,7 +8,7 @@ import dk.lessismore.nojpa.db.statements.mysql.*;
  * like forinstance update/insert statements. The produced sql statements will
  * be instances which will make sql statements optimesed for a specific database.
  *
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  * @version 1.0 25-7-02
  */
 public class SQLStatementFactory {

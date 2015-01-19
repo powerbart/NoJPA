@@ -11,7 +11,7 @@ import java.util.Properties;
  * specify the nr of pool connections in this file under the property
  * <tt>nrOfPoolConnections</tt>...
  *
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  * @version 1.0 25-7-02
  */
 public class ConnectionPoolFactory  {

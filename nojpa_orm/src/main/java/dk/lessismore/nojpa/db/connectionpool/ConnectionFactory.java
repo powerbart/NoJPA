@@ -21,7 +21,7 @@ import org.apache.log4j.Logger;
  * <li>dbpasswd: The password of the database user.
  * </ul>
  *
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  * @version 1.0 25-7-02
  */
 public class ConnectionFactory implements ResourceFactory {

@@ -12,7 +12,7 @@ import java.util.Calendar;
 /**
  * Mysql statement implementation
  *
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  * @version 1.0 25-7-02
  */
 public class OracleLeafExpression implements LeafExpression {

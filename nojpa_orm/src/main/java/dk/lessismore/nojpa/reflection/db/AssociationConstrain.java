@@ -8,7 +8,7 @@ import java.util.*;
  * possible to set it to allow all associations; or to not allow all associations.
  *
  * @version 1.0 21-5-2
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  */
 public class AssociationConstrain {
 

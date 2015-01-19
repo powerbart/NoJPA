@@ -8,7 +8,7 @@ import java.util.*;
 /**
  * This class is a factory that contains the different caches for the model objects; which is persisted in the db reflection library.
  *
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  * @version 1.0 21-5-2
  */
 public class ObjectCacheFactory {

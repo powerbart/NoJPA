@@ -25,7 +25,7 @@ import org.apache.log4j.Logger;
  * which starts the analysation of the class.
  *
  * @version 1.0 21-5-2
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  */
 public class AttributeContainer {
 
@@ -106,7 +106,7 @@ public class AttributeContainer {
         //Handle get Methods.
         for(int i = 0; i < methods.length; i++) {
 	        //log.debug("findAttributesFromMethods:2 ... " + methods[i].getDeclaringClass());
-            //log.debug(getTargetClass().getName() + ": Current Method: " + methods[i].getName());
+            log.debug(getTargetClass().getName() + ": Current Method: " + methods[i].getName());
             if(staticAttributesAllowed || ClassAnalyser.isMethodStatic(methods[i])) {
                 Method method = methods[i];
                 if(ClassAnalyser.isValidGetMethod(method)) {
@@ -121,10 +121,12 @@ public class AttributeContainer {
                         MethodAttribute methodAttribute = new MethodAttribute();
                         methodAttribute.setDeclaringClass( methods[i].getDeclaringClass() );
                         methodAttribute.setGetMethod(method);
+                        if((method.getName().startsWith("get") && method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(Locale.class))){
+                            methodAttribute.setTranslatedAssociation( true );
+                        }
                         getAttributes().put(methodAttribute.getAttributeName(), methodAttribute);
 			//log.debug("findAttributesFromMethods:5");
-                    }
-                    else if(attribute instanceof MethodAttribute) {
+                    } else if(attribute instanceof MethodAttribute) {
                         MethodAttribute methodAttribute = (MethodAttribute)attribute;
                         methodAttribute.setGetMethod(method);
                     }

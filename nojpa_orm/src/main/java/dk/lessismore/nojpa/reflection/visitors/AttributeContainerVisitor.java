@@ -8,7 +8,7 @@ import dk.lessismore.nojpa.reflection.attributes.*;
  * want to make an visitor which can visit each attributeContainer recursivly.
  *
  * @version 1.0 21-5-2
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  */
 public interface AttributeContainerVisitor {
 

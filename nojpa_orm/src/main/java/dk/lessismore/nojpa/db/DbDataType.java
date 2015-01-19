@@ -15,7 +15,7 @@ import java.lang.annotation.Annotation;
  * integer, double, date etc.
  *
  * @version 1.0 21-5-2
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  */
 public class DbDataType implements Serializable {
 
@@ -36,16 +36,18 @@ public class DbDataType implements Serializable {
 
     private DbAttribute dbAttribute = null;
     private int type = DB_VARCHAR;
+    private int length = -1;
 
     public DbDataType() {}
 
     public DbDataType(int type) {
         this.type = type;
     }
-//    public DbDataType(Class attributeClass) {
-//        setType(attributeClass);
-//    }
-//
+    public DbDataType(int type, int length) {
+        this.type = type;
+        this.length = length;
+    }
+
     public void setDbAttribute(DbAttribute dbAttribute) {
         this.dbAttribute = dbAttribute;
         Annotation[] as = dbAttribute.getAttribute().getDeclaredAnnotations();
@@ -149,7 +151,7 @@ public class DbDataType implements Serializable {
                     }
                 }
                 return "VARCHAR("+ (dbAttribute != null ? dbAttribute.getNrOfCharacters() : 250)+")";
-            case DB_CHAR: return "CHAR("+(dbAttribute != null ? dbAttribute.getNrOfCharacters() : 32)+")";
+            case DB_CHAR: return "CHAR("+(dbAttribute != null ? dbAttribute.getNrOfCharacters() : (length != -1 ? length : 32))+")";
             case DB_INT: return "INT";
             case DB_DOUBLE: return "DOUBLE PRECISION";
             case DB_FLOAT: return "DOUBLE PRECISION";

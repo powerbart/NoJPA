@@ -11,6 +11,7 @@ import dk.lessismore.nojpa.reflection.db.DatabaseCreator;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectSearchService;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
 import dk.lessismore.nojpa.reflection.db.model.SolrServiceImpl;
+import dk.lessismore.nojpa.reflection.translate.LessismoreTranslateServiceImpl;
 import dk.lessismore.nojpa.utils.Pair;
 import junit.framework.Assert;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -49,7 +50,7 @@ public class NQLTest {
         for (int i = 0; i < 10; i++) {
             Person person = ModelObjectService.create(Person.class);
             person.setName("person " + (i % 4));
-            person.setDescription("Hello:ąčęėįšųūž");
+//            person.setDescription("Hello:ąčęėįšųūž");
 
             person.setSomeFloat((float) (20f * Math.random()));
             if (i < 7) {
@@ -73,9 +74,9 @@ public class NQLTest {
         NList<Person> persons = NQL.search(mPerson).getList();
         Assert.assertEquals(persons.getNumberFound(), 10);
 
-        for(int i = 0; i < persons.size(); i++){
-            System.out.println("********************** " + persons.get(i).getDescription());
-        }
+//        for(int i = 0; i < persons.size(); i++){
+//            System.out.println("********************** " + persons.get(i).getDescription());
+//        }
 
 
 
@@ -274,7 +275,7 @@ public class NQLTest {
                 person.setGirlFriend(prev);
             }
 //            person.setName("person " + (i % 4) + );
-            person.setDescription(descs[i % descs.length]);
+//            person.setDescription(descs[i % descs.length]);
             person.setIsSick(i % 2 == 0);
 
             person.setPersonStatus(PersonStatus.BETWEEN_RELATIONS);
@@ -291,7 +292,7 @@ public class NQLTest {
         }
         solrService.commit();
 
-        NList<Person> personsWithoutCar = NQL.search(mPerson).search(mPerson.getName(), NQL.Comp.EQUAL, "person").search(mPerson.getDescription(), NQL.Comp.EQUAL, "person").getList();
+//        NList<Person> personsWithoutCar = NQL.search(mPerson).search(mPerson.getName(), NQL.Comp.EQUAL, "person").search(mPerson.getDescription(), NQL.Comp.EQUAL, "person").getList();
 
         Person m2Person = NQL.mock(Person.class);
 
@@ -331,7 +332,7 @@ public class NQLTest {
             }
             person.setName("person " + (i % 4));
             person.setCountOfCars(i * 100);
-            person.setDescription(descs[i % descs.length]);
+//            person.setDescription(descs[i % descs.length]);
             person.setIsSick(i % 2 == 0);
 
             person.setPersonStatus(PersonStatus.BETWEEN_RELATIONS);
@@ -369,6 +370,7 @@ public class NQLTest {
         String[] descs = new String[]{"Næste generation danske Formel 1-håb er allerede i støbeskeen", "12-årige Noah Watt", "gokart-juniormesterskaber i 2015, EM, VM", "person", "Det koster en hulens masse penge at køre det store program"};
         DatabaseCreator.createDatabase("dk.lessismore.nojpa.db.testmodel");
         SolrServiceImpl solrService = new SolrServiceImpl();
+        solrService.addTranslateService(new LessismoreTranslateServiceImpl("something", "asda"), Locale.US, new Locale("da"),  new Locale("no"),   new Locale("sv"),   new Locale("de"));
         solrService.setCoreName("nojpa");
         solrService.setCleanOnStartup(true);
 
@@ -387,7 +389,7 @@ public class NQLTest {
             person.setName("person " + (i % 4));
             person.setCountOfCars(i * 100);
             person.setCountOfFriends((long) (1000 * Math.random()));
-            person.setDescription(descs[i % descs.length]);
+//            person.setDescription(descs[i % descs.length]);
             person.setIsSick(i % 2 == 0);
 
             person.setPersonStatus(PersonStatus.BETWEEN_RELATIONS);
@@ -456,7 +458,7 @@ public class NQLTest {
             person.setCountOfCars(i * 100);
             person.setSomeDouble( (double) (100 * Math.random()) );
             person.setCountOfFriends((long) (1000 * Math.random()));
-            person.setDescription(descs[i % descs.length]);
+//            person.setDescription(descs[i % descs.length]);
             person.setIsSick(i % 2 == 0);
 
             person.setPersonStatus(PersonStatus.BETWEEN_RELATIONS);
@@ -515,7 +517,7 @@ public class NQLTest {
             person.setCountOfCars(i * 100);
             person.setSomeDouble( (double) (100 * Math.random()) );
             person.setCountOfFriends((long) (1000 * Math.random()));
-            person.setDescription(descs[i % descs.length]);
+//            person.setDescription(descs[i % descs.length]);
             person.setIsSick(i % 2 == 0);
 
             person.setPersonStatus(PersonStatus.BETWEEN_RELATIONS);
@@ -533,39 +535,55 @@ public class NQLTest {
         solrService.commit();
 
         List<Pair<String, Long>> ss = NQL.search(mPerson).search(mPerson.getName(), NQL.Comp.EQUAL, "person").getCloud(mPerson.getName(), 2);
-
-//        ArrayList<FacetField.Count> tags = new ArrayList<FacetField.Count>();
-//        try {
-//            SolrQuery query = new SolrQuery();
-//            //query.setQuery("(_ArticleRunner_article__ID_Article_tags__TXT_ARRAY_Tag_name__TXT_ARRAY:("+ q+" ))");
-//            query.setQuery("*:*");
-////            if(!filterQ.isEmpty()) {
-////                query.addFilterQuery(filterQ); //only active
-////            }
-//            query.setFacet(true);
-//            query.setFacetLimit(40);
-//            query.addFacetField("_Person_isSick__BOOL");
-////            query.addFacetPivotField("_Person_isSick__BOOL, _Person_countOfFriends__LONG");
-////            query.addFacetPivotField();
-//
-////            query.addFacetField("");
-//            QueryResponse response = solrService.query(query);
-//            List<FacetField.Count> facets = response.getFacetFields().get(0).getValues();
-//            for (FacetField.Count facet : facets) {
-//                if(facet.getCount() > 0) {
-//                    tags.add(facet);
-//                }
-//            }
-//            int k = 0;
-//
-//        } catch (Exception e) {
-//            System.out.println("cloud: got some error, ignore it: " + e.getMessage());
-//            e.printStackTrace();
-//        }
-
         int k = 0;
 
+    }
 
+
+
+    @Test
+    public void testReverse() {
+        String[] descs = new String[]{"Næste generation danske Person Formel 1-håb er allerede i støbeskeen", "12-årige PersNoah Watt", "gokart-juniormesterskaber personi 2015, EM, VM", "person", "Det koster en hulens masse penge at køre det store program"};
+        DatabaseCreator.createDatabase("dk.lessismore.nojpa.db.testmodel");
+        SolrServiceImpl solrService = new SolrServiceImpl();
+        solrService.setCoreName("nojpa");
+        solrService.setCleanOnStartup(true);
+
+        ModelObjectSearchService.addSolrServer(Person.class, solrService.getServer());
+        Person mPerson = NQL.mock(Person.class);
+
+        Person prev = null;
+        for (int i = 0; i < 10; i++) {
+            Person person = ModelObjectService.create(Person.class);
+            if(i % 2 == 0){
+                prev = person;
+            } else {
+                prev.setGirlFriend(person);
+                person.setGirlFriend(prev);
+            }
+            person.setName("person " + (i % 4));
+            person.setCountOfCars(i * 100);
+            person.setSomeDouble( (double) (100 * Math.random()) );
+            person.setCountOfFriends((long) (1000 * Math.random()));
+            person.setFun(descs[i % descs.length], new Locale("da"));
+            person.setIsSick(i % 2 == 0);
+
+            person.setPersonStatus(PersonStatus.BETWEEN_RELATIONS);
+//            person.setHistoryStatus(new PersonStatus[]{PersonStatus.BETWEEN_RELATIONS, PersonStatus.SINGLE});
+            person.setSomeFloat((float) (20f * Math.random()));
+            if (i < 7) {
+                Car car = ModelObjectService.create(Car.class);
+                person.setCar(car);
+            }
+            ModelObjectService.save(person);
+            System.out.println("---------------- PUT START -----------------------");
+            ModelObjectSearchService.put(person);
+            System.out.println("---------------- PUT END -----------------------");
+        }
+        solrService.commit();
+
+        List<Pair<String, Long>> ss = NQL.search(mPerson).search(mPerson.getName(), NQL.Comp.EQUAL, "person").getCloud(mPerson.getName(), 2);
+        int k = 0;
 
     }
 

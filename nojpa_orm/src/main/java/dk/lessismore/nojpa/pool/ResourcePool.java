@@ -16,7 +16,7 @@ import dk.lessismore.nojpa.pool.factories.*;
  * there is a common interface called 'ResourceFactory' which all factories must
  * implement, if you want this class to use the factory.   ..
  *
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  * @version 1.0 14-01-02
  */
 public class ResourcePool {

@@ -14,7 +14,7 @@ import org.apache.log4j.Logger;
  * You should call <tt>getDbAttributeContainer</tt> to get the container you are looking for.
  *
  * @version 1.0 21-5-2
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  */
 public class DbClassReflector {
 

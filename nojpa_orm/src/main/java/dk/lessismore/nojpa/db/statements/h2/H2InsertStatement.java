@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * Mysql statement implementation
  *
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  * @version 1.0 25-7-02
  */
 public class H2InsertStatement extends H2Statement implements InsertSQLStatement {

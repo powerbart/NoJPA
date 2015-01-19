@@ -18,7 +18,7 @@ import dk.lessismore.nojpa.cache.*;
  * which associations must be deleted and which may not. This class allso
  * does the job about; removing the object from the cache !!
  *
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  * @version 1.0 21-5-2
  */
 public class DbObjectDeleter {

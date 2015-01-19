@@ -21,7 +21,7 @@ import org.apache.log4j.Logger;
  * which allready has been loaded. Enternal loops, when circular associations is made; is
  * allso prevented.
  *
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  * @version 1.0 21-5-2
  */
 public class DbObjectReader {

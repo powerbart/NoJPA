@@ -14,7 +14,7 @@ import dk.lessismore.nojpa.reflection.db.model.ModelObject;
  * work.
  *
  * @version 1.0 21-5-2
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  */
 public class ClassReflector {
 

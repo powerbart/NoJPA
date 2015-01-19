@@ -9,7 +9,7 @@ import java.util.*;
  * to set an attribute value from a attribute path.
  *
  * @version 1.0 21-5-2
- * @author LESS-IS-MORE ApS
+ * @author LESS-IS-MORE
  */
 public class SetAttributeValueVisitor implements AttributeContainerVisitor {
 
