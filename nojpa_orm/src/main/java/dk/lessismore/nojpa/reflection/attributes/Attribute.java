@@ -1,5 +1,7 @@
 package dk.lessismore.nojpa.reflection.attributes;
 
+import dk.lessismore.nojpa.reflection.db.annotations.DbStrip;
+import dk.lessismore.nojpa.reflection.db.annotations.SearchField;
 import dk.lessismore.nojpa.reflection.visitors.*;
 import dk.lessismore.nojpa.reflection.*;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
@@ -19,6 +21,8 @@ public abstract class Attribute {
 
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(Attribute.class);
     protected boolean translatedAssociation = false;
+    private SearchField searchFieldAnnotation;
+    private DbStrip dbStripAnnotation;
 
     public Attribute() {}
 
@@ -237,5 +241,21 @@ public abstract class Attribute {
 
     public void setTranslatedAssociation(boolean translatedAssociation) {
         this.translatedAssociation = translatedAssociation;
+    }
+
+    public void setSearchFieldAnnotation(SearchField searchFieldAnnotation) {
+        this.searchFieldAnnotation = searchFieldAnnotation;
+    }
+
+    public SearchField getSearchFieldAnnotation() {
+        return searchFieldAnnotation;
+    }
+
+    public DbStrip getDbStripAnnotation() {
+        return dbStripAnnotation;
+    }
+
+    public void setDbStripAnnotation(DbStrip dbStripAnnotation) {
+        this.dbStripAnnotation = dbStripAnnotation;
     }
 }

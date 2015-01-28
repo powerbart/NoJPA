@@ -4,6 +4,8 @@ import java.util.*;
 import java.lang.reflect.*;
 import java.lang.annotation.Annotation;
 
+import dk.lessismore.nojpa.reflection.db.annotations.DbStrip;
+import dk.lessismore.nojpa.reflection.db.annotations.SearchField;
 import dk.lessismore.nojpa.reflection.db.model.ModelObject;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.util.*;
@@ -116,20 +118,27 @@ public class AttributeContainer {
                         continue;
 		    //log.debug("findAttributesFromMethods:4");
                     Attribute attribute = (Attribute)getAttributes().get(attributeName);
+                    MethodAttribute methodAttribute = null;
                     if(attribute == null ) {
                         //This attribute has not been made before. We make it.
-                        MethodAttribute methodAttribute = new MethodAttribute();
-                        methodAttribute.setDeclaringClass( methods[i].getDeclaringClass() );
+                        methodAttribute = new MethodAttribute();
                         methodAttribute.setGetMethod(method);
-                        if((method.getName().startsWith("get") && method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(Locale.class))){
-                            methodAttribute.setTranslatedAssociation( true );
-                        }
+
                         getAttributes().put(methodAttribute.getAttributeName(), methodAttribute);
-			//log.debug("findAttributesFromMethods:5");
                     } else if(attribute instanceof MethodAttribute) {
-                        MethodAttribute methodAttribute = (MethodAttribute)attribute;
+                        methodAttribute = (MethodAttribute)attribute;
                         methodAttribute.setGetMethod(method);
                     }
+
+                    methodAttribute.setDeclaringClass( methods[i].getDeclaringClass() );
+                    SearchField searchFieldAnnotation = method.getAnnotation(SearchField.class);
+                    methodAttribute.setSearchFieldAnnotation(searchFieldAnnotation);
+
+                    if((method.getName().startsWith("get") && method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(Locale.class))){
+                        methodAttribute.setTranslatedAssociation( true );
+                    }
+
+
                 }
             }
         }
@@ -150,8 +159,7 @@ public class AttributeContainer {
                         methodAttribute.setSetMethod(method);
                         //log.debug("method = " + method.getName());
                         getAttributes().put(methodAttribute.getAttributeName(), methodAttribute);
-                    }
-                    else if(attribute instanceof MethodAttribute) {
+                    } else if(attribute instanceof MethodAttribute) {
                         //We have encountered this attribute before (maybe as an get method).
                         MethodAttribute methodAttribute = (MethodAttribute)attribute;
                         Method oldSetMethod = methodAttribute.getSetMethod();
@@ -163,9 +171,13 @@ public class AttributeContainer {
                             Class getMethodReturnClass = methodAttribute.getGetMethod().getReturnType();
                             if(methodParameterClass.getName().equals(getMethodReturnClass.getName()))
                                 methodAttribute.setSetMethod(method);
-                        }
-                        else
+                        } else {
                             methodAttribute.setSetMethod(method);
+                        }
+                    }
+                    DbStrip dbStripAnnotation = method.getAnnotation(DbStrip.class);
+                    if(dbStripAnnotation != null){
+                        attribute.setDbStripAnnotation(dbStripAnnotation);
                     }
                 }
             }

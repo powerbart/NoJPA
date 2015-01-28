@@ -1,5 +1,7 @@
 package dk.lessismore.nojpa.solr;
 
+import dk.lessismore.nojpa.cache.ObjectCacheFactory;
+import dk.lessismore.nojpa.db.methodquery.MQL;
 import dk.lessismore.nojpa.db.methodquery.NList;
 import dk.lessismore.nojpa.db.methodquery.NQL;
 import dk.lessismore.nojpa.db.methodquery.NStats;
@@ -542,7 +544,14 @@ public class NQLTest {
 
 
     @Test
-    public void testReverse() {
+    public void testValue() {
+        Calendar value = Calendar.getInstance();
+        System.out.println(value instanceof Calendar);
+
+
+    }
+    @Test
+    public void testAnnotation() {
         String[] descs = new String[]{"Næste generation danske Person Formel 1-håb er allerede i støbeskeen", "12-årige PersNoah Watt", "gokart-juniormesterskaber personi 2015, EM, VM", "person", "Det koster en hulens masse penge at køre det store program"};
         DatabaseCreator.createDatabase("dk.lessismore.nojpa.db.testmodel");
         SolrServiceImpl solrService = new SolrServiceImpl();
@@ -563,9 +572,12 @@ public class NQLTest {
             }
             person.setName("person " + (i % 4));
             person.setCountOfCars(i * 100);
-            person.setSomeDouble( (double) (100 * Math.random()) );
+            person.setSomeDouble((double) (100 * Math.random()));
             person.setCountOfFriends((long) (1000 * Math.random()));
             person.setFun(descs[i % descs.length], new Locale("da"));
+            person.setUrl("http://dr.dk/fun");
+            System.out.println("FIRST: Should not be null: " + person.getFun());
+
             person.setIsSick(i % 2 == 0);
 
             person.setPersonStatus(PersonStatus.BETWEEN_RELATIONS);
@@ -582,10 +594,25 @@ public class NQLTest {
         }
         solrService.commit();
 
-        List<Pair<String, Long>> ss = NQL.search(mPerson).search(mPerson.getName(), NQL.Comp.EQUAL, "person").getCloud(mPerson.getName(), 2);
-        int k = 0;
+        List<Person> list = MQL.select(Person.class).getList();
+        for(int i = 0; i < 1; i++){
+            System.out.println("Should not be null: " + list.get(i).getFun());
+        }
+
+        ObjectCacheFactory.getInstance().getObjectCache(Person.class).clear();
+        list = MQL.select(Person.class).getList();
+        for(int i = 0; i < 1; i++){
+            System.out.println("Should not be null: " + list.get(i).getFun());
+        }
+
+        Person mock = NQL.mock(Person.class);
+        long count = NQL.search(mock).search(mock.getUrl(), NQL.Comp.EQUAL, "http://dr.dk/").getCount();
+        System.out.println("count = " + count);
+
 
     }
+
+
 
 
 

@@ -5,6 +5,7 @@ import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
@@ -66,8 +67,13 @@ public class MethodAttribute extends Attribute {
         }
         Object[] arguments = { value };
         try{
-            _setMethod.invoke(objectToSetOn, arguments);
-            return true;
+            if(_setMethod.getParameterTypes().length == 2 && _setMethod.getParameterTypes()[1].equals(Locale.class)){
+                _setMethod.invoke(objectToSetOn, new Object[]{value, null});
+                return true;
+            } else {
+                _setMethod.invoke(objectToSetOn, arguments);
+                return true;
+            }
         } catch(IllegalAccessException e) {
             reportInvocationFailure(_setMethod, arguments, e);
         } catch(IllegalArgumentException e) {

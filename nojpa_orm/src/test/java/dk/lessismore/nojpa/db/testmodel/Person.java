@@ -21,13 +21,18 @@ public interface Person extends ModelObjectInterface {
     String getName();
     void setName(String name);
 
+    @SearchField()
+    String getUrl();
+    @DbStrip(stripItHard = false, stripItSoft = false)
+    void setUrl(String url);
+
 //    String[] getMyName();
 //    void setMyName(String[] myAlias);
 
 
 
     @SearchField(translate = true, searchReverse = true, reverseBoostFactor = 0.3f, boostFactor = 4.3f)
-    String getFun(Locale locale);
+    String getFun();
     void setFun(String fun, Locale locale);
 
     @SearchField
