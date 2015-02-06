@@ -31,7 +31,7 @@ public interface Person extends ModelObjectInterface {
 
 
 
-    @SearchField(translate = true, searchReverse = true, reverseBoostFactor = 0.3f, boostFactor = 4.3f)
+    @SearchField(dynamicSolrPostName = "_da_TXT", translate = true, searchReverse = true, reverseBoostFactor = 0.3f, boostFactor = 4.3f)
     String getFun();
     void setFun(String fun, Locale locale);
 

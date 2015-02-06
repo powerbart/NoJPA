@@ -1222,7 +1222,10 @@ public class NQL {
             } else if(this.comparator == Comp.EQUAL_OR_GREATER){
                 return " (" + solrAttributeName + ":[" + value + " TO *]"+ boostQuery +")" + otherFunctions;
             } else if(this.comparator == Comp.NOT_EQUAL){
-                return " (" + solrAttributeName + ":-(" + value + ")"+ boostQuery +")" + otherFunctions;
+                return
+                        (otherFunctions.equals(" ") ? "" : " (") +
+                        " -" + solrAttributeName + ":(" + value + ")"+ boostQuery +" " +
+                                (otherFunctions.equals(" ") ? "" : " )" + otherFunctions);
             }
 
 //            return " (" + solrAttributeName + ":(" + removeFunnyChars(value) + ")"+ boostQuery +")" + otherFunctions;

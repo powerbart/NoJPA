@@ -31,7 +31,7 @@ public class ModelObjectSearchService {
     private static HashMap<String, SolrServer> servers = new HashMap<String, SolrServer>();
 
     //TODO: Should be StreamingUpdateSolrServer
-    @Deprecated
+//    @Deprecated
     public static void addSolrServer(Class className, SolrServer solrServer){
         log.info("Adding solrServer("+ solrServer +") for class("+ className.getSimpleName() +")");
         servers.put(className.getSimpleName(), solrServer);

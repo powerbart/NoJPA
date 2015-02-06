@@ -36,7 +36,7 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
 	        new Class<?>[] { interfaceClass, ModelObject.class, },
             object);
         T toReturn = (T) object.proxyObject;
-//DEBUG        log.info("Making new object of type " + interfaceClass + " with objectID("+ toReturn +") ", new Exception("THIS_IS_NOT_AN_EXCEPTION__JUST_DEBUG"));
+//     log.info("Making new object of type " + interfaceClass + " with objectID("+ toReturn +") ", new Exception("THIS_IS_NOT_AN_EXCEPTION__JUST_DEBUG"));
 
         return toReturn;
     }
