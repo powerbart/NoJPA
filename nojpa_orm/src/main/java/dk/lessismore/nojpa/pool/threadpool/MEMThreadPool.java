@@ -23,16 +23,21 @@ public class MEMThreadPool<E extends ThreadPoolJob> {
     LinkedList<E> jobs = new LinkedList<E>();
     boolean running = true;
     Thread[] myWorkers = null;
+    long maxRunningTimeInMillis = 0;
 
 
-    public MEMThreadPool(Class<? extends ThreadPoolWorker> workerClazz, int countOfWorkers){
+    public MEMThreadPool(Class<? extends ThreadPoolWorker> workerClazz, int countOfWorkers, long maxRunningTimeInMillis){
         this.workerClazz = workerClazz;
         myWorkers = new Thread[countOfWorkers];
         for(int i = 0; i < countOfWorkers; i++){
             myWorkers[i] = new MyWorker();
             myWorkers[i].start();
         }
+        this.maxRunningTimeInMillis = maxRunningTimeInMillis;
 
+    }
+    public MEMThreadPool(Class<? extends ThreadPoolWorker> workerClazz, int countOfWorkers){
+        this(workerClazz, countOfWorkers, 0);
 
     }
 
@@ -65,6 +70,36 @@ public class MEMThreadPool<E extends ThreadPoolJob> {
     }
 
 
+    protected class WatchWorker extends Thread {
+        private final MyWorker myWorker;
+
+        public WatchWorker(MyWorker myWorker){
+            this.myWorker = myWorker;
+        }
+
+
+        public void run(){
+            String oldID = "" + myWorker.getName();
+            try {
+                this.sleep(maxRunningTimeInMillis);
+            } catch (InterruptedException e) {
+            }
+            log.debug("Will now check id("+ myWorker.getName() +")/oldID("+ oldID +") myWorker.isAlive("+ myWorker.isAlive() +")");
+            if(myWorker.isAlive() && myWorker.getName().equals(oldID)){
+                log.debug("Will now KILL "+ myWorker.getName());
+                myWorker.interrupt();
+                for(int i = 0; i < myWorkers.length; i++){
+                    if(myWorker.equals(myWorkers[i])) {
+                        myWorkers[i] = new MyWorker();
+                        myWorkers[i].start();
+                        myWorker.setName("Killed-it-" + myWorker.getName());
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
     protected class MyWorker extends Thread {
 
 
@@ -85,8 +120,17 @@ public class MEMThreadPool<E extends ThreadPoolJob> {
                 } else {
                     try {
                         setName("MEMThreadPool-Worker-" + (new File(job.fullPathToStoreFile)).getName());
-                        log.debug("Do work");
+
+                        if(maxRunningTimeInMillis > 0){
+                            WatchWorker watchWorker = new WatchWorker(this);
+                            watchWorker.setName("WatchWorker: " + getName());
+                            watchWorker.start();
+                        }
+
+
+                        log.debug("Do work - STARTS " + getName());
                         workerClazz.newInstance().doWork(job);
+                        log.debug("Do work - ENDS "  + getName());
                     } catch (Exception e) {
                         log.error("Some error :: " +e, e);
                     }

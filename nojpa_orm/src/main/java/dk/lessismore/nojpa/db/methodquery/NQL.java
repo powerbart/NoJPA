@@ -2,7 +2,9 @@ package dk.lessismore.nojpa.db.methodquery;
 
 import com.sun.tools.internal.jxc.ap.Const;
 import dk.lessismore.nojpa.db.statements.*;
+import dk.lessismore.nojpa.reflection.attributes.AttributeContainer;
 import dk.lessismore.nojpa.reflection.db.DbClassReflector;
+import dk.lessismore.nojpa.reflection.db.annotations.DbStrip;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttribute;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttributeContainer;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
@@ -16,8 +18,12 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.FieldStatsInfo;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.response.TermsResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.params.CommonParams;
+import org.apache.solr.common.params.TermsParams;
+import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.SimpleOrderedMap;
 
 import java.lang.reflect.Array;
@@ -361,6 +367,89 @@ public class NQL {
         }
 
 
+
+
+        private String cleanTerm(String input){
+            StringTokenizer toks = new StringTokenizer(input, " <>'@\"/");
+            StringBuilder toReturn = new StringBuilder();
+            while(toks.hasMoreTokens()){
+                String s = toks.nextToken();
+                boolean ignore = s.length() < 1;
+                if(!ignore){
+                    toReturn.append(s); toReturn.append(' ');
+                }
+            }
+            return toReturn.toString();
+
+        }
+
+
+//
+//        public List<String> terms(String userInput) throws SolrServerException {
+//            SolrQuery query = new SolrQuery();
+//            query.setParam(CommonParams.QT, "/terms");
+//            query.setParam(TermsParams.TERMS, true);
+//            query.setParam(TermsParams.TERMS_LIMIT, "30");
+//            query.setParam(TermsParams.TERMS_FIELD, "_Lot_translations__ID_Translations_title_da__TXT", "_Lot_translations__ID_Translations_description_da__TXT");  //"description_da", "title_da"
+//            query.setParam(TermsParams.TERMS_PREFIX_STR, userInput.trim()); //brudekjole    jacobsen
+//
+//            SolrServer solrServer = ModelObjectSearchService.solrServer(selectClass);
+//            QueryResponse resp = solrServer.query(query);
+//
+//            Map<String,List<TermsResponse.Term>> termMap = resp.getTermsResponse().getTermMap();
+//
+////    List<TermsResponse.Term> title_da = termMap.get("title_da");
+////    for(int j = 0; title_da != null && j < title_da.size(); j++){
+////        TermsResponse.Term term = title_da.get(j);
+////        System.err.println("title_da: " + term.getTerm());
+////        jsonArray.add(term.getTerm());
+////    }
+////
+////    List<TermsResponse.Term> description_da = termMap.get("description_da");
+////    for(int j = 0; description_da != null && j < description_da.size(); j++){
+////        TermsResponse.Term term = description_da.get(j);
+////        System.err.println("description_da: " + term.getTerm());
+////        jsonArray.add(term.getTerm());
+////    }
+//
+//            HashMap<String, Long> fMap = new HashMap<String, Long>();
+//
+//            List<TermsResponse.Term> title_shingles_da = termMap.get("title_shingles_da");
+//            for(int j = 0; title_shingles_da != null && j < title_shingles_da.size(); j++){
+//                TermsResponse.Term term = title_shingles_da.get(j);
+//
+//                String cleanTerm = cleanTerm(term.getTerm());
+//                if(fMap.containsKey(cleanTerm)){
+//                    fMap.put(cleanTerm, fMap.get(cleanTerm) + term.getFrequency());
+//                    System.err.println("RE-add of " + cleanTerm + " / " + term.getTerm());
+//                } else {
+//                    System.err.println("add of " + cleanTerm + " / " + term.getTerm());
+//                    fMap.put(cleanTerm, term.getFrequency());
+//                }
+//                //        jsonArray.add(term.getTerm() + " :: " + term.getFrequency());
+//            }
+//
+//            List<TermsResponse.Term> description_shingles_da = termMap.get("description_shingles_da");
+//            for(int j = 0; description_shingles_da != null && j < description_shingles_da.size(); j++){
+//                TermsResponse.Term term = description_shingles_da.get(j);
+//                String cleanTerm = cleanTerm(term.getTerm());
+//                if(fMap.containsKey(cleanTerm)){
+//                    fMap.put(cleanTerm, fMap.get(cleanTerm) + term.getFrequency());
+//                    System.err.println("RE-add of " + cleanTerm + " / " + term.getTerm());
+//                } else {
+//                    System.err.println("add of " + cleanTerm + " / " + term.getTerm());
+//                    fMap.put(cleanTerm, term.getFrequency());
+//                }
+//            }
+//
+//            String[] ss = fMap.keySet().toArray(new String[fMap.size()]);
+//
+//            Arrays.sort(ss);
+//            return Arrays.asList(ss);
+//        }
+
+
+
         public List<String> suggest(String userInput){
             ArrayList<String> tags = new ArrayList<String>();
             try {
@@ -369,6 +458,14 @@ public class NQL {
                 query.setQuery(ClientUtils.escapeQueryChars(userInput));
                 SolrServer solrServer = ModelObjectSearchService.solrServer(selectClass);
                 QueryResponse response = solrServer.query(query);
+
+//                NamedList<Object> namedList = response.getResponse();
+//                for(Iterator<Map.Entry<String, Object>> iterator = namedList.iterator(); iterator.hasNext(); ){
+//                    Map.Entry<String, Object> kv = iterator.next();
+//                    log.debug("NamedList::: k("+ kv.getKey() +") -> " + );
+//                }
+
+
                 Object solrSuggester = ((HashMap) response.getResponse().get("suggest")).get("default");
                 SimpleOrderedMap suggestionsList = ((SimpleOrderedMap<SimpleOrderedMap>)solrSuggester).getVal(0);
                 ArrayList<SimpleOrderedMap> suggestions = (ArrayList<SimpleOrderedMap>)suggestionsList.get("suggestions");
@@ -690,10 +787,19 @@ public class NQL {
     }
 
     public static Constraint has(String mockValue, Comp comp, String value) {
-        value = createSearchString(value);
         List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
         Pair<Class, String> pair = getSourceAttributePair();
         clearMockCallSequence();
+        DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(pair.getFirst());
+        DbAttribute dbAttribute = dbAttributeContainer.getDbAttribute(pair.getSecond());
+        DbStrip dbStripAnnotation = dbAttribute.getAttribute().getDbStripAnnotation();
+        if(dbStripAnnotation != null && !dbStripAnnotation.stripItHard() && !dbStripAnnotation.stripItSoft()){
+            if(value != null && value.length() > 0) {
+                value = "\"" + value + "\"";
+            }
+        } else {
+            value = createSearchString(value);
+        }
         value = (value == null || value.trim().equals("") ? "*" : value);
         SolrExpression expression = newLeafExpression().addConstrain(makeAttributeIdentifier(pair), comp, value);
         return new SolrConstraint(expression, joints);
@@ -1169,7 +1275,10 @@ public class NQL {
             } else if(this.comparator == Comp.EQUAL_OR_GREATER){
                 return " (" + solrAttributeName + ":[" + value + " TO *]"+ boostQuery +")" + otherFunctions;
             } else if(this.comparator == Comp.NOT_EQUAL){
-                return " (" + solrAttributeName + ":-(" + value + ")"+ boostQuery +")" + otherFunctions;
+                return
+                        (otherFunctions.equals(" ") ? "" : " (") +
+                        " -" + solrAttributeName + ":(" + value + ")"+ boostQuery +" " +
+                                (otherFunctions.equals(" ") ? "" : " )" + otherFunctions);
             }
 
 //            return " (" + solrAttributeName + ":(" + removeFunnyChars(value) + ")"+ boostQuery +")" + otherFunctions;

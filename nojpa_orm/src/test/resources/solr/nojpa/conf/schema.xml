@@ -117,6 +117,13 @@
     <dynamicField name="*__ID" type="string"  indexed="true"  stored="true"/>
     <dynamicField name="*__TXT" type="text_general"  indexed="true"  stored="true" />
 
+
+     <dynamicField name="*_da_TXT" type="text_da"  indexed="true"  stored="true" />
+     <!--<dynamicField name="*_sv_TXT" type="text_general_sv"  indexed="true"  stored="true" />-->
+     <!--<dynamicField name="*_de_TXT" type="text_general_de"  indexed="true"  stored="true" />-->
+     <!--<dynamicField name="*_en_TXT" type="text_general"  indexed="true"  stored="true" />-->
+
+
      <!--termVectors="true"-->
      <!--termPositions="true"-->
      <!--termOffsets="true"-->
@@ -580,7 +587,60 @@
 
    <!-- some examples for different languages (generally ordered by ISO code) -->
 
-    <!-- Arabic -->
+      <!-- Danish -->
+      <fieldType name="text_da" class="solr.TextField" positionIncrementGap="100">
+          <analyzer>
+              <tokenizer class="solr.StandardTokenizerFactory"/>
+              <filter class="solr.LowerCaseFilterFactory"/>
+              <filter class="solr.StopFilterFactory" ignoreCase="true" words="lang/stopwords_da.txt" format="snowball" />
+              <filter class="solr.SnowballPorterFilterFactory" language="Danish"/>
+          </analyzer>
+      </fieldType>
+
+      <!-- Swedish -->
+      <fieldType name="text_sv" class="solr.TextField" positionIncrementGap="100">
+          <analyzer>
+              <tokenizer class="solr.StandardTokenizerFactory"/>
+              <filter class="solr.LowerCaseFilterFactory"/>
+              <filter class="solr.StopFilterFactory" ignoreCase="true" words="lang/stopwords_sv.txt" format="snowball" />
+              <filter class="solr.SnowballPorterFilterFactory" language="Swedish"/>
+              <!-- less aggressive: <filter class="solr.SwedishLightStemFilterFactory"/> -->
+          </analyzer>
+      </fieldType>
+
+
+      <!-- Norwegian -->
+      <fieldType name="text_no" class="solr.TextField" positionIncrementGap="100">
+          <analyzer>
+              <tokenizer class="solr.StandardTokenizerFactory"/>
+              <filter class="solr.LowerCaseFilterFactory"/>
+              <filter class="solr.StopFilterFactory" ignoreCase="true" words="lang/stopwords_no.txt" format="snowball" />
+              <filter class="solr.SnowballPorterFilterFactory" language="Norwegian"/>
+              <!-- less aggressive: <filter class="solr.NorwegianLightStemFilterFactory" variant="nb"/> -->
+              <!-- singular/plural: <filter class="solr.NorwegianMinimalStemFilterFactory" variant="nb"/> -->
+              <!-- The "light" and "minimal" stemmers support variants: nb=Bokmål, nn=Nynorsk, no=Both -->
+          </analyzer>
+      </fieldType>
+
+
+      <!-- German -->
+      <fieldType name="text_de" class="solr.TextField" positionIncrementGap="100">
+          <analyzer>
+              <tokenizer class="solr.StandardTokenizerFactory"/>
+              <filter class="solr.LowerCaseFilterFactory"/>
+              <filter class="solr.StopFilterFactory" ignoreCase="true" words="lang/stopwords_de.txt" format="snowball" />
+              <filter class="solr.GermanNormalizationFilterFactory"/>
+              <filter class="solr.GermanLightStemFilterFactory"/>
+              <!-- less aggressive: <filter class="solr.GermanMinimalStemFilterFactory"/> -->
+              <!-- more aggressive: <filter class="solr.SnowballPorterFilterFactory" language="German2"/> -->
+          </analyzer>
+      </fieldType>
+
+
+
+
+
+      <!-- Arabic -->
     <fieldType name="text_ar" class="solr.TextField" positionIncrementGap="100">
       <analyzer> 
         <tokenizer class="solr.StandardTokenizerFactory"/>
@@ -634,29 +694,6 @@
         <filter class="solr.LowerCaseFilterFactory"/>
         <filter class="solr.StopFilterFactory" ignoreCase="true" words="lang/stopwords_cz.txt" />
         <filter class="solr.CzechStemFilterFactory"/>       
-      </analyzer>
-    </fieldType>
-    
-    <!-- Danish -->
-    <fieldType name="text_da" class="solr.TextField" positionIncrementGap="100">
-      <analyzer> 
-        <tokenizer class="solr.StandardTokenizerFactory"/>
-        <filter class="solr.LowerCaseFilterFactory"/>
-        <filter class="solr.StopFilterFactory" ignoreCase="true" words="lang/stopwords_da.txt" format="snowball" />
-        <filter class="solr.SnowballPorterFilterFactory" language="Danish"/>       
-      </analyzer>
-    </fieldType>
-    
-    <!-- German -->
-    <fieldType name="text_de" class="solr.TextField" positionIncrementGap="100">
-      <analyzer> 
-        <tokenizer class="solr.StandardTokenizerFactory"/>
-        <filter class="solr.LowerCaseFilterFactory"/>
-        <filter class="solr.StopFilterFactory" ignoreCase="true" words="lang/stopwords_de.txt" format="snowball" />
-        <filter class="solr.GermanNormalizationFilterFactory"/>
-        <filter class="solr.GermanLightStemFilterFactory"/>
-        <!-- less aggressive: <filter class="solr.GermanMinimalStemFilterFactory"/> -->
-        <!-- more aggressive: <filter class="solr.SnowballPorterFilterFactory" language="German2"/> -->
       </analyzer>
     </fieldType>
     
@@ -888,19 +925,6 @@
       </analyzer>
     </fieldType>
     
-    <!-- Norwegian -->
-    <fieldType name="text_no" class="solr.TextField" positionIncrementGap="100">
-      <analyzer> 
-        <tokenizer class="solr.StandardTokenizerFactory"/>
-        <filter class="solr.LowerCaseFilterFactory"/>
-        <filter class="solr.StopFilterFactory" ignoreCase="true" words="lang/stopwords_no.txt" format="snowball" />
-        <filter class="solr.SnowballPorterFilterFactory" language="Norwegian"/>
-        <!-- less aggressive: <filter class="solr.NorwegianLightStemFilterFactory" variant="nb"/> -->
-        <!-- singular/plural: <filter class="solr.NorwegianMinimalStemFilterFactory" variant="nb"/> -->
-        <!-- The "light" and "minimal" stemmers support variants: nb=Bokmål, nn=Nynorsk, no=Both -->
-      </analyzer>
-    </fieldType>
-    
     <!-- Portuguese -->
     <fieldType name="text_pt" class="solr.TextField" positionIncrementGap="100">
       <analyzer> 
@@ -935,17 +959,7 @@
       </analyzer>
     </fieldType>
     
-    <!-- Swedish -->
-    <fieldType name="text_sv" class="solr.TextField" positionIncrementGap="100">
-      <analyzer> 
-        <tokenizer class="solr.StandardTokenizerFactory"/>
-        <filter class="solr.LowerCaseFilterFactory"/>
-        <filter class="solr.StopFilterFactory" ignoreCase="true" words="lang/stopwords_sv.txt" format="snowball" />
-        <filter class="solr.SnowballPorterFilterFactory" language="Swedish"/>
-        <!-- less aggressive: <filter class="solr.SwedishLightStemFilterFactory"/> -->
-      </analyzer>
-    </fieldType>
-    
+
     <!-- Thai -->
     <fieldType name="text_th" class="solr.TextField" positionIncrementGap="100">
       <analyzer> 

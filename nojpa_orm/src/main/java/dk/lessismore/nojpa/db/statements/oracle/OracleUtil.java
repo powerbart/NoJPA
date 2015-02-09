@@ -115,4 +115,40 @@ public class OracleUtil {
         }
         return (new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")).format(value.getTime());
     }
+
+
+    public static final String oracleNameToJava(String oracleName){
+        StringBuilder jsonName = new StringBuilder();
+        char[] chars = oracleName.toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            if (chars[i] == '_') {
+                jsonName.append(("" + chars[++i]).toUpperCase());
+            } else {
+                jsonName.append(chars[i]);
+            }
+        }
+        return jsonName.toString();
+    }
+
+    public static final String javaNameToOracle(String javaName){
+        StringBuilder oracleName = new StringBuilder();
+        char[] chars = javaName.toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            String c = ""+chars[i];
+            if (c.equals(c.toUpperCase())) {
+                oracleName.append("_");
+                oracleName.append(c.toLowerCase());
+            } else {
+                oracleName.append(c);
+            }
+        }
+        return oracleName.toString();
+    }
+
+
+    public static void main(String[] args) {
+        System.out.println(javaNameToOracle("javaNameToOracle"));
+    }
+
+
 }

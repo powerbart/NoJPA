@@ -31,13 +31,14 @@ public class ModelObjectSearchService {
     private static HashMap<String, SolrServer> servers = new HashMap<String, SolrServer>();
 
     //TODO: Should be StreamingUpdateSolrServer
-    @Deprecated
+//    @Deprecated
     public static void addSolrServer(Class className, SolrServer solrServer){
         log.info("Adding solrServer("+ solrServer +") for class("+ className.getSimpleName() +")");
         servers.put(className.getSimpleName(), solrServer);
     }
 
     public static void addSolrServer(Class className, SolrService solrServer){
+        solrServer.startup();
         log.info("Adding solrServer("+ solrServer +") for class("+ className.getSimpleName() +")");
         servers.put(className.getSimpleName(), solrServer.getServer());
     }
@@ -290,7 +291,12 @@ public class ModelObjectSearchService {
     private static void addAttributeValueToStatement(DbAttribute dbAttribute, SolrInputDocument solrObj, Object value, String prefix) {
         String attributeName = dbAttribute.getAttributeName();
         String solrAttributeName = dbAttribute.getSolrAttributeName(prefix);
-        log.debug("Will add solrAttributeName("+ solrAttributeName +") with value("+ value +")");
+        if(value != null && value instanceof Calendar){
+            log.debug("Will add solrAttributeName("+ solrAttributeName +") with value("+ ((Calendar) value).getTime() +")");
+        } else {
+            log.debug("Will add solrAttributeName("+ solrAttributeName +") with value("+ value +")");
+        }
+
         if (value != null) {
             //Convert the value to the equivalent data type.
 
