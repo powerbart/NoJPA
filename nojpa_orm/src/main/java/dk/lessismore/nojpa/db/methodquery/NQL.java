@@ -1,6 +1,5 @@
 package dk.lessismore.nojpa.db.methodquery;
 
-import com.sun.tools.internal.jxc.ap.Const;
 import dk.lessismore.nojpa.db.statements.*;
 import dk.lessismore.nojpa.reflection.attributes.AttributeContainer;
 import dk.lessismore.nojpa.reflection.db.DbClassReflector;
