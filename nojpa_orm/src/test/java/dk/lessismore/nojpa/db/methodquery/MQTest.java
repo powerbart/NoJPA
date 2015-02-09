@@ -18,6 +18,7 @@ import dk.lessismore.nojpa.reflection.db.DbObjectVisitor;
 import dk.lessismore.nojpa.cache.ObjectCacheFactory;
 
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -408,6 +409,21 @@ public class MQTest {
         Person mPerson = MQL.mock(Person.class);
         MQL.select(mPerson).where(mPerson.getName(), MQL.Comp.LIKE, "SOME%").where(mPerson.getCar().getBrand(), MQL.Comp.LIKE, "br%").where(mPerson.getCar().getFuelType(), MQL.Comp.EQUAL, Car.FuelType.DIESEL).getList();
 
+    }
+
+    @Test
+    public void testCreationDate() throws Exception {
+        InitTestDatabase.initPlanetExpress();
+        Calendar instance = Calendar.getInstance();
+        instance.add(Calendar.DAY_OF_YEAR, -2);
+        Cpr p2 = ModelObjectService.create(Cpr.class);
+        p2.setCreationDate(instance);
+        ModelObjectService.save(p2);
+
+        Cpr p1 = MQL.selectByID(Cpr.class, p2.getObjectID());
+        System.out.println("p1.getCreationDate() = " + p1.getCreationDate().getTime());
+        System.out.println("p2.getCreationDate() = " + p2.getCreationDate().getTime());
+        System.out.println("p1 == p2 = " + Boolean.toString(p1 == p2));
     }
 
     @Test

@@ -1,5 +1,6 @@
 package dk.lessismore.nojpa.db.methodquery;
 
+import com.sun.tools.internal.jxc.ap.Const;
 import dk.lessismore.nojpa.db.statements.*;
 import dk.lessismore.nojpa.reflection.db.DbClassReflector;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttribute;
@@ -767,6 +768,22 @@ public class NQL {
         return new SolrConstraint(expression, joints);
     }
 
+    public static <M extends ModelObjectInterface> Constraint hasNull(Calendar mockValue) {
+        List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
+        Pair<Class, String> pair = getSourceAttributePair();
+        clearMockCallSequence();
+        SolrExpression expression = newLeafExpression().isNull(makeAttributeIdentifier(pair), joints);
+        return new SolrConstraint(expression, joints);
+    }
+
+    public static <M extends ModelObjectInterface> Constraint hasNotNull(Calendar mockValue) {
+        List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
+        Pair<Class, String> pair = getSourceAttributePair();
+        clearMockCallSequence();
+        SolrExpression expression = newLeafExpression().isNotNull(makeAttributeIdentifier(pair), joints);
+        return new SolrConstraint(expression, joints);
+    }
+
 //
 //    public static <M extends ModelObjectInterface> Constraint hasIn(Enum mockValue, Enum ... values) {
 //        if (values == null || values.length == 0) {
@@ -812,6 +829,33 @@ public class NQL {
         return new SolrExpression();
     }
 
+
+    public static class SolrNegatingExpression implements UpdateSolrQueryAble {
+        UpdateSolrQueryAble expression = null;
+        ArrayList<SolrFunction> solrFunctions = new ArrayList<SolrFunction>();
+
+        public void setExpression(UpdateSolrQueryAble expression) {
+            this.expression = expression;
+        }
+
+        //TODO: solrFunctions is not in use in the moment for Containers ...
+        @Override
+        public void addSolrFunction(SolrFunction solrFunction){
+            solrFunctions.add(solrFunction);
+        }
+
+        @Override
+        public String updateSolrQuery(SolrQuery solrQuery) {
+            StringBuilder builder = new StringBuilder("-");
+            String subQuery = expression.updateSolrQuery(solrQuery);
+            if(subQuery != null){
+                builder.append(subQuery);
+            }
+
+            return builder.toString();
+        }
+
+    }
 
     public static class SolrContainerExpression implements UpdateSolrQueryAble{
         List<UpdateSolrQueryAble> expressions = new ArrayList<UpdateSolrQueryAble>();
@@ -873,11 +917,12 @@ public class NQL {
                     }
                 }
             }
+
             if(builder.length() > 2){
-                return "(" + builder.toString() + ")";
-            } else {
-                return builder.toString();
+                builder.insert(0, "(");
+                builder.append(")");
             }
+            return builder.toString();
         }
     }
 
@@ -1061,7 +1106,11 @@ public class NQL {
         public SolrExpression isNull(String attributeName, List<Pair<Class, String>> joints) {
 //            log.warn("isNull ("+ attributeName +")");
             attributeName = createFinalSolrAttributeName(joints, attributeName);
-            this.statement = "-("+ attributeName +":[\"\" TO *])";
+            if (attributeName.endsWith("__DATE")) {
+                this.statement = "-(" + attributeName + ":[* TO *])";
+            } else {
+                this.statement = "-(" + attributeName + ":[\"\" TO *])";
+            }
             this.attr = "-" + attributeName;
             return this;
         }
@@ -1069,7 +1118,11 @@ public class NQL {
         public SolrExpression isNotNull(String attributeName, List<Pair<Class, String>> joints) {
 //            log.debug("isNotNull("+ attributeName +")");
             attributeName = createFinalSolrAttributeName(joints, attributeName);
-            this.statement = "("+ attributeName +":[\"\" TO *])";
+            if (attributeName.endsWith("__DATE")) {
+                this.statement = "(" + attributeName + ":[* TO *])";
+            } else {
+                this.statement = "(" + attributeName + ":[\"\" TO *])";
+            }
             this.attr = attributeName;
             return this;
         }
@@ -1160,6 +1213,10 @@ public class NQL {
     }
 
 
+
+    public static Constraint not(Constraint constraint) {
+        return new NotConstraint(constraint);
+    }
 
     public static Constraint all(Collection<Constraint> constraints) {
         return all(toConstraintArray(constraints));
@@ -1294,6 +1351,31 @@ public class NQL {
                 return new SolrExpression();
             }
             return super.getExpression();
+        }
+    }
+
+    /**
+     * This constraint that will negate the wrapped constraint.
+     * If non child constraints is given, this constraint is false.
+     */
+    public static class NotConstraint extends Constraint {
+        private Constraint constraint;
+        private NotConstraint(Constraint constraint) {
+            this.constraint = constraint;
+        }
+
+        @Override
+        public UpdateSolrQueryAble getExpression() {
+            SolrNegatingExpression container = new SolrNegatingExpression();
+            container.setExpression(constraint.getExpression());
+            return container;
+        }
+
+        @Override
+        public List<Pair<Class, String>> getJoints() {
+            List<Pair<Class, String>> joints = new ArrayList<Pair<Class, String>>();
+            joints.addAll(constraint.getJoints());
+            return joints;
         }
     }
 

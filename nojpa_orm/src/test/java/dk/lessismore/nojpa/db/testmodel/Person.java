@@ -8,6 +8,7 @@ import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.maputil.ReusableMap;
 
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.util.Calendar;
 import java.util.Locale;
 
 @XmlJavaTypeAdapter(ModelXmlAdapter.class)
@@ -26,15 +27,18 @@ public interface Person extends ModelObjectInterface {
 
 
 
-    @SearchField(translate = true, searchReverse = true, reverseBoostFactor = 0.3f, boostFactor = 4.3f)
-    String getFun(Locale locale);
+//    @SearchField(translate = true, searchReverse = true, reverseBoostFactor = 0.3f, boostFactor = 4.3f)
+    String getFun();
+    void setFun(String fun);
     void setFun(String fun, Locale locale);
 
     @SearchField
     String getDescription();
     void setDescription(String description);
 
-
+    @SearchField
+    Calendar getBirthDate();
+    void setBirthDate(Calendar birthDate);
 
     @ReusableMap(mapNames = {"map2"})
     @SearchField

@@ -218,7 +218,11 @@ public class NQLTest {
             person.setName("person " + (i % 4));
             person.setIsSick(i % 2 == 0);
 
-
+            if (i % 2 == 0) {
+                Calendar birthDate = Calendar.getInstance();
+                birthDate.add(Calendar.YEAR, i * -1);
+                person.setBirthDate(birthDate);
+            }
             person.setPersonStatus(PersonStatus.BETWEEN_RELATIONS);
 //            person.setHistoryStatus(new PersonStatus[]{PersonStatus.BETWEEN_RELATIONS, PersonStatus.SINGLE});
             person.setSomeFloat((float) (20f * Math.random()));
@@ -246,6 +250,20 @@ public class NQLTest {
 //        NQL.Constraint C = NQL.hasNull(m2Person.getCar());
 //        NList<Person> personsWithoutCar2 = NQL.search(m2Person).search(NQL.all(B, C)).getList();
 //        //Assert.assertEquals(personsWithoutCar.getNumberFound(), 3);
+
+
+        Calendar instance = Calendar.getInstance();
+        instance.add(Calendar.YEAR, -5);
+        NList<Person> list = NQL.search(m2Person).search(
+                NQL.not(
+                        NQL.all(
+                                NQL.not(NQL.has(m2Person.getBirthDate(), NQL.Comp.EQUAL_OR_LESS, instance)),
+                                NQL.hasNotNull(m2Person.getBirthDate())))
+        ).getList();
+        for (Person person : list) {
+            System.out.println("person.getBirthDate().getTime() = " + person.getBirthDate());
+        }
+        System.out.println("count = " + list.size());
 
 
     }
