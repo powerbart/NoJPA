@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Created by niakoi on 7/23/14.
+ * Created by seb on 7/23/14.
  */
 public class SolrServiceImpl implements SolrService {
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(SolrServiceImpl.class);

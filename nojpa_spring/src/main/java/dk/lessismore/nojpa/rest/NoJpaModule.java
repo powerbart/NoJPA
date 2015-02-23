@@ -13,7 +13,7 @@ import java.util.Calendar;
 
 /**
  * Created with IntelliJ IDEA.
- * User: niakoi
+ * User: seb
  * Date: 3/25/14
  * Time: 9:30 AM
  */

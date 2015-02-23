@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Created with IntelliJ IDEA.
- * User: niakoi
+ * User: seb
  * Date: 3/24/14
  * Time: 11:42 PM
  */

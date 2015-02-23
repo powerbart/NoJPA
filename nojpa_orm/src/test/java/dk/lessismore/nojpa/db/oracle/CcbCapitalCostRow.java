@@ -9,6 +9,7 @@ import java.util.Calendar;
 public interface CcbCapitalCostRow {
 
 
+    public Long getA();
     public long getAbe();
     public String getName();
     public Calendar getB4();

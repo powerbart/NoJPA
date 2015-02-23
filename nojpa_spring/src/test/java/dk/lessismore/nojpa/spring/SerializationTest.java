@@ -16,7 +16,7 @@ import org.junit.Test;
 import java.util.List;
 
 /**
- * Created by niakoi on 19/1/15.
+ * Created by seb on 19/1/15.
  */
 public class SerializationTest {
 

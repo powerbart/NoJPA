@@ -18,12 +18,15 @@ public class MEMThreadPool<E extends ThreadPoolJob> {
     protected final static Log log = LogFactory.getLog(MEMThreadPool.class);
 
 
-    Thread workers = null;
-    Class<? extends ThreadPoolWorker> workerClazz = null;
-    LinkedList<E> jobs = new LinkedList<E>();
-    boolean running = true;
-    Thread[] myWorkers = null;
-    long maxRunningTimeInMillis = 0;
+    protected Thread workers = null;
+    protected Class<? extends ThreadPoolWorker> workerClazz = null;
+    protected LinkedList<E> jobs = new LinkedList<E>();
+    protected boolean running = true;
+    protected Thread[] myWorkers = null;
+    protected long maxRunningTimeInMillis = 0;
+
+
+    int numberOfRunningThread = 0;
 
 
     public MEMThreadPool(Class<? extends ThreadPoolWorker> workerClazz, int countOfWorkers, long maxRunningTimeInMillis){
@@ -57,6 +60,17 @@ public class MEMThreadPool<E extends ThreadPoolJob> {
         
     }
 
+    public int getNumberOfRunningThreads(){
+        int result = 0;
+        for(int i = 0; i < myWorkers.length; i++){
+            if(((MyWorker)myWorkers[i]).doingWork){
+                result++;
+            }
+        }
+        return result;
+    }
+
+
     public synchronized boolean isDone(){
         return jobs.isEmpty();
     }
@@ -84,7 +98,7 @@ public class MEMThreadPool<E extends ThreadPoolJob> {
                 this.sleep(maxRunningTimeInMillis);
             } catch (InterruptedException e) {
             }
-            log.debug("Will now check id("+ myWorker.getName() +")/oldID("+ oldID +") myWorker.isAlive("+ myWorker.isAlive() +")");
+//            log.debug("Will now check id("+ myWorker.getName() +")/oldID("+ oldID +") myWorker.isAlive("+ myWorker.isAlive() +")");
             if(myWorker.isAlive() && myWorker.getName().equals(oldID)){
                 log.debug("Will now KILL "+ myWorker.getName());
                 myWorker.interrupt();
@@ -93,6 +107,7 @@ public class MEMThreadPool<E extends ThreadPoolJob> {
                         myWorkers[i] = new MyWorker();
                         myWorkers[i].start();
                         myWorker.setName("Killed-it-" + myWorker.getName());
+                        myWorker.shouldRun = false;
                         break;
                     }
                 }
@@ -102,17 +117,23 @@ public class MEMThreadPool<E extends ThreadPoolJob> {
 
     protected class MyWorker extends Thread {
 
+        boolean shouldRun = true;
+        boolean doingWork = false;
 
 
         public void run() {
-            while(running){
+            int debugCounter = 0;
+            while(running && shouldRun){
                 try{
+                    if(++debugCounter % 5000 == 0){
+                        log.debug("Checking for new job debugCounter("+ debugCounter +")");
+                    }
                 E job = getNextJob();
                 if(job == null){
                     try {
                         setName("MEMThreadPool-Worker");
                         synchronized(this){
-                            wait(50);
+                            wait(100);
                         }
                     } catch (InterruptedException e) {
 
@@ -120,19 +141,31 @@ public class MEMThreadPool<E extends ThreadPoolJob> {
                 } else {
                     try {
                         setName("MEMThreadPool-Worker-" + (new File(job.fullPathToStoreFile)).getName());
-
+                        doingWork = true;
                         if(maxRunningTimeInMillis > 0){
                             WatchWorker watchWorker = new WatchWorker(this);
                             watchWorker.setName("WatchWorker: " + getName());
                             watchWorker.start();
                         }
-
-
                         log.debug("Do work - STARTS " + getName());
                         workerClazz.newInstance().doWork(job);
                         log.debug("Do work - ENDS "  + getName());
+                    } catch (java.lang.OutOfMemoryError e) {
+                        log.error("Some error OutOfMemoryError:: " +e, e);
+                        shouldRun = false;
+                        for(int i = 0; i < myWorkers.length; i++){
+                            if (this.equals(myWorkers[i])) {
+                                myWorkers[i] = new MyWorker();
+                                myWorkers[i].start();
+                                this.setName("Killed-it-" + this.getName());
+                                this.shouldRun = false;
+                                break;
+                            }
+                        }
                     } catch (Exception e) {
                         log.error("Some error :: " +e, e);
+                    } finally {
+                        doingWork = false;
                     }
                 }
                 } catch(Exception e){

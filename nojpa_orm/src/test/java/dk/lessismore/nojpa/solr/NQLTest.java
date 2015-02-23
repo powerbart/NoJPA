@@ -32,7 +32,7 @@ import org.junit.Test;
 import java.util.*;
 
 /**
- * Created by niakoi on 7/23/14.
+ * Created by seb on 7/23/14.
  */
 public class NQLTest {
 
