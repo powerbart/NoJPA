@@ -731,11 +731,13 @@ public class NQL {
     private static List<Pair<Class, String>> getJoinsByMockCallSequence() {
 //        log.debug("NQL.getJoinsByMockCallSequence:1");
         LinkedList<Pair<Object, Method>> mockSequence = threadMockCallSequenceMap.get(Thread.currentThread());
+        List<Pair<Class, String>> joints = new ArrayList<Pair<Class, String>>();
         if (mockSequence == null) {
-            throw new RuntimeException("Did you mix up MQL and NQL???? ... Or did you call 2 mock-methods in the same statement? .... Some mock calls are expected to have been made at this time Thread.currentThread().getId("+ Thread.currentThread().getId() +")");
+            log.debug("Did you mix up MQL and NQL???? ... Or did you call 2 mock-methods in the same statement? .... Some mock calls are expected to have been made at this time Thread.currentThread().getId(" + Thread.currentThread().getId() + ")");
+            return joints;
         }
 //        log.debug("NQL.getJoinsByMockCallSequence:mockSequence:: " + (mockSequence.size() > 0 ? ((mockSequence.size() > 1 ? mockSequence.get(0).getSecond().getName() + "." + mockSequence.get(1).getSecond().getName() : mockSequence.get(0).getSecond().getName())) : null) );
-        List<Pair<Class, String>> joints = new ArrayList<Pair<Class, String>>();
+
         for (Pair<Object, Method> pair: mockSequence) {
             //log.debug("NQL.getJoinsByMockCallSequence:2");
             if (pair.equals(mockSequence.getLast()) && ! pair.getSecond().getReturnType().isArray()) break;
@@ -800,7 +802,12 @@ public class NQL {
             value = createSearchString(value);
         }
         value = (value == null || value.trim().equals("") ? "*" : value);
-        SolrExpression expression = newLeafExpression().addConstrain(makeAttributeIdentifier(pair), comp, value);
+        SolrExpression expression = null;
+        if(joints.size() == 0 && pair.getSecond().equals("objectID")){
+            expression = newLeafExpression().addConstrain("objectID", comp, value);
+        } else {
+            expression = newLeafExpression().addConstrain(makeAttributeIdentifier(pair), comp, value);
+        }
         return new SolrConstraint(expression, joints);
     }
 
@@ -1276,7 +1283,7 @@ public class NQL {
             } else if(this.comparator == Comp.NOT_EQUAL){
                 return
                         (otherFunctions.equals(" ") ? "" : " (") +
-                        " -" + solrAttributeName + ":(" + value + ")"+ boostQuery +" " +
+                        " -(" + solrAttributeName + ":(" + value + "))"+ boostQuery +" " +
                                 (otherFunctions.equals(" ") ? "" : " )" + otherFunctions);
             }
 
