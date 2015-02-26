@@ -618,6 +618,7 @@ public class MQTest {
             Person mPerson = MQL.mock(Person.class);
 
             MQL.select(mPerson).where(mPerson.getCountOfCars(), MQL.Comp.GREATER, 1).whereIsNotNull(mPerson.getCreationDate()).whereIsNull(mPerson.getCreationDate()).where(mPerson.getDescription(), MQL.Comp.LIKE, "%descr%").orderBy(mPerson.getName(), MQL.Order.DESC).orderBy(mPerson.getCreationDate(), MQL.Order.DESC).limit(10, 12).getFirst();
+            MQL.select(mPerson).where(mPerson.getCountOfCars(), MQL.Comp.GREATER, 1).whereIsNull(mPerson.getPersonStatus()).limit(10, 12).getFirst();
         }
         assertEquals(true, true);
     }
