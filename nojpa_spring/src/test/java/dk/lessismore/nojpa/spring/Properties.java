@@ -10,7 +10,7 @@ import java.net.URI;
 import java.net.URL;
 
 /**
- * Created by niakoi on 10/9/14.
+ * Created by seb on 10/9/14.
  */
 public class Properties {
 

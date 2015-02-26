@@ -46,19 +46,35 @@ public class OracleTest {
 
 
     @Test
-    public void testCallIterator() throws Exception {
+    public void testCallSingle() throws Exception {
         CrbCapitalCost crbCapitalCost = OracleDB.connectInterface(CrbCapitalCost.class);
-        Iterator<CcbCapitalCostRow> measures = crbCapitalCost.getMeasures(Calendar.getInstance(), 6666L, "myMsg-desc", 3L);
-        while(measures.hasNext()){
-            CcbCapitalCostRow capitalCostRow = measures.next();
+        CcbCapitalCostRow measures = crbCapitalCost.getMeasures(Calendar.getInstance(), 6666L, "myMsg-desc", 3L);
+//        for(int i = 0; i < measures.size(); i++){
+            CcbCapitalCostRow capitalCostRow = measures; //.get(i);
+            System.out.println("capitalCostRow.getA() = " + capitalCostRow.getA());
             System.out.println("capitalCostRow.getAbe() = " + capitalCostRow.getAbe());
             System.out.println("capitalCostRow.getName() = " + capitalCostRow.getName());
             System.out.println("capitalCostRow.getB3() = " + capitalCostRow.getB3());
-        }
+//        }
 
 
     }
 
+//    @Test
+//    public void testCallIterator() throws Exception {
+//        CrbCapitalCost crbCapitalCost = OracleDB.connectInterface(CrbCapitalCost.class);
+//        List<CcbCapitalCostRow> measures = crbCapitalCost.getMeasures(Calendar.getInstance(), 6666L, "myMsg-desc", 3L);
+//        for(int i = 0; i < measures.size(); i++){
+//            CcbCapitalCostRow capitalCostRow = measures.get(i);
+//            System.out.println("capitalCostRow.getA() = " + capitalCostRow.getA());
+//            System.out.println("capitalCostRow.getAbe() = " + capitalCostRow.getAbe());
+//            System.out.println("capitalCostRow.getName() = " + capitalCostRow.getName());
+//            System.out.println("capitalCostRow.getB3() = " + capitalCostRow.getB3());
+//        }
+//
+//
+//    }
+//
     @Test
     public void testCallSimpleStoredProcedure() throws Exception {
         Connection conn = DriverManager.getConnection("jdbc:oracle:thin:@//192.168.56.101:1521", "system", "1234");

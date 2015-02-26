@@ -6,7 +6,7 @@ import dk.lessismore.nojpa.rest.NoJpaMapper;
 import dk.lessismore.nojpa.spring.model.*;
 
 /**
- * Created by niakoi on 22/5/14.
+ * Created by seb on 22/5/14.
  */
 public class MQSerializeTest {
 

@@ -6,7 +6,7 @@ import org.springframework.hateoas.hal.Jackson2HalModule;
 
 /**
  * Created with IntelliJ IDEA.
- * User: niakoi
+ * User: seb
  * Date: 3/25/14
  * Time: 9:29 AM
  */

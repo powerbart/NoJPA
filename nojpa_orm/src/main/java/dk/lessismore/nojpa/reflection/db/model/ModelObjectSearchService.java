@@ -112,7 +112,10 @@ public class ModelObjectSearchService {
         ModelObject modelObject = (ModelObject) object;
         DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(modelObject.getInterface());
         String objectIDInSolr = (prefix.length() == 0 ? "" : prefix + "_") + "objectID" + (prefix.length() == 0 ? "" : "__ID");
-        solrObj.addField(objectIDInSolr, object.getObjectID());
+        if(prefix.length() == 0) {
+            log.debug("Adding solr-row: objectIDInSolr(" + objectIDInSolr + ")->" + object.getObjectID());
+            solrObj.addField(objectIDInSolr, object.getObjectID());
+        }
         for (Iterator iterator = dbAttributeContainer.getDbAttributes().values().iterator(); iterator.hasNext();) {
             DbAttribute dbAttribute = (DbAttribute) iterator.next();
             SearchField searchField = dbAttribute.getAttribute().getAnnotation(SearchField.class);
@@ -326,7 +329,7 @@ public class ModelObjectSearchService {
                         }
                     }
                     solrObj.addField(solrAttributeName, valueStr);
-                    log.debug("solrObj.addField(" + solrAttributeName +", "+ valueStr +");");
+                    log.debug("addAttributeValueToStatement(): solrObj.addField(" + solrAttributeName +", "+ valueStr +");");
                     break;
                 case DbDataType.DB_INT:
                     solrObj.addField(solrAttributeName, ((Integer) value).intValue());

@@ -4,6 +4,7 @@ import dk.lessismore.nojpa.db.statements.oracle.PackageTarget;
 
 import java.util.Calendar;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -18,7 +19,7 @@ public interface CrbCapitalCost {
 //    p_str                  IN     VARCHAR2,
 //    p_legal_entity_id      IN     NUMBER)
 
-    Iterator<CcbCapitalCostRow> getMeasures(Calendar reportDate, long counterpartSuKey, String myMsg, long legalID);
+    CcbCapitalCostRow getMeasures(Calendar reportDate, long counterpartSuKey, String myMsg, long legalID);
 
 
 

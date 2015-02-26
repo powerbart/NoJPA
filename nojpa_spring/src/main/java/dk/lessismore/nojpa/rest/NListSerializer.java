@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Created by niakoi on 19/1/15.
+ * Created by seb on 19/1/15.
  */
 public class NListSerializer extends JsonSerializer<NList> {
     private PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy strategy = new PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy();

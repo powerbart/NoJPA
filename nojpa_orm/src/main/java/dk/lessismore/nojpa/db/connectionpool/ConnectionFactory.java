@@ -38,11 +38,19 @@ public class ConnectionFactory implements ResourceFactory {
     private String db = "mysql";
     private String dn = "some";
 
+    private String poolName = null;
+
     public ConnectionFactory() {
         ConnectionFactory.resources = new PropertyResources("db");
         init();
     }
     public ConnectionFactory(Resources resources) {
+        ConnectionFactory.resources = resources;
+        init();
+    }
+
+    public ConnectionFactory(Resources resources, String poolName) {
+        this.poolName = poolName;
         ConnectionFactory.resources = resources;
         init();
     }
@@ -69,9 +77,15 @@ public class ConnectionFactory implements ResourceFactory {
         this.dbName = dbName;
     }
     public String getDbName() {
-        if(resources.gotResource("databaseName"))
-            dbName = resources.getString("databaseName");
-
+        if(poolName == null) {
+            if(resources.gotResource("databaseName")) {
+                dbName = resources.getString("databaseName");
+            }
+        } else {
+            if(resources.gotResource(poolName +".databaseName")) {
+                dbName = resources.getString(poolName + ".databaseName");
+            }
+        }
         return dbName;
     }
 
@@ -79,10 +93,18 @@ public class ConnectionFactory implements ResourceFactory {
         this.user = user;
     }
     public String getUser() {
-        if(resources.gotResource("dbuser")) {
-            user = resources.getString("dbuser");
-        } else if (resources.gotResource("user")) {
-            user = resources.getString("user");
+        if(poolName == null) {
+            if(resources.gotResource("dbuser")) {
+                user = resources.getString("dbuser");
+            } else if (resources.gotResource("user")) {
+                user = resources.getString("user");
+            }
+        } else {
+            if(resources.gotResource(poolName +".dbuser")) {
+                user = resources.getString(poolName +".dbuser");
+            } else if (resources.gotResource(poolName +".user")) {
+                user = resources.getString(poolName +".user");
+            }
         }
         return user;
     }
@@ -91,11 +113,20 @@ public class ConnectionFactory implements ResourceFactory {
         this.password = password;
     }
     public String getPassword() {
-        if(resources.gotResource("dbpasswd")) {
-            password = resources.getString("dbpasswd");
-        } else if (resources.gotResource("password")) {
-            password = resources.getString("password");
+        if(poolName == null) {
+            if(resources.gotResource("dbpasswd")) {
+                password = resources.getString("dbpasswd");
+            } else if (resources.gotResource("password")) {
+                password = resources.getString("password");
 
+            }
+        } else {
+            if(resources.gotResource(poolName +".dbpasswd")) {
+                password = resources.getString(poolName +".dbpasswd");
+            } else if (resources.gotResource(poolName +".password")) {
+                password = resources.getString(poolName +".password");
+
+            }
         }
         return password;
     }
@@ -104,8 +135,15 @@ public class ConnectionFactory implements ResourceFactory {
         this.driverName = driverName;
     }
     public String getDriverName() {
-        if(resources.gotResource("driverName"))
-            driverName = resources.getString("driverName");
+        if(poolName == null) {
+            if (resources.gotResource("driverName")) {
+                driverName = resources.getString("driverName");
+            }
+        } else {
+            if (resources.gotResource(poolName +".driverName")) {
+                driverName = resources.getString(poolName + ".driverName");
+            }
+        }
         return driverName;
     }
 
@@ -138,20 +176,26 @@ public class ConnectionFactory implements ResourceFactory {
 //            }
 //            log.debug("db.properties -- end ----- ::: (" + getDriverName() + ") getUser("+ getUser() +") res.get("+ resources.getResource("driverName")+") ..... GotIt? " + resources.gotResource("driverName"));
 
-            SQLStatementFactory.setDriverName(getDriverName());
+            //SQLStatementFactory.setDriverName(getDriverName());
 
-            if(SQLStatementFactory.getDatabaseInstance() == SQLStatementFactory.DatabaseInstance.MYSQL){
+            if(poolName == null){
+                SQLStatementFactory.setDriverName(getDriverName());
+            }
+
+
+            if(getDriverName().contains("mysql")){
                 Class.forName(getDriverName()).newInstance();
                 conStr = "jdbc:"+getDb()+"://"+getIp()+":"+getPort()+"/"+getDbName();
                 log.debug("Creating new MySQL-DB-Connection " + conStr);
                 return DriverManager.getConnection(conStr, getUser(), getPassword());
-            } else if(SQLStatementFactory.getDatabaseInstance() == SQLStatementFactory.DatabaseInstance.H2){
+            } else if(getDriverName().contains("h2")){
                 Class.forName(getDriverName()).newInstance();
                 conStr = "jdbc:"+getDb()+":"+getDbName();
                 log.debug("Creating new H2-DB-Connection " + conStr);
                 return DriverManager.getConnection(conStr, getUser(), getPassword());
-            } else if(SQLStatementFactory.getDatabaseInstance() == SQLStatementFactory.DatabaseInstance.ORACLE){
-                throw new RuntimeException("Unsupported database driver - Oracle");
+            } else if(getDriverName().contains("oracle")){
+                // "jdbc:oracle:thin:@ora_twd:1521/twd", "ccrd_gui", "ccrd_gui1234"
+                return DriverManager.getConnection(getDbName(), getUser(), getPassword());
             } else {
                 throw new RuntimeException("Unsupported database driver ");
             }
