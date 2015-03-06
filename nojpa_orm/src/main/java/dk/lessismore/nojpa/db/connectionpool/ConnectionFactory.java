@@ -32,7 +32,7 @@ public class ConnectionFactory implements ResourceFactory {
 
     private String ip = "localhost";
     private int port = 3306;
-    private String dbName = "test";
+    private String dbName = "";
     private String user = "";
     private String password = "";
     private String driverName = ""; //com.mysql.jdbc.Driver  "org.gjt.mm.mysql.Driver"; "com.mysql.jdbc.Driver";
