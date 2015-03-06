@@ -6,6 +6,7 @@ import java.sql.*;
 import java.util.Enumeration;
 
 import dk.lessismore.nojpa.resources.*;
+import dk.lessismore.nojpa.utils.Strings;
 import org.apache.log4j.Logger;
 
 /**
@@ -77,13 +78,19 @@ public class ConnectionFactory implements ResourceFactory {
         this.dbName = dbName;
     }
     public String getDbName() {
+
+        if(dbName != null && dbName.length() > 0){
+            return dbName;
+        }
         if(poolName == null) {
             if(resources.gotResource("databaseName")) {
                 dbName = resources.getString("databaseName");
+                dbName = Strings.replace("$NOW", "" + System.currentTimeMillis(), dbName);
             }
         } else {
             if(resources.gotResource(poolName +".databaseName")) {
                 dbName = resources.getString(poolName + ".databaseName");
+                dbName = Strings.replace("$NOW", "" + System.currentTimeMillis(), dbName);
             }
         }
         return dbName;
@@ -194,7 +201,6 @@ public class ConnectionFactory implements ResourceFactory {
                 log.debug("Creating new H2-DB-Connection " + conStr);
                 return DriverManager.getConnection(conStr, getUser(), getPassword());
             } else if(getDriverName().contains("oracle")){
-                // "jdbc:oracle:thin:@ora_twd:1521/twd", "ccrd_gui", "ccrd_gui1234"
                 return DriverManager.getConnection(getDbName(), getUser(), getPassword());
             } else {
                 throw new RuntimeException("Unsupported database driver ");

@@ -19,4 +19,20 @@ public class Strings {
         }
         return builder.toString();
     }
+
+    public static String replace(String find, String replace, String bigString) {
+        int indexStart = 0;
+        int lengthOfFind = find.length();
+        while (indexStart != -1) {
+            indexStart = bigString.indexOf(find, indexStart);
+            if (indexStart != -1) {
+                bigString = bigString.substring(0, indexStart)
+                        + replace + bigString.substring(indexStart + lengthOfFind);
+                indexStart++;
+            }
+        }
+        return bigString;
+    }
+
+
 }
