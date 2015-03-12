@@ -113,7 +113,7 @@ public class ModelObjectSearchService {
         DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(modelObject.getInterface());
         String objectIDInSolr = (prefix.length() == 0 ? "" : prefix + "_") + "objectID" + (prefix.length() == 0 ? "" : "__ID");
         if(prefix.length() == 0) {
-            log.debug("Adding solr-row: objectIDInSolr(" + objectIDInSolr + ")->" + object.getObjectID());
+            log.trace("Adding solr-row: objectIDInSolr(" + objectIDInSolr + ")->" + object.getObjectID());
             solrObj.addField(objectIDInSolr, object.getObjectID());
         }
         for (Iterator iterator = dbAttributeContainer.getDbAttributes().values().iterator(); iterator.hasNext();) {
@@ -154,7 +154,7 @@ public class ModelObjectSearchService {
                             String name = nameIterator.next();
                             ArrayList<Object> objects = values.get(name);
                             String solrArrayName = name + "_ARRAY";
-                            log.debug("Adding " + solrArrayName + "("+ (objects != null ? objects.size() : -1) +")");
+                            log.trace("Adding " + solrArrayName + "("+ (objects != null ? objects.size() : -1) +")");
                             solrObj.addField(solrArrayName, objects);
                         }
                     }
@@ -295,9 +295,9 @@ public class ModelObjectSearchService {
         String attributeName = dbAttribute.getAttributeName();
         String solrAttributeName = dbAttribute.getSolrAttributeName(prefix);
         if(value != null && value instanceof Calendar){
-            log.debug("Will add solrAttributeName("+ solrAttributeName +") with value("+ ((Calendar) value).getTime() +")");
+            log.trace("Will add solrAttributeName(" + solrAttributeName + ") with value(" + ((Calendar) value).getTime() + ")");
         } else {
-            log.debug("Will add solrAttributeName("+ solrAttributeName +") with value("+ value +")");
+            log.trace("Will add solrAttributeName("+ solrAttributeName +") with value("+ value +")");
         }
 
         if (value != null) {
@@ -329,7 +329,7 @@ public class ModelObjectSearchService {
                         }
                     }
                     solrObj.addField(solrAttributeName, valueStr);
-                    log.debug("addAttributeValueToStatement(): solrObj.addField(" + solrAttributeName +", "+ valueStr +");");
+                    log.trace("addAttributeValueToStatement(): solrObj.addField(" + solrAttributeName +", "+ valueStr +");");
                     break;
                 case DbDataType.DB_INT:
                     solrObj.addField(solrAttributeName, ((Integer) value).intValue());

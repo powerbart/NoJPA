@@ -277,6 +277,58 @@ public class NQLTest {
 
 
 
+
+    @Test
+    public void testReadRawFromSolr() {
+        DatabaseCreator.createDatabase("dk.lessismore.nojpa.db.testmodel");
+        SolrServiceImpl solrService = new SolrServiceImpl();
+        solrService.setCoreName("nojpa");
+        solrService.setCleanOnStartup(true);
+
+        ModelObjectSearchService.addSolrServer(Person.class, solrService.getServer());
+        Person mPerson = NQL.mock(Person.class);
+
+        Person prev = null;
+        for (int i = 0; i < 10; i++) {
+            Person person = ModelObjectService.create(Person.class);
+            if(i % 2 == 0){
+                prev = person;
+            } else {
+                prev.setGirlFriend(person);
+                person.setGirlFriend(prev);
+            }
+            person.setName("person " + (i % 4));
+            person.setIsSick(i % 2 == 0);
+
+            if (i % 2 == 0) {
+                Calendar birthDate = Calendar.getInstance();
+                birthDate.add(Calendar.YEAR, i * -1);
+                person.setBirthDate(birthDate);
+            }
+            person.setPersonStatus(PersonStatus.BETWEEN_RELATIONS);
+//            person.setHistoryStatus(new PersonStatus[]{PersonStatus.BETWEEN_RELATIONS, PersonStatus.SINGLE});
+            person.setSomeFloat((float) (20f * Math.random()));
+            if (i < 7) {
+                Car car = ModelObjectService.create(Car.class);
+                person.setCar(car);
+            }
+            ModelObjectService.save(person);
+            System.out.println("---------------- PUT START -----------------------");
+            ModelObjectSearchService.put(person);
+            System.out.println("---------------- PUT END -----------------------");
+        }
+        solrService.commit();
+
+        NList<Person> personsWithoutCar = NQL.search(mPerson).search(NQL.all(NQL.has(mPerson.getPersonStatus(), NQL.Comp.EQUAL, PersonStatus.BETWEEN_RELATIONS), NQL.has(mPerson.getName(), NQL.Comp.EQUAL, "per*3"), NQL.hasNull(mPerson.getCar()))).getList();
+        System.out.println("count = " + personsWithoutCar.getNumberFound());
+
+
+    }
+
+
+
+
+
     @Test
     public void testScore() {
         String[] descs = new String[]{"Næste generation danske Formel 1-håb er allerede i støbeskeen", "12-årige Noah Watt", "gokart-juniormesterskaber i 2015, EM, VM", "person", "Det koster en hulens masse penge at køre det store program"};
@@ -322,6 +374,17 @@ public class NQLTest {
 
     }
 
+
+
+    @Test
+    public void testFunnyChars() throws InterruptedException {
+        System.out.println(NQL.removeFunnyChars("wegner and sort"));
+    }
+
+    @Test
+    public void testFunnyChars2() throws InterruptedException {
+        System.out.println(NQL.removeFunnyChars("wegner and and or"));
+    }
 
 
     @Test
@@ -730,7 +793,7 @@ public class NQLTest {
         System.out.println(" ============================= ");
         {
             SolrServer solrServer = ModelObjectSearchService.solrServer(Person.class);
-            SolrQuery solrQuery = new SolrQuery("(_Person_countOfCars__INT:[0 TO *]) ( (_Person_fun___da_TXT:( generationer ) AND _Person_fun___da_TXT:(allerede) AND  -_Person_fun___da_TXT:( tiger )) )");
+            SolrQuery solrQuery = new SolrQuery("(_Person_countOfCars__INT:[0 TO *]) ( (_Person_fun___da_TXT:( generationer AND allerede AND tiger )) )");
             solrQuery.setFields("*, score, _explain_");
             QueryResponse queryResponse = solrServer.query(solrQuery);
             int size = queryResponse.getResults().size();

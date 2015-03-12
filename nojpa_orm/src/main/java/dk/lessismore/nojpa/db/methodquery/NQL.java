@@ -1039,7 +1039,7 @@ public class NQL {
     }
 
 
-    private static String removeFunnyChars(String s){
+    public static String removeFunnyChars(String s){
 //        log.debug("START: removeFunnyChars: input ("+ s +")");
         if(s == null || s.equals("")){
             return s;
@@ -1053,20 +1053,62 @@ public class NQL {
                     .trim();
             s = " " + s + " ";
             String[] noWords = new String[]{"or", "and", "not"};
-            String[] ss = s.split(" ");
+            String[] split = s.trim().split(" ");
+            List<String> ss = new LinkedList<String>();
+            for(int i = 0; i < split.length; i++){
+                ss.add(split[i]);
+            }
+
+
             StringBuilder toReturn = new StringBuilder();
-            for(int j = 0; j < ss.length; j++){
+//            for(int j = 0; j < ss.length; j++){
+//                boolean cleanWord = true;
+//                for(int i = 0; cleanWord && i < noWords.length; i++){
+//                    if(ss[j].equalsIgnoreCase(noWords[i])){
+//                        cleanWord = false;
+//                   }
+//                }
+//                if(cleanWord){
+//                    toReturn.append(ss[j]);
+//                    toReturn.append(' ');
+//                }
+//            }
+            for(int j = 0; j < ss.size(); j++){
                 boolean cleanWord = true;
-                for(int i = 0; cleanWord && i < noWords.length; i++){
-                    if(ss[j].equalsIgnoreCase(noWords[i])){
-                        cleanWord = false;
-                   }
+                if(j == 0) {
+                    for (int i = 0; cleanWord && i < noWords.length; i++) {
+                        if (ss.get(j).equalsIgnoreCase(noWords[i])) {
+                            cleanWord = false;
+                        }
+                    }
                 }
-                if(cleanWord){
-                    toReturn.append(ss[j]);
-                    toReturn.append(' ');
+                if(!cleanWord){
+                    ss.remove(j);
+                    j--;
                 }
             }
+
+            for(int j = 0; j < ss.size(); j++){
+                boolean cleanWord = true;
+                if(j == 0) {
+                    for (int i = 0; cleanWord && i < noWords.length; i++) {
+                        if (ss.get(ss.size() - j - 1).equalsIgnoreCase(noWords[i])) {
+                            cleanWord = false;
+                        }
+                    }
+                }
+                if(!cleanWord){
+                    ss.remove(ss.size() - j - 1);
+                    j--;
+                }
+            }
+
+
+            for(int j = 0; j < ss.size(); j++){
+                toReturn.append(ss.get(j));
+                toReturn.append(" ");
+            }
+
 
             s = toReturn.toString();
             s = (s == null || s.trim().equals("") ? "*" : s);
@@ -1080,7 +1122,7 @@ public class NQL {
 
 
     public static void main(String[] args) {
-        System.out.println(removeFunnyChars("(zzz k||k ^asdasd asd asd as d adsf!!!! ^not"));
+        System.out.println(removeFunnyChars("wegner and sort"));
     }
 
 
