@@ -44,10 +44,15 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
 
     public Object invoke(Object object, Method method, Object[] objects) throws Throwable {
         String name = method.getName();
+        if(method.getName().equals("getInterface")){
+            return getInterface();
+        }
         if(method.getDeclaringClass().isAssignableFrom(ModelObjectInterface.class)
                 || ModelObject.class.isAssignableFrom(method.getDeclaringClass())) {
             return method.invoke(this, objects);
-        } if(name.startsWith("get") && (objects == null || objects.length == 0)) {
+        }
+
+        if(name.startsWith("get") && (objects == null || objects.length == 0)) {
             ModelObjectMethodListener annotation = method.getAnnotation(ModelObjectMethodListener.class);
             ModelObjectMethodListener.MethodListener methodListener = null;
             if(annotation != null && annotation.methodListener() != null){

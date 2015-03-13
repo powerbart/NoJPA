@@ -17,26 +17,21 @@ public interface ModelObjectInterface {
 
     @SearchField
     Calendar getCreationDate();
-    void setCreationDate(Calendar creationDate); // The set methods is needed for for the corresp 
+    void setCreationDate(Calendar creationDate); // The set methods is needed for for the corresp
 
-//    @AdminHide
-//    @XmlTransient
-//    @GenericHtmlAdminForMethod(editViewRowNumber = 3, ignoreThisAttribute = true)
+    Class<? extends ModelObjectInterface> getInterface();
+
+
 //    Calendar getLastModified();
 //    void setLastModified(Calendar lastModified);
 //
-//    @AdminHide
-//    @XmlTransient
-//    @GenericHtmlAdminForMethod(ignoreThisAttribute = true)
+
 //    Calendar getLastAccessed();
 //    void setLastAccessed(Calendar lastAccessed);
 //
-//    @AdminHide
-//    @XmlTransient
-//    @GenericHtmlAdminForMethod(ignoreThisAttribute = true)
+
 //    Calendar getExpireDate();
 //    void setExpireDate(Calendar expireDate);
 
-//    void copyNotNullValuesIntoMe(ModelObjectInterface copyFromInterface);
-    
+
 }

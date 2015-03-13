@@ -304,6 +304,15 @@ public class AttributeContainer {
     public boolean setAttributeValue(Object objectToSetOn, String attributeName, Object value) {
 
         Attribute attribute = getAttribute(attributeName);
+        if(attribute == null){
+            log.fatal("We don't know ("+ attributeName +") on " + _targetClass.getSimpleName());
+            for(Iterator<String> iterator = _attributes.keySet().iterator(); iterator.hasNext(); ){
+                log.info("Attribute on " + _targetClass.getSimpleName() + " is: " + iterator.next());
+            }
+
+        }
+
+
         if(attribute.getAttributeClass().isEnum()){
             if(value == null){
                 attribute.setAttributeValuePlain(objectToSetOn, null);

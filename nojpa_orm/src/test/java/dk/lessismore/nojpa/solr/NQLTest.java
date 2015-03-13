@@ -5,10 +5,7 @@ import dk.lessismore.nojpa.db.methodquery.MQL;
 import dk.lessismore.nojpa.db.methodquery.NList;
 import dk.lessismore.nojpa.db.methodquery.NQL;
 import dk.lessismore.nojpa.db.methodquery.NStats;
-import dk.lessismore.nojpa.db.testmodel.Car;
-import dk.lessismore.nojpa.db.testmodel.DatabaseCreatorTest;
-import dk.lessismore.nojpa.db.testmodel.Person;
-import dk.lessismore.nojpa.db.testmodel.PersonStatus;
+import dk.lessismore.nojpa.db.testmodel.*;
 import dk.lessismore.nojpa.reflection.db.DatabaseCreator;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectSearchService;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
@@ -714,6 +711,56 @@ public class NQLTest {
     }
 
 
+    @Test
+    public void testBoolean() {
+        String[] descs = new String[]{"Næste generation danske Person Formel 1-håb er allerede i støbeskeen", "12-årige PersNoah Watt", "gokart-juniormesterskaber personi 2015, EM, VM", "person", "Det koster en hulens masse penge at køre det store program"};
+        DatabaseCreator.createDatabase("dk.lessismore.nojpa.db.testmodel");
+        SolrServiceImpl solrService = new SolrServiceImpl();
+        solrService.setCoreName("nojpa");
+        solrService.setCleanOnStartup(true);
+
+        ModelObjectSearchService.addSolrServer(Person.class, solrService.getServer());
+        Person mPerson = NQL.mock(Person.class);
+
+        Person prev = null;
+        for (int i = 0; i < 10; i++) {
+            Person person = ModelObjectService.create(Person.class);
+            if(i % 2 == 0){
+                prev = person;
+            } else {
+                prev.setGirlFriend(person);
+                person.setGirlFriend(prev);
+            }
+            person.setName("person " + (i % 4));
+            person.setDescription(i % 4 == 0 ? "adadasd" : null);
+            person.setIsSick(i % 2 == 0);
+            person.setCountOfCars(i * 100);
+            person.setSomeDouble( (double) (100 * Math.random()) );
+            person.setCountOfFriends((long) (1000 * Math.random()));
+//            person.setDescription(descs[i % descs.length]);
+            person.setIsSick(i % 2 == 0);
+
+            person.setPersonStatus(PersonStatus.BETWEEN_RELATIONS);
+//            person.setHistoryStatus(new PersonStatus[]{PersonStatus.BETWEEN_RELATIONS, PersonStatus.SINGLE});
+            person.setSomeFloat((float) (20f * Math.random()));
+            if (i < 7) {
+                Car car = ModelObjectService.create(Car.class);
+                person.setCar(car);
+            }
+            ModelObjectService.save(person);
+            System.out.println("---------------- PUT START -----------------------");
+            ModelObjectSearchService.put(person);
+            System.out.println("---------------- PUT END -----------------------");
+        }
+        solrService.commit();
+
+
+        NList<Person> list = NQL.search(mPerson).search(NQL.all(NQL.has(mPerson.getIsSick(), NQL.Comp.EQUAL, true), NQL.has(mPerson.getName(), NQL.Comp.EQUAL, "person"))).searchIsNull(mPerson.getDescription()).getList();
+        System.out.println("list.getNumberFound() = " + list.getNumberFound());
+
+    }
+
+
 
     @Test
     public void testValue() {
@@ -746,10 +793,10 @@ public class NQLTest {
             person.setCountOfCars(i * 100);
             person.setSomeDouble((double) (100 * Math.random()));
             person.setCountOfFriends((long) (1000 * Math.random()));
-            person.setFun(descs[i % descs.length] + (i % 3 == 0? " abe" : " tiger"), new Locale("da"));
+            person.setFun(descs[i % descs.length] + (i % 3 == 0 ? " abe" : " tiger"), new Locale("da"));
             person.setUrl("http://dr.dk/fun");
             System.out.println("FIRST: Should not be null: " + person.getFun());
-
+            person.setAddresses(new Address[]{ModelObjectService.create(Address.class)});
             person.setIsSick(i % 2 == 0);
 
             person.setPersonStatus(PersonStatus.BETWEEN_RELATIONS);
@@ -765,6 +812,7 @@ public class NQLTest {
             System.out.println("---------------- PUT END -----------------------");
         }
         solrService.commit();
+        ObjectCacheFactory.getInstance().getObjectCache(Person.class).clear();
 
 //        List<Person> list = MQL.select(Person.class).getList();
 //        for(int i = 0; i < 1; i++){

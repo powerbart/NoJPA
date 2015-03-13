@@ -1,6 +1,8 @@
 package dk.lessismore.nojpa.reflection.db.model;
 
 import dk.lessismore.nojpa.db.methodquery.MQL;
+import dk.lessismore.nojpa.reflection.ClassReflector;
+import dk.lessismore.nojpa.reflection.attributes.AttributeContainer;
 import dk.lessismore.nojpa.reflection.db.annotations.ModelObjectLifeCycleListener;
 import dk.lessismore.nojpa.reflection.util.ReflectionUtil;
 
@@ -24,6 +26,7 @@ public class ModelObjectService {
     public static String toDebugString(ModelObjectInterface object) {
         return ((ModelObject) object).toDebugString(";");
     }
+
 
     /** Creates a new model object implementing the given interface. */
     public static <T extends ModelObjectInterface> T create(Class<T> interfaceClass) {
@@ -78,6 +81,18 @@ public class ModelObjectService {
             ((ModelObject) object).delete();
         }
     }
+
+
+    public static  <T extends ModelObjectInterface> Object getAttributeValue(T modelObject, String attributeName){
+        AttributeContainer attributeContainer = ClassReflector.getAttributeContainer(modelObject.getInterface());
+        return attributeContainer.getAttribute(attributeName);
+    }
+
+    public static  <T extends ModelObjectInterface> Object setAttributeValue(T modelObjectToSetOn, String attributeName, Object value){
+        AttributeContainer attributeContainer = ClassReflector.getAttributeContainer(modelObjectToSetOn.getInterface());
+        return attributeContainer.setAttributeValue(modelObjectToSetOn, attributeName, value);
+    }
+
 
     public static void delete(Class<? extends ModelObjectInterface> moiClass, String objectID) {
         ModelObjectInterface moi = MQL.selectByID(moiClass, objectID);

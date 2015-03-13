@@ -20,7 +20,7 @@ import java.util.List;
  * Created with IntelliJ IDEA.
  * User: seb
  */
-public class LessismoreTranslateServiceImpl implements TranslateService {
+public class LessismoreApiTranslateServiceImpl  implements TranslateService {
 
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(LessismoreTranslateServiceImpl.class);
 
@@ -29,7 +29,7 @@ public class LessismoreTranslateServiceImpl implements TranslateService {
     private String lessismoreAPIkey = null;
 
 
-    public LessismoreTranslateServiceImpl(String lessismoreAPIkey, String googleAPIkey){
+    public LessismoreApiTranslateServiceImpl(String lessismoreAPIkey, String googleAPIkey){
         this.lessismoreAPIkey = lessismoreAPIkey;
         this.googleAPIkey = googleAPIkey;
     }
@@ -54,15 +54,12 @@ public class LessismoreTranslateServiceImpl implements TranslateService {
 
 
         List<NameValuePair> qparams = new ArrayList<NameValuePair>();
-        qparams.add(new BasicNameValuePair("key", googleAPIkey));
-        qparams.add(new BasicNameValuePair("limkey", lessismoreAPIkey));
+        qparams.add(new BasicNameValuePair("key", lessismoreAPIkey));
         qparams.add(new BasicNameValuePair("source", srcLang2Char));
         qparams.add(new BasicNameValuePair("target", destLang2Char));
         qparams.add(new BasicNameValuePair("q", originalText));
-        qparams.add(new BasicNameValuePair("itemID", uniqueID));
-        qparams.add(new BasicNameValuePair("attribute", attributeNameForDebug));
 
-        HttpPost httpPost = new HttpPost("http://translate.less-is-more.dk/ProxyServlet");
+        HttpPost httpPost = new HttpPost("http://vsrvj71.less-is-more.dk/translate");
         httpPost.setHeader(new BasicHeader("X-HTTP-Method-Override", "GET"));
 
         httpPost.setEntity(new UrlEncodedFormEntity(qparams, "UTF-8"));
@@ -83,4 +80,6 @@ public class LessismoreTranslateServiceImpl implements TranslateService {
         String translatedText = (String) responseJSON.get("translatedText");
         return translatedText;
     }
+
+
 }
