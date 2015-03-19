@@ -237,6 +237,15 @@ public class NQLTest {
             }
             ModelObjectService.save(person);
         }
+        
+        { //With SQL... With a hidden join !?!?!?!
+            Person mock = MQL.mock(Person.class);
+            MQL.select(mock).where(mock.getGirlFriend().getName(), MQL.Comp.EQUAL, "Sabrina").getList();
+        }
+        { //With NoSQL... Here left joins are for free :-)
+            Person mock = NQL.mock(Person.class);
+            NQL.search(mock).search(mock.getGirlFriend().getName(), NQL.Comp.EQUAL, "Sabrina").getList();
+        }
 
     }
 

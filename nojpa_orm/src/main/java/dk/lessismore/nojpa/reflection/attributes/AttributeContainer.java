@@ -31,7 +31,7 @@ import org.apache.log4j.Logger;
  */
 public class AttributeContainer {
 
-    private static final Logger log = Logger.getLogger(dk.lessismore.nojpa.reflection.attributes.AttributeContainer.class);
+    private static final org.apache.log4j.Logger log = Logger.getLogger(AttributeContainer.class);
 
 
 
