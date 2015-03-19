@@ -199,6 +199,50 @@ public class NQLTest {
 
 
     @Test
+    public void testSmall() {
+        DatabaseCreator.createDatabase("dk.lessismore.nojpa.db.testmodel");
+        SolrServiceImpl solrService = new SolrServiceImpl();
+        solrService.setCoreName("nojpa");
+        solrService.setCleanOnStartup(true);
+
+        ModelObjectSearchService.addSolrServer(Person.class, solrService.getServer());
+        Person mPerson = NQL.mock(Person.class);
+
+        Person prev = null;
+        for (int i = 0; i < 1; i++) {
+            Person person = ModelObjectService.create(Person.class);
+            if(i % 2 == 0){
+                prev = person;
+            } else {
+                prev.setGirlFriend(person);
+                person.setGirlFriend(prev);
+            }
+            Address address = ModelObjectService.create(Address.class);
+            ModelObjectService.save(address);
+            person.setAddresses(new Address[]{address});
+            person.setName("person " + (i % 4));
+            person.setIsSick(i % 2 == 0);
+
+            if (i % 2 == 0) {
+                Calendar birthDate = Calendar.getInstance();
+                birthDate.add(Calendar.YEAR, i * -1);
+                person.setBirthDate(birthDate);
+            }
+            person.setPersonStatus(PersonStatus.BETWEEN_RELATIONS);
+//            person.setHistoryStatus(new PersonStatus[]{PersonStatus.BETWEEN_RELATIONS, PersonStatus.SINGLE});
+            person.setSomeFloat((float) (20f * Math.random()));
+            if (i < 7) {
+                Car car = ModelObjectService.create(Car.class);
+                person.setCar(car);
+            }
+            ModelObjectService.save(person);
+        }
+
+    }
+
+
+
+    @Test
     public void test02() {
         DatabaseCreator.createDatabase("dk.lessismore.nojpa.db.testmodel");
         SolrServiceImpl solrService = new SolrServiceImpl();

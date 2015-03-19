@@ -129,13 +129,9 @@ public class ClassAnalyser {
      * The first character of the name will be made into lower case!
      */
     public static String getAttributeNameFromMethod(Method method) {
-        String fieldName = method.getName();
-        fieldName = fieldName.substring(3, fieldName.length());
-        if(fieldName.length() > 0) {
-            fieldName = fieldName.substring(0, 1).toLowerCase()+fieldName.substring(1);
-        }
-        return fieldName;
+        return method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4);
     }
+
 
     /**
      * Determines wether the method is a valid get method.

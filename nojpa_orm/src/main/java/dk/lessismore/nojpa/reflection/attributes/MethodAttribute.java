@@ -103,12 +103,22 @@ public class MethodAttribute extends Attribute {
         } else return null;
     }
 
-    public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
-        if(_getMethod != null){
-            T annotation = _getMethod.getAnnotation(annotationClass);
-            return annotation;
-        } else return null;
+    public <T extends Annotation> T getAnnotation(Class<T> annotationsClass) {
+        Annotation getAnno = _getMethod.getAnnotation(annotationsClass);
+        if(getAnno != null){
+            return (T) getAnno;
+        } else {
+            return _setMethod.getAnnotation(annotationsClass);
+        }
     }
+
+
+//    public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
+//        if(_getMethod != null){
+//            T annotation = _getMethod.getAnnotation(annotationClass);
+//            return annotation;
+//        } else return null;
+//    }
 
     public Object getAttributeValuePrettyPrint(Object objectToGetFrom){
         Object value = getAttributeValue(objectToGetFrom);

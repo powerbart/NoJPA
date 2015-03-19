@@ -31,23 +31,10 @@ import org.apache.log4j.Logger;
  */
 public class AttributeContainer {
 
-    private static final org.apache.log4j.Logger log = Logger.getLogger(AttributeContainer.class);
+    private static final Logger log = Logger.getLogger(dk.lessismore.nojpa.reflection.attributes.AttributeContainer.class);
 
 
-    /**
-     * Should we allow static attributes.
-     */
-    private static boolean _staticAttributesAllowed = false;
 
-    /**
-     * Should we look for attributes in set and get methods.
-     */
-    private static boolean _findAttributesInMethods = true;
-
-    /**
-     * Should we look for attributes in public fields.
-     */
-    private static boolean _findAttributesInFields = true;
 
     /**
      * The class which the attribute in this container belongs to.
@@ -83,102 +70,85 @@ public class AttributeContainer {
      * This method starts the process that identifies the attributes of the class.
      */
     public void findAttributes(Class targetClass) {
-        findAttributes(targetClass, _staticAttributesAllowed, _findAttributesInMethods, _findAttributesInFields);
+        _targetClass = targetClass;
+        findAttributesFromMethods();
     }
 
-    /**
-     * This method starts the process that identifies the attributes of the class.
-     */
-    public void findAttributes(Class targetClass, boolean staticAttributesAllowed, boolean findAttributesInMethods, boolean findAttributesInFields) {
-        _targetClass = targetClass;
-        if(findAttributesInMethods)
-            findAttributesFromMethods(staticAttributesAllowed);
-        if(findAttributesInFields)
-            findAttributesFromFields(staticAttributesAllowed);
-    }
 
     /**
      * This method analyses the class, and findes the attributes in it; from the
      * get and set methods in the class.
      */
-    protected void findAttributesFromMethods(boolean staticAttributesAllowed) {
+    protected void findAttributesFromMethods() {
         //Get public methods.
         Method[] methods = getTargetClass().getMethods();
-	//log.debug("findAttributesFromMethods:1");
         //Handle get Methods.
         for(int i = 0; i < methods.length; i++) {
-	        //log.debug("findAttributesFromMethods:2 ... " + methods[i].getDeclaringClass());
             log.debug(getTargetClass().getName() + ": Current Method: " + methods[i].getName());
-            if(staticAttributesAllowed || ClassAnalyser.isMethodStatic(methods[i])) {
-                Method method = methods[i];
-                if(ClassAnalyser.isValidGetMethod(method)) {
-		    //log.debug("findAttributesFromMethods:3");
-                    String attributeName = ClassAnalyser.getAttributeNameFromMethod(method);
-                    if(attributeName.isEmpty())
-                        continue;
-		    //log.debug("findAttributesFromMethods:4");
-                    Attribute attribute = (Attribute)getAttributes().get(attributeName);
-                    MethodAttribute methodAttribute = null;
-                    if(attribute == null ) {
-                        //This attribute has not been made before. We make it.
-                        methodAttribute = new MethodAttribute();
-                        methodAttribute.setGetMethod(method);
+            Method method = methods[i];
+            if(ClassAnalyser.isValidGetMethod(method)) {
+                String attributeName = ClassAnalyser.getAttributeNameFromMethod(method);
+                if(attributeName.isEmpty())
+                    continue;
+                Attribute attribute = (Attribute)getAttributes().get(attributeName);
+                MethodAttribute methodAttribute = null;
+                if(attribute == null ) {
+                    //This attribute has not been made before. We make it.
+                    methodAttribute = new MethodAttribute();
+                    methodAttribute.setGetMethod(method);
 
-                        getAttributes().put(methodAttribute.getAttributeName(), methodAttribute);
-                    } else if(attribute instanceof MethodAttribute) {
-                        methodAttribute = (MethodAttribute)attribute;
-                        methodAttribute.setGetMethod(method);
-                    }
-
-                    methodAttribute.setDeclaringClass( methods[i].getDeclaringClass() );
-                    SearchField searchFieldAnnotation = method.getAnnotation(SearchField.class);
-                    methodAttribute.setSearchFieldAnnotation(searchFieldAnnotation);
-
-                    if((method.getName().startsWith("get") && method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(Locale.class))){
-                        methodAttribute.setTranslatedAssociation( true );
-                    }
-
-
+                    getAttributes().put(methodAttribute.getAttributeName(), methodAttribute);
+                } else if(attribute instanceof MethodAttribute) {
+                    methodAttribute = (MethodAttribute)attribute;
+                    methodAttribute.setGetMethod(method);
                 }
+
+                methodAttribute.setDeclaringClass( methods[i].getDeclaringClass() );
+                SearchField searchFieldAnnotation = method.getAnnotation(SearchField.class);
+                methodAttribute.setSearchFieldAnnotation(searchFieldAnnotation);
+
+                if((method.getName().startsWith("get") && method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(Locale.class))){
+                    methodAttribute.setTranslatedAssociation( true );
+                }
+
+
             }
         }
         //Handle set methods.
         for(int i = 0; i < methods.length; i++) {
 	    //log.debug("findAttributesFromMethods:6");
-            if(_staticAttributesAllowed || !Modifier.isStatic(methods[i].getModifiers())) {
-                Method method = methods[i];
-                if(ClassAnalyser.isValidSetMethod(method)) {
-                    String attributeName = ClassAnalyser.getAttributeNameFromMethod(method);
-                    if(attributeName.isEmpty())
-                        continue;
+            Method method = methods[i];
+            if(ClassAnalyser.isValidSetMethod(method)) {
+                String attributeName = ClassAnalyser.getAttributeNameFromMethod(method);
+                if(attributeName.isEmpty())
+                    continue;
 
-                    Attribute attribute = (Attribute)getAttributes().get(attributeName);
-                    if(attribute == null ) {
-                        //We have not encountered this attribute before
-                        MethodAttribute methodAttribute = new MethodAttribute(getTargetClass());
-                        methodAttribute.setSetMethod(method);
-                        //log.debug("method = " + method.getName());
-                        getAttributes().put(methodAttribute.getAttributeName(), methodAttribute);
-                    } else if(attribute instanceof MethodAttribute) {
-                        //We have encountered this attribute before (maybe as an get method).
-                        MethodAttribute methodAttribute = (MethodAttribute)attribute;
-                        Method oldSetMethod = methodAttribute.getSetMethod();
-                        if(oldSetMethod != null) {
-                            //If we allready have an set method we check to see if its
-                            //argument class type match that of the get method
-                            //If so its a better match and should be used instead.
-                            Class methodParameterClass = method.getParameterTypes()[0];
-                            Class getMethodReturnClass = methodAttribute.getGetMethod().getReturnType();
-                            if(methodParameterClass.getName().equals(getMethodReturnClass.getName()))
-                                methodAttribute.setSetMethod(method);
-                        } else {
+                Attribute attribute = (Attribute)getAttributes().get(attributeName);
+                if(attribute == null ) {
+                    //We have not encountered this attribute before
+                    MethodAttribute methodAttribute = new MethodAttribute(getTargetClass());
+                    methodAttribute.setSetMethod(method);
+                    //log.debug("method = " + method.getName());
+                    getAttributes().put(methodAttribute.getAttributeName(), methodAttribute);
+                } else if(attribute instanceof MethodAttribute) {
+                    //We have encountered this attribute before (maybe as an get method).
+                    MethodAttribute methodAttribute = (MethodAttribute)attribute;
+                    Method oldSetMethod = methodAttribute.getSetMethod();
+                    if(oldSetMethod != null) {
+                        //If we allready have an set method we check to see if its
+                        //argument class type match that of the get method
+                        //If so its a better match and should be used instead.
+                        Class methodParameterClass = method.getParameterTypes()[0];
+                        Class getMethodReturnClass = methodAttribute.getGetMethod().getReturnType();
+                        if(methodParameterClass.getName().equals(getMethodReturnClass.getName()))
                             methodAttribute.setSetMethod(method);
-                        }
+                    } else {
+                        methodAttribute.setSetMethod(method);
                     }
-                    DbStrip dbStripAnnotation = method.getAnnotation(DbStrip.class);
-                    if(dbStripAnnotation != null){
-                        attribute.setDbStripAnnotation(dbStripAnnotation);
-                    }
+                }
+                DbStrip dbStripAnnotation = method.getAnnotation(DbStrip.class);
+                if(dbStripAnnotation != null){
+                    attribute.setDbStripAnnotation(dbStripAnnotation);
                 }
             }
         }
@@ -213,45 +183,6 @@ public class AttributeContainer {
     }
 
 
-
-    /**
-     * This method will analyse the target class; and finde the attribute from the
-     * public fields.
-     */
-    protected void findAttributesFromFields(boolean staticAttributesAllowed) {
-
-        //Get all the public fields of the target class.
-        Field[] fields = getTargetClass().getFields();
-
-        for(int i = 0; i < fields.length; i++) {
-            Field field = fields[i];
-            if(staticAttributesAllowed || ClassAnalyser.isFieldStatic(field)) {
-                String attributeName = ClassAnalyser.getAttributeNameFromField(field);
-                if(attributeName.isEmpty())
-                    continue;
-
-                Attribute attribute = (Attribute)getAttributes().get(attributeName);
-                if(attribute == null) {
-                    //We have not encountered the attribute before. We create it.
-                    FieldAttribute fieldAttribute = new FieldAttribute(getTargetClass());
-                    fieldAttribute.setDeclaringClass( field.getDeclaringClass() );
-                    fieldAttribute.setField(field);
-                    getAttributes().put(fieldAttribute.getAttributeName(), fieldAttribute);
-                }
-                else if(attribute instanceof MethodAttribute) {
-                    //The attribute has been encountered before; but through methods..
-                    //If attribute is uncomplete; missing get or set method; we overwrite it
-                    //with this new attribute with field accessor.
-                    MethodAttribute methodAttribute = (MethodAttribute)attribute;
-                    if(methodAttribute.getSetMethod() == null || methodAttribute.getGetMethod() == null) {
-                        FieldAttribute fieldAttribute = new FieldAttribute();
-                        fieldAttribute.setField(field);
-                        getAttributes().put(fieldAttribute.getAttributeName(), fieldAttribute);
-                    }
-                }
-            }
-        }
-    }
 
     /**
      * Gets the attribute hashtable (key=attributeName, value=Attribute).

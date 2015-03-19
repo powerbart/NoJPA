@@ -168,7 +168,7 @@ public class ConnectionFactory implements ResourceFactory {
             Class.forName(getDriverName()).newInstance();
             return true;
         }catch(Exception e) {
-            log.error("Could not make instance of db drivere " + driverName, e);
+            log.error("Could not make instance of db drivere ... driverName("+ driverName +")", e);
             return false;
         }
     }

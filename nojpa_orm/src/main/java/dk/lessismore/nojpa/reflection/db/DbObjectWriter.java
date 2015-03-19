@@ -392,7 +392,7 @@ public class DbObjectWriter {
     private static boolean updateAssociationTable(ModelObject modelObject, DbAttributeContainer dbAttributeContainer, DbAttribute dbAttribute, Object[] associations) {
         if (modelObject.isNew() || associations == null || associations.length < 10 || !(associations instanceof ModelObjectInterface[])) {
             //log.debug("updateAssociationTable old !! ");
-            boolean successfull = deleteAssociations(modelObject.getPrimaryKeyValue(), dbAttributeContainer, dbAttribute);
+            boolean successfull = modelObject.isNew() || deleteAssociations(modelObject.getPrimaryKeyValue(), dbAttributeContainer, dbAttribute);
             successfull = successfull && insertAssociations(modelObject, dbAttributeContainer, dbAttribute, associations);
             return successfull;
         } else {

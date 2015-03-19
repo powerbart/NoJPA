@@ -4,6 +4,7 @@ import dk.lessismore.nojpa.cache.ObjectArrayCache;
 import dk.lessismore.nojpa.cache.ObjectCache;
 import dk.lessismore.nojpa.cache.ObjectCacheFactory;
 import dk.lessismore.nojpa.reflection.db.annotations.ModelObjectMethodListener;
+import dk.lessismore.nojpa.reflection.util.ClassAnalyser;
 import org.apache.log4j.Logger;
 import dk.lessismore.nojpa.reflection.db.*;
 import dk.lessismore.nojpa.reflection.db.annotations.DbStrip;
@@ -13,6 +14,7 @@ import dk.lessismore.nojpa.guid.GuidFactory;
 import dk.lessismore.nojpa.properties.Default;
 import dk.lessismore.nojpa.properties.PropertiesProxy;
 
+import javax.persistence.Id;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationHandler;
@@ -44,9 +46,6 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
 
     public Object invoke(Object object, Method method, Object[] objects) throws Throwable {
         String name = method.getName();
-        if(method.getName().equals("getInterface")){
-            return getInterface();
-        }
         if(method.getDeclaringClass().isAssignableFrom(ModelObjectInterface.class)
                 || ModelObject.class.isAssignableFrom(method.getDeclaringClass())) {
             return method.invoke(this, objects);
@@ -98,6 +97,8 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
 //			log.debug("END:invoke:method.getName() = " + method.getName() + "->" + association);
 			return association;
         } else if(name.startsWith("set") && (objects != null && objects.length == 1)) {
+            DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(interfaceClass);
+            DbAttribute dbAttribute = dbAttributeContainer.getDbAttribute(getAssociationName(method));
             ModelObjectMethodListener annotation = method.getAnnotation(ModelObjectMethodListener.class);
             ModelObjectMethodListener.MethodListener methodListener = null;
             if(annotation != null && annotation.methodListener() != null){
@@ -111,6 +112,9 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
                     }
                     methodListenerMap.remove(Thread.currentThread().getId() +":"+ method.getName());
                 }
+            }
+            if(dbAttribute.getAttribute().getAnnotation(Id.class) != null){
+                setObjectID("" + objects[0]);
             }
             setAssociation(method, objects[0]);
 
@@ -162,11 +166,11 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
         }
     }
 
-    private Object getAssociation(Method method) {
+    public Object getAssociation(Method method) {
         return getAssociation(getAssociationName(method), method);
     }
 
-    private void setAssociation(Method method, Object object) {
+    public void setAssociation(Method method, Object object) {
         String name = getAssociationName(method);
         Class<?> parameterClass = method.getParameterTypes()[0];
         if(ModelObjectInterface.class.isAssignableFrom(parameterClass)) {
@@ -218,8 +222,8 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
         }
     }
 
-    private String getAssociationName(Method method) {
-        return method.getName().substring(3, 4).toLowerCase() + method.getName().substring(4);
+    public static String getAssociationName(Method method) {
+        return ClassAnalyser.getAttributeNameFromMethod(method);
     }
 
     

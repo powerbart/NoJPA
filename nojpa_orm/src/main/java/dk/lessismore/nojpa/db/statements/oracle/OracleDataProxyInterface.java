@@ -1,5 +1,6 @@
 package dk.lessismore.nojpa.db.statements.oracle;
 
+import java.lang.reflect.Method;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 
@@ -9,6 +10,7 @@ import java.sql.ResultSetMetaData;
  */
 public interface OracleDataProxyInterface {
 
-    void readRow(ResultSet rs, ResultSetMetaData metaData, Object objectToFill) throws Exception;
-
+//    void readRow(ResultSet rs, ResultSetMetaData metaData, Object objectToFill) throws Exception;
+//
+//    void setAssociation(Method method, Object object);
 }

@@ -57,7 +57,7 @@ public class ClassReflector {
                 //log.debug("getAttributeContainer : 2 ");
                 //This class has not been reflected before. We reflect it and place it in the cache.
                 container = new AttributeContainer();
-                container.findAttributes(myClass, false, true, false);
+                container.findAttributes(myClass);
                 //log.debug("getAttributeContainer : 3 container = " + container);
                 getReflectedClasses().put(myClass.getName(), container);
                 //log.debug("getAttributeContainer : 4 ");
