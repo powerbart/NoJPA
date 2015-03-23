@@ -165,19 +165,16 @@ public class Mailer {
                 debug(message);
                 log.error(message, exception);
                 exception.printStackTrace();
-                return;
             } catch (MalformedURLException exception) {
                 String message = "Could not send mail from " + from + " to " + Arrays.toString(recipents) + " subject " + subject;
                 debug(message);
                 log.error(message, exception);
                 exception.printStackTrace();
-                return;
             } catch (Exception exception) {
                 String message = "Could not send mail from " + from + " to " + Arrays.toString(recipents) + " subject " + subject;
                 debug(message);
                 log.error(message, exception);
                 exception.printStackTrace();
-                return;
             }
 
         }
