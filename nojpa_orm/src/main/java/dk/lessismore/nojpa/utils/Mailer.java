@@ -91,8 +91,11 @@ public class Mailer {
         StringTokenizer mailhosts = new StringTokenizer(smtpHost, ", ");
         boolean sent = false;
         while (!sent && mailhosts.hasMoreTokens()) {
-            prop.put("mail.smtp.host", smtpHost);
-            debug("Sending mail to: " + Arrays.toString(recipents) + " via " + smtpHost);
+
+            String host = mailhosts.nextToken();
+
+            prop.put("mail.smtp.host", host);
+            debug("Sending mail to: " + Arrays.toString(recipents) + " via " + host);
 
             try {
                 Session session = Session.getDefaultInstance(prop, smtpUser == null || smtpPort == 587 ? null : new javax.mail.Authenticator() {
@@ -145,12 +148,12 @@ public class Mailer {
 
                 Transport trans = session.getTransport("smtp");
 
-                debug("Got transport, going for '" + smtpHost + "' and '" + from);
+                debug("Got transport, going for '" + host + "' and '" + from);
                 // TODO: Consider using another user for login (preferably one with password)
                 if (smtpPort > 0) {
-                    trans.connect(smtpHost, smtpPort, smtpUser != null ? smtpUser : from, smtpPass);
+                    trans.connect(host, smtpPort, smtpUser != null ? smtpUser : from, smtpPass);
                 } else {
-                    trans.connect(smtpHost, smtpUser != null ? smtpUser : from);
+                    trans.connect(host, smtpUser != null ? smtpUser : from);
                 }
                 debug("Connectied");
                 trans.sendMessage(msg, msg.getAllRecipients());
