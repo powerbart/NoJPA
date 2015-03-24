@@ -199,7 +199,7 @@ public class NQLTest {
 
 
     @Test
-    public void testSmall() {
+    public void testObjectID_simpleRelation() {
         DatabaseCreator.createDatabase("dk.lessismore.nojpa.db.testmodel");
         SolrServiceImpl solrService = new SolrServiceImpl();
         solrService.setCoreName("nojpa");
@@ -209,7 +209,7 @@ public class NQLTest {
         Person mPerson = NQL.mock(Person.class);
 
         Person prev = null;
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < 2; i++) {
             Person person = ModelObjectService.create(Person.class);
             if(i % 2 == 0){
                 prev = person;
@@ -236,18 +236,208 @@ public class NQLTest {
                 person.setCar(car);
             }
             ModelObjectService.save(person);
+            ModelObjectSearchService.put(person);
+            ModelObjectSearchService.commit(person);
         }
         
-        { //With SQL... With a hidden join !?!?!?!
-            Person mock = MQL.mock(Person.class);
-            MQL.select(mock).where(mock.getGirlFriend().getName(), MQL.Comp.EQUAL, "Sabrina").getList();
-        }
-        { //With NoSQL... Here left joins are for free :-)
+        {
             Person mock = NQL.mock(Person.class);
-            NQL.search(mock).search(mock.getGirlFriend().getName(), NQL.Comp.EQUAL, "Sabrina").getList();
+            int size = NQL.search(mock).search(mock.getGirlFriend(), NQL.Comp.EQUAL, prev).getList().size();
+            Assert.assertEquals(size, 1);
+
         }
 
+        //_Person_girlFriend__ID= 13CE568292B5FF208BDEB8F439D5E71C)
+        //_Person_girlFriend__ID:(13CE568292B5FF208BDEB8F439D5E71C)
+
+
     }
+
+    @Test
+    public void testObjectID_complexRelation() throws InterruptedException {
+        DatabaseCreator.createDatabase("dk.lessismore.nojpa.db.testmodel");
+        SolrServiceImpl solrService = new SolrServiceImpl();
+        solrService.setCoreName("nojpa");
+        solrService.setCleanOnStartup(true);
+
+        ModelObjectSearchService.addSolrServer(Person.class, solrService.getServer());
+        Person mPerson = NQL.mock(Person.class);
+
+        Person prev = null;
+        Address firstAddress = null;
+        for (int i = 0; i < 2; i++) {
+            Person person = ModelObjectService.create(Person.class);
+            if(i % 2 == 0){
+                prev = person;
+            } else {
+                prev.setGirlFriend(person);
+                person.setGirlFriend(prev);
+            }
+            Address address = ModelObjectService.create(Address.class);
+            if(firstAddress == null) {
+                firstAddress = address;
+            }
+            ModelObjectService.save(address);
+            person.setAddresses(new Address[]{address});
+            person.setName("person " + (i % 4));
+            person.setIsSick(i % 2 == 0);
+
+            if (i % 2 == 0) {
+                Calendar birthDate = Calendar.getInstance();
+                birthDate.add(Calendar.YEAR, i * -1);
+                person.setBirthDate(birthDate);
+            }
+            person.setPersonStatus(PersonStatus.BETWEEN_RELATIONS);
+//            person.setHistoryStatus(new PersonStatus[]{PersonStatus.BETWEEN_RELATIONS, PersonStatus.SINGLE});
+            person.setSomeFloat((float) (20f * Math.random()));
+            if (i < 7) {
+                Car car = ModelObjectService.create(Car.class);
+                person.setCar(car);
+            }
+            ModelObjectService.save(person);
+            ModelObjectSearchService.put(person);
+            ModelObjectSearchService.commit(person);
+            Thread.sleep(20);
+        }
+
+        {
+            Person mock = NQL.mock(Person.class);
+            int size = NQL.search(mock).search(mock.getAddresses()[MQL.ANY], NQL.Comp.EQUAL, firstAddress).getList().size();
+            Assert.assertEquals(size, 1);
+        }
+        //_Person_addresses__TXT_ARRAY_Address__ID_ARRAY:(13CE596B32874708FDC69E5006107BC4)
+        //_Person_addresses__TXT_ARRAY_Address__ID_ARRAY:(13CE596B386F31D051339156467D3284)
+
+    }
+
+    @Test
+    public void testObjectID_noRelation() {
+        DatabaseCreator.createDatabase("dk.lessismore.nojpa.db.testmodel");
+        SolrServiceImpl solrService = new SolrServiceImpl();
+        solrService.setCoreName("nojpa");
+        solrService.setCleanOnStartup(true);
+
+        ModelObjectSearchService.addSolrServer(Person.class, solrService.getServer());
+        Person mPerson = NQL.mock(Person.class);
+
+        Person prev = null;
+        for (int i = 0; i < 2; i++) {
+            Person person = ModelObjectService.create(Person.class);
+            if(i % 2 == 0){
+                prev = person;
+            } else {
+                prev.setGirlFriend(person);
+                person.setGirlFriend(prev);
+            }
+            Address address = ModelObjectService.create(Address.class);
+            ModelObjectService.save(address);
+            person.setAddresses(new Address[]{address});
+            person.setName("person " + (i % 4));
+            person.setIsSick(i % 2 == 0);
+
+            if (i % 2 == 0) {
+                Calendar birthDate = Calendar.getInstance();
+                birthDate.add(Calendar.YEAR, i * -1);
+                person.setBirthDate(birthDate);
+            }
+            person.setPersonStatus(PersonStatus.BETWEEN_RELATIONS);
+//            person.setHistoryStatus(new PersonStatus[]{PersonStatus.BETWEEN_RELATIONS, PersonStatus.SINGLE});
+            person.setSomeFloat((float) (20f * Math.random()));
+            if (i < 7) {
+                Car car = ModelObjectService.create(Car.class);
+                person.setCar(car);
+            }
+            ModelObjectService.save(person);
+            ModelObjectSearchService.put(person);
+            ModelObjectSearchService.commit(person);
+        }
+
+        {
+            Person mock = NQL.mock(Person.class);
+            long numberFound = NQL.search(mock).search(mock.getObjectID(), NQL.Comp.EQUAL, prev.getObjectID()).getList().getNumberFound();
+            Assert.assertEquals(numberFound, 1);
+        }
+
+        //_Person_girlFriend__ID= 13CE568292B5FF208BDEB8F439D5E71C)
+        //_Person_girlFriend__ID:(13CE568292B5FF208BDEB8F439D5E71C)
+
+
+    }
+
+
+
+    @Test
+    public void testObjectID() throws InterruptedException {
+        String[] descs = new String[]{"Næste generation danske Formel 1-håb er allerede i støbeskeen", "12-årige Noah Watt", "gokart-juniormesterskaber i 2015, EM, VM", "person", "Det koster en hulens masse penge at køre det store program"};
+        DatabaseCreator.createDatabase("dk.lessismore.nojpa.db.testmodel");
+        SolrServiceImpl solrService = new SolrServiceImpl();
+        solrService.setCoreName("nojpa");
+        solrService.setCleanOnStartup(true);
+
+        ModelObjectSearchService.addSolrServer(Person.class, solrService.getServer());
+        Person mPerson = NQL.mock(Person.class);
+
+        Person prev = null;
+        for (int i = 0; i < 10; i++) {
+            Person person = ModelObjectService.create(Person.class);
+            if(i % 2 == 0){
+                prev = person;
+            } else {
+                prev.setGirlFriend(person);
+                person.setGirlFriend(prev);
+            }
+//            person.setName("person " + (i % 4) + );
+//            person.setDescription(descs[i % descs.length]);
+            person.setIsSick(i % 2 == 0);
+
+            person.setPersonStatus(PersonStatus.BETWEEN_RELATIONS);
+//            person.setHistoryStatus(new PersonStatus[]{PersonStatus.BETWEEN_RELATIONS, PersonStatus.SINGLE});
+            person.setSomeFloat((float) (20f * Math.random()));
+            if (i < 7) {
+                Car car = ModelObjectService.create(Car.class);
+                person.setCar(car);
+            }
+            ModelObjectService.save(person);
+            System.out.println("---------------- PUT START -----------------------");
+            ModelObjectSearchService.put(person);
+            System.out.println("---------------- PUT END -----------------------");
+        }
+        solrService.commit();
+
+
+//        {
+//            Person m2Person = NQL.mock(Person.class);
+//            long some = NQL.search(m2Person).search(mPerson.getName(), NQL.Comp.EQUAL, "Some").getCount();
+//        }
+//        Thread.sleep(1);
+//        System.out.println("-------------------------------------- ***** 1");
+//        {
+//            Person m2Person = NQL.mock(Person.class);
+//            long some = NQL.search(m2Person).search(mPerson.getGirlFriend().getObjectID(), NQL.Comp.EQUAL, prev.getObjectID()).getCount();
+//        }
+//        Thread.sleep(1);
+//        System.out.println("-------------------------------------- ***** 2");
+//        {
+//            Person m2Person = NQL.mock(Person.class);
+//            long some = NQL.search(m2Person).search(mPerson.getGirlFriend(), NQL.Comp.EQUAL, prev).getCount();
+//        }
+//        Thread.sleep(1);
+//        System.out.println("-------------------------------------- ***** 3");  ATANAS IS GREAT !!!!!
+
+        {
+            Person m2Person = NQL.mock(Person.class);
+            long numberFound = NQL.search(m2Person).search(mPerson.getObjectID(), NQL.Comp.NOT_EQUAL, prev.getObjectID()).getCount();
+            Assert.assertEquals(numberFound, 9);
+            System.out.println("numberFound = " + numberFound);
+        }
+//        {
+//            String q = "-(objectID:(" + prev.getObjectID() + ") )";
+//            QueryResponse response = solrService.query(new SolrQuery(q));
+//            System.out.println("response.getResults().getNumFound(): ALL - 1 ["+ q +"]= " + response.getResults().getNumFound());
+//        }
+
+    }
+
 
 
 
@@ -436,100 +626,6 @@ public class NQLTest {
         System.out.println(NQL.removeFunnyChars("wegner and and or"));
     }
 
-
-    @Test
-    public void testObjectID() throws InterruptedException {
-        String[] descs = new String[]{"Næste generation danske Formel 1-håb er allerede i støbeskeen", "12-årige Noah Watt", "gokart-juniormesterskaber i 2015, EM, VM", "person", "Det koster en hulens masse penge at køre det store program"};
-        DatabaseCreator.createDatabase("dk.lessismore.nojpa.db.testmodel");
-        SolrServiceImpl solrService = new SolrServiceImpl();
-        solrService.setCoreName("nojpa");
-        solrService.setCleanOnStartup(true);
-
-        ModelObjectSearchService.addSolrServer(Person.class, solrService.getServer());
-        Person mPerson = NQL.mock(Person.class);
-
-        Person prev = null;
-        for (int i = 0; i < 10; i++) {
-            Person person = ModelObjectService.create(Person.class);
-            if(i % 2 == 0){
-                prev = person;
-            } else {
-                prev.setGirlFriend(person);
-                person.setGirlFriend(prev);
-            }
-//            person.setName("person " + (i % 4) + );
-//            person.setDescription(descs[i % descs.length]);
-            person.setIsSick(i % 2 == 0);
-
-            person.setPersonStatus(PersonStatus.BETWEEN_RELATIONS);
-//            person.setHistoryStatus(new PersonStatus[]{PersonStatus.BETWEEN_RELATIONS, PersonStatus.SINGLE});
-            person.setSomeFloat((float) (20f * Math.random()));
-            if (i < 7) {
-                Car car = ModelObjectService.create(Car.class);
-                person.setCar(car);
-            }
-            ModelObjectService.save(person);
-            System.out.println("---------------- PUT START -----------------------");
-            ModelObjectSearchService.put(person);
-            System.out.println("---------------- PUT END -----------------------");
-        }
-        solrService.commit();
-
-
-//        {
-//            Person m2Person = NQL.mock(Person.class);
-//            long some = NQL.search(m2Person).search(mPerson.getName(), NQL.Comp.EQUAL, "Some").getCount();
-//        }
-//        Thread.sleep(1);
-//        System.out.println("-------------------------------------- ***** 1");
-//        {
-//            Person m2Person = NQL.mock(Person.class);
-//            long some = NQL.search(m2Person).search(mPerson.getGirlFriend().getObjectID(), NQL.Comp.EQUAL, prev.getObjectID()).getCount();
-//        }
-//        Thread.sleep(1);
-//        System.out.println("-------------------------------------- ***** 2");
-//        {
-//            Person m2Person = NQL.mock(Person.class);
-//            long some = NQL.search(m2Person).search(mPerson.getGirlFriend(), NQL.Comp.EQUAL, prev).getCount();
-//        }
-//        Thread.sleep(1);
-//        System.out.println("-------------------------------------- ***** 3");  ATANAS IS GREAT !!!!!
-
-        {
-            Person m2Person = NQL.mock(Person.class);
-            long some = NQL.search(m2Person).search(mPerson.getObjectID(), NQL.Comp.NOT_EQUAL, prev.getObjectID()).getCount();
-            System.out.println("some = " + some);
-        }
-//        {
-//            QueryResponse response = solrService.query(new SolrQuery("(*:*)"));
-//            System.out.println("response.getResults().getNumFound(): ALL = " + response.getResults().getNumFound());
-//        }
-//        {
-//            QueryResponse response = solrService.query(new SolrQuery("( *:* AND -objectID:" + prev.getObjectID() + " )"));
-//            System.out.println("response.getResults().getNumFound(): ALL - 1 = " + response.getResults().getNumFound());
-//        }
-//        {
-//            QueryResponse response = solrService.query(new SolrQuery("-(objectID:" + prev.getObjectID() + " )"));
-//            System.out.println("response.getResults().getNumFound(): ALL - 1 = " + response.getResults().getNumFound());
-//        }
-        {
-            String q = "-(objectID:(" + prev.getObjectID() + ") )";
-            QueryResponse response = solrService.query(new SolrQuery(q));
-            System.out.println("response.getResults().getNumFound(): ALL - 1 ["+ q +"]= " + response.getResults().getNumFound());
-        }
-
-
-
-//        Thread.sleep(1);
-//        System.out.println("-------------------------------------- ***** 3");
-//
-//        {
-//            Person m2Person = NQL.mock(Person.class);
-//            long some = NQL.search(m2Person).search(mPerson, NQL.Comp.EQUAL, prev).getCount();
-//        }
-
-
-    }
 
 
 

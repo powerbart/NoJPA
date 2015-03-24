@@ -154,7 +154,7 @@ public class ModelObjectSearchService {
                             String name = nameIterator.next();
                             ArrayList<Object> objects = values.get(name);
                             String solrArrayName = name + "_ARRAY";
-                            log.trace("Adding " + solrArrayName + "("+ (objects != null ? objects.size() : -1) +")");
+                            log.trace("Adding_to_array.size " + solrArrayName + "("+ (objects == null ? "-1" : (objects.size() == 1 ? ""+ objects.get(0) : ""+ objects.size())) +")");
                             solrObj.addField(solrArrayName, objects);
                         }
                     }
@@ -177,6 +177,11 @@ public class ModelObjectSearchService {
         for (Iterator iterator = dbAttributeContainer.getDbAttributes().values().iterator(); iterator.hasNext();) {
             DbAttribute dbAttribute = (DbAttribute) iterator.next();
             String attributeName = dbAttribute.getAttributeName();
+            if(attributeName.equals("objectID")){
+                addAttributeValueToMap(dbAttribute, "" + object, prefix, values);
+            }
+
+
             SearchField searchField = dbAttribute.getAttribute().getAnnotation(SearchField.class);
             if(searchField != null) {
                 if(!dbAttribute.isAssociation()) {
