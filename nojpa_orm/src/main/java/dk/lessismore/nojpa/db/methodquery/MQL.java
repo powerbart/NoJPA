@@ -598,6 +598,17 @@ public class MQL {
             DbObjectSelector.iterateObjectsFromDb(selectClass, statement, visitor);
         }
 
+        public void visit(DbObjectVisitor visitor, int interval){
+            log.debug("Will run: DbObjectSelector.iterateObjectsFromDb(selectClass, statement, visitor)");
+            statement.addExpression(getExpressionAddJoins());
+            int count = this.getCount();
+            for(int i = 0; i < count; ) {
+                this.limit(i, i + interval);
+                DbObjectSelector.iterateObjectsFromDb(selectClass, statement, visitor);
+                i = i + interval;
+            }
+        }
+
         public SelectSQLStatement getSelectSQLStatement(){
             statement.addExpression(getExpressionAddJoins());
             return statement;

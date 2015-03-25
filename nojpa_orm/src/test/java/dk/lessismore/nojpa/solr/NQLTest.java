@@ -7,6 +7,8 @@ import dk.lessismore.nojpa.db.methodquery.NQL;
 import dk.lessismore.nojpa.db.methodquery.NStats;
 import dk.lessismore.nojpa.db.testmodel.*;
 import dk.lessismore.nojpa.reflection.db.DatabaseCreator;
+import dk.lessismore.nojpa.reflection.db.DbObjectVisitor;
+import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectSearchService;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
 import dk.lessismore.nojpa.reflection.db.model.SolrServiceImpl;
@@ -561,8 +563,6 @@ public class NQLTest {
 
         NList<Person> personsWithoutCar = NQL.search(mPerson).search(NQL.all(NQL.has(mPerson.getPersonStatus(), NQL.Comp.EQUAL, PersonStatus.BETWEEN_RELATIONS), NQL.has(mPerson.getName(), NQL.Comp.EQUAL, "per*3"), NQL.hasNull(mPerson.getCar()))).getList();
         System.out.println("count = " + personsWithoutCar.getNumberFound());
-
-
     }
 
 
@@ -918,6 +918,9 @@ public class NQLTest {
 
 
     }
+
+
+
     @Test
     public void testAnnotation() throws SolrServerException {
         String[] descs = new String[]{"Næste generationer danske Person Formel 1-håb er allerede i støbeskeen", "12-årige PersNoah Watt allerede", "gokart-juniormesterskaber personi 2015, EM, VM", "person allerede", "Det koster en hulens masse penge at køre det store program"};
@@ -1008,6 +1011,68 @@ public class NQLTest {
                 System.out.println(i + "::" + entries.get("_Person_fun___da_TXT").toString());
             }
         }
+
+    }
+
+
+
+    public static int countOfVisit = 0;
+
+
+    @Test
+    public void testVisitor() throws SolrServerException {
+        String[] descs = new String[]{"Næste generationer danske Person Formel 1-håb er allerede i støbeskeen", "12-årige PersNoah Watt allerede", "gokart-juniormesterskaber personi 2015, EM, VM", "person allerede", "Det koster en hulens masse penge at køre det store program"};
+        DatabaseCreator.createDatabase("dk.lessismore.nojpa.db.testmodel");
+        SolrServiceImpl solrService = new SolrServiceImpl();
+        solrService.setCoreName("nojpa");
+        solrService.setCleanOnStartup(true);
+
+        ModelObjectSearchService.addSolrServer(Person.class, solrService.getServer());
+        Person mPerson = NQL.mock(Person.class);
+
+        Person prev = null;
+        for (int i = 0; i < 50; i++) {
+            Person person = ModelObjectService.create(Person.class);
+            person.setName("person " + (i % 4));
+            Address address = ModelObjectService.create(Address.class);
+            address.setZip(2860);
+            person.setAddresses(new Address[]{address});
+
+            person.setCountOfCars(i * 100);
+            person.setSomeDouble((double) (100 * Math.random()));
+            person.setCountOfFriends((long) (1000 * Math.random()));
+            person.setFun(descs[i % descs.length] + (i % 3 == 0 ? " abe" : " tiger"), new Locale("da"));
+            person.setUrl("http://dr.dk/fun");
+            person.setIsSick(i % 2 == 0);
+            person.setPersonStatus(PersonStatus.BETWEEN_RELATIONS);
+            person.setSomeFloat((float) (20f * Math.random()));
+            ModelObjectService.save(person);
+        }
+
+        DbObjectVisitor visitor = new DbObjectVisitor() {
+
+
+            @Override
+            public void visit(ModelObjectInterface m) {
+                countOfVisit++;
+//                System.out.println("RUNNING("+ countOfVisit +") visit of: " + m);
+            }
+
+            @Override
+            public void setDone(boolean b) {
+
+            }
+
+            @Override
+            public boolean getDone() {
+                return false;
+            }
+        };
+
+        Person mock = MQL.mock(Person.class);
+        MQL.select(mock).where(mock.getAddresses()[MQL.ANY].getZip(), MQL.Comp.EQUAL, 2860).visit(visitor, 30);
+
+        System.out.println("Called visitor.count("+ countOfVisit +")");
 
     }
 
