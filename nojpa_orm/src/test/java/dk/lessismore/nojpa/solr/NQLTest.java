@@ -1049,12 +1049,18 @@ public class NQLTest {
             ModelObjectService.save(person);
         }
 
-        DbObjectVisitor visitor = new DbObjectVisitor() {
+        final DbObjectVisitor visitor = new DbObjectVisitor() {
 
 
             @Override
             public void visit(ModelObjectInterface m) {
                 countOfVisit++;
+                try {
+                    System.out.println("VISIT(m) = " + m);
+                    Thread.sleep(45 * 1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 //                System.out.println("RUNNING("+ countOfVisit +") visit of: " + m);
             }
 
@@ -1069,8 +1075,42 @@ public class NQLTest {
             }
         };
 
-        Person mock = MQL.mock(Person.class);
-        MQL.select(mock).where(mock.getAddresses()[MQL.ANY].getZip(), MQL.Comp.EQUAL, 2860).visit(visitor, 30);
+
+        Thread t1 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Person mock = MQL.mock(Person.class);
+                MQL.select(mock).where(mock.getAddresses()[MQL.ANY].getZip(), MQL.Comp.EQUAL, 2860).visit(visitor, 2);
+            }
+        });
+        t1.start();
+
+        Thread t2 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for(int i = 0; i < 280; i++){
+                    System.out.println("running(i) = " + i);
+                    Person mock = MQL.mock(Person.class);
+                    MQL.select(mock).getFirst();
+                    try {
+                        Thread.sleep(5 * 1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        t2.start();
+
+
+        while(t1.isAlive() && t2.isAlive()){
+            try {
+                Thread.sleep(45 * 1000);
+                System.out.println("w...");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
 
         System.out.println("Called visitor.count("+ countOfVisit +")");
 
