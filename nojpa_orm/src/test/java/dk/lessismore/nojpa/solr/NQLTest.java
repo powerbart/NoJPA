@@ -1076,6 +1076,53 @@ public class NQLTest {
 
     }
 
+    @Test
+    public void testMinMaxScores() {
+        // <------Prepearation------>
+        DatabaseCreator.createDatabase("dk.lessismore.nojpa.db.testmodel");
+        SolrServiceImpl solrService = new SolrServiceImpl();
+        solrService.setCoreName("nojpa");
+        solrService.setCleanOnStartup(true);
+
+        ModelObjectSearchService.addSolrServer(Person.class, solrService.getServer());
+        Person mPerson = NQL.mock(Person.class);
+
+        Person prev = null;
+        for (int i = 0; i < 10; i++) {
+            Person person = ModelObjectService.create(Person.class);
+            if(i % 2 == 0){
+                prev = person;
+            } else {
+                prev.setGirlFriend(person);
+                person.setGirlFriend(prev);
+            }
+            String personNumber = "";
+            for (int j = 0; j < 10; j++) {
+                personNumber += (int) (2 * Math.random()) + " ";
+            }
+            person.setName("person " + personNumber);
+            person.setPersonStatus(PersonStatus.BETWEEN_RELATIONS);
+//            person.setHistoryStatus(new PersonStatus[]{PersonStatus.BETWEEN_RELATIONS, PersonStatus.SINGLE});
+            person.setSomeFloat((float) (20f * Math.random()));
+            if (i < 7) {
+                Car car = ModelObjectService.create(Car.class);
+                person.setCar(car);
+            }
+            ModelObjectService.save(person);
+            System.out.println("---------------- PUT START -----------------------");
+            ModelObjectSearchService.put(person);
+            System.out.println("---------------- PUT END -----------------------");
+        }
+        solrService.commit();
+        // <------ END Prepearation------>
+
+        // <------TEST------>
+        NQL.search(mPerson).search(mPerson.getName(), NQL.Comp.LIKE, "1").getList(); //
+        NList<Person> scoreMax = NQL.search(mPerson).search(mPerson.getName(), NQL.Comp.LIKE, "1").scoreMax(1.5f).getList();
+        NList<Person> scoreMin = NQL.search(mPerson).search(mPerson.getName(), NQL.Comp.LIKE, "1").scoreMin(1.1f).getList();
+        NList<Person> scoreWithin = NQL.search(mPerson).search(mPerson.getName(), NQL.Comp.LIKE, "1").scoreWithin(0.5f, 1.5f).getList();
+        // <------END TEST------>
+    }
 
 
 
