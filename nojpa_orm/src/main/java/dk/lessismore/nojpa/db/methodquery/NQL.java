@@ -206,6 +206,20 @@ public class NQL {
             return this;
         }
 
+        public <M extends ModelObjectInterface> SearchQuery<T> scoreMin(float lower) {
+            solrQuery.setFilterQueries("{!frange l=" + lower + "}query($q)");
+            return this;
+        }
+
+        public <M extends ModelObjectInterface> SearchQuery<T> scoreMax(float upper) {
+            solrQuery.setFilterQueries("{!frange u=" + upper + "}query($q)");
+            return this;
+        }
+
+        public <M extends ModelObjectInterface> SearchQuery<T> scoreWithin(float lower, float upper) {
+            solrQuery.setFilterQueries("{!frange l=" + lower + " " + "u=" + upper + "}query($q)");
+            return this;
+        }
 //
 //        private String makeAttributeIdentifier(Pair<Class, String> sourceAttributePair) {
 //            return DbClassReflector.getDbAttributeContainer(sourceAttributePair.getFirst()).getDbAttribute(sourceAttributePair.getSecond()).getAttributeName();
