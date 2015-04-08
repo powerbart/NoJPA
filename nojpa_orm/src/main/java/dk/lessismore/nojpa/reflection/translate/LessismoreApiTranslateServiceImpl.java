@@ -40,7 +40,7 @@ public class LessismoreApiTranslateServiceImpl  implements TranslateService {
     @Override
     public String translate(String uniqueID, String attributeNameForDebug, String srcLang2Char, String destLang2Char, String originalText) throws Exception{
 
-
+        long start = System.currentTimeMillis();
         if(originalText == null || srcLang2Char == null || destLang2Char == null){
             if(originalText != null) {
                 log.warn("We will return null - because we was called with null, in translate[uniqueID("+ uniqueID +")srcLang2Char(" + srcLang2Char + "), destLang2Char(" + destLang2Char + "), originalText(" + originalText + ")]");
@@ -74,10 +74,11 @@ public class LessismoreApiTranslateServiceImpl  implements TranslateService {
         JSONParser parser = new JSONParser();
         JSONObject responseJSON = (JSONObject) parser.parse(cache.toString());
 
-        log.debug("uniqueID("+ uniqueID +") src("+ srcLang2Char +") dest("+ destLang2Char +") translated_text: " + cache);
+        long end = System.currentTimeMillis();
 
         String code = (String) responseJSON.get("code");
         String translatedText = (String) responseJSON.get("translatedText");
+        log.debug("Running translate: uniqueID("+ uniqueID +") TIME["+ (end - start) +"] src("+ srcLang2Char +") dest("+ destLang2Char +") originalText("+ originalText +") translated_text(" + translatedText +")");
         return translatedText;
     }
 
