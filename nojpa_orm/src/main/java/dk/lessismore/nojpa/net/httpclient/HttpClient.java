@@ -1,5 +1,7 @@
 package dk.lessismore.nojpa.net.httpclient;
 
+import dk.lessismore.nojpa.utils.TimerWithPrinter;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,6 +12,7 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,36 +22,60 @@ import java.util.regex.Pattern;
  */
 public class HttpClient {
 
+    final private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(HttpClient.class);
 
+    private static boolean logAll = false;
 
     public static String get(String url) throws Exception {
-
         String host = getHostname(url);
         boolean isSSL = url.startsWith("https");
-
         int port = isSSL ? 443 : 80;
 
-        if(url.indexOf("/", 10) > url.indexOf(":", 10)){
-            port = new Integer(url.substring(url.indexOf(":", 10) + 1, url.indexOf("/", 10)));
+        int colonIndex = url.indexOf(":", 10);
+        int slashIndex = url.indexOf("/", 10);
+        if(colonIndex > 10 && slashIndex > colonIndex){
+            port = new Integer(url.substring(colonIndex + 1, slashIndex));
         }
 
         // open connection
+        if(logAll)  log.debug("Opening socket to " + host);
         Socket socket = new Socket(host, port);
 
         // send request
         String request = createRequest(url, host);
         OutputStream os = socket.getOutputStream();
+        if(logAll) log.debug("Sending request:\n----------\n" + request + "\n----------\n");
         os.write(request.getBytes());
+        os.flush();
 
         // recieve response
         InputStream is = socket.getInputStream();
-        HttpParser parser = new HttpParser(is);
 
+        boolean debug = false;
 
-        ByteArrayOutputStream response = new ByteArrayOutputStream();
-//        parser.writeTo(false, response);
+        if(debug) {
+            byte[] bs = new byte[32];
+            int s = 0;
+            while ((s = is.read(bs, 0, bs.length)) > 0) {
+                for(int i = 0; i < s; i++){
+                    if(bs[i] == '\r') {
+                        System.out.println(" - r - ");
+                    } else if(bs[i] == '\n' || bs[i] == '\r'){
+                        System.out.println(" - n - ");
+                    } else {
+                        System.out.print("["+((int) bs[i])+"|"+ ((char) bs[i]) +"] ");
+                    }
 
-        return new String(response.toByteArray());
+                }
+            }
+            return "";
+        } else {
+            HttpParser parser = new HttpParser(is);
+
+            ByteArrayOutputStream response = new ByteArrayOutputStream();
+            parser.writeTo(false, true, response);
+            return new String(response.toByteArray());
+        }
     }
 
 
@@ -59,9 +86,10 @@ public class HttpClient {
         request.append("\r\n");
         request.append("User-Agent: curl/7.37.1");
         request.append("\r\n");
-        request.append("Host: " + url.substring(url.indexOf("/") + 2, url.indexOf("/", 10)));
+        request.append("Host: " + host);
         request.append("\r\n");
         request.append("Accept: */*");
+        request.append("\r\n");
         request.append("\r\n");
         return request.toString();
     }
@@ -99,21 +127,6 @@ public class HttpClient {
         private boolean isResponse = false;
         private boolean partlyWritten = false;
 
-        /**
-         * Creates a parser from an existing parser. Assumes that the header has been read
-         * and written, but that the body has neither been read nor written.
-         */
-        public HttpParser(HttpParser httpParser) {
-            this.inputStream = httpParser.inputStream;
-            this.bytes = httpParser.bytes;
-            this.partlyWritten = httpParser.partlyWritten;
-            this.headers = httpParser.headers;
-            this.firstLine = httpParser.firstLine;
-            this.sessionId = httpParser.sessionId;
-            this.contentLength = httpParser.contentLength;
-            this.chunked = httpParser.chunked;
-            this.isResponse = httpParser.isResponse;
-        }
 
         /**
          * Creates a parser and reads in the HTTP header from the InputStream.
@@ -131,23 +144,19 @@ public class HttpClient {
             byte[] data;
             while((data = readLine()).length > 0) {
                 String line = new String(data, HTTP_CHARSET);
+                if(logAll) log.debug("Reading line("+ line +")");
                 debugTotalHeaderLength += (line != null ? line.length() : -1);
                 String[] header = line.split(": ", 2);
                 String key = header[0];
                 String value = null;
-//                if(key != null && key.equals("Location") && HttpProxyServer.sslMode){ // && HttpProxyServer.sslMode
-//                    value = header[1].replace("http", "https");
-//                    log.debug("Will change to https ........... ("+ header[1] +") new value ("+ value +")");
-//                } else {
-////                log.debug("Will not change anything ... value ("+ value +")");
-//                    value = header[1];
-//                }
+                value = header[1];
+                if(logAll) log.debug("headers.put("+ key +", "+ value +");");
                 headers.put(key, value);
                 bytes.write(new String(key + ": " + value).getBytes(HTTP_CHARSET));
                 bytes.write('\r');
                 bytes.write('\n');
             }
-//        log.debug("Reads " +debugTotalHeaderLength);
+            if(logAll) log.debug("Reads " +debugTotalHeaderLength);
             bytes.write('\r');
             bytes.write('\n');
 
@@ -175,7 +184,7 @@ public class HttpClient {
                     chunked = true;
                 }
             }
-//        log.debug("Parsing header ------------------------------ END ");
+            if(logAll) log.debug("Parsing header ------------------------------ END ");
         }
 
         public Map<String, String> getHeaders() {
@@ -229,12 +238,11 @@ public class HttpClient {
          * Writes the entire request to one or more streams. This can only be called once.
          */
         public void writeTo(boolean onlyWriteHeader, boolean skipHeader, OutputStream... streams) throws IOException {
-            if(onlyWriteHeader || !partlyWritten) {
+            if(!skipHeader) {
                 if(bytes == null) throw new IllegalStateException("writeTo has already been called.");
                 byte[] headerBytes = bytes.toByteArray();
-//            log.debug("WWWWWWWWWWWWWWWWWWWWWWWWWWWW1: wrinting headers:\n" + (new String(headerBytes)) + "\n-------------------" );
+//              log.debug("WWWWWWWWWWWWWWWWWWWWWWWWWWWW1: wrinting headers:\n" + (new String(headerBytes)) + "\n-------------------" );
                 for(OutputStream stream: streams) {
-
                     stream.write(headerBytes);
                 }
                 bytes = null;
@@ -244,9 +252,6 @@ public class HttpClient {
             if(chunked) {
                 while(true) {
                     byte[] line = readLine();
-                    for(OutputStream stream: streams) {
-                        writeLine(stream, line);
-                    }
                     String size = new String(line, HTTP_CHARSET);
                     if(size.contains(";")) size = size.substring(0, size.indexOf(";"));
                     int chunkLength = Integer.parseInt(size, 16);
@@ -255,15 +260,6 @@ public class HttpClient {
                     for(OutputStream stream: streams) {
                         writeLine(stream, line);
                     }
-                }
-                byte[] line;
-                while((line = readLine()).length != 0) {
-                    for(OutputStream stream: streams) {
-                        writeLine(stream, line);
-                    }
-                }
-                for(OutputStream stream: streams) {
-                    writeLine(stream, line);
                 }
             } else if(firstLine == null || !firstLine.equals("HTTP/1.1 100 Continue")){
                 // We dont need content-length header if closing connection
@@ -322,8 +318,6 @@ public class HttpClient {
 
         private void writeLine(OutputStream stream, byte[] line) throws IOException {
             stream.write(line);
-            stream.write('\r');
-            stream.write('\n');
         }
 
         private int bufferRead(byte[] buffer, int length) throws IOException {
@@ -332,12 +326,6 @@ public class HttpClient {
             else return inputStream.read(buffer, 0, length);
         }
 
-        public static class ConnectionResetByServerException extends Exception {
-            public ConnectionResetByServerException(String m, Throwable t) { super(m, t); }
-            public ConnectionResetByServerException(String m) { super(m); }
-            public ConnectionResetByServerException(Throwable t) { super(t); }
-            public ConnectionResetByServerException() { super(); }
-        }
 
     }
 

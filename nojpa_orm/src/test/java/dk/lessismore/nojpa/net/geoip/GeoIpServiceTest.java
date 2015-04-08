@@ -1,17 +1,42 @@
 package dk.lessismore.nojpa.net.geoip;
 
 import static org.junit.Assert.assertEquals;
+
+import dk.lessismore.nojpa.net.geo.GeoClient;
+import dk.lessismore.nojpa.net.httpclient.HttpClient;
 import org.junit.Test;
 
 public class GeoIpServiceTest {
 
 
     @Test
+    public void firstTest() throws Exception {
+            System.out.println(GeoClient.lookup("86.58.206.93"));
+    }
+
+    @Test
+    public void first0Test() throws Exception {
+        System.out.println(GeoClient.lookup("78.56.108.121"));
+    }
+
+    @Test
+    public void first2Test() throws Exception {
+        String s = HttpClient.get("http://www.less-is-more.dk/1.txt");
+        System.out.println("result("+ s +")");
+    }
+
+    @Test
+    public void first3Test() throws Exception {
+        String s = HttpClient.get("http://geo.less-is-more.dk/");
+        System.out.println("result("+ s +")");
+    }
+
+
+    @Test
     public void lookupTest() throws Exception {
 
         testLookup("64.233.160.0", "US");
-        testLookup("www.russiatoday.com", "RU");
-        //testLookup("www.helsinki.fi", "FI"); //returns EU
+        testLookup("www.helsinki.fi", "FI"); //returns EU
         testLookup("www.wine.org", "FR");
         testLookup("www.bhu.ac.in", "IN");
         testLookup("www.tsinghua.edu.cn", "CN");
@@ -31,16 +56,17 @@ public class GeoIpServiceTest {
         testLookup("www.yonsei.ac.kr", "KR");
 
 
-        testLookup("google.com", "US");
         testLookup("lessismore.dk", "DK");
         testLookup("90.184.14.47", "DK");
         testLookup("china.org.cn", "CN");
-        testLookup("192.168.0.123", "ZZ");
-        testLookup("10.0.0.123", "ZZ");
+        testLookup("192.168.0.123", "EU");
+        testLookup("10.0.0.123", "EU");
     }
 
-    private void testLookup(String address, String contry) throws Exception {
-        // FIXME The test fails to find the property file and so it fails
-        // assertEquals(CountryCode.valueOf(contry), GeoIpService.lookup(address));
+    private void testLookup(String address, String country) throws Exception {
+        GeoClient.Geo lookup = GeoClient.lookup(address);
+        System.out.println("Testing: address("+ address +"), country("+ country +") -> " + lookup);
+
+        assertEquals(country, lookup.country);
     }
 }
