@@ -651,7 +651,7 @@ public class NQL {
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 //            log.debug("MockInvocationHandler::Calling " + sourceClass.getSimpleName() + "." + method.getName() + "()");
             String methodName = method.getName();
-            if (methodName.equals("mockExtra_getSourceClass")) {
+            if (methodName.equals("mockExtra_getSourceClass") || methodName.equals("getInterface")) {
                 return sourceClass;
             }
             if (methodName.equals("equals") && args.length == 1) {

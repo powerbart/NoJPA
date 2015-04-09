@@ -9,6 +9,8 @@ import org.json.JSONObject;
  */
 public class GeoClient {
 
+    final private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(GeoClient.class);
+
 
     public static class Geo {
         public final String city;
@@ -30,8 +32,13 @@ public class GeoClient {
 
 
     public static Geo lookup(String ip) throws Exception {
-//        String s = HttpClient.get("http://geo.less-is-more.dk/lookup?ip=" + ip);
-        String s = HttpClient.get("http://localhost:8080/lookup?ip=" + ip);
+        String s = null;
+        try {
+            s = HttpClient.get("http://geo.less-is-more.dk/lookup?ip=" + ip);
+        } catch (Exception e){
+            s = HttpClient.get("http://geo.less-is-more.dk/lookup?ip=" + ip);
+            log.error("Some error: " + e, e);
+        }
         JSONObject json = new JSONObject(s);
         return new Geo(json.getString("city"), json.getString("country"), json.getString("continent"));
     }

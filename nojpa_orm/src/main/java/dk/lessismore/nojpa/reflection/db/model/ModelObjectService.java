@@ -85,7 +85,7 @@ public class ModelObjectService {
 
     public static  <T extends ModelObjectInterface> Object getAttributeValue(T modelObject, String attributeName){
         AttributeContainer attributeContainer = ClassReflector.getAttributeContainer(modelObject.getInterface());
-        return attributeContainer.getAttribute(attributeName);
+        return attributeContainer.getAttributeValue(modelObject, attributeName);
     }
 
     public static  <T extends ModelObjectInterface> Object setAttributeValue(T modelObjectToSetOn, String attributeName, Object value){

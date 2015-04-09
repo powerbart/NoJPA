@@ -96,13 +96,17 @@ public class RemoteCacheTest {
         Assert.assertEquals(true, true);
     }
 
+
+    static long sleep = 1;
+
     @Test
     public void testGlobalLock_UpOfTwo_A() throws Exception {
         ObjectCacheRemote s1 = new ObjectCacheRemote();
         s1.clusterFilenameForTest = "cluster-serverA";
         s1.contextInitialized(null);
+        sleep = 30 * 1000;
         {
-            Thread.sleep(1 * 1000);
+            Thread.sleep(15 * 1000);
             List<Person> persons = MQL.select(Person.class).getList();
             for (int i = 0; i < persons.size(); i++) {
                 Person person = persons.get(i);
@@ -121,7 +125,18 @@ public class RemoteCacheTest {
         ObjectCacheRemote s1 = new ObjectCacheRemote();
         s1.clusterFilenameForTest = "cluster-serverB";
         s1.contextInitialized(null);
-        Thread.sleep(260 * 1000);
+        sleep = 10 * 1000;
+
+        {
+
+            List<Person> persons = MQL.select(Person.class).getList();
+            for (int i = 0; i < persons.size(); i++) {
+                Thread.sleep(1 * 1000);
+                Person person = persons.get(i);
+                person.setSomeFloat((float) Math.random());
+                this.saveWithLock(person);
+            }
+        }
         s1.contextDestroyed(null);
         Assert.assertEquals(true, true);
     }
@@ -146,12 +161,13 @@ public class RemoteCacheTest {
 
 
     public void saveWithLock(Person p) throws Exception {
-        GlobalLockService.getInstance().lockAndRun(p, new GlobalLockService.LockedExecutor<Person>() {
+        GlobalLockService.getInstance().lockAndRun("STATIC-LOCK", new GlobalLockService.LockedExecutor<Person>() {
 
             @Override
             public void execute(Person ms) throws Exception {
                 log.debug("::::::::::::: EXECUTE - START");
-                ModelObjectService.save(ms);
+                Thread.sleep(sleep);
+//                ModelObjectService.save(ms);
                 log.debug("::::::::::::: EXECUTE - END");
             }
         });
