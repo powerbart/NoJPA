@@ -2,6 +2,7 @@ package dk.lessismore.nojpa.net.dns;
 
 import dk.lessismore.nojpa.pool.threadpool.RuntimeCallbackCalcInterface;
 import dk.lessismore.nojpa.pool.threadpool.RuntimeCallbackThreadPool;
+import dk.lessismore.nojpa.utils.MaxSizeMaxTimeMap;
 import dk.lessismore.nojpa.utils.MaxSizeWeakMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -242,7 +243,8 @@ public class DNSServerLookup {
         env.put("java.naming.factory.initial", "com.sun.jndi.dns.DnsContextFactory");
         DirContext ictx = new InitialDirContext(env);
 
-        Attributes attrs = ictx.getAttributes(hostName);
+        Attributes attrs = ictx.getAttributes(hostName, new String[]{"A"});
+//        Attributes attrs = ictx.getAttributes(hostName);
 
         NamingEnumeration<? extends Attribute> namingEnumeration = attrs.getAll();
 
@@ -261,34 +263,64 @@ public class DNSServerLookup {
     }
 
 
-    public static void main(String[] args) throws Exception {
-//        System.out.println("----------------------------------------");
-//        listAllDNS("hotmail.com");
-//        System.out.println("----------------------------------------");
-//        listAllDNS("webpartner.dk");
-//        System.out.println("----------------------------------------");
-//        listAllDNS("less-is-more.dk");
-//        System.out.println("----------------------------------------");
-//        listAllDNS("webpartner.dk");
-//        System.out.println("----------------------------------------");
-//        listAllDNS("smtp.webpartner.dk");
-//        System.out.println("----------------------------------------");
-//        listAllDNS("yahoo.com");
-//        System.out.println("----------------------------------------");
-//        listAllDNS("dating.dk");
-//        System.out.println("----------------------------------------");
-//        listAllDNS("spf-b.hotmail.com");
-//        System.out.println("----------------------------------------");
-//        listAllDNS("topchancen.dk");
-//        System.out.println("----------------------------------------");
+    private static final MaxSizeMaxTimeMap ipCache = new MaxSizeMaxTimeMap(500, 60 * 60);
+    public static List<String> lookupIp(String hostName) throws Exception {
 
-
-        Calendar now = Calendar.getInstance();
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        for(int i = 0; i < 400; i++){
-            now.add(Calendar.DAY_OF_YEAR, -1);
-            System.out.println("" + format.format(now.getTime()));
+        synchronized (ipCache) {
+            List<String> ipCandidate = (List<String>) ipCache.get(hostName);
+            if (ipCandidate != null) {
+                return ipCandidate;
+            }
         }
+
+        Hashtable env = new Hashtable();
+        env.put("java.naming.factory.initial", "com.sun.jndi.dns.DnsContextFactory");
+        DirContext ictx = new InitialDirContext(env);
+
+        Attributes attrs = ictx.getAttributes(hostName, new String[]{"A"});
+
+        NamingEnumeration<? extends Attribute> namingEnumeration = attrs.getAll();
+
+        LinkedList<String> toReturn = new LinkedList<String>();
+
+        for(int i = 0; namingEnumeration.hasMore() ; i++){
+            Attribute attribute = namingEnumeration.next();
+            NamingEnumeration en = attribute.getAll();
+            while (en.hasMore()) {
+                toReturn.add("" + en.next());
+            }
+        }
+
+        synchronized (ipCache) {
+            ipCache.put(hostName, toReturn);
+        }
+
+        return toReturn;
+    }
+
+
+    private static void debugLookupIp(String hostname) throws Exception {
+        List<String> ips = lookupIp(hostname);
+        for(int i = 0; i < ips.size(); i++){
+            String ip = ips.get(i);
+            System.out.println(hostname  + "->" + ip);
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        System.out.println("----------------------------------------");
+        debugLookupIp("geo.less-is-more.dk");
+        System.out.println("----------------------------------------");
+        debugLookupIp("webpartner.dk");
+        System.out.println("----------------------------------------");
+        debugLookupIp("less-is-more.dk");
+        System.out.println("----------------------------------------");
+        debugLookupIp("webpartner.dk");
+        System.out.println("----------------------------------------");
+        debugLookupIp("smtp.webpartner.dk");
+        System.out.println("----------------------------------------");
+        debugLookupIp("yahoo.com");
+        System.out.println("----------------------------------------");
 
 
 

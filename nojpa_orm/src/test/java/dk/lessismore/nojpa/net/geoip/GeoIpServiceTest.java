@@ -32,41 +32,64 @@ public class GeoIpServiceTest {
     }
 
 
+    static long numberOfLookup = 0;
+    static long start = 0;
     @Test
     public void lookupTest() throws Exception {
-        for(int i = 0; i < 100; i++) {
-            testLookup("64.233.160.0", "US");
-            testLookup("www.helsinki.fi", "FI"); //returns EU
-            testLookup("www.wine.org", "FR");
-            testLookup("www.bhu.ac.in", "IN");
-            testLookup("www.tsinghua.edu.cn", "CN");
-            testLookup("www.keio.ac.jp", "JP");
-            testLookup("www.huji.ac.il", "IL");
-            testLookup("www.uu.se", "SE"); //returns EU
-            testLookup("www.uio.no", "NO"); //returns EU
-            testLookup("www.uni-heidelberg.de", "DE"); //return EU
-            testLookup("www.deutschland.de", "DE");
-            testLookup("www.uibk.ac.at", "AT"); //return eu
-            testLookup("wien.gv.at", "AT");
-            testLookup("www.sabanciuniv.edu.tr", "TR");
-            testLookup("www.unb.br", "BR");
-            testLookup("www.unam.mx", "MX");
-            testLookup("uwaterloo.ca", "CA");
-            testLookup("www.unibz.it", "IT");
-            testLookup("www.yonsei.ac.kr", "KR");
 
 
-            testLookup("lessismore.dk", "DK");
-            testLookup("90.184.14.47", "DK");
-            testLookup("china.org.cn", "CN");
-            testLookup("192.168.0.123", "EU");
-            testLookup("10.0.0.123", "EU");
+        start = System.currentTimeMillis();
+        for(int t = 0; t < 50; t++){
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    for(int i = 0; i < 100; i++) {
+                        try {
+                            testLookup("64.233.160.0", "US");
+                            testLookup("www.helsinki.fi", "FI"); //returns EU
+                            testLookup("www.wine.org", "FR");
+                            testLookup("www.bhu.ac.in", "IN");
+                            testLookup("www.tsinghua.edu.cn", "CN");
+                            testLookup("www.keio.ac.jp", "JP");
+                            testLookup("www.huji.ac.il", "IL");
+                            testLookup("www.uu.se", "SE"); //returns EU
+                            testLookup("www.uio.no", "NO"); //returns EU
+                            testLookup("www.uni-heidelberg.de", "DE"); //return EU
+                            testLookup("www.deutschland.de", "DE");
+                            testLookup("www.uibk.ac.at", "AT"); //return eu
+                            testLookup("wien.gv.at", "AT");
+                            testLookup("www.sabanciuniv.edu.tr", "TR");
+                            testLookup("www.unb.br", "BR");
+                            testLookup("www.unam.mx", "MX");
+                            testLookup("uwaterloo.ca", "CA");
+                            testLookup("www.unibz.it", "IT");
+                            testLookup("www.yonsei.ac.kr", "KR");
+
+
+                            testLookup("lessismore.dk", "DK");
+                            testLookup("90.184.14.47", "DK");
+                            testLookup("china.org.cn", "CN");
+                            testLookup("192.168.0.123", "EU");
+                            testLookup("10.0.0.123", "EU");
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                }
+            });
+            thread.start();
+
         }
+
+        Thread.sleep(1000 * 60 * 10);
+
     }
 
-    private void testLookup(String address, String country) throws Exception {
+    public static void testLookup(String address, String country) throws Exception {
         GeoClient.Geo lookup = GeoClient.lookup(address);
-        System.out.println("Testing: address("+ address +"), country("+ country +") -> " + lookup);
+        long totalTime = System.currentTimeMillis() - start;
+        System.out.println("["+ numberOfLookup++ +"] in ms("+ totalTime +") avg("+ (totalTime / numberOfLookup) +")Testing: address("+ address +"), country("+ country +") -> " + lookup);
 
         assertEquals(country, lookup.country);
     }

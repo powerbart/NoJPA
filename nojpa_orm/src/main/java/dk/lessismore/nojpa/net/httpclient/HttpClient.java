@@ -1,5 +1,6 @@
 package dk.lessismore.nojpa.net.httpclient;
 
+import dk.lessismore.nojpa.net.dns.DNSServerLookup;
 import dk.lessismore.nojpa.utils.TimerWithPrinter;
 
 import java.io.ByteArrayOutputStream;
@@ -9,10 +10,7 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Timer;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,45 +35,62 @@ public class HttpClient {
             port = new Integer(url.substring(colonIndex + 1, slashIndex));
         }
 
-        // open connection
-        if(logAll)  log.debug("Opening socket to " + host);
-        Socket socket = new Socket(host, port);
 
-        // send request
-        String request = createRequest(url, host);
-        OutputStream os = socket.getOutputStream();
-        if(logAll) log.debug("Sending request:\n----------\n" + request + "\n----------\n");
-        os.write(request.getBytes());
-        os.flush();
+        List<String> ips = DNSServerLookup.lookupIp(host);
 
-        // recieve response
-        InputStream is = socket.getInputStream();
+        Exception expToReturn = null;
+        boolean rev = Math.random() > 0.5;
+        for(int p = 0; p < ips.size(); p++){
+            String ip = ips.get(rev ? ips.size() - 1 - p : p);
+            try{
+                // open connection
+                if(logAll)  log.debug("Opening socket to " + host);
+                Socket socket = new Socket(ip, port);
 
-        boolean debug = false;
+                // send request
+                String request = createRequest(url, host);
+                OutputStream os = socket.getOutputStream();
+                if(logAll) log.debug("Sending request:\n----------\n" + request + "\n----------\n");
+                os.write(request.getBytes());
+                os.flush();
 
-        if(debug) {
-            byte[] bs = new byte[32];
-            int s = 0;
-            while ((s = is.read(bs, 0, bs.length)) > 0) {
-                for(int i = 0; i < s; i++){
-                    if(bs[i] == '\r') {
-                        System.out.println(" - r - ");
-                    } else if(bs[i] == '\n' || bs[i] == '\r'){
-                        System.out.println(" - n - ");
-                    } else {
-                        System.out.print("["+((int) bs[i])+"|"+ ((char) bs[i]) +"] ");
+                // recieve response
+                InputStream is = socket.getInputStream();
+
+                boolean debug = false;
+
+                if(debug) {
+                    byte[] bs = new byte[32];
+                    int s = 0;
+                    while ((s = is.read(bs, 0, bs.length)) > 0) {
+                        for(int i = 0; i < s; i++){
+                            if(bs[i] == '\r') {
+                                System.out.println(" - r - ");
+                            } else if(bs[i] == '\n' || bs[i] == '\r'){
+                                System.out.println(" - n - ");
+                            } else {
+                                System.out.print("["+((int) bs[i])+"|"+ ((char) bs[i]) +"] ");
+                            }
+
+                        }
                     }
+                    return "";
+                } else {
+                    HttpParser parser = new HttpParser(is);
 
+                    ByteArrayOutputStream response = new ByteArrayOutputStream();
+                    parser.writeTo(false, true, response);
+                    return new String(response.toByteArray());
                 }
+            } catch (Exception e){
+                log.error("Got error when trying for hostname("+ host +")/ip("+ ip +") out of "+ p +"/"+ ips.size() +" ");
+                expToReturn = e;
             }
-            return "";
-        } else {
-            HttpParser parser = new HttpParser(is);
-
-            ByteArrayOutputStream response = new ByteArrayOutputStream();
-            parser.writeTo(false, true, response);
-            return new String(response.toByteArray());
         }
+        if(expToReturn != null){
+            throw expToReturn;
+        }
+        throw new Exception("No result from: " + host);
     }
 
 
