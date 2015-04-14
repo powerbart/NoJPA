@@ -75,8 +75,7 @@ public class ObjectCacheRemotePostThread extends Thread {
                 }
             } catch(Exception e){
                 errorCounter = (1+errorCounter) * 2;
-                log.error("Some error in run() when sending data to host("+ host.host +") port("+ host.port +") " + e, e);
-                e.printStackTrace();
+                log.error("Some error in run() when sending data to host("+ host.host +") port("+ host.port +") " + e);
                 try{
                 if(outputStream != null) outputStream.close();
                 } catch (Exception t){}

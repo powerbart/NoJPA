@@ -53,7 +53,6 @@ public class GlobalLockService {
     }
 
     private void lock(String lockID, ModelObjectInterface moi, LockedExecutor executor) throws Exception {
-        log.debug("lock("+ lockID +")");
 
         LockObject lockObject = null;
         boolean locked = true;
@@ -86,8 +85,11 @@ public class GlobalLockService {
         }
         Exception toThrow = null;
         synchronized (lockObject.lockID){
+            log.debug("LOCKED (local) lockID("+ lockID +")");
+
             try {
                 ObjectCacheRemote.takeLock(lockObject.lockID);
+                log.debug("LOCKED (remote) lockID("+ lockID +")");
                 if(moi != null) {
                     ModelObjectInterface modelObjectInterface = MQL.selectByID(((ModelObject) moi).getInterface(), moi.getObjectID());
                     executor.execute(modelObjectInterface);
@@ -98,6 +100,7 @@ public class GlobalLockService {
             } catch (Exception e){
                 toThrow = e;
             } finally {
+                log.debug("LOCKED (-----release----) lockID("+ lockID +")");
                 ObjectCacheRemote.releaseLock(lockObject.lockID);
             }
         }

@@ -104,7 +104,7 @@ public class ObjectCacheRemote implements ServletContextListener {
                 for(int i = 0; i < hostList.size(); i++){
                     String host = hostList.get(i);
                     if(host.indexOf(":") != -1){
-                        log.debug("Will now load host: " + host);
+                        log.debug("Will now connect to remote host: " + host);
                         hosts[i] = new RemoteHost(host.substring(0, host.indexOf(":")), Integer.parseInt(host.substring(host.indexOf(":") + 1)));
                     } else {
                         hosts[i] = new RemoteHost(host, 6666);
@@ -112,7 +112,7 @@ public class ObjectCacheRemote implements ServletContextListener {
                     postThreads[i] = new ObjectCacheRemotePostThread(hosts[i]);
                     postThreads[i].start();
                 }
-                log.debug("Will now start server listener ... ");
+                log.debug("STARTING SERVER: ... bindAddressStr("+ bindAddressStr +"):port("+ port +")");
                 if(bindAddressStr != null && bindAddressStr.length() > 2){
                     server = new Server(ObjectCacheRemoteServerThread.class, null, bindAddressStr, port);
                     server.start();

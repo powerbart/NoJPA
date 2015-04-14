@@ -104,17 +104,31 @@ public class RemoteCacheTest {
         ObjectCacheRemote s1 = new ObjectCacheRemote();
         s1.clusterFilenameForTest = "cluster-serverA";
         s1.contextInitialized(null);
-        sleep = 30 * 1000;
+        Thread.sleep(1 * 1000 * 10);
+        sleep = 1000;
         {
-            Thread.sleep(15 * 1000);
-            List<Person> persons = MQL.select(Person.class).getList();
-            for (int i = 0; i < persons.size(); i++) {
-                Person person = persons.get(i);
-                person.setSomeFloat((float) Math.random());
-                this.saveWithLock(person);
+            for(int t = 0; t < 50; t++){
+                Thread thread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        List<Person> persons = MQL.select(Person.class).getList();
+                        for (int i = 0; i < persons.size(); i++) {
+                            Person person = persons.get(i);
+                            person.setSomeFloat((float) Math.random());
+                            try {
+                                saveWithLock(person);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                });
+                thread.start();
             }
         }
-        Thread.sleep(260 * 1000);
+        System.out.println("NOW SLEEPING ........ START..");
+        Thread.sleep(1 * 1000 * 500);
+        System.out.println("NOW SLEEPING ........ DONE..");
         s1.contextDestroyed(null);
         Assert.assertEquals(true, true);
     }
@@ -125,18 +139,25 @@ public class RemoteCacheTest {
         ObjectCacheRemote s1 = new ObjectCacheRemote();
         s1.clusterFilenameForTest = "cluster-serverB";
         s1.contextInitialized(null);
-        sleep = 10 * 1000;
+        sleep = 1000;
 
         {
 
-            List<Person> persons = MQL.select(Person.class).getList();
-            for (int i = 0; i < persons.size(); i++) {
-                Thread.sleep(1 * 1000);
-                Person person = persons.get(i);
-                person.setSomeFloat((float) Math.random());
-                this.saveWithLock(person);
+            for(int u = 0; u < 100; u++){
+                List<Person> persons = MQL.select(Person.class).getList();
+                for (int i = 0; i < persons.size(); i++) {
+//                    System.out.println("NOW SLEEPING ........ START..");
+//                Thread.sleep(1 * 1000 * 500);
+//                System.out.println("NOW SLEEPING ........ START..");
+                    Person person = persons.get(i);
+                    person.setSomeFloat((float) Math.random());
+                    this.saveWithLock(person);
+                }
             }
         }
+        System.out.println("NOW SLEEPING ........ START..");
+        Thread.sleep(1 * 1000 * 500);
+        System.out.println("NOW SLEEPING ........ DONE..");
         s1.contextDestroyed(null);
         Assert.assertEquals(true, true);
     }
@@ -160,7 +181,7 @@ public class RemoteCacheTest {
     }
 
 
-    public void saveWithLock(Person p) throws Exception {
+    public static void saveWithLock(Person p) throws Exception {
         GlobalLockService.getInstance().lockAndRun("STATIC-LOCK", new GlobalLockService.LockedExecutor<Person>() {
 
             @Override

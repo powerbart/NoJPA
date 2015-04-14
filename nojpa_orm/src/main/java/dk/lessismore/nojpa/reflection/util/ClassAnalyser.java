@@ -146,7 +146,7 @@ public class ClassAnalyser {
                 &&
                 !method.getReturnType().getName().equalsIgnoreCase("void") &&
                 !method.getName().equalsIgnoreCase("getClass");
-        log.debug("ClassAnalyser.isValidGetMethod("+ method.getDeclaringClass().getSimpleName() +"." + name + ") = " + result);
+//        log.debug("ClassAnalyser.isValidGetMethod["+ method.getName() +"]("+ method.getDeclaringClass().getSimpleName() +"." + name + ") = " + result);
         return result;
     }
 

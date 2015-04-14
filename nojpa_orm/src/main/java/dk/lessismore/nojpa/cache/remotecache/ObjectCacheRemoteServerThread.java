@@ -67,7 +67,7 @@ public class ObjectCacheRemoteServerThread  extends Thread {
             client.setTcpNoDelay(true);
 
             log.debug("Got connection from " + clientIP);
-//            output = client.getOutputStream();
+            output = client.getOutputStream();
             client.setKeepAlive( true );
             boolean run = true;
             String curLine = null;
@@ -108,13 +108,14 @@ public class ObjectCacheRemoteServerThread  extends Thread {
                         }
                     } else if(curLine.startsWith("ll:")){
                         String command = tok.nextToken();
-                        String clazz = tok.nextToken();
                         String lockID = tok.nextToken();
+                        log.debug("READING: lockFromRemote("+ lockID +") ");
+
                         GlobalLockService.getInstance().lockFromRemote(lockID);
                     } else if(curLine.startsWith("ul:")){
                         String command = tok.nextToken();
-                        String clazz = tok.nextToken();
                         String lockID = tok.nextToken();
+                        log.debug("READING: unlockFromRemote("+ lockID +") ");
                         GlobalLockService.getInstance().unlockFromRemote(lockID);
                     } else {
                         log.error("Dont understand line: " + curLine);
@@ -124,14 +125,15 @@ public class ObjectCacheRemoteServerThread  extends Thread {
                 }
             }
 
-            output.flush();
-            output.close();
-            input.close();
-            log.debug("Try to close client -normal");
-            client.close();
+            if(client.isConnected()){
+                output.flush();
+                output.close();
+                input.close();
+                log.debug("Try to close client -normal");
+                client.close();
+            }
         } catch (Exception e) {
             log.error("Some error in run() " + e.toString(), e);
-            e.printStackTrace();
         } finally {
             try{
             if(output != null) output.close();
