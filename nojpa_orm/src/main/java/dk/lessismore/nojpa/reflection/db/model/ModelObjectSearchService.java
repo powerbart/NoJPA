@@ -89,26 +89,62 @@ public class ModelObjectSearchService {
 
     public static <T extends ModelObjectInterface> void put(T object) {
         try{
-//            log.debug("put_:1:start");
             ModelObject modelObject = (ModelObject) object;
             SolrServer solrServer = servers.get(modelObject.getInterface().getSimpleName());
-//            log.debug("put_:2");
             if(solrServer == null){
                 log.fatal("Cant find a solrServer for class("+ modelObject.getInterface().getSimpleName() +")");
             }
-//            log.debug("put_:3");
             SolrInputDocument solrObj = new SolrInputDocument();
-            put(object, "", new HashMap<String, String>(), solrServer, solrObj);
-//            log.debug("put_:4:end");
+            addAttributesToSolrDocument(object, "", new HashMap<String, String>(), solrServer, solrObj);
+            try {
+                solrServer.add(solrObj, AUTO_COMMIT_MS);
+            } catch (SolrServerException e) {
+                log.error("Some error when adding document ... " + e, e);
+            } catch (IOException e) {
+                log.error("Some error when adding document ... " + e, e);
+            }
         } catch (Exception e){
             log.error("put:_ Some error in put-1 " + e, e);
             throw new RuntimeException(e);
 
         }
+    }
 
+    public static <T extends ModelObjectInterface> void putWithoutCommit(T object) {
+        try{
+            ModelObject modelObject = (ModelObject) object;
+            SolrServer solrServer = servers.get(modelObject.getInterface().getSimpleName());
+            if(solrServer == null){
+                log.fatal("Cant find a solrServer for class("+ modelObject.getInterface().getSimpleName() +")");
+            }
+            SolrInputDocument solrObj = new SolrInputDocument();
+            addAttributesToSolrDocument(object, "", new HashMap<String, String>(), solrServer, solrObj);
+            try {
+                solrServer.add(solrObj);
+            } catch (SolrServerException e) {
+                log.error("Some error when adding document ... " + e, e);
+            } catch (IOException e) {
+                log.error("Some error when adding document ... " + e, e);
+            }
+        } catch (Exception e){
+            log.error("put:_ Some error in put-1 " + e, e);
+            throw new RuntimeException(e);
+
+        }
     }
 
     public static <T extends ModelObjectInterface> void put(T object, String prefix, HashMap<String, String> storedObjects, SolrServer solrServer, SolrInputDocument solrObj) {
+        addAttributesToSolrDocument(object, prefix, storedObjects, solrServer, solrObj);
+        try {
+            solrServer.add(solrObj, AUTO_COMMIT_MS);
+        } catch (SolrServerException e) {
+            log.error("Some error when adding document ... " + e, e);
+        } catch (IOException e) {
+            log.error("Some error when adding document ... " + e, e);
+        }
+    }
+
+    private static <T extends ModelObjectInterface> void addAttributesToSolrDocument(T object, String prefix, HashMap<String, String> storedObjects, SolrServer solrServer, SolrInputDocument solrObj) {
         ModelObject modelObject = (ModelObject) object;
         DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(modelObject.getInterface());
         String objectIDInSolr = (prefix.length() == 0 ? "" : prefix + "_") + "objectID" + (prefix.length() == 0 ? "" : "__ID");
@@ -160,13 +196,6 @@ public class ModelObjectSearchService {
                     }
                 }
             }
-        }
-        try {
-            solrServer.add(solrObj, AUTO_COMMIT_MS);
-        } catch (SolrServerException e) {
-            log.error("Some error when adding document ... " + e, e);
-        } catch (IOException e) {
-            log.error("Some error when adding document ... " + e, e);
         }
     }
 
@@ -248,7 +277,7 @@ public class ModelObjectSearchService {
             //TODO:SEB This can be optimized !!
             @Override
             public void visit(ModelObjectInterface m) {
-                put(m);
+                putWithoutCommit(m);
                 if(counter++ % inputsBetweenCommits == 0){
                     ModelObjectSearchService.commit(m);
                 }
