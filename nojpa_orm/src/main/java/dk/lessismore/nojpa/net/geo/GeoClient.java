@@ -44,10 +44,13 @@ public class GeoClient {
         String s = null;
         try {
             s = HttpClient.get("http://geo.less-is-more.dk/lookup?ip=" + ip);
-        } catch (Exception e){
-            s = HttpClient.get("http://geo.less-is-more.dk/lookup?ip=" + ip);
-            log.error("Some error: " + e, e);
-            throw e;
+        } catch (Exception e) {
+        	try {
+            	s = HttpClient.get("http://geo.less-is-more.dk/lookup?ip=" + ip);
+        	} catch (Exception e) {
+	            log.error("Some error: " + e, e);
+	            throw e;
+        	}
         }
         JSONObject json = new JSONObject(s);
         Geo geo = new Geo(json.getString("city"), json.getString("country"), json.getString("continent"));
