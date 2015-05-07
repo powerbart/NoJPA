@@ -47,9 +47,9 @@ public class GeoClient {
         } catch (Exception e) {
         	try {
             	s = HttpClient.get("http://geo.less-is-more.dk/lookup?ip=" + ip);
-        	} catch (Exception e) {
-	            log.error("Some error: " + e, e);
-	            throw e;
+        	} catch (Exception ee) {
+	            log.error("Some error: " + ee, ee);
+	            throw ee;
         	}
         }
         JSONObject json = new JSONObject(s);
