@@ -196,4 +196,51 @@ public class RemoteCacheTest {
 
 
 
+
+    static class MyMessageListener implements MessageListener {
+
+        @Override
+        public void gotMessage(String message) {
+            System.out.println(" WE GOT MESSAGE !!!! (" + message + ")");
+        }
+    }
+
+    @Test
+    public void testGlobalLock_UpOfTwo_A_message() throws Exception {
+        ObjectCacheRemote s1 = new ObjectCacheRemote();
+        s1.clusterFilenameForTest = "cluster-serverA";
+        s1.contextInitialized(null);
+        GlobalLockService.getInstance().addListener(new MyMessageListener());
+        Thread.sleep(1 * 1000 * 10);
+        sleep = 1000;
+        System.out.println("NOW SLEEPING ........ START..");
+        Thread.sleep(1 * 1000 * 500);
+        System.out.println("NOW SLEEPING ........ DONE..");
+        s1.contextDestroyed(null);
+        Assert.assertEquals(true, true);
+    }
+
+
+    @Test
+    public void testGlobalLock_UpOfTwo_B_message() throws Exception {
+        ObjectCacheRemote s1 = new ObjectCacheRemote();
+        s1.clusterFilenameForTest = "cluster-serverB";
+        s1.contextInitialized(null);
+        sleep = 1000;
+        Thread.sleep(1 * 1000 * 15);
+
+
+        System.out.println("Sending message ..... - start");
+        GlobalLockService.getInstance().sendMessage("Hello Atanas");
+        System.out.println("Sending message ..... - done");
+
+        Thread.sleep(1 * 1000 * 500);
+        s1.contextDestroyed(null);
+        Assert.assertEquals(true, true);
+    }
+
+
+
+
+
 }

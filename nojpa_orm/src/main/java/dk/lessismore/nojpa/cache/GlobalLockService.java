@@ -6,8 +6,10 @@ import dk.lessismore.nojpa.reflection.db.model.ModelObject;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -156,6 +158,28 @@ public class GlobalLockService {
             }
         }
     }
+
+
+    private static List<MessageListener> mlList = new ArrayList<MessageListener>();
+
+    public void addListener(MessageListener ml){
+        mlList.add(ml);
+    }
+
+    public void sendMessage(String message){
+        ObjectCacheRemote.sendMessage(message);
+    }
+
+    public void gotMessage(String message){
+        for(int i = 0; i < mlList.size(); i++){
+            try{
+                mlList.get(i).gotMessage(message);
+            } catch (Exception e){
+                log.error("Some exception in calling MessageListener: "+ e, e);
+            }
+        }
+    }
+
 
 
 

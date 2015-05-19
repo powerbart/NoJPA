@@ -71,6 +71,15 @@ public class ObjectCacheRemote implements ServletContextListener {
     }
 
 
+    public static void sendMessage(String messsage) {
+        for(int i = 0; postThreads != null && i < postThreads.length; i++){
+            log.debug("sendMessage("+ i +"/"+ postThreads.length +")->" + postThreads[i]);
+            postThreads[i].sendMessage(messsage);
+        }
+
+    }
+
+
     static public class RemoteHost {
         public final String host;
         public final int port;

@@ -117,6 +117,11 @@ public class ObjectCacheRemoteServerThread  extends Thread {
                         String lockID = tok.nextToken();
                         log.debug("READING: unlockFromRemote("+ lockID +") ");
                         GlobalLockService.getInstance().unlockFromRemote(lockID);
+                    } else if(curLine.startsWith("ml:")){
+                        String command = tok.nextToken();
+                        String message = tok.nextToken();
+                        log.debug("READING: message("+ message +") ");
+                        GlobalLockService.getInstance().gotMessage(message);
                     } else {
                         log.error("Dont understand line: " + curLine);
     //                    write("-ERR Not implementet", output);

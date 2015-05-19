@@ -126,4 +126,14 @@ public class ObjectCacheRemotePostThread extends Thread {
         }
 
     }
+
+    public void sendMessage(String messsage) {
+        synchronized (toPost){
+            String strToSend = "ml:" + messsage;
+            toPost.add(strToSend);
+        }
+        synchronized (this) {
+            notify();
+        }
+    }
 }
