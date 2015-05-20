@@ -37,7 +37,7 @@ public class SQLStatementExecutor {
     private static boolean selectSqlToFile = false;
     private static boolean enableUpdateDbConnection = true;
     private static boolean enableSelectDbConnection = true;
-    private static String sqlFileName = "/tmp/sqlStatements.sql";
+    private static FileWriter sqlFileWriter = null;
     public static boolean debugMode = false;
     public static boolean debugCpuMode = false; //true  = memory leak
     private static EventCounter eventCounter = new EventCounter();
@@ -60,7 +60,7 @@ public class SQLStatementExecutor {
             updateSqlToFile = false;
         }
         if (websiteResources.getString("sqlFileName") != null) {
-            sqlFileName = websiteResources.getString("sqlFileName") ;
+            setSqlFileName(websiteResources.getString("sqlFileName"));
         }
     }
 
@@ -87,22 +87,31 @@ public class SQLStatementExecutor {
     }
 
     public static void setSqlFileName(String sqlFileName) {
-        SQLStatementExecutor.sqlFileName = sqlFileName;
         try {
-            FileWriter writer = new FileWriter(sqlFileName);
-            writer.close();
+            if (sqlFileWriter != null) {
+                try {
+                    sqlFileWriter.close();
+                    sqlFileWriter = null;
+                } catch (Exception e) {
+                    log.error("Could not close old sql output file: " + sqlFileName, e);
+                }
+            }
+            sqlFileWriter = new FileWriter(sqlFileName);
         } catch (Exception e) {
             log.error("Could not create sql output file: " + sqlFileName, e);
+            sqlFileWriter = null;
         }
     }
 
 
     public static void addSqlStatementToSqlFile(String sqlStatement) {
         try {
-            FileWriter writer = new FileWriter(sqlFileName, true);
-            writer.write(sqlStatement + ";\n");
-            writer.flush();
-            writer.close();
+            if (sqlFileWriter != null) {
+                sqlFileWriter.write(sqlStatement + ";\n");
+                sqlFileWriter.flush();
+            } else {
+                log.warn("cannot add to sql file, writer is null");
+            }
         } catch (Exception e) {
             log.error("Failed sql write", e);
         }
