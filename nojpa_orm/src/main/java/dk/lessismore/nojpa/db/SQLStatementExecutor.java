@@ -54,6 +54,14 @@ public class SQLStatementExecutor {
         } else {
             debugMode = false;
         }
+        if (websiteResources.getString("updateSqlToFile") != null || websiteResources.getBoolean("updateSqlToFile")) {
+            updateSqlToFile = true;
+        } else {
+            updateSqlToFile = false;
+        }
+        if (websiteResources.getString("sqlFileName") != null) {
+            sqlFileName = websiteResources.getString("sqlFileName") ;
+        }
     }
 
 
@@ -87,6 +95,7 @@ public class SQLStatementExecutor {
             log.error("Could not create sql output file: " + sqlFileName, e);
         }
     }
+
 
     public static void addSqlStatementToSqlFile(String sqlStatement) {
         try {
