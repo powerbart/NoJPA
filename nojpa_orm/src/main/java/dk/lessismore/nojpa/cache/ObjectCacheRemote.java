@@ -20,7 +20,7 @@ public class ObjectCacheRemote implements ServletContextListener {
     final private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(ObjectCacheRemote.class);
 
     public static String clusterFilenameForTest = null;
-    
+
     private static boolean run = true;
 
     public static boolean shouldRun() {
@@ -28,67 +28,62 @@ public class ObjectCacheRemote implements ServletContextListener {
     }
 
     public void contextInitialized(ServletContextEvent servletContextEvent) {
-        try{
+        try {
             run = true;
             initCluster();
-        } catch(Throwable e){
+        } catch (Throwable e) {
             log.error("Some error when initCluster() " + e, e);
             e.printStackTrace();
         }
-
     }
 
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
-        try{
+        try {
             run = false;
-            if(server != null){
+            if (server != null) {
                 server.stopServer();
             }
             ObjectCacheRemoteServerThread.closeAll();
-            for(int i = 0; postThreads != null && i < postThreads.length; i++){
+            for (int i = 0; postThreads != null && i < postThreads.length; i++) {
                 postThreads[i].close();
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             log.error("Some error when closing ObjectCacheRemoteServer " + e, e);
             e.printStackTrace();
         }
     }
 
     public static void takeLock(String lockID) {
-        for(int i = 0; postThreads != null && i < postThreads.length; i++){
-            log.debug("removeFromRemoteCache("+ i +"/"+ postThreads.length +")->" + postThreads[i]);
+        for (int i = 0; postThreads != null && i < postThreads.length; i++) {
+            log.debug("takeLock(" + i + "/" + postThreads.length + ")->" + postThreads[i]);
             postThreads[i].takeLock(lockID);
         }
-
     }
 
     public static void releaseLock(String lockID) {
-        for(int i = 0; postThreads != null && i < postThreads.length; i++){
-            log.debug("removeFromRemoteCache("+ i +"/"+ postThreads.length +")->" + postThreads[i]);
+        for (int i = 0; postThreads != null && i < postThreads.length; i++) {
+            log.debug("releaseLock(" + i + "/" + postThreads.length + ")->" + postThreads[i]);
             postThreads[i].releaseLock(lockID);
         }
-
     }
 
-
-    public static void sendMessage(String messsage) {
-        for(int i = 0; postThreads != null && i < postThreads.length; i++){
-            log.debug("sendMessage("+ i +"/"+ postThreads.length +")->" + postThreads[i]);
-            postThreads[i].sendMessage(messsage);
+    public static void sendMessage(String message) {
+        for (int i = 0; postThreads != null && i < postThreads.length; i++) {
+            log.debug("sendMessage(" + i + "/" + postThreads.length + ")->" + postThreads[i]);
+            postThreads[i].sendMessage(message);
         }
-
     }
-
 
     static public class RemoteHost {
         public final String host;
         public final int port;
-        public RemoteHost(String host, int port){
+
+        public RemoteHost(String host, int port) {
             this.host = host;
             this.port = port;
         }
 
-        public String toString(){
+        public String toString() {
             return host + ":" + port;
         }
 
@@ -102,17 +97,19 @@ public class ObjectCacheRemote implements ServletContextListener {
 
     static void initCluster() {
         PropertyResources resources = PropertyService.getInstance().getPropertyResources(clusterFilenameForTest != null ? clusterFilenameForTest : "cluster");
-        if(resources != null){
+        if (resources != null) {
             String portStr = resources.getString("port");
             String bindAddressStr = resources.getString("bindAddress");
-            if(portStr != null && portStr.length() > 1) { port = Integer.parseInt(portStr); }
-            List<String> hostList = (List<String>) resources.getList("remoteHosts");
-            if(hostList != null && !hostList.isEmpty()){
+            if (portStr != null && portStr.length() > 1) {
+                port = Integer.parseInt(portStr);
+            }
+            List<String> hostList = resources.getList("remoteHosts");
+            if (hostList != null && !hostList.isEmpty()) {
                 hosts = new RemoteHost[hostList.size()];
                 postThreads = new ObjectCacheRemotePostThread[hostList.size()];
-                for(int i = 0; i < hostList.size(); i++){
+                for (int i = 0; i < hostList.size(); i++) {
                     String host = hostList.get(i);
-                    if(host.indexOf(":") != -1){
+                    if (host.contains(":")) {
                         log.debug("Will now connect to remote host: " + host);
                         hosts[i] = new RemoteHost(host.substring(0, host.indexOf(":")), Integer.parseInt(host.substring(host.indexOf(":") + 1)));
                     } else {
@@ -121,8 +118,8 @@ public class ObjectCacheRemote implements ServletContextListener {
                     postThreads[i] = new ObjectCacheRemotePostThread(hosts[i]);
                     postThreads[i].start();
                 }
-                log.debug("STARTING SERVER: ... bindAddressStr("+ bindAddressStr +"):port("+ port +")");
-                if(bindAddressStr != null && bindAddressStr.length() > 2){
+                log.debug("STARTING SERVER: ... bindAddressStr(" + bindAddressStr + "):port(" + port + ")");
+                if (bindAddressStr != null && bindAddressStr.length() > 2) {
                     server = new Server(ObjectCacheRemoteServerThread.class, null, bindAddressStr, port);
                     server.start();
                 } else {
@@ -134,9 +131,9 @@ public class ObjectCacheRemote implements ServletContextListener {
         }
     }
 
-    public static void gotNewConnection(){
-        for(int i = 0; postThreads != null && i < postThreads.length; i++){
-            if(postThreads[i].getState() == Thread.State.WAITING){
+    public static void gotNewConnection() {
+        for (int i = 0; postThreads != null && i < postThreads.length; i++) {
+            if (postThreads[i].getState() == Thread.State.WAITING) {
                 postThreads[i].errorCounter = 1;
                 postThreads[i].interrupt();
             }
@@ -145,9 +142,9 @@ public class ObjectCacheRemote implements ServletContextListener {
     }
 
 
-    public static void removeFromRemoteCache(ModelObjectInterface modelObject){
-        for(int i = 0; postThreads != null && i < postThreads.length; i++){
-            log.debug("removeFromRemoteCache("+ i +"/"+ postThreads.length +")->" + postThreads[i]);
+    public static void removeFromRemoteCache(ModelObjectInterface modelObject) {
+        for (int i = 0; postThreads != null && i < postThreads.length; i++) {
+            log.debug("removeFromRemoteCache(" + i + "/" + postThreads.length + ")->" + postThreads[i]);
             postThreads[i].add(modelObject);
         }
     }

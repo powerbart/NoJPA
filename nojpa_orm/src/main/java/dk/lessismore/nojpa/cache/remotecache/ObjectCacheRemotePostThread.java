@@ -33,8 +33,8 @@ public class ObjectCacheRemotePostThread extends Thread {
         this.host = host;
     }
 
-    public void add(ModelObjectInterface modelObjectInterface){
-        synchronized (toPost){
+    public void add(ModelObjectInterface modelObjectInterface) {
+        synchronized (toPost) {
             String strToSend = "r:" + ((ModelObject) modelObjectInterface).getInterface().getName() + ":" + modelObjectInterface;
             toPost.add(strToSend);
         }
@@ -43,29 +43,29 @@ public class ObjectCacheRemotePostThread extends Thread {
         }
     }
 
-    protected String pull(){
-        synchronized (toPost){
+    protected String pull() {
+        synchronized (toPost) {
             return toPost.pull();
         }
     }
 
     protected static void write(String str, OutputStream output) throws Exception {
-       output.write((str + "\r\n").getBytes());
-       output.flush();
-       log.debug("write::DONE::Writing to client " + str);
-   }
+        output.write((str + "\r\n").getBytes());
+        output.flush();
+        log.debug("write::DONE::Writing to client " + str);
+    }
 
 
-    public void run(){
-        while(ObjectCacheRemote.shouldRun()){
-            try{
-                log.debug("Is now making connection to host("+ host.host+") port("+ host.port +")");
+    public void run() {
+        while (ObjectCacheRemote.shouldRun()) {
+            try {
+                log.debug("Is now making connection to host(" + host.host + ") port(" + host.port + ")");
                 socket = new Socket(host.host, host.port);
                 outputStream = socket.getOutputStream();
-                while(ObjectCacheRemote.shouldRun()){
+                while (ObjectCacheRemote.shouldRun()) {
                     String s = null;
-                    while((s = pull()) != null){
-                        log.debug("Will write to host("+ host.host +") port("+ host.port +") -> " + s);
+                    while ((s = pull()) != null) {
+                        log.debug("Will write to host(" + host.host + ") port(" + host.port + ") -> " + s);
                         write(s, outputStream);
                         errorCounter = 1;
                     }
@@ -73,15 +73,17 @@ public class ObjectCacheRemotePostThread extends Thread {
                         wait(5 * 1000);
                     }
                 }
-            } catch(Exception e){
-                errorCounter = (1+errorCounter) * 2;
-                log.error("Some error in run() when sending data to host("+ host.host +") port("+ host.port +") " + e);
-                try{
-                if(outputStream != null) outputStream.close();
-                } catch (Exception t){}
-                try{
-                if(socket != null) socket.close();
-                } catch (Exception t){}
+            } catch (Exception e) {
+                errorCounter = (1 + errorCounter) * 2;
+                log.error("Some error in run() when sending data to host(" + host.host + ") port(" + host.port + ") " + e);
+                try {
+                    if (outputStream != null) outputStream.close();
+                } catch (Exception t) {
+                }
+                try {
+                    if (socket != null) socket.close();
+                } catch (Exception t) {
+                }
                 socket = null;
                 outputStream = null;
                 try {
@@ -94,20 +96,22 @@ public class ObjectCacheRemotePostThread extends Thread {
         }
     }
 
-    public void close(){
-        try{
-        if(outputStream != null) outputStream.close();
-        } catch (Exception t){}
-        try{
-        if(socket != null) socket.close();
-        } catch (Exception t){}
+    public void close() {
+        try {
+            if (outputStream != null) outputStream.close();
+        } catch (Exception t) {
+        }
+        try {
+            if (socket != null) socket.close();
+        } catch (Exception t) {
+        }
         socket = null;
         outputStream = null;
     }
 
 
     public void takeLock(String lockID) {
-        synchronized (toPost){
+        synchronized (toPost) {
             String strToSend = "ll:" + lockID;
             toPost.add(strToSend);
         }
@@ -117,7 +121,7 @@ public class ObjectCacheRemotePostThread extends Thread {
     }
 
     public void releaseLock(String lockID) {
-        synchronized (toPost){
+        synchronized (toPost) {
             String strToSend = "ul:" + lockID;
             toPost.add(strToSend);
         }
@@ -128,7 +132,7 @@ public class ObjectCacheRemotePostThread extends Thread {
     }
 
     public void sendMessage(String messsage) {
-        synchronized (toPost){
+        synchronized (toPost) {
             String strToSend = "ml:" + messsage;
             toPost.add(strToSend);
         }
