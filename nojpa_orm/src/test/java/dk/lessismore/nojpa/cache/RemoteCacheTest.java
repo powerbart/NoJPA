@@ -120,13 +120,16 @@ public class RemoteCacheTest {
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
+                            for(int j = 0; j < 100; j++){
+                                ObjectCacheRemote.removeFromRemoteCache(person);
+                            }
                         }
                     }
                 });
                 thread.start();
             }
         }
-        System.out.println("NOW SLEEPING ........ START..");
+        System.out.println("                                                                                                                                                                                                   NOW SLEEPING ........ START..");
         Thread.sleep(1 * 1000 * 500);
         System.out.println("NOW SLEEPING ........ DONE..");
         s1.contextDestroyed(null);
@@ -182,13 +185,13 @@ public class RemoteCacheTest {
 
 
     public static void saveWithLock(Person p) throws Exception {
-        GlobalLockService.getInstance().lockAndRun("STATIC-LOCK", new GlobalLockService.LockedExecutor<Person>() {
+        GlobalLockService.getInstance().lockAndRun(p, new GlobalLockService.LockedExecutor<Person>() {
 
             @Override
             public void execute(Person ms) throws Exception {
-                log.debug("::::::::::::: EXECUTE - START");
-                Thread.sleep(sleep);
-//                ModelObjectService.save(ms);
+                log.debug("::::::::::::: EXECUTE - START ("+ ms +")");
+//                Thread.sleep(sleep);
+                ModelObjectService.save(ms);
                 log.debug("::::::::::::: EXECUTE - END");
             }
         });
