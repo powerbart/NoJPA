@@ -86,17 +86,14 @@ public class ObjectCacheRemoteServerThread extends Thread {
                     break;
                 }
                 String readLine = new String(dataBytes, 0, byteLength);
-                int indexOfN = readLine.indexOf("\n");
-                if (indexOfN < 0) {
-                    preline = preline + readLine;
-                } else {
-                    curLine = ((preline != null ? preline : "") + readLine.substring(0, indexOfN)).trim();
-                    preline = readLine.substring(indexOfN);
-                    tok = new StringTokenizer(curLine, " \n\r\t:");
+                StringTokenizer toks = new StringTokenizer(readLine, "\n\t\r");
+
+                while (toks.hasMoreTokens()) {
+                    curLine = toks.nextToken().trim();
                     if (curLine.startsWith("r:")) { //remove
-                        String command = tok.nextToken();
-                        String clazzName = tok.nextToken();
-                        String objectID = tok.nextToken();
+                        int dem = curLine.indexOf(":", 4);
+                        String clazzName = curLine.substring(2, dem);
+                        String objectID = curLine.substring(dem + 1);
                         log.debug("Parameters: clazz(" + clazzName + ") objectID(" + objectID + ")");
                         Class<?> aClass = Class.forName(clazzName);
                         ObjectCache objectCache = ObjectCacheFactory.getInstance().getObjectCache(aClass);
