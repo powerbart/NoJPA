@@ -49,12 +49,12 @@ public class SQLStatementExecutor {
 
     static {
         PropertyResources websiteResources = PropertyService.getInstance().getPropertyResources(SQLStatementExecutor.class);
-        if (websiteResources.getString("debug") != null || websiteResources.getBoolean("debug")) {
+        if (websiteResources.getString("debug") != null && websiteResources.getBoolean("debug")) {
             debugMode = true;
         } else {
             debugMode = false;
         }
-        if (websiteResources.getString("updateSqlToFile") != null || websiteResources.getBoolean("updateSqlToFile")) {
+        if (websiteResources.getString("updateSqlToFile") != null && websiteResources.getBoolean("updateSqlToFile")) {
             updateSqlToFile = true;
         } else {
             updateSqlToFile = false;
