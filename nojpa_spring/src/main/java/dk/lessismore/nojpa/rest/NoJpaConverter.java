@@ -5,6 +5,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.text.ParseException;
 import java.util.LinkedHashSet;
@@ -38,7 +39,14 @@ public class NoJpaConverter implements GenericConverter {
                 return formatter.parse((String) source, null);
             } catch (ParseException e) {
                 throw new RuntimeException(e);
+            } catch (RuntimeException re) {
+                // if @RequestParam(required=false)
+                if (targetType.hasAnnotation(RequestParam.class) && !targetType.getAnnotation(RequestParam.class).required()) {
+                    return null;
+                }
+                throw re;
             }
+
         } else {
             return formatter.print((ModelObjectInterface) source, null);
         }
