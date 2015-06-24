@@ -6,6 +6,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
 
+import java.text.ParseException;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -32,15 +33,14 @@ public class NoJpaConverter implements GenericConverter {
 
     @Override
     public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-        try {
-            if (sourceType.getType().equals(String.class)) {
+        if (sourceType.getType().equals(String.class)) {
+            try {
                 return formatter.parse((String) source, null);
-            } else {
-                return formatter.print((ModelObjectInterface) source, null);
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
             }
-        } catch (Exception e) {
-            log.warn("cant convert " + source + " to " + targetType, e);
+        } else {
+            return formatter.print((ModelObjectInterface) source, null);
         }
-        return null;
     }
 }
