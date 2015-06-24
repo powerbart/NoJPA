@@ -107,7 +107,7 @@ public class ObjectCacheRemoteServerThread extends Thread {
             }
             lastUnlockCounter = n;
         } catch (Exception e){
-            log.error("validateUnlockCounter " + e, e);
+            log.error("validateUnlockCounter " + e, e); //ERROE
         }
     }
 
