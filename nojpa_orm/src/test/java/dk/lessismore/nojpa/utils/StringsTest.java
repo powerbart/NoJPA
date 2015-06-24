@@ -20,8 +20,15 @@ public class StringsTest {
         return in.replaceAll("\\p{InCombiningDiacriticalMarks}+", "ø").toLowerCase().replaceAll("[^a-z0-9_\\- ]", "ø").trim();
     }
 
+//    public static void main(String[] args) {
+//        System.out.println(trimUrlTitle("bente-s�rensen"));
+//    }
+
+
+
     public static void main(String[] args) {
-        System.out.println(trimUrlTitle("bente-s�rensen"));
+        String s = "r:0:aa";
+        System.out.println(s.substring(s.indexOf(":", 2)));
     }
 
 

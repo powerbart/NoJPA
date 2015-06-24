@@ -117,11 +117,17 @@ public class RemoteCacheTest {
                             person.setSomeFloat((float) Math.random());
                             try {
                                 saveWithLock(person);
+                                Thread.sleep(4);
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
                             for(int j = 0; j < 100; j++){
                                 ObjectCacheRemote.removeFromRemoteCache(person);
+                                try {
+                                    Thread.sleep(4);
+                                } catch (InterruptedException e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }
                     }
@@ -155,6 +161,12 @@ public class RemoteCacheTest {
                     Person person = persons.get(i);
                     person.setSomeFloat((float) Math.random());
                     this.saveWithLock(person);
+                    try {
+                        Thread.sleep(4);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
                 }
             }
         }

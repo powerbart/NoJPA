@@ -25,6 +25,9 @@ public class MaxSizeArray<E> {
 
     public void add(E e){
         popCounter = popCounter % maxSize;
+        if(array[popCounter] != null){
+            pullCounter = ++pullCounter % maxSize;
+        }
         array[popCounter++] = e;
     }
 
@@ -51,6 +54,18 @@ public class MaxSizeArray<E> {
         } else {
             return null;
         }
+    }
+
+    public void debug(){
+        System.out.print("DEBUG-ARRAY popCounter("+ popCounter +") pullCounter("+ pullCounter +") maxSize("+ maxSize +")[");
+        for(int i = 0; i < array.length; i++){
+            if(i > 0) {
+                System.out.print(", ");
+            }
+            System.out.print(array[i]);
+        }
+        System.out.print("]");
+        System.out.print("\n");
     }
 
 
@@ -203,6 +218,67 @@ public class MaxSizeArray<E> {
             for(int i = 0; i < 10; i++){
                 System.out.println("x*null="+ mx.pull());
             }
+        }
+
+
+        System.out.println("---------------K2K2K2K2K2K2K2K2K2K2K2K2K2K2K2K------------------------------------");
+        {
+            MaxSizeArray<String> mx = new MaxSizeArray<String>(5);
+            mx.add("1");
+            mx.add("2");
+            mx.debug();
+            mx.add("3");
+            mx.add("4");
+            mx.add("5");
+            mx.debug();
+            mx.add("6");
+            mx.debug();
+            mx.add("7");
+            mx.debug();
+            System.out.println("3=" + mx.pull());
+            mx.debug();
+            System.out.println("4=" + mx.pull());
+            mx.debug();
+            System.out.println("5=" + mx.pull());
+            mx.debug();
+            System.out.println("6=" + mx.pull());
+            mx.debug();
+            System.out.println("7=" + mx.pull());
+            mx.debug();
+            System.out.println("null=" + mx.pull());
+            mx.add("8");
+            mx.add("9");
+            mx.add("0");
+            mx.add("1");
+            mx.add("2");
+            mx.add("3");
+            System.out.println("9=" + mx.pull());
+            System.out.println("0=" + mx.pull());
+            System.out.println("1=" + mx.pull());
+            System.out.println("2=" + mx.pull());
+            mx.add("0");
+            mx.add("1");
+            mx.add("2");
+            mx.add("3");
+            System.out.println("3=" + mx.pull());
+            System.out.println("0=" + mx.pull());
+            System.out.println("1=" + mx.pull());
+            System.out.println("2=" + mx.pull());
+            System.out.println("3=" + mx.pull());
+            System.out.println("null=" + mx.pull());
+            mx.add("7");
+            System.out.println("7=" + mx.pull());
+            mx.add("7");
+            System.out.println("7=" + mx.pull());
+            mx.add("7");
+            System.out.println("7=" + mx.pull());
+            System.out.println("null="+ mx.pull());
+            System.out.println("null="+ mx.pull());
+            System.out.println("null="+ mx.pull());
+            System.out.println("null="+ mx.pull());
+            System.out.println("null="+ mx.pull());
+            System.out.println("null="+ mx.pull());
+            System.out.println("null="+ mx.pull());
         }
 
 
