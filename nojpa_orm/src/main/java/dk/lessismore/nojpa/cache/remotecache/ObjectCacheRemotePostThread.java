@@ -22,11 +22,15 @@ public class ObjectCacheRemotePostThread extends Thread {
 
     final private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(ObjectCacheRemotePostThread.class);
 
-    private final MaxSizeArray<String> toPost = new MaxSizeArray<String>(200);
+    private final MaxSizeArray<String> toPost = new MaxSizeArray<String>(1000);
     private ObjectCacheRemote.RemoteHost host;
     private Socket socket = null;
     private OutputStream outputStream = null;
     public int errorCounter = 1;
+
+    long lastRemoveCounter = 1;
+    long lastLockCounter = 1;
+    long lastUnlockCounter = 1;
 
 
     public ObjectCacheRemotePostThread(ObjectCacheRemote.RemoteHost host) {
@@ -35,7 +39,7 @@ public class ObjectCacheRemotePostThread extends Thread {
 
     public void add(ModelObjectInterface modelObjectInterface) {
         synchronized (toPost) {
-            String strToSend = "r:" + ((ModelObject) modelObjectInterface).getInterface().getName() + ":" + modelObjectInterface;
+            String strToSend = "r:"+ (lastRemoveCounter++) +":" + ((ModelObject) modelObjectInterface).getInterface().getName() + ":" + modelObjectInterface;
             toPost.add(strToSend);
         }
         synchronized (this) {
@@ -112,7 +116,7 @@ public class ObjectCacheRemotePostThread extends Thread {
 
     public void takeLock(String lockID) {
         synchronized (toPost) {
-            String strToSend = "ll:" + lockID;
+            String strToSend = "ll:"+ (lastLockCounter++ ) +":" + lockID;
             toPost.add(strToSend);
         }
         synchronized (this) {
@@ -122,7 +126,7 @@ public class ObjectCacheRemotePostThread extends Thread {
 
     public void releaseLock(String lockID) {
         synchronized (toPost) {
-            String strToSend = "ul:" + lockID;
+            String strToSend = "ul:"+ (lastUnlockCounter++) +":" + lockID;
             toPost.add(strToSend);
         }
         synchronized (this) {

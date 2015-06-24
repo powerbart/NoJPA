@@ -144,7 +144,7 @@ public class ObjectCacheRemote implements ServletContextListener {
 
     public static void removeFromRemoteCache(ModelObjectInterface modelObject) {
         for (int i = 0; postThreads != null && i < postThreads.length; i++) {
-            log.debug("removeFromRemoteCache(" + i + "/" + postThreads.length + ")->" + postThreads[i]);
+            log.debug("removeFromRemoteCache(" + i + "/" + postThreads.length + ")->" + postThreads[i] + " please remove ("+ (modelObject == null ? null : modelObject.getInterface().getSimpleName() + ":" + modelObject)+")");
             postThreads[i].add(modelObject);
         }
     }

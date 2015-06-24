@@ -50,6 +50,67 @@ public class ObjectCacheRemoteServerThread extends Thread {
 //   }
 
 
+    long lastRemoveCounter = -1;
+    long lastLockCounter = -1;
+    long lastUnlockCounter = -1;
+    
+    private void validateRemoveCounter(String number){
+        try{
+            long n = Long.parseLong(number);
+            if(lastRemoveCounter == -1){
+                log.debug("validateRemoveCounter: first number is " + lastRemoveCounter);
+            } else {
+                if(n == lastRemoveCounter + 1){
+                    log.debug("validateRemoveCounter: FINE("+ n +") " + lastRemoveCounter);
+                } else {
+                    log.error("validateRemoveCounter: EXPECTED(" + (lastRemoveCounter + 1) +") GOT("+ n +")");
+
+                }
+            }
+            lastRemoveCounter = n;
+        } catch (Exception e){
+            log.error("validateRemoveCounter " + e, e);
+        }
+    }
+
+    private void validateLockCounter(String number){
+        try{
+            long n = Long.parseLong(number);
+            if(lastLockCounter == -1){
+                log.debug("validateLockCounter: first number is " + lastLockCounter);
+            } else {
+                if(n == lastLockCounter + 1){
+                    log.debug("validateLockCounter: FINE("+ n +") " + lastLockCounter);
+                } else {
+                    log.error("validateLockCounter: EXPECTED(" + (lastLockCounter + 1) +") GOT("+ n +")");
+
+                }
+            }
+            lastLockCounter = n;
+        } catch (Exception e){
+            log.error("validateLockCounter " + e, e);
+        }
+    }
+
+    private void validateUnlockCounter(String number){
+        try{
+            long n = Long.parseLong(number);
+            if(lastUnlockCounter == -1){
+                log.debug("validateUnlockCounter: first number is " + lastUnlockCounter);
+            } else {
+                if(n == lastUnlockCounter + 1){
+                    log.debug("validateUnlockCounter: FINE("+ n +") " + lastUnlockCounter);
+                } else {
+                    log.error("validateUnlockCounter: EXPECTED(" + (lastUnlockCounter + 1) +") GOT("+ n +")");
+
+                }
+            }
+            lastUnlockCounter = n;
+        } catch (Exception e){
+            log.error("validateUnlockCounter " + e, e); //ERROE
+        }
+    }
+
     public void run() {
         try {
             ObjectCacheRemote.gotNewConnection();
@@ -69,7 +130,7 @@ public class ObjectCacheRemoteServerThread extends Thread {
             client.setKeepAlive(true);
             boolean run = true;
             String curLine = null;
-            byte[] dataBytes = new byte[256];
+            byte[] dataBytes = new byte[4096];
             int byteLength = 0;
             StringTokenizer tok = null;
             input = client.getInputStream();
@@ -86,14 +147,18 @@ public class ObjectCacheRemoteServerThread extends Thread {
                     break;
                 }
                 String readLine = new String(dataBytes, 0, byteLength);
+                log.debug("reading readLine("+ readLine +")");
                 StringTokenizer toks = new StringTokenizer(readLine, "\n\t\r");
 
                 while (toks.hasMoreTokens()) {
                     curLine = toks.nextToken().trim();
+                    StringTokenizer curLineToks = new StringTokenizer(curLine, ":");
                     if (curLine.startsWith("r:")) { //remove
-                        int dem = curLine.indexOf(":", 4);
-                        String clazzName = curLine.substring(2, dem);
-                        String objectID = curLine.substring(dem + 1);
+                        String command = curLineToks.nextToken();
+                        String number = curLineToks.nextToken();
+                        validateRemoveCounter(number);
+                        String clazzName = curLineToks.nextToken();
+                        String objectID = curLineToks.nextToken();
                         log.debug("Parameters: clazz(" + clazzName + ") objectID(" + objectID + ")");
                         Class<?> aClass = Class.forName(clazzName);
                         ObjectCache objectCache = ObjectCacheFactory.getInstance().getObjectCache(aClass);
@@ -102,11 +167,17 @@ public class ObjectCacheRemoteServerThread extends Thread {
                             objectCache.removeFromCache(objectID);
                         }
                     } else if (curLine.startsWith("ll:")) {
-                        String lockID = curLine.substring(3);
+                        String command = curLineToks.nextToken();
+                        String number = curLineToks.nextToken();
+                        validateLockCounter(number);
+                        String lockID = curLineToks.nextToken();
                         log.debug("READING: lockFromRemote(" + lockID + ") ");
                         GlobalLockService.getInstance().lockFromRemote(lockID);
                     } else if (curLine.startsWith("ul:")) {
-                        String lockID = curLine.substring(3);
+                        String command = curLineToks.nextToken();
+                        String number = curLineToks.nextToken();
+                        String lockID = curLineToks.nextToken();
+                        validateUnlockCounter(number);
                         log.debug("READING: unlockFromRemote(" + lockID + ") ");
                         GlobalLockService.getInstance().unlockFromRemote(lockID);
                     } else if (curLine.startsWith("ml:")) {
@@ -167,6 +238,7 @@ public class ObjectCacheRemoteServerThread extends Thread {
         output = null;
         input = null;
     }
+
 
 
 }
