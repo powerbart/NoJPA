@@ -28,6 +28,8 @@ public class Mailer {
     private static String smtpUser;
     private static String smtpPass;
     private static int smtpPort = 0;
+    private static boolean smtpSSL = false;
+    private static boolean isAUTH = false;
     private static final PropertyResources propertyResources;
 
     static {
@@ -35,6 +37,9 @@ public class Mailer {
         smtpHost = propertyResources.getString("smtpHost");
         smtpUser = propertyResources.getString("smtpUser");
         smtpPass = propertyResources.getString("smtpPass");
+        smtpSSL = propertyResources.getBoolean("smtpSSL");
+        isAUTH = smtpUser != null && smtpPass != null;
+
         try {
             smtpPort = propertyResources.getInt("smtpPort");
         } catch (Exception e) {
@@ -73,18 +78,20 @@ public class Mailer {
         System.out.println("smtpHost = " + smtpHost);
 
         if (smtpUser != null) {
-            prop.setProperty("mail.smtp.submitter", smtpUser);
-            prop.setProperty("mail.smtp.auth", "true");
-            prop.setProperty("mail.smtp.host", "mail.example.com");
-        }
-        if (smtpPort == 25) {
-        } else if (smtpPort == 587) {
-            log.debug("Going for SSL");
+            prop.put("mail.smtp.submitter", smtpUser);
             prop.put("mail.smtp.auth", "true");
+            prop.put("mail.smtp.host", "mail.example.com");
+        }
+        if (smtpSSL) {
+            log.debug("Going for SSL");
             prop.put("mail.smtp.starttls.enable", "true");
+
         }
 
-        prop.setProperty("mail.smtp.port", "" + smtpPort);
+        if (isAUTH) {
+            prop.put("mail.smtp.auth", "true");
+        }
+        prop.put("mail.smtp.port", "" + smtpPort);
         prop.put("mail.smtp.connectiontimeout", "10000");
         prop.put("mail.smtp.timeout", "10000");
 
@@ -98,11 +105,11 @@ public class Mailer {
             debug("Sending mail to: " + Arrays.toString(recipents) + " via " + host);
 
             try {
-                Session session = Session.getDefaultInstance(prop, smtpUser == null || smtpPort == 587 ? null : new javax.mail.Authenticator() {
+                Session session = Session.getDefaultInstance(prop, isAUTH ? new javax.mail.Authenticator() {
                     protected PasswordAuthentication getPasswordAuthentication() {
                         return new PasswordAuthentication(smtpUser, smtpPass);
                     }
-                });
+                }: null);
                 MimeMessage msg = new MimeMessage(session);
 
                 msg.setSentDate(new Date());
@@ -146,7 +153,7 @@ public class Mailer {
 
                 debug("Sending mail using things of a generally obscure nature: " + msg.toString());
 
-                Transport trans = session.getTransport("smtp");
+                Transport trans = session.getTransport(smtpSSL ? "smtps" : "smtp");
 
                 debug("Got transport, going for '" + host + "' and '" + from);
                 // TODO: Consider using another user for login (preferably one with password)
