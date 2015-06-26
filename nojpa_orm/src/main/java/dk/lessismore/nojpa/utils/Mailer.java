@@ -90,6 +90,7 @@ public class Mailer {
 
         if (isAUTH) {
             prop.put("mail.smtp.auth", "true");
+            prop.put("mail.smtps.auth", "true");
         }
         prop.put("mail.smtp.port", "" + smtpPort);
         prop.put("mail.smtp.connectiontimeout", "10000");

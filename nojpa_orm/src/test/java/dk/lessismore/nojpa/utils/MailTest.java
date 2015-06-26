@@ -8,7 +8,7 @@ import org.junit.Test;
 public class MailTest {
     @Test
     public void testMail() throws Exception {
-        Mailer.send(true, "my subject", "some body", "support@qxl.com", new String[] {"atanas.balevsky@gmail.com"}, null, null);
+        Mailer.send(true, "my subject", "some body", "less-is-more@lauritz.com", new String[] {"allan@edderkoppe.net"}, null);
 
     }
 }
