@@ -251,6 +251,7 @@ public class SQLStatementExecutor {
                 //if(debugMode){
                     //eventCounter.newEvent(sqlStatement);
                     log.debug("doQuery: Will run: " + sqlStatement.replaceAll("\n", " "));
+                    log.debug("DEBUG-TRACE", new Exception("DEBUG"));
                 //}
                 connection = (Connection) ConnectionPoolFactory.getPool().getFromPool();
                 long start = System.nanoTime();

@@ -21,6 +21,7 @@ public abstract class Attribute {
 
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(Attribute.class);
     protected boolean translatedAssociation = false;
+    protected boolean unique = false;
     private SearchField searchFieldAnnotation;
     private DbStrip dbStripAnnotation;
 
@@ -39,6 +40,15 @@ public abstract class Attribute {
      * The attribute class.
      */
     protected Class _attributeClass = null;
+
+
+    public boolean isUnique() {
+        return unique;
+    }
+
+    public void setUnique(boolean unique) {
+        this.unique = unique;
+    }
 
     /**
      * Sets the attribute value right on. No evaluation of anykind.

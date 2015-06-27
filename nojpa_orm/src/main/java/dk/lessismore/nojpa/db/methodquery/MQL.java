@@ -1,5 +1,7 @@
 package dk.lessismore.nojpa.db.methodquery;
 
+import dk.lessismore.nojpa.cache.ObjectCache;
+import dk.lessismore.nojpa.cache.ObjectCacheFactory;
 import dk.lessismore.nojpa.db.LimResultSet;
 import dk.lessismore.nojpa.db.statements.*;
 import dk.lessismore.nojpa.reflection.db.DbClassReflector;
@@ -31,6 +33,15 @@ public class MQL {
 //        return MQ.select(aClass).where(MQ.mock(aClass).getObjectID(), MQ.Comp.EQUAL, objectID).getFirst();
         return (T) DbObjectReader.readObjectFromDb(objectID, aClass);
     }
+
+
+    public static <T  extends ModelObjectInterface> T selectByFirstUnique(T sourceMock, Constraint constraint) {
+        T firstUnique = MQL.select(sourceMock).getFirstUnique(constraint);
+        return firstUnique;
+    }
+
+
+
     public static <T  extends ModelObjectInterface> T[] selectByIDs(Class<T> aClass, String[] objectIDs) {
         if(objectIDs == null) return null;
         if(objectIDs.length <= 20){
@@ -106,6 +117,11 @@ public class MQL {
         private final SelectSQLStatement statement;
         private boolean useCache = true;
 
+        private final List<Pair<Class, String>> pairs = new ArrayList<Pair<Class, String>>();
+        private final List<Object> pairValues = new ArrayList<Object>();
+
+
+
         public SelectQuery(Class<T> selectClass) {
             this.selectClass = selectClass;
             creator = new SelectSqlStatementCreator();
@@ -157,6 +173,7 @@ public class MQL {
         public SelectQuery<T>  whereIn(String mockValue, String ... values) {
             List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
             Pair<Class, String> pair = getSourceAttributePair();
+            pairs.add(pair); pairValues.add(values);
             clearMockCallSequence();
             String attribute = makeAttributeIdentifier(pair);
             Constraint[] constraints = new Constraint[values.length];
@@ -174,6 +191,7 @@ public class MQL {
             }
             List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
             Pair<Class, String> pair = getSourceAttributePair();
+            pairs.add(pair); pairValues.add(values);
             clearMockCallSequence();
             String attribute = makeAttributeIdentifier(pair);
             Constraint[] constraints = new Constraint[values.length];
@@ -569,6 +587,30 @@ public class MQL {
             if (list.isEmpty()) return null;
             else return list.get(0);
         }
+
+
+        protected T getFirstUnique(Constraint constraint) {
+            rootConstraints.add(constraint);
+
+            String statementKey = constraint.getExpression().makeStatement();
+            ObjectCache objectCache = ObjectCacheFactory.getInstance().getObjectCache(selectClass);
+            String objectID = objectCache.getUniqueRelation(statementKey);
+            if(objectID != null) {
+                T t = MQL.selectByID(selectClass, objectID);
+                return t;
+            }
+            limit(1);
+            List<T> list = getList();
+            if (list.isEmpty()){
+                return null;
+            } else {
+                T t = list.get(0);
+                objectCache.putUniqueRelation(statementKey, t.getObjectID());
+                return t;
+            }
+
+        }
+
 
         /**
          * Add join on attribute.

@@ -41,10 +41,12 @@ public class InitTestDatabase {
 
         Car ford = ModelObjectService.create(Car.class);
         ford.setBrand("Ford");
+        ford.setAddress(address1);
         save(ford);
 
         Car toyota = ModelObjectService.create(Car.class);
         toyota.setBrand("Toyota");
+        toyota.setAddress(address2);
         save(toyota);
 
         List<Person> employees = new ArrayList<Person>();

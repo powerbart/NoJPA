@@ -46,4 +46,8 @@ public interface ObjectCacheInterface extends Serializable {
     Object getFromCache(String primaryKey);
 
     void clear();
+
+    String getUniqueRelation(String key);
+
+    void putUniqueRelation(String key, String objectID);
 }

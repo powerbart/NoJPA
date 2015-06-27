@@ -5,6 +5,7 @@ import dk.lessismore.nojpa.reflection.db.model.ModelObjectProxy;
 import dk.lessismore.nojpa.reflection.util.ClassAnalyser;
 import dk.lessismore.nojpa.resources.PropertyResources;
 import dk.lessismore.nojpa.resources.Resources;
+import dk.lessismore.nojpa.utils.MaxSizeMap;
 
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
@@ -402,5 +403,25 @@ public class ObjectCache implements ObjectCacheInterface {
         }
         //}
         ////log.debug("clean::END");
+    }
+
+
+    MaxSizeMap<String, String> uniqueRelation = null;
+
+    private MaxSizeMap<String, String> getUniqueRelation(){
+        if(uniqueRelation == null){
+            uniqueRelation = new MaxSizeMap<String, String>(getMaxCacheSize());
+        }
+        return uniqueRelation;
+    }
+
+    @Override
+    public String getUniqueRelation(String key) {
+        return getUniqueRelation().get(key);
+    }
+
+    @Override
+    public void putUniqueRelation(String key, String objectID) {
+        getUniqueRelation().put(key, objectID);
     }
 }

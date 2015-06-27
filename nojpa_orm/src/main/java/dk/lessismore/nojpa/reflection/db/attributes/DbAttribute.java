@@ -121,6 +121,22 @@ public class DbAttribute implements Serializable {
         dbDataType = new DbDataType();
         dbDataType.setDbAttribute(this);
         association = ModelObjectInterface.class.isAssignableFrom(attribute.getAttributeClass());
+        {
+            Annotation[] as = attribute.getDeclaredAnnotations();
+            if (as != null && as.length > 0) {
+                for (int i = 0; i < as.length; i++) {
+                    if (as[i] instanceof Column) {
+                        Column c = (Column) as[i];
+                        if(c.unique()){
+                            attribute.setUnique(true);
+                        }
+                    }
+                }
+            }
+        }
+
+
+
         if (!association) {
             association = attribute.isArray();
             if (association) {
