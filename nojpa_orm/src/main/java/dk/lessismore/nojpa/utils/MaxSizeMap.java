@@ -96,6 +96,11 @@ public class MaxSizeMap<K, V> {
         }
     }
 
+    public synchronized void clear(){
+        shiftBuckets();
+        shiftBuckets();
+    }
+
 
     public static void main(String[] args) {
         MaxSizeMap map = new MaxSizeMap(5);

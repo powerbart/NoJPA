@@ -1,11 +1,13 @@
 package dk.lessismore.nojpa.cache;
 
 import dk.lessismore.nojpa.reflection.db.model.ModelObject;
+import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectProxy;
 import dk.lessismore.nojpa.reflection.util.ClassAnalyser;
 import dk.lessismore.nojpa.resources.PropertyResources;
 import dk.lessismore.nojpa.resources.Resources;
 import dk.lessismore.nojpa.utils.MaxSizeMap;
+import dk.lessismore.nojpa.utils.MaxSizeMaxTimeMap;
 
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
@@ -271,54 +273,33 @@ public class ObjectCache implements ObjectCacheInterface {
      */
     public synchronized void removeFromCache(String primaryKey) {
         //log.debug("removeFromCache::START for "+primaryKey+" / "+targetClass.getName());
-        ////log.debug("removeFromCache::1 " + primaryKey);
-        //synchronized(mySync){
-        ////log.debug("removeFromCache::2 " + primaryKey);
         try {
             ////log.debug("removeFromCache::3 " + primaryKey);
-            CacheEntry entry = (CacheEntry) getNewBucket().get(primaryKey);
-            ////log.debug("removeFromCache::4 "+entry);
-            if (entry != null) {
-                ////log.debug("removeFromCache::5 " + primaryKey);
-                for (int i = 0; i < entry.listOfListeners.size(); i++) {
-                    ////log.debug("removeFromCache::6 " + primaryKey);
-                    CacheListener cacheListener = (CacheListener) entry.listOfListeners.get(i);
-                    ////log.debug("removeFromCache::7 " + primaryKey);
-                    cacheListener.listener.removeAllListnersForFieldName(cacheListener.fieldNameOnListener);
-                    ////log.debug("removeFromCache::8 " + primaryKey);
-                }
-                getNewBucket().remove(primaryKey);
-            } else {
-                ////log.debug("removeFromCache::9 " + primaryKey);
-                entry = (CacheEntry) getOldBucket().get(primaryKey);
-                ////log.debug("removeFromCache::10 " + primaryKey);
-                if (entry != null) {
-                    ////log.debug("removeFromCache::11 " + primaryKey);
-                    for (int i = 0; i < entry.listOfListeners.size(); i++) {
-                        ////log.debug("removeFromCache::12 "  + primaryKey);
-                        CacheListener cacheListener = (CacheListener) entry.listOfListeners.get(i);
-                        ////log.debug("removeFromCache::13 " + primaryKey);
-                        cacheListener.listener.removeAllListnersForFieldName(cacheListener.fieldNameOnListener);
-                        ////log.debug("removeFromCache::14 " + primaryKey);
-                    }
-                    ////log.debug("removeFromCache::15 " + primaryKey);
-                    getOldBucket().remove(primaryKey);
-                }
-                ////log.debug("removeFromCache::16 " + primaryKey);
+            Map bucket = getNewBucket();
+            CacheEntry entry = (CacheEntry) bucket.get(primaryKey);
+            if(entry == null){
+                bucket = getOldBucket();
+                entry = (CacheEntry) bucket.get(primaryKey);
             }
-            ////log.debug("removeFromCache::17 " + primaryKey);
+
+            if(entry != null){
+                for (int i = 0; i < entry.listOfListeners.size(); i++) {
+                    //We need to remove a list of the Ref's ... since the same address can be use and the some object many times or or many diff objects
+                    CacheListener cacheListener = (CacheListener) entry.listOfListeners.get(i);
+                    cacheListener.listener.removeAllListnersForFieldName(cacheListener.fieldNameOnListener);
+                }
+                bucket.remove(primaryKey);
+            }
         } catch (Exception e) {
             log.error("removeFromCache:: some error ... " + e);
             e.printStackTrace();
         }
-        //}
-        ////log.debug("removeFromCache::END " + primaryKey);
     }
 
     /**
      * This method gets an object with the given primary key from the cache.
      */
-    public synchronized Object getFromCache(String primaryKey) {
+    public synchronized ModelObject getFromCache(String primaryKey) {
 //    log.debug("getFromCache::START " + primaryKey + " sizes(n:"+ getNewBucket().size() +"-o:"+ getOldBucket().size() +")");
         //synchronized (cachedObjects) {
         try {
@@ -332,9 +313,9 @@ public class ObjectCache implements ObjectCacheInterface {
                     putInCache(primaryKey, entry);
                     ////log.debug("getFromCache::END1 " + primaryKey);
                     numberOfFoundInCache++;
-                    Object toReturn = entry.objectToCache;
+                    ModelObject toReturn = entry.objectToCache;
                     if (toReturn.getClass().getName().indexOf("$") == -1) {
-                        toReturn = Proxy.newProxyInstance(
+                        toReturn = (ModelObject) Proxy.newProxyInstance(
                                 this.getClass().getClassLoader(),
                                 new Class<?>[]{targetClass, ModelObject.class},
                                 (ModelObjectProxy) toReturn);
@@ -349,9 +330,9 @@ public class ObjectCache implements ObjectCacheInterface {
                 ////log.debug("getFromCache::END3 " + primaryKey);
                 numberOfFoundInCache++;
 //          log.debug("getFromCache::END3 " + primaryKey + " returns " + entry.objectToCache + " / " + entry.objectToCache.getClass() );
-                Object toReturn = entry.objectToCache;
+                ModelObject toReturn = entry.objectToCache;
                 if (toReturn.getClass().getName().indexOf("$") == -1) {
-                    toReturn = Proxy.newProxyInstance(
+                    toReturn = (ModelObject) Proxy.newProxyInstance(
                             this.getClass().getClassLoader(),
                             new Class<?>[]{targetClass, ModelObject.class},
                             (ModelObjectProxy) toReturn);
@@ -406,22 +387,62 @@ public class ObjectCache implements ObjectCacheInterface {
     }
 
 
-    MaxSizeMap<String, String> uniqueRelation = null;
+    MaxSizeMaxTimeMap<String> uniqueRelation = null;
 
-    private MaxSizeMap<String, String> getUniqueRelation(){
+    private MaxSizeMaxTimeMap<String> getUniqueRelationMap(){
         if(uniqueRelation == null){
-            uniqueRelation = new MaxSizeMap<String, String>(getMaxCacheSize());
+            uniqueRelation = new MaxSizeMaxTimeMap<String>(getMaxCacheSize(), 10 * 60);
         }
         return uniqueRelation;
     }
 
     @Override
     public String getUniqueRelation(String key) {
-        return getUniqueRelation().get(key);
+        return getUniqueRelationMap().get(key);
     }
 
     @Override
     public void putUniqueRelation(String key, String objectID) {
-        getUniqueRelation().put(key, objectID);
+        synchronized (this) {
+            getUniqueRelationMap().put(key, objectID);
+        }
     }
+
+//    @Override
+//    public void clearUniqueRelation() {
+//        synchronized (this) {
+//            getUniqueRelationMap().clear();
+//        }
+//    }
+
+
+//    MaxSizeMap<String, String> refRelation = null;
+//
+//    private MaxSizeMap<String, String> getRefRelationMap(){
+//        if(refRelation == null){
+//            refRelation = new MaxSizeMap<String, String>(getMaxCacheSize());
+//        }
+//        return refRelation;
+//    }
+//
+//
+//    @Override
+//    public String getRefRelation(String refKey) {
+//        return getRefRelationMap().get(refKey);
+//    }
+//
+//    //remoteObjectID, key,
+//    @Override
+//    public void putRemoveRefListener(String remoteObjectID, String key, Class<? extends ModelObjectInterface> selectClass, String objectID) {
+//        ModelObject fromCache = getFromCache(key);    TODO
+//    }
+//
+//    @Override
+//    public void putRefRelation(String refKey, String objectID) {
+//        synchronized (this) {
+//            getRefRelationMap().put(refKey, objectID);
+//        }
+//    }
+
+
 }

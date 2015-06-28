@@ -152,7 +152,7 @@ public class DbObjectReader {
             //Have we been here before =>
             modelObject = (ModelObject) modelObjects.get(dbAttributeContainer.getClassName() + ":" + objectId);
             if (modelObject != null) {
-                log.debug("readObjectFromDb: We have been here before; and can safly return this model object.");
+                log.debug("readObjectFromDb: We have been here before; and can safely return this model object.");
                 //log.debug("Loop found. using allready created object. ");
                 return (T) modelObject;
             }

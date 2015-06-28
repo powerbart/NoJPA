@@ -1,6 +1,7 @@
 package dk.lessismore.nojpa.cache;
 
 import dk.lessismore.nojpa.reflection.db.model.ModelObject;
+import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -50,4 +51,12 @@ public interface ObjectCacheInterface extends Serializable {
     String getUniqueRelation(String key);
 
     void putUniqueRelation(String key, String objectID);
+
+//    void clearUniqueRelation();
+
+//    String getRefRelation(String refKey);
+//
+//    void putRemoveRefListener(String remoteObjectID, String key, Class<? extends ModelObjectInterface> selectClass, String objectID);
+//
+//    void putRefRelation(String refKey, String objectID);
 }

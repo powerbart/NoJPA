@@ -612,6 +612,61 @@ public class MQL {
         }
 
 
+        //                    public static String makeAttributeIdentifier(Pair<Class, String> pair) {
+//                        return makeAttributeIdentifier(pair.getFirst(), pair.getSecond());
+//                    }
+//
+//                    public static String makeAttributeIdentifier(Class sourceClass, String attributeName) {
+//                        DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(sourceClass);
+//                        DbAttribute dbAttribute = dbAttributeContainer.getDbAttribute(attributeName);
+//                        return dbAttributeContainer.getTableName()+"."+dbAttribute.getAttributeName();
+//                    }
+
+
+//        public T getFirstFromRefAttribute() {
+//
+//            if(pairs.size() == 1 && pairValues.size() == 1){
+//
+//
+//                //String refKey = ""+ pairValues.get(0);
+//                String remoteObjectID = "" + pairValues.get(0);
+//                String key = pairs.get(0).getSecond() + ":" + remoteObjectID;
+//                ObjectCache objectCache = ObjectCacheFactory.getInstance().getObjectCache(selectClass);
+//                String objectID = objectCache.getRefRelation(remoteObjectID);
+//                if(objectID != null) {
+//                    T t = MQL.selectByID(selectClass, objectID);
+//                    return t;
+//                }
+//                limit(1);
+//                List<T> list = getList();
+//                if (list.isEmpty()){
+//                    return null;
+//                } else {
+//                    Pair<Class, String> classStringPair = pairs.get(0);
+//                    DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(classStringPair.getFirst());
+//                    DbAttribute dbAttribute = dbAttributeContainer.getDbAttribute(classStringPair.getSecond());
+//                    Class attributeClass = dbAttribute.getAttributeClass();
+//                    if(attributeClass.isAssignableFrom(ModelObjectInterface.class) && !attributeClass.isArray()){
+//                        T t = list.get(0);
+//                        ModelObjectInterface refModelObject = MQL.selectByID(attributeClass, remoteObjectID);
+//                        ObjectCacheFactory.getInstance().getObjectCache(attributeClass).putRemoveRefListener(remoteObjectID, key, selectClass, t.getObjectID());
+//                        objectCache.putRefRelation(key, t.getObjectID());
+//                        return t;
+//
+//                    } else {
+//                        log.debug("Not able to get directly from MEM-cache, since attributeClass("+ attributeClass.getSimpleName() +") is not a modelObject");
+//                        return getFirst();
+//                    }
+//                }
+//            } else {
+//                log.debug("Not able to get directly from MEM-cache, since there are more than one ref");
+//                return getFirst();
+//            }
+//
+//
+//        }
+
+
         /**
          * Add join on attribute.
          * This enables one to put constraint on the class of the join Attribute.

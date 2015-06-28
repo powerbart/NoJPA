@@ -36,6 +36,7 @@ public class NoJpaConverter implements GenericConverter {
     public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
         if (sourceType.getType().equals(String.class)) {
             try {
+                log.debug("convert(source("+ source +"), sourceType("+ sourceType +"), targetType("+ targetType +"))");
                 return formatter.parse((String) source, null);
             } catch (ParseException e) {
                 throw new RuntimeException(e);
