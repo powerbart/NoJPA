@@ -53,7 +53,7 @@ public class DbClassReflector {
      * If its not possible; null will be returned.
      */
     public static DbAttributeContainer getDbAttributeContainer(Class myClass) {
-        synchronized(log){
+//        synchronized(log){
             DbAttributeContainer container = (DbAttributeContainer)getReflectedClasses().get(myClass.getName());
             //log.debug("DbAttributeContainer:: getDbAttributeContainer:0");
             if(container == null) {
@@ -71,7 +71,7 @@ public class DbClassReflector {
             }
             //log.debug("DbAttributeContainer:: getDbAttributeContainer. 4 " + container);
             return container;
-        }
+//        }
     }
 
     //public static Class<? extends ModelObjectInterface> getClass

@@ -110,6 +110,12 @@ public interface ModelObject extends Serializable, ModelObjectInterface, Compara
 
     public void doneSavingByDbObjectWriter();
 
+    static enum ArrayIsNullResult { YES_IS_NULL, NO_NOT_NULL, DONT_KNOW };
+    ArrayIsNullResult isArrayNull(String fieldName);
+
+    void putInInstanceCache(String key, Object object);
+    void removeFromInstanceCache(String key);
+
     public boolean delete();
 
     public boolean deleteWithAssociations(String commaStringOfAttributeNames);

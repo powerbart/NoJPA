@@ -72,6 +72,26 @@ public class SelectSqlStatementCreator  {
         return false;
     }
 
+    public boolean addJoinForCountArray(Class sourceClass, String attributeName, String objectID) {
+        DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(sourceClass);
+        DbAttribute dbAttribute = dbAttributeContainer.getDbAttribute(attributeName);
+        if(dbAttribute != null) {
+            if(dbAttribute.isAssociation()) {
+                DbAttributeContainer targetAttributeContainer = DbClassReflector.getDbAttributeContainer(dbAttribute.getAttributeClass());
+                String sourceTableName = dbAttributeContainer.getTableName();
+                String sourcePrimaryKey = dbAttributeContainer.getPrimaryKeyAttribute().getAttributeName();
+
+                String associationTableName = AssociationTable.makeAssociationTableName(dbAttributeContainer, dbAttribute);
+                getSelectSQLStatement().addTableName(associationTableName);
+                getSelectSQLStatement().addConstrain(dbAttributeContainer.getAttributeContainer().getClassName() + "_" + sourcePrimaryKey, WhereSQLStatement.EQUAL, objectID);
+                return true;
+            }
+        }
+        log.error("addJoin: something wrong with the name or attributeName = " + attributeName +
+            ", container=" + dbAttributeContainer + ", thread="+ Thread.currentThread().getName(), new Exception("addJoin"));
+        return false;
+    }
+
     public void addConstrain(Class sourceClass, String attributeName, int comparator, int value) {
         getSelectSQLStatement().addConstrain(makeAttributeIdentifier(sourceClass, attributeName), comparator, value);
     }

@@ -10,6 +10,7 @@ import dk.lessismore.nojpa.reflection.db.DbObjectSelector;
 import dk.lessismore.nojpa.reflection.db.DbObjectVisitor;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttribute;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttributeContainer;
+import dk.lessismore.nojpa.reflection.db.model.ModelObject;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.db.statements.SelectSqlStatementCreator;
 import dk.lessismore.nojpa.utils.Pair;
@@ -29,6 +30,39 @@ public class MQL {
 
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(MQL.class);
 
+
+    public static <T extends ModelObjectInterface,S extends ModelObjectInterface> boolean isNull(T realModelObject, T sourceMock, S[] arrayMock) {
+        List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
+        Pair<Class, String> pair = getSourceAttributePair();
+        clearMockCallSequence();
+
+        if(joints.size() != 1){
+            throw new RuntimeException("We can only handle to ask one level down on an array");
+        }
+
+        Pair<Class, String> joint = joints.get(0);
+        ModelObject.ArrayIsNullResult arrayIsNullResult = ((ModelObject) realModelObject).isArrayNull(joint.getSecond());
+        if(arrayIsNullResult == ModelObject.ArrayIsNullResult.YES_IS_NULL){
+            return true;
+        } else if(arrayIsNullResult == ModelObject.ArrayIsNullResult.NO_NOT_NULL) {
+            return false;
+        } else {
+            int arrayCount = MQL.getArrayCount(sourceMock, "" + realModelObject, joints, pair);
+            return arrayCount > 0 ? false : true;
+        }
+    }
+
+    private static <T extends ModelObjectInterface> int getArrayCount(T sourceMock, String realObjectID, List<Pair<Class, String>> joints, Pair<Class, String> pair) {
+        Expression expression = newLeafExpression().addConstrain(makeAttributeIdentifier(pair), compToNum(Comp.EQUAL), realObjectID);
+        ExpressionConstraint expressionConstraint = new ExpressionConstraint(expression, joints);
+
+        SelectQuery<T> select = MQL.select(sourceMock);
+        select.rootConstraints.add(expressionConstraint);
+        int count = select.selectCountFromDbForArray(realObjectID);
+        return count;
+    }
+
+
     public static <T  extends ModelObjectInterface> T selectByID(Class<T> aClass, String objectID) {
 //        return MQ.select(aClass).where(MQ.mock(aClass).getObjectID(), MQ.Comp.EQUAL, objectID).getFirst();
         return (T) DbObjectReader.readObjectFromDb(objectID, aClass);
@@ -44,7 +78,7 @@ public class MQL {
 
     public static <T  extends ModelObjectInterface> T[] selectByIDs(Class<T> aClass, String[] objectIDs) {
         if(objectIDs == null) return null;
-        if(objectIDs.length <= 20){
+        if(objectIDs.length <= 32){
             ArrayList<T> toReturn = new ArrayList<T>(objectIDs.length);
             for(int i = 0; i < objectIDs.length; i++){
                 T t = selectByID(aClass, objectIDs[i]);
@@ -57,6 +91,24 @@ public class MQL {
             return toReturn.toArray((T[]) Array.newInstance(aClass, toReturn.size()));
         }
         return MQL.select(aClass).whereIn(MQL.mock(aClass).getObjectID(), objectIDs).getArray();
+    }
+
+
+    public static <T  extends ModelObjectInterface> List<T> selectByIDs(Class<T> aClass, List<String> objectIDs) {
+        if(objectIDs == null) return null;
+        if(objectIDs.size() <= 32){
+            ArrayList<T> toReturn = new ArrayList<T>(objectIDs.size());
+            for(int i = 0; i < objectIDs.size(); i++){
+                T t = selectByID(aClass, objectIDs.get(i));
+                if(t != null){
+                    toReturn.add(t);
+                } else {
+                    log.fatal("You are calling selectByIDs("+ aClass.getSimpleName() +") with objectIDs["+ i +"] .. which does not exists!!!! ", new Exception() );
+                }
+            }
+            return toReturn;
+        }
+        return MQL.select(aClass).whereIn(MQL.mock(aClass).getObjectID(), objectIDs).getList();
     }
 
     public enum Comp {EQUAL, EQUAL_OR_GREATER, EQUAL_OR_LESS, GREATER, LESS, NOT_EQUAL, LIKE, NOT_LIKE}
@@ -117,8 +169,9 @@ public class MQL {
         private final SelectSQLStatement statement;
         private boolean useCache = true;
 
-        private final List<Pair<Class, String>> pairs = new ArrayList<Pair<Class, String>>();
-        private final List<Object> pairValues = new ArrayList<Object>();
+//        private final List<Pair<Class, String>> pairs = new ArrayList<Pair<Class, String>>();
+//        private final List<String> pairValues = new ArrayList<String>();
+//        private final List<List<Pair<Class, String>>> jointValues = new ArrayList<List<Pair<Class, String>>>();
 
 
 
@@ -173,12 +226,27 @@ public class MQL {
         public SelectQuery<T>  whereIn(String mockValue, String ... values) {
             List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
             Pair<Class, String> pair = getSourceAttributePair();
-            pairs.add(pair); pairValues.add(values);
+
             clearMockCallSequence();
             String attribute = makeAttributeIdentifier(pair);
             Constraint[] constraints = new Constraint[values.length];
             for(int i = 0; i < values.length; i++){
                 Expression expression = newLeafExpression().addConstrain(attribute, compToNum(Comp.EQUAL), values[i]);
+                constraints[i] = new ExpressionConstraint(expression, i == 0 ? joints : new ArrayList<Pair<Class, String>>());
+            }
+            rootConstraints.add(new AnyConstraint(constraints));
+            return this;
+        }
+
+        public SelectQuery<T>  whereIn(String mockValue, List<String> values) {
+            List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
+            Pair<Class, String> pair = getSourceAttributePair();
+
+            clearMockCallSequence();
+            String attribute = makeAttributeIdentifier(pair);
+            Constraint[] constraints = new Constraint[values.size()];
+            for(int i = 0; i < values.size(); i++){
+                Expression expression = newLeafExpression().addConstrain(attribute, compToNum(Comp.EQUAL), values.get(i));
                 constraints[i] = new ExpressionConstraint(expression, i == 0 ? joints : new ArrayList<Pair<Class, String>>());
             }
             rootConstraints.add(new AnyConstraint(constraints));
@@ -191,7 +259,7 @@ public class MQL {
             }
             List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
             Pair<Class, String> pair = getSourceAttributePair();
-            pairs.add(pair); pairValues.add(values);
+
             clearMockCallSequence();
             String attribute = makeAttributeIdentifier(pair);
             Constraint[] constraints = new Constraint[values.length];
@@ -550,11 +618,53 @@ public class MQL {
          * Execute query
          * @return result list, possible empty, never null.
          */
+
+
+
+
+
         public List<T> getList() {
             List<T> list = selectObjectsFromDb();
             if (list != null) return list;
             else return new ArrayList<T>();
         }
+
+//        public List<T> getList() {
+//            if(pairs.size() == 1 && pairValues.size() == 1){
+//                String remoteObjectID = "" + pairValues.get(0);
+//                String key = pairs.get(0).getSecond() + ":" + remoteObjectID;
+//                ObjectCache objectCache = ObjectCacheFactory.getInstance().getObjectCache(selectClass);
+//                List<String> objectIDs = objectCache.getRefRelation(remoteObjectID);
+//                if(objectIDs != null && !objectIDs.isEmpty()) {
+//                    if(objectIDs.size() > 32){
+//                        return getNonCachedList();
+//                    }
+//                    List<T> ts = MQL.selectByIDs(selectClass, objectIDs);
+//                    return ts;
+//                }
+//                List<T> list = getNonCachedList();
+//                if (list.isEmpty()){
+//                    //TODO: add the NULL_LIST
+//                    return null;
+//                } else if(list.size() < 32){
+//                    Pair<Class, String> classStringPair = pairs.get(0);
+//                    DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(classStringPair.getFirst());
+//                    DbAttribute dbAttribute = dbAttributeContainer.getDbAttribute(classStringPair.getSecond());
+//                    Class attributeClass = dbAttribute.getAttributeClass();
+//                    if(attributeClass.isAssignableFrom(ModelObjectInterface.class)){
+//                        objectCache.putRefRelation(key, list);
+//                        return list;
+//                    } else {
+//                        log.debug("Not able to get directly from MEM-cache, since attributeClass("+ attributeClass.getSimpleName() +") is not a modelObject");
+//                        return getNonCachedList();
+//                    }
+//                } else {
+//                    return list;
+//                }
+//            } else {
+//                return getNonCachedList();
+//            }
+//        }
 
         public LimResultSet getLimResultSet() {
             statement.addExpression(getExpressionAddJoins());
@@ -689,6 +799,14 @@ public class MQL {
             return allConstraint.getExpression();
         }
 
+        private void getExpressionAddJoinsForCountArray(String objectID) {
+            Constraint[] constraints = rootConstraints.toArray((Constraint[]) Array.newInstance(Constraint.class, rootConstraints.size()));
+            AllConstraint allConstraint = new AllConstraint(constraints);
+            for (Pair<Class, String> joint: allConstraint.getJoints()) {
+                creator.addJoinForCountArray(joint.getFirst(), joint.getSecond(), objectID);
+            }
+        }
+
         public void visit(DbObjectVisitor visitor){
             log.debug("Will run: DbObjectSelector.iterateObjectsFromDb(selectClass, statement, visitor)");
             statement.addExpression(getExpressionAddJoins());
@@ -719,6 +837,11 @@ public class MQL {
 
         private int selectCountFromDb() {
             statement.addExpression(getExpressionAddJoins());
+            return DbObjectSelector.countObjectsFromDb(statement); // The cache arguments is ignored
+        }
+
+        private int selectCountFromDbForArray(String objectID) {
+            getExpressionAddJoinsForCountArray(objectID);
             return DbObjectSelector.countObjectsFromDb(statement); // The cache arguments is ignored
         }
 

@@ -80,11 +80,13 @@ public class TimerWithPrinter {
     public static void printLapsInAlfaOrder(){
         Map.Entry<String,Long>[] entries = laps.entrySet().toArray(new Map.Entry[laps.size()]);
         Arrays.sort(entries, new GenericComparator<Object>(Map.Entry.class, "key"));
+        System.out.println("------------------"+ new Date() +"-------------------- START printing stats");
         for(int i = 0; i < entries.length; i++){
             String s = "printLap(" + entries[i].getKey() + ") -> " + entries[i].getValue() + "\n";
             SuperIO.writeTextToFile("/tmp/printLapsInAlfaOrder.log", s, true);
             System.out.print(s);
         }
+        System.out.println("------------------"+ new Date() +"-------------------- END printing stats");
     }
 
 

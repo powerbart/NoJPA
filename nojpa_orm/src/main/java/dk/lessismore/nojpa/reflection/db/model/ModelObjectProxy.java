@@ -3,8 +3,10 @@ package dk.lessismore.nojpa.reflection.db.model;
 import dk.lessismore.nojpa.cache.ObjectArrayCache;
 import dk.lessismore.nojpa.cache.ObjectCache;
 import dk.lessismore.nojpa.cache.ObjectCacheFactory;
+import dk.lessismore.nojpa.db.methodquery.MQL;
 import dk.lessismore.nojpa.reflection.db.annotations.ModelObjectMethodListener;
 import dk.lessismore.nojpa.reflection.util.ClassAnalyser;
+import dk.lessismore.nojpa.utils.MaxSizeMap;
 import org.apache.log4j.Logger;
 import dk.lessismore.nojpa.reflection.db.*;
 import dk.lessismore.nojpa.reflection.db.annotations.DbStrip;
@@ -484,6 +486,29 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
     }
     protected Object getAssociation(String fieldName) {
         return getAssociation(fieldName, (Method) null);
+    }
+
+
+
+    public ArrayIsNullResult isArrayNull(String fieldName){
+        Object toReturn = multiAssociations.get(fieldName);
+        if (toReturn != null) {
+            if (toReturn.equals(THE_NULL_OBJECT)) {
+                return ArrayIsNullResult.YES_IS_NULL;
+            } else {
+                return ArrayIsNullResult.NO_NOT_NULL;
+            }
+        }
+        if (multiAssociationsWithResultEqualToNull.containsKey(fieldName)) {
+            return ArrayIsNullResult.YES_IS_NULL;
+        }
+
+        toReturn = getArrayFromCache(fieldName);
+        if (toReturn == null) {
+            return ArrayIsNullResult.DONT_KNOW;
+        } else {
+            return ((Object[])toReturn).length > 0 ? ArrayIsNullResult.NO_NOT_NULL : ArrayIsNullResult.YES_IS_NULL;
+        }
     }
 
 
@@ -1363,6 +1388,19 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
     public void doneSavingByDbObjectWriter() {
         singleAssociations.clear();
         multiAssociations.clear();
+    }
+
+
+
+    Map<String, Object> instanceCache = new HashMap<String, Object>(20);
+    @Override
+    public void putInInstanceCache(String key, Object object) {
+        instanceCache.put(key, object);
+    }
+
+    @Override
+    public void removeFromInstanceCache(String key) {
+        instanceCache.remove(key);
     }
 
     public boolean delete() {
