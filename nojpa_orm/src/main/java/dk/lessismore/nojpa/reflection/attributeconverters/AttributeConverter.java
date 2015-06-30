@@ -49,7 +49,7 @@ public abstract class AttributeConverter {
      */
     public String arrayToString(Object[] array) {
 
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         for(int i = 0; i < array.length; i++) {
             if(i > 0 ) {
                 buffer.append(arraySeparator);
