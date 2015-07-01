@@ -585,7 +585,7 @@ public class NQL {
 
                     T t = MQL.selectByID(selectClass, objectID);
                     if(t == null){
-                        log.error("We have a problem with the sync between the DB & Solr ... Can't find objectID("+ objectID +") class("+ selectClass +")");
+                        log.error("We have a problem with the sync between the DB & Solr ... Can't find objectID("+ objectID +") class("+ selectClass +")", new Exception("Sync problem"));
                     } else {
                         toReturn.add(t);
                     }
