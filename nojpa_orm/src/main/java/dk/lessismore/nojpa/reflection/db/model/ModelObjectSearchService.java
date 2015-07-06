@@ -89,7 +89,15 @@ public class ModelObjectSearchService {
 
     public static <T extends ModelObjectInterface> void put(T object) {
         try{
+
+
+
             ModelObject modelObject = (ModelObject) object;
+
+            if(log.isTraceEnabled()) {
+                log.trace("DEBUG-TRACE Adding (" + modelObject.getInterface().getSimpleName() + ")[" + object + "]", new Exception("DEBUG-TRACE"));
+            }
+
             SolrServer solrServer = servers.get(modelObject.getInterface().getSimpleName());
             if(solrServer == null){
                 log.fatal("Cant find a solrServer for class("+ modelObject.getInterface().getSimpleName() +")");
