@@ -94,7 +94,7 @@ public class ModelObjectSearchService {
 
             ModelObject modelObject = (ModelObject) object;
 
-            if(log.isTraceEnabled()) {
+            if(log.isDebugEnabled()) {
                 log.trace("DEBUG-TRACE Adding (" + modelObject.getInterface().getSimpleName() + ")[" + object + "]", new Exception("DEBUG-TRACE"));
             }
 
