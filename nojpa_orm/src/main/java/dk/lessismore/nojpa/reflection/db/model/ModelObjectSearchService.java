@@ -95,7 +95,7 @@ public class ModelObjectSearchService {
             ModelObject modelObject = (ModelObject) object;
 
 
-            log.debug("DEBUG-TRACE Adding (" + modelObject.getInterface().getSimpleName() + ")[" + object + "]", new Exception("DEBUG-TRACE"));
+//            log.debug("DEBUG-TRACE Adding (" + modelObject.getInterface().getSimpleName() + ")[" + object + "]", new Exception("DEBUG-TRACE"));
 
             SolrServer solrServer = servers.get(modelObject.getInterface().getSimpleName());
             if(solrServer == null){
