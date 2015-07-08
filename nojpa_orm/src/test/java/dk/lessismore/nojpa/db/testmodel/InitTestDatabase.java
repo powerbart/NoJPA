@@ -1,5 +1,7 @@
 package dk.lessismore.nojpa.db.testmodel;
 
+import dk.lessismore.nojpa.db.methodquery.MQL;
+import dk.lessismore.nojpa.db.methodquery.NQL;
 import dk.lessismore.nojpa.reflection.db.DatabaseCreator;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
@@ -28,6 +30,13 @@ public class InitTestDatabase {
         address1.setStreet("Address1");
         address1.setZip(1111);
         save(address1);
+
+        Address mock = MQL.mock(Address.class);
+        List<Address> list = MQL.select(mock).where(mock.getZip(), MQL.Comp.EQUAL, 2223).getList();
+
+        List<Address> list2 = NQL.search(mock).search(mock.getZip(), NQL.Comp.EQUAL, 2223).getList();
+
+
 
         Address address2 = ModelObjectService.create(Address.class);
         address2.setStreet("Address2");
