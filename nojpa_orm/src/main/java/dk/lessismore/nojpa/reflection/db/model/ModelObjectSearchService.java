@@ -95,6 +95,7 @@ public class ModelObjectSearchService {
             ModelObject modelObject = (ModelObject) object;
 
 
+            log.info("Adding (" + modelObject.getInterface().getSimpleName() + ")[" + object + "]");
 //            log.debug("DEBUG-TRACE Adding (" + modelObject.getInterface().getSimpleName() + ")[" + object + "]", new Exception("DEBUG-TRACE"));
 
             SolrServer solrServer = servers.get(modelObject.getInterface().getSimpleName());
@@ -119,6 +120,8 @@ public class ModelObjectSearchService {
 
     public static <T extends ModelObjectInterface> void putWithoutCommit(T object) {
         try{
+            log.info("Adding (without commit) (" + object.getInterface().getSimpleName() + ")[" + object + "]");
+
             ModelObject modelObject = (ModelObject) object;
             SolrServer solrServer = servers.get(modelObject.getInterface().getSimpleName());
             if(solrServer == null){

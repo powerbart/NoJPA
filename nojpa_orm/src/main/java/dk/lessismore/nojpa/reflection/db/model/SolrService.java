@@ -21,6 +21,7 @@ public interface SolrService {
 
     SolrServer getServer();
 
+    String getName();
     public void startup();
 
     void index(SolrInputDocument solrInputDocument);
