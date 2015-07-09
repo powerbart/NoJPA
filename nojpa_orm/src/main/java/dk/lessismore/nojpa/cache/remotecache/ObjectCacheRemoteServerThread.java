@@ -147,6 +147,20 @@ public class ObjectCacheRemoteServerThread extends Thread {
                     break;
                 }
                 String readLine = new String(dataBytes, 0, byteLength);
+
+                //We have read something before....
+                if(preline != null){
+                    readLine = preline + readLine;
+                    preline = null;
+                }
+
+                //We didn't read all of it
+                if(readLine != null && readLine.length() < 20){
+                    preline = readLine;
+                    continue;
+                }
+
+
                 log.debug("reading readLine("+ readLine +")");
                 StringTokenizer toks = new StringTokenizer(readLine, "\n\t\r");
 
@@ -186,6 +200,7 @@ public class ObjectCacheRemoteServerThread extends Thread {
                         GlobalLockService.getInstance().gotMessage(message);
                     } else {
                         log.error("Don't understand line: " + curLine);
+                        run = false;
                         // write("-ERR Not implementet", output);
                         // run = false;
                     }
