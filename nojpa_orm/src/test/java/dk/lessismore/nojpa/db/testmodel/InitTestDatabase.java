@@ -31,10 +31,6 @@ public class InitTestDatabase {
         address1.setZip(1111);
         save(address1);
 
-        Address mock = MQL.mock(Address.class);
-        List<Address> list = MQL.select(mock).where(mock.getZip(), MQL.Comp.EQUAL, 2223).getList();
-
-        List<Address> list2 = NQL.search(mock).search(mock.getZip(), NQL.Comp.EQUAL, 2223).getList();
 
 
 

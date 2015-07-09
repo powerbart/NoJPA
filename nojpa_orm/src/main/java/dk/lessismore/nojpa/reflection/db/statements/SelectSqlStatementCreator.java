@@ -78,10 +78,11 @@ public class SelectSqlStatementCreator  {
         if(dbAttribute != null) {
             if(dbAttribute.isAssociation()) {
                 DbAttributeContainer targetAttributeContainer = DbClassReflector.getDbAttributeContainer(dbAttribute.getAttributeClass());
-                String sourceTableName = dbAttributeContainer.getTableName();
+//                String sourceTableName = dbAttributeContainer.getTableName();
                 String sourcePrimaryKey = dbAttributeContainer.getPrimaryKeyAttribute().getAttributeName();
 
                 String associationTableName = AssociationTable.makeAssociationTableName(dbAttributeContainer, dbAttribute);
+                setSelectSQLStatement(SQLStatementFactory.getSelectSQLStatement());
                 getSelectSQLStatement().addTableName(associationTableName);
                 getSelectSQLStatement().addConstrain(dbAttributeContainer.getAttributeContainer().getClassName() + "_" + sourcePrimaryKey, WhereSQLStatement.EQUAL, objectID);
                 return true;

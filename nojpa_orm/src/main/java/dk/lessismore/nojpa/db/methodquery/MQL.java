@@ -842,7 +842,8 @@ public class MQL {
 
         private int selectCountFromDbForArray(String objectID) {
             getExpressionAddJoinsForCountArray(objectID);
-            return DbObjectSelector.countObjectsFromDb(statement); // The cache arguments is ignored
+
+            return DbObjectSelector.countObjectsFromDb(creator.getSelectSQLStatement()); // The cache arguments is ignored
         }
 
     }
