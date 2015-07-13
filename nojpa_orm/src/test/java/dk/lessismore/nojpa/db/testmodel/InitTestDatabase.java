@@ -1,5 +1,7 @@
 package dk.lessismore.nojpa.db.testmodel;
 
+import dk.lessismore.nojpa.db.methodquery.MQL;
+import dk.lessismore.nojpa.db.methodquery.NQL;
 import dk.lessismore.nojpa.reflection.db.DatabaseCreator;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
@@ -28,6 +30,9 @@ public class InitTestDatabase {
         address1.setStreet("Address1");
         address1.setZip(1111);
         save(address1);
+
+
+
 
         Address address2 = ModelObjectService.create(Address.class);
         address2.setStreet("Address2");

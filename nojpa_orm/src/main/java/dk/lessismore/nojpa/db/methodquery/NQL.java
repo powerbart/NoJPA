@@ -554,7 +554,8 @@ public class NQL {
 //                timer.markLap("1");
                 SolrServer solrServer = ModelObjectSearchService.solrServer(selectClass);
 //                timer.markLap("2");
-                solrQuery.setFields("*, score, _explain_");
+                solrQuery.setFields("*");
+//                solrQuery.setFields("*, score, _explain_");
 //                solrQuery.setParam("bf", "sum(_Post_pageViewCounter__ID_Counter_count__LONG,8)");
                 QueryResponse queryResponse = solrServer.query(solrQuery);
 
@@ -576,16 +577,16 @@ public class NQL {
 
                     String objectID = entries.get("objectID").toString();
                     if(entries.containsKey("score")){
-                        log.debug("objectID("+ objectID +") has score("+ entries.get("score")+")");
+                        log.trace("objectID("+ objectID +") has score("+ entries.get("score")+")");
                     }
                     if(entries.containsKey("_explain_")){
-                        log.debug("_explain_ :: ("+ entries.get("_explain_") +")");
+                        log.trace("_explain_ :: ("+ entries.get("_explain_") +")");
                     }
 
 
                     T t = MQL.selectByID(selectClass, objectID);
                     if(t == null){
-                        log.error("We have a problem with the sync between the DB & Solr ... Can't find objectID("+ objectID +") class("+ selectClass +")", new Exception("Sync problem"));
+                        log.error("We have a problem with the sync between the DB & Solr ... Can't find objectID("+ objectID +") class("+ selectClass +")" , new Exception("Sync problem"));
                     } else {
                         toReturn.add(t);
                     }
@@ -1136,7 +1137,7 @@ public class NQL {
 
             s = toReturn.toString();
             s = (s == null || s.trim().equals("") ? "*" : s);
-            log.debug("END: removeFunnyChars returns input ("+ s +")");
+            log.trace("END: removeFunnyChars returns input ("+ s +")");
             return s;
 
 
@@ -1246,7 +1247,7 @@ public class NQL {
         }
 
         public SolrExpression addConstrain(String attributeName, Comp comparator, int value) {
-            log.debug("addConstrain:int("+ value +")");
+            log.trace("addConstrain:int("+ value +")");
             this.statement = "("+ attributeName +":"+ value +")";
             this.attr = attributeName;
             this.value = "" + value;
@@ -1255,7 +1256,7 @@ public class NQL {
         }
 
         public SolrExpression addConstrain(String attributeName, Comp comparator, double value) {
-            log.debug("addConstrain:double("+ value +")");
+            log.trace("addConstrain:double("+ value +")");
             this.statement = "("+ attributeName +":"+ value +")";
             this.attr = attributeName;
             this.value = "" + value;
@@ -1264,7 +1265,7 @@ public class NQL {
         }
 
         public SolrExpression addConstrain(String attributeName, Comp comparator, float value) {
-            log.debug("addConstrain:float("+ value +")");
+            log.trace("addConstrain:float("+ value +")");
             this.statement = "("+ attributeName +":"+ value +")";
             this.attr = attributeName;
             this.value = "" + value;
@@ -1273,7 +1274,7 @@ public class NQL {
         }
 
         public SolrExpression addConstrain(String attributeName, Comp comparator, long value) {
-            log.debug("addConstrain:long("+ value +")");
+            log.trace("addConstrain:long("+ value +")");
             this.statement = "("+ attributeName +":"+ value +")";
             this.attr = attributeName;
             this.value = "" + value;

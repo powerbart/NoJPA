@@ -12,7 +12,9 @@ import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrInputDocument;
 
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -27,6 +29,8 @@ public class ModelObjectSearchService {
 
     public static int AUTO_COMMIT_MS = 300;
     public static int INPUTS_BETWEEN_COMMITS_VISITOR = 1000;
+
+    public static boolean trace = false;
 
     private static HashMap<String, SolrServer> servers = new HashMap<String, SolrServer>();
 
@@ -94,9 +98,22 @@ public class ModelObjectSearchService {
 
             ModelObject modelObject = (ModelObject) object;
 
-            if(log.isDebugEnabled()) {
-                log.trace("DEBUG-TRACE Adding (" + modelObject.getInterface().getSimpleName() + ")[" + object + "]", new Exception("DEBUG-TRACE"));
+
+            log.info("Adding (" + modelObject.getInterface().getSimpleName() + ")[" + object + "]");
+            try{
+                if(trace){
+                    FileWriter fileWriter = new FileWriter("/tmp/trace-ModelObjectSearchService.log", true);
+                    PrintWriter pw = new PrintWriter(fileWriter);
+                    new Exception("DEBUG-TRACE").printStackTrace(pw);
+                    pw.flush();
+                    pw.close();
+                    fileWriter.close();
+                }
+            } catch (Exception e){
+                log.error("Can't trace the puts...  " + e, e);
             }
+
+//            log.debug("DEBUG-TRACE Adding (" + modelObject.getInterface().getSimpleName() + ")[" + object + "]", new Exception("DEBUG-TRACE"));
 
             SolrServer solrServer = servers.get(modelObject.getInterface().getSimpleName());
             if(solrServer == null){
@@ -120,6 +137,20 @@ public class ModelObjectSearchService {
 
     public static <T extends ModelObjectInterface> void putWithoutCommit(T object) {
         try{
+            log.info("Adding (without commit) (" + object.getInterface().getSimpleName() + ")[" + object + "]");
+            try{
+                if(trace){
+                    FileWriter fileWriter = new FileWriter("/tmp/trace-ModelObjectSearchService.log", true);
+                    PrintWriter pw = new PrintWriter(fileWriter);
+                    new Exception("DEBUG-TRACE").printStackTrace(pw);
+                    pw.flush();
+                    pw.close();
+                    fileWriter.close();
+                }
+            } catch (Exception e){
+                log.error("Can't trace the puts...  " + e, e);
+            }
+
             ModelObject modelObject = (ModelObject) object;
             SolrServer solrServer = servers.get(modelObject.getInterface().getSimpleName());
             if(solrServer == null){

@@ -13,6 +13,7 @@ import org.apache.solr.core.CoreContainer;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -57,6 +58,11 @@ public class SolrServiceImpl implements SolrService {
         }
         return server;
     }
+
+    public String getName() {
+        return coreName;
+    }
+
 
     @Override
     public void startup() {
