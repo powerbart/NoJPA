@@ -303,5 +303,14 @@ public class MQSelectTest {
     }
     
     
+    @Test
+    public void testDoubleReferences() throws Exception {
+        Company m = MQL.mock(Company.class);
+        List<Company> list = MQL.select(m).where(m.getCeo().getIsSick(), EQUAL, true).orderBy(m.getCfo().getSomeFloat(), ASC).getList();
+        Assert.assertEquals("first company is impress", list.get(0).getName(), "Planet Impress");
+        Assert.assertEquals("second company is express", list.get(1).getName(), "Planet Express");
+    }
+
+
 
 }

@@ -54,7 +54,7 @@ public class InitTestDatabase {
         c.setName("C.B.C");
         c.setIsSick(true);
         employees.add(c);
-        c.setAddresses(new Address[] {address2});
+        c.setAddresses(new Address[]{address2});
         save(c);
 
         Person b =ModelObjectService.create(Person.class);
@@ -62,21 +62,32 @@ public class InitTestDatabase {
         b.setChildren(new Person[]{c});
         b.setCar(toyota);
         employees.add(b);
-        b.setAddresses(new Address[] {address1, address3});
+        b.setSomeFloat(20);
+        b.setAddresses(new Address[]{address1, address3});
         save(b);
 
         Person a = ModelObjectService.create(Person.class);
         a.setName("A");
         a.setChildren(new Person[]{b});
         a.setCar(ford);
-        a.setAddresses(new Address[] {address1, address2});
+        a.setSomeFloat(10);
+        a.setAddresses(new Address[]{address1, address2});
         employees.add(a);
         save(a);
 
         Company planetExpress = ModelObjectService.create(Company.class);
         planetExpress.setName("Planet Express");
         planetExpress.setEmployees(employees.toArray(new Person[employees.size()]));
+        planetExpress.setCeo(a);
+        planetExpress.setCfo(b);
         save(planetExpress);
+
+        Company planet2Express = ModelObjectService.create(Company.class);
+        planet2Express.setName("Planet Impress");
+        planet2Express.setEmployees(employees.toArray(new Person[employees.size()]));
+        planet2Express.setCeo(b);
+        planet2Express.setCfo(a);
+        save(planet2Express);
 
     }
 
