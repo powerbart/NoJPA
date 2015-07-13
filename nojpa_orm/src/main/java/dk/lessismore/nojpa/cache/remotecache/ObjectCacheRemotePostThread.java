@@ -78,7 +78,6 @@ public class ObjectCacheRemotePostThread extends Thread {
                     }
                 }
             } catch (Exception e) {
-                errorCounter = (1 + errorCounter) * 2;
                 log.error("Some error in run() when sending data to host(" + host.host + ") port(" + host.port + ") " + e);
                 try {
                     if (outputStream != null) outputStream.close();
@@ -91,8 +90,12 @@ public class ObjectCacheRemotePostThread extends Thread {
                 socket = null;
                 outputStream = null;
                 try {
+                    if(errorCounter > 5){
+                        errorCounter = 5;
+                    }
                     log.warn("Will now sleep in " + errorCounter + " sec. And the retry...");
-                    this.sleep((errorCounter % 120) * 1000); // Will sleep for max 5 mins
+                    this.sleep((errorCounter) * 1000); // Will sleep for max 5 mins
+                    errorCounter++;
                 } catch (InterruptedException e1) {
                     e1.printStackTrace();
                 }
