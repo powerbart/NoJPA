@@ -14,7 +14,7 @@ public class MailTest {
 
     @Test
     public void testMail_prod() throws Exception {
-        Mailer.send(true, "my subject ", "some body ", "QXL.dk <kundeservice@qxl.dk>", new String[]{"atanas.balevsky@gmail.com"}, null);
+        Mailer.send(true, "my subject ", "some body ", "QXL.com <support@qxl.com>", new String[]{"atanas.balevsky@gmail.com"}, null);
 
 
     }
