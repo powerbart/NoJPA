@@ -118,6 +118,8 @@ public class ObjectCacheRemoteServerThread extends Thread {
 
         }
 
+        String preline = null;
+        String readLine = null;
 
         try {
             String clientIP = ("" + client.getInetAddress()).substring(1);
@@ -134,7 +136,6 @@ public class ObjectCacheRemoteServerThread extends Thread {
             int byteLength = 0;
             StringTokenizer tok = null;
             input = client.getInputStream();
-            String preline = null;
             while (run) {
                 try {
                     byteLength = input.read(dataBytes, 0, dataBytes.length);
@@ -146,7 +147,7 @@ public class ObjectCacheRemoteServerThread extends Thread {
                     run = false;
                     break;
                 }
-                String readLine = new String(dataBytes, 0, byteLength);
+                readLine = new String(dataBytes, 0, byteLength);
 
                 //We have read something before....
                 if(preline != null){
@@ -155,7 +156,7 @@ public class ObjectCacheRemoteServerThread extends Thread {
                 }
 
                 //We didn't read all of it
-                if(readLine != null && readLine.length() < 20){
+                if(readLine != null && readLine.length() < 32){
                     preline = readLine;
                     continue;
                 }
@@ -215,7 +216,7 @@ public class ObjectCacheRemoteServerThread extends Thread {
                 client.close();
             }
         } catch (Exception e) {
-            log.error("Some error in run() " + e.toString(), e);
+            log.error("Some error in run() readline("+ readLine +") ... preline("+ preline +")" + e.toString(), e);
         } finally {
             try {
                 if (output != null) output.close();
