@@ -163,47 +163,56 @@ public class ObjectCacheRemoteServerThread extends Thread {
 
 
                 log.debug("reading readLine("+ readLine +")");
-                StringTokenizer toks = new StringTokenizer(readLine, "\n\t\r");
+                StringTokenizer toks = new StringTokenizer(readLine, "\n");
 
                 while (toks.hasMoreTokens()) {
-                    curLine = toks.nextToken().trim();
-                    StringTokenizer curLineToks = new StringTokenizer(curLine, ":");
-                    if (curLine.startsWith("r:")) { //remove
-                        String command = curLineToks.nextToken();
-                        String number = curLineToks.nextToken();
-                        validateRemoveCounter(number);
-                        String clazzName = curLineToks.nextToken();
-                        String objectID = curLineToks.nextToken();
-                        log.debug("Parameters: clazz(" + clazzName + ") objectID(" + objectID + ")");
-                        Class<?> aClass = Class.forName(clazzName);
-                        ObjectCache objectCache = ObjectCacheFactory.getInstance().getObjectCache(aClass);
-                        if (objectCache != null) {
-                            log.debug("Removing from cache: clazz(" + clazzName + ") objectID(" + objectID + ")");
-                            objectCache.removeFromCache(objectID);
+                    curLine = toks.nextToken();
+                    if(curLine.endsWith("\r")) {
+                        curLine = curLine.trim();
+                        StringTokenizer curLineToks = new StringTokenizer(curLine, ":");
+                        if (curLine.startsWith("r:")) { //remove
+                            String command = curLineToks.nextToken();
+                            String number = curLineToks.nextToken();
+                            validateRemoveCounter(number);
+                            String clazzName = curLineToks.nextToken();
+                            String objectID = curLineToks.nextToken();
+                            log.debug("Parameters: clazz(" + clazzName + ") objectID(" + objectID + ")");
+                            Class<?> aClass = Class.forName(clazzName);
+                            ObjectCache objectCache = ObjectCacheFactory.getInstance().getObjectCache(aClass);
+                            if (objectCache != null) {
+                                log.debug("Removing from cache: clazz(" + clazzName + ") objectID(" + objectID + ")");
+                                objectCache.removeFromCache(objectID);
+                            }
+                        } else if (curLine.startsWith("ll:")) {
+                            String command = curLineToks.nextToken();
+                            String number = curLineToks.nextToken();
+                            validateLockCounter(number);
+                            String lockID = curLineToks.nextToken();
+                            log.debug("READING: lockFromRemote(" + lockID + ") ");
+                            GlobalLockService.getInstance().lockFromRemote(lockID);
+                        } else if (curLine.startsWith("ul:")) {
+                            String command = curLineToks.nextToken();
+                            String number = curLineToks.nextToken();
+                            String lockID = curLineToks.nextToken();
+                            validateUnlockCounter(number);
+                            log.debug("READING: unlockFromRemote(" + lockID + ") ");
+                            GlobalLockService.getInstance().unlockFromRemote(lockID);
+                        } else if (curLine.startsWith("ml:")) {
+                            String message = curLine.substring(3);
+                            log.debug("READING: message(" + message + ") ");
+                            GlobalLockService.getInstance().gotMessage(message);
+                        } else {
+                            log.error("Don't understand line: " + curLine);
+                            run = false;
+                            // write("-ERR Not implementet", output);
+                            // run = false;
                         }
-                    } else if (curLine.startsWith("ll:")) {
-                        String command = curLineToks.nextToken();
-                        String number = curLineToks.nextToken();
-                        validateLockCounter(number);
-                        String lockID = curLineToks.nextToken();
-                        log.debug("READING: lockFromRemote(" + lockID + ") ");
-                        GlobalLockService.getInstance().lockFromRemote(lockID);
-                    } else if (curLine.startsWith("ul:")) {
-                        String command = curLineToks.nextToken();
-                        String number = curLineToks.nextToken();
-                        String lockID = curLineToks.nextToken();
-                        validateUnlockCounter(number);
-                        log.debug("READING: unlockFromRemote(" + lockID + ") ");
-                        GlobalLockService.getInstance().unlockFromRemote(lockID);
-                    } else if (curLine.startsWith("ml:")) {
-                        String message = curLine.substring(3);
-                        log.debug("READING: message(" + message + ") ");
-                        GlobalLockService.getInstance().gotMessage(message);
                     } else {
-                        log.error("Don't understand line: " + curLine);
-                        run = false;
-                        // write("-ERR Not implementet", output);
-                        // run = false;
+                        if(preline == null){
+                            preline = curLine;
+                        } else {
+                            preline = preline + curLine;
+                        }
                     }
                 }
             }
