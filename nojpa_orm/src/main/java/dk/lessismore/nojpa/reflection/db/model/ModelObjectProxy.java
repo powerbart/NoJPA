@@ -7,6 +7,7 @@ import dk.lessismore.nojpa.db.methodquery.MQL;
 import dk.lessismore.nojpa.reflection.db.annotations.ModelObjectMethodListener;
 import dk.lessismore.nojpa.reflection.util.ClassAnalyser;
 import dk.lessismore.nojpa.utils.MaxSizeMap;
+import dk.lessismore.nojpa.utils.Pair;
 import org.apache.log4j.Logger;
 import dk.lessismore.nojpa.reflection.db.*;
 import dk.lessismore.nojpa.reflection.db.annotations.DbStrip;
@@ -400,6 +401,11 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
 
     public void removeAllListnersForFieldName(String fieldName) {
         //log.debug("removeAllListnersForFieldName start - " + fieldName);
+        if(fieldName.startsWith("__")){
+            instanceCache.clear();
+            return;
+        }
+
         Class arrayClass = (Class) cachedMultiAssociations.get(fieldName);
         if (arrayClass != null) {
             ModelObjectInterface[] array = getArrayFromCache(fieldName);
@@ -1388,14 +1394,36 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
     public void doneSavingByDbObjectWriter() {
         singleAssociations.clear();
         multiAssociations.clear();
+        instanceCache.clear();
     }
 
 
 
-    Map<String, Object> instanceCache = new HashMap<String, Object>(20);
+
+    Map<String, Pair<Long, Object>> instanceCache = new HashMap<String, Pair<Long, Object>>(20);
     @Override
-    public void putInInstanceCache(String key, Object object) {
-        instanceCache.put(key, object);
+    public void putInInstanceCache(String key, Object object, int secondsToLive) {
+        long newTime = System.currentTimeMillis() + secondsToLive * 1000;
+        instanceCache.put(key, new Pair<Long, Object>(newTime, object));
+
+        if(object instanceof ModelObject){
+            ObjectCacheFactory.getInstance().getObjectCache(object).addListener("" + objectID, this, "__instanceCache");
+        }
+    }
+
+    public Object getFromInstanceCache(String key) {
+        Pair<Long, Object> longObjectPair = instanceCache.get(key);
+        if(longObjectPair == null) {
+            return null;
+        } else {
+            Long first = longObjectPair.getFirst();
+            if(System.currentTimeMillis() < first){
+                return longObjectPair.getSecond();
+            } else {
+                removeFromInstanceCache(key);
+                return null;
+            }
+        }
     }
 
     @Override

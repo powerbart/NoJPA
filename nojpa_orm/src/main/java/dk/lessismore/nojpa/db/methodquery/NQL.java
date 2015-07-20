@@ -545,7 +545,7 @@ public class NQL {
         @SuppressWarnings("unchecked")
         private NList<T> selectObjectsFromDb() {
 //            TimerWithPrinter timer = new TimerWithPrinter("selectObjectsFromDb", "/tmp/luuux-timer-getPosts.log");
-
+//            log.debug("DEBUG-TRACE", new Exception("DEBUG"));
             List<T> toReturn = new ArrayList<T>();
             try {
 

@@ -113,7 +113,8 @@ public interface ModelObject extends Serializable, ModelObjectInterface, Compara
     static enum ArrayIsNullResult { YES_IS_NULL, NO_NOT_NULL, DONT_KNOW };
     ArrayIsNullResult isArrayNull(String fieldName);
 
-    void putInInstanceCache(String key, Object object);
+    void putInInstanceCache(String key, Object object, int secondsToLive);
+    Object getFromInstanceCache(String key);
     void removeFromInstanceCache(String key);
 
     public boolean delete();
