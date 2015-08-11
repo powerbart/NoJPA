@@ -42,6 +42,56 @@ public class NQLTest {
 
 
     @Test
+    public void testBig10() {
+        DatabaseCreator.createDatabase("dk.lessismore.nojpa.db.testmodel");
+        SolrServiceImpl solrService = new SolrServiceImpl();
+        solrService.setCoreName("nojpa");
+        solrService.setCleanOnStartup(true);
+
+        ModelObjectSearchService.addSolrServer(Person.class, solrService.getServer());
+        Person mPerson = NQL.mock(Person.class);
+
+        for (int i = 0; i < 10; i++) {
+            Person person = ModelObjectService.create(Person.class);
+            person.setName("person " + (i % 4));
+            ModelObjectService.save(person);
+            ModelObjectSearchService.put(person);
+
+        }
+
+
+    }
+
+
+    @Test
+    public void testBoolean2() throws InterruptedException {
+        DatabaseCreator.createDatabase("dk.lessismore.nojpa.db.testmodel");
+        SolrServiceImpl solrService = new SolrServiceImpl();
+        solrService.setCoreName("nojpa");
+        solrService.setCleanOnStartup(true);
+
+        ModelObjectSearchService.addSolrServer(Person.class, solrService.getServer());
+        Person person = ModelObjectService.create(Person.class);
+        person.setName("person name");
+        Thread.sleep(30);
+        System.out.println("saving - 1");
+        ModelObjectService.save(person);
+        person.setIsSick(false);
+        Thread.sleep(30);
+        System.out.println("saving - 2");
+        ModelObjectService.save(person);
+        person.setIsSick(true);
+//        person.setName("sdfsdfsdf");
+        Thread.sleep(30);
+        System.out.println("saving - 3");
+        ModelObjectService.save(person);
+        System.out.println("saving - DONE");
+
+    }
+
+
+
+        @Test
     public void test01() {
         DatabaseCreator.createDatabase("dk.lessismore.nojpa.db.testmodel");
         SolrServiceImpl solrService = new SolrServiceImpl();

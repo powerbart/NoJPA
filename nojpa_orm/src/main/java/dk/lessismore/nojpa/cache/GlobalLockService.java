@@ -54,66 +54,80 @@ public class GlobalLockService {
     }
 
     private void lock(String lockID, ModelObjectInterface moi, LockedExecutor executor) throws Exception {
-
-        LockObject lockObject = null;
-        boolean locked = true;
-        lastLockTime = Calendar.getInstance();
-        while (locked) {
-            synchronized (mapOfIDs) {
-                lockObject = mapOfIDs.get(lockID);
-                if (lockObject == null) {
-                    locked = false;
-                    lockObject = new LockObject(lockID);
-                    mapOfIDs.put(lockID, lockObject);
-                } else {
-                    Calendar oneMin = Calendar.getInstance();
-                    oneMin.add(Calendar.MINUTE, -1);
-                    if (lockObject.creationDate.before(oneMin)) {
-                        log.error("LockID(" + lockID + ") has been locked since(" + lockObject.creationDate.getTime() + ") ... Now removing lock!!! ");
+        try{
+            LockObject lockObject = null;
+            boolean locked = true;
+            lastLockTime = Calendar.getInstance();
+            while (locked) {
+                synchronized (mapOfIDs) {
+                    lockObject = mapOfIDs.get(lockID);
+                    if (lockObject == null) {
                         locked = false;
-                        mapOfIDs.remove(lockID);
+                        lockObject = new LockObject(lockID);
+                        mapOfIDs.put(lockID, lockObject);
+                    } else {
+                        Calendar oneMin = Calendar.getInstance();
+                        oneMin.add(Calendar.MINUTE, -1);
+                        if (lockObject.creationDate.before(oneMin)) {
+                            log.error("LockID(" + lockID + ") has been locked since(" + lockObject.creationDate.getTime() + ") ... Now removing lock!!! ");
+                            locked = false;
+                            mapOfIDs.remove(lockID);
+                        }
+                    }
+                }
+                if (locked) {
+                    try {
+                        synchronized (Thread.currentThread()) {
+                            Thread.currentThread().wait(5);
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
                 }
             }
-            if (locked) {
-                try {
-                    synchronized (Thread.currentThread()) {
-                        Thread.currentThread().wait(5);
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        Exception toThrow = null;
-        synchronized (lockObject.lockID) {
-            log.debug("LOCKED (local) lockID(" + lockID + ")");
+            Exception toThrow = null;
+            synchronized (lockObject.lockID) {
+                log.debug("LOCKED (local) lockID(" + lockID + ")");
 
+                try {
+                    ObjectCacheRemote.takeLock(lockObject.lockID);
+                    log.debug("LOCKED (remote) lockID(" + lockID + ")");
+                    if (moi != null) {
+                        ModelObjectInterface modelObjectInterface = MQL.selectByID(((ModelObject) moi).getInterface(), moi.getObjectID());
+                        executor.execute(modelObjectInterface);
+                    } else {
+                        executor.execute(null);
+                    }
+
+                } catch (Exception e) {
+                    toThrow = e;
+                } finally {
+                    log.debug("LOCKED (-----release----) lockID(" + lockID + ")");
+                    ObjectCacheRemote.releaseLock(lockObject.lockID);
+                }
+            }
+            synchronized (mapOfIDs) {
+                mapOfIDs.remove(lockObject.lockID);
+            }
+            synchronized (Thread.currentThread()) {
+                Thread.currentThread().notifyAll();
+            }
+            if (toThrow != null) {
+                throw toThrow;
+            }
+        } catch (Exception e){
+            log.error("FATAL: Some error in lock " + e, e);
             try {
-                ObjectCacheRemote.takeLock(lockObject.lockID);
-                log.debug("LOCKED (remote) lockID(" + lockID + ")");
                 if (moi != null) {
                     ModelObjectInterface modelObjectInterface = MQL.selectByID(((ModelObject) moi).getInterface(), moi.getObjectID());
                     executor.execute(modelObjectInterface);
                 } else {
                     executor.execute(null);
                 }
-
-            } catch (Exception e) {
-                toThrow = e;
-            } finally {
-                log.debug("LOCKED (-----release----) lockID(" + lockID + ")");
-                ObjectCacheRemote.releaseLock(lockObject.lockID);
+            } catch (Exception e2){
+                log.error("FATAL: some error 2 in lock " + e, e);
             }
-        }
-        synchronized (mapOfIDs) {
-            mapOfIDs.remove(lockObject.lockID);
-        }
-        synchronized (Thread.currentThread()) {
-            Thread.currentThread().notifyAll();
-        }
-        if (toThrow != null) {
-            throw toThrow;
+            throw e;
         }
     }
 

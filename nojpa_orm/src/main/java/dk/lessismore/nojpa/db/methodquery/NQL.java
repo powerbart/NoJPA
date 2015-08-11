@@ -554,7 +554,7 @@ public class NQL {
 //                timer.markLap("1");
                 SolrServer solrServer = ModelObjectSearchService.solrServer(selectClass);
 //                timer.markLap("2");
-                solrQuery.setFields("*");
+                solrQuery.setFields("objectID");
 //                solrQuery.setFields("*, score, _explain_");
 //                solrQuery.setParam("bf", "sum(_Post_pageViewCounter__ID_Counter_count__LONG,8)");
                 QueryResponse queryResponse = solrServer.query(solrQuery);

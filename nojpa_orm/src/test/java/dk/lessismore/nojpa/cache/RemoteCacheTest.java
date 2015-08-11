@@ -202,7 +202,6 @@ public class RemoteCacheTest {
             @Override
             public void execute(Person ms) throws Exception {
                 log.debug("::::::::::::: EXECUTE - START ("+ ms +")");
-//                Thread.sleep(sleep);
                 ModelObjectService.save(ms);
                 log.debug("::::::::::::: EXECUTE - END");
             }
