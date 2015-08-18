@@ -46,7 +46,7 @@ public class ModelObjectService {
 
     public static <T extends ModelObjectInterface> void save(T object) {
         ModelObjectLifeCycleListener annotation = ((ModelObject) object).getInterface().getAnnotation(ModelObjectLifeCycleListener.class);
-        if(annotation != null && annotation.lifeCycleListener() != null){
+        if(annotation != null && annotation.lifeCycleListener() != null && (object.isNew() || object.isDirty())){
             try {
                 ModelObjectLifeCycleListener.LifeCycleListener lifeCycleListener = annotation.lifeCycleListener().newInstance();
                 lifeCycleListener.preUpdate(object);
@@ -56,7 +56,7 @@ public class ModelObjectService {
 
         }
         ((ModelObject) object).save();
-        if(annotation != null && annotation.lifeCycleListener() != null){
+        if(annotation != null && annotation.lifeCycleListener() != null && (object.isNew() || object.isDirty())){
             try {
                 ModelObjectLifeCycleListener.LifeCycleListener lifeCycleListener = annotation.lifeCycleListener().newInstance();
                 lifeCycleListener.postUpdate(object);

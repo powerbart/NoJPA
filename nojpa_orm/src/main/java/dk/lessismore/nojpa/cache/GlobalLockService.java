@@ -54,6 +54,11 @@ public class GlobalLockService {
     }
 
     private void lock(String lockID, ModelObjectInterface moi, LockedExecutor executor) throws Exception {
+        if(moi != null && moi.isDirty()){
+            log.error("FATAL: We are locking a DIRTY object...!!! This means that the changes maybe get lost!!! " , new Exception("Lock on dirty object"));
+        }
+
+
         try{
             LockObject lockObject = null;
             boolean locked = true;

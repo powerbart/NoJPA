@@ -73,6 +73,11 @@ public class NQLTest {
         ModelObjectSearchService.addSolrServer(Person.class, solrService.getServer());
         Person person = ModelObjectService.create(Person.class);
         person.setName("person name");
+
+        Car c1 = ModelObjectService.create(Car.class);
+        Car c2 = ModelObjectService.create(Car.class);
+        person.setCar(c1);
+
         Thread.sleep(30);
         System.out.println("saving - 1");
         ModelObjectService.save(person);
@@ -84,6 +89,10 @@ public class NQLTest {
 //        person.setName("sdfsdfsdf");
         Thread.sleep(30);
         System.out.println("saving - 3");
+        ModelObjectService.save(person);
+        System.out.println("saving - DONE - boolean");
+        System.out.println("saving - START - association");
+        person.setCar(c2);
         ModelObjectService.save(person);
         System.out.println("saving - DONE");
 

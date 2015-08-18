@@ -3,6 +3,7 @@ package dk.lessismore.nojpa.db.testmodel;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 
 import javax.persistence.Column;
+import java.util.Calendar;
 
 public interface Car extends ModelObjectInterface {
 
@@ -13,6 +14,9 @@ public interface Car extends ModelObjectInterface {
 
     double getVolume();
     void setVolume(double volume);
+
+    Calendar getLastModified();
+    void setLastModified(Calendar lastModified);
 
     FuelType getFuelType();
     void setFuelType(FuelType fuelType);

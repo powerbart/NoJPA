@@ -109,8 +109,6 @@ public class SQLStatementExecutor {
             if (sqlFileWriter != null) {
                 sqlFileWriter.write(sqlStatement + ";\n");
                 sqlFileWriter.flush();
-            } else {
-                log.warn("cannot add to sql file, writer is null");
             }
         } catch (Exception e) {
             log.error("Failed sql write", e);

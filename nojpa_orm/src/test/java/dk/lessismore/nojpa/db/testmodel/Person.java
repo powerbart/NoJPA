@@ -32,6 +32,10 @@ public interface Person extends ModelObjectInterface {
 
 
 
+    Calendar getLastModified();
+    void setLastModified(Calendar lastModified);
+
+
     @SearchField(dynamicSolrPostName = "_da_TXT", translate = true, searchReverse = true, reverseBoostFactor = 0.3f, boostFactor = 4.3f)
     String getFun();
     void setFun(String fun, Locale locale);

@@ -75,6 +75,65 @@ public class DbObjectWriter {
         return writeObjectToDb(modelObject, map, associationConstrain, "", DEFAULT_DEEP);
     }
 
+
+     protected static Calendar preLastModifiedFromDB(Class<? extends ModelObjectInterface> interfaceClass, ModelObject modelObject){
+        DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(interfaceClass);
+        SelectSQLStatement selectSQLStatement = SQLStatementFactory.getSelectSQLStatement();
+        selectSQLStatement.addTableName(dbAttributeContainer.getTableName());
+        selectSQLStatement.addConstrain(dbAttributeContainer.getPrimaryKeyAttribute().getAttributeName(), WhereSQLStatement.EQUAL, modelObject.getObjectID());
+        //Loop through the attributes.
+        selectSQLStatement.addAttributeName("lastModified");
+        LimResultSet limSet = null;
+        try {
+            limSet = SQLStatementExecutor.doQuery(selectSQLStatement);
+            ResultSet resultSet = limSet.getResultSet();
+
+            if (resultSet != null && resultSet.next()) {
+                try {
+                    String strValue = resultSet.getString("lastModified");
+                    if (strValue != null) {
+                        if (!strValue.equals("0000-00-00")) {
+                            if (resultSet.getTime("lastModified") != null) {
+                                if (resultSet.getDate("lastModified") != null) {
+                                    Calendar time = Calendar.getInstance();
+                                    Calendar date = Calendar.getInstance();
+
+                                    time.setTime(resultSet.getTime("lastModified"));
+                                    date.setTime(resultSet.getDate("lastModified"));
+                                    date.set(Calendar.HOUR_OF_DAY, time.get(Calendar.HOUR_OF_DAY));
+                                    date.set(Calendar.MINUTE, time.get(Calendar.MINUTE));
+                                    date.set(Calendar.SECOND, time.get(Calendar.SECOND));
+                                    //log.debug("*** Time " + name + ":" + date.getTime());
+                                    return date;
+                                }
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    if((e.toString().indexOf("0000-00-00") == -1)){
+                        log.error("some error in preLastModifiedFromDB " + e, e);
+                    }
+                }
+
+            }
+        } catch (Exception e){
+            log.error("some other error in preLastModifiedFromDB " + e, e);
+        } finally {
+            try {
+                if(limSet != null){
+                    limSet.close();
+                    limSet = null;
+                }
+            } catch (Exception exp) {
+                log.error("error.close() = " + exp);
+                exp.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+
+
     /**
      * Main save method. For internal and recursive use only.
      * The method will determine if the object allready has been saved. If this
@@ -103,6 +162,27 @@ public class DbObjectWriter {
 
         DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(modelObject.getInterface());
         if (dbAttributeContainer != null) {
+
+
+            if(!modelObject.isNew() && modelObject.isDirty()){
+                DbAttribute dbAttributeLastModified = dbAttributeContainer.getDbAttributes().get("lastModified");
+                if(dbAttributeLastModified == null){
+                    //System.out.println("XXXX: Do nothing... ");
+                } else {
+                    Calendar myCurrentLastModified = (Calendar) dbAttributeLastModified.getAttribute().getAttributeValue(modelObject);
+                    Calendar myPreLastModified = preLastModifiedFromDB(modelObject.getInterface(), modelObject);
+                    if(myPreLastModified != null && myCurrentLastModified != null){
+                        log.debug("XXX: Checking oldData vs new data... myCurrentLastModified[" + myCurrentLastModified.getTime() + "] vs myPreLastModified[" + myPreLastModified.getTime() + "] for modelObject.getInterface("+ modelObject.getInterface() +") ID("+ modelObject +")");
+                        if(myCurrentLastModified.getTimeInMillis() < myPreLastModified.getTimeInMillis()){
+                            String message = "Saving oldData ontop of new data... myCurrentLastModified[" + myCurrentLastModified.getTime() + "] vs myPreLastModified[" + myPreLastModified.getTime() + "] for modelObject.getInterface("+ modelObject.getInterface() +") ID("+ modelObject +")";
+                            log.error(message);
+                            throw new RuntimeException(message);
+                        }
+                    }
+                }
+            }
+
+
 
             boolean successfull = true;
 
