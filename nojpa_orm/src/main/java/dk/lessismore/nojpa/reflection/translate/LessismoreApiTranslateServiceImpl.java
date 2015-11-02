@@ -1,5 +1,7 @@
 package dk.lessismore.nojpa.reflection.translate;
 
+import dk.lessismore.nojpa.resources.PropertyResources;
+import dk.lessismore.nojpa.resources.Resources;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -25,13 +27,21 @@ public class LessismoreApiTranslateServiceImpl  implements TranslateService {
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(LessismoreTranslateServiceImpl.class);
 
 
+
     private String googleAPIkey = null;
     private String lessismoreAPIkey = null;
+    private String gglTransUrl = null;
 
 
     public LessismoreApiTranslateServiceImpl(String lessismoreAPIkey, String googleAPIkey){
         this.lessismoreAPIkey = lessismoreAPIkey;
         this.googleAPIkey = googleAPIkey;
+    }
+
+    public LessismoreApiTranslateServiceImpl(String lessismoreAPIkey, String googleAPIkey, String gglTransUrl){
+        this.lessismoreAPIkey = lessismoreAPIkey;
+        this.googleAPIkey = googleAPIkey;
+        this.gglTransUrl = gglTransUrl;
     }
 
 
@@ -59,7 +69,12 @@ public class LessismoreApiTranslateServiceImpl  implements TranslateService {
         qparams.add(new BasicNameValuePair("target", destLang2Char));
         qparams.add(new BasicNameValuePair("q", originalText));
 
-        HttpPost httpPost = new HttpPost("http://vsrvj71.less-is-more.dk/translate");
+        HttpPost httpPost = null;
+        if(gglTransUrl == null) {
+            httpPost = new HttpPost("http://vsrvj71.less-is-more.dk/translate");
+        } else {
+            httpPost = new HttpPost(gglTransUrl);
+        }
         httpPost.setHeader(new BasicHeader("X-HTTP-Method-Override", "GET"));
 
         httpPost.setEntity(new UrlEncodedFormEntity(qparams, "UTF-8"));
