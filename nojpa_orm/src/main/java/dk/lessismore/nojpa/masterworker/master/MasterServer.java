@@ -113,10 +113,10 @@ public class MasterServer {
         notifyObservers();
     }
 
-    synchronized public void setResult(JobResultMessage result) {
+    synchronized public void setResult(JobResultMessage result, ServerLink serverLink) {
         storeResult(result);
         jobPool.setResult(result);
-        notifyObservers();
+        workerPool.setIdle(true, serverLink);
     }
 
 

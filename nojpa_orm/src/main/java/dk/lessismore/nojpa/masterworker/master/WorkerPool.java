@@ -67,6 +67,15 @@ public class WorkerPool {
         return entry.idle;
     }
 
+    public void setIdle(boolean idle, ServerLink worker) {
+        WorkerEntry entry = pool.get(worker);
+        if (entry == null) {
+            log.error("Worker does not exists - setIdle");
+            return;
+        }
+        entry.idle = idle;
+    }
+
     public void updateWorkerHealth(double systemLoad, double vmMemoryUsage, Map<String, Double> diskUsages, ServerLink serverLink) {
         WorkerEntry workerEntry = pool.get(serverLink);
         workerEntry.systemLoad = systemLoad;
