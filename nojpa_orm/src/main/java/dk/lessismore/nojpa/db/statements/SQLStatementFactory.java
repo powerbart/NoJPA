@@ -53,8 +53,8 @@ public class SQLStatementFactory {
     public static InsertSQLStatement getInsertSQLStatement() {
         if(databaseInstance == DatabaseInstance.H2) {
             return new dk.lessismore.nojpa.db.statements.h2.H2InsertStatement();
-        } else if(databaseInstance == DatabaseInstance.ORACLE) {
-            return new dk.lessismore.nojpa.db.statements.oracle.OracleInsertStatement();
+//        } else if(databaseInstance == DatabaseInstance.ORACLE) {
+//            return new dk.lessismore.nojpa.db.statements.oracle.OracleInsertStatement();
         } else {
             return new MySqlInsertStatement();
         }
@@ -64,8 +64,8 @@ public class SQLStatementFactory {
     public static UpdateSQLStatement getUpdateSQLStatement() {
         if(databaseInstance == DatabaseInstance.H2) {
             return new dk.lessismore.nojpa.db.statements.h2.H2UpdateStatement();
-        } else if(databaseInstance == DatabaseInstance.ORACLE) {
-            return new dk.lessismore.nojpa.db.statements.oracle.OracleUpdateStatement();
+//        } else if(databaseInstance == DatabaseInstance.ORACLE) {
+//            return new dk.lessismore.nojpa.db.statements.oracle.OracleUpdateStatement();
         } else {
             return new MySqlUpdateStatement();
         }
@@ -74,8 +74,8 @@ public class SQLStatementFactory {
     public static DeleteSQLStatement getDeleteSQLStatement() {
         if(databaseInstance == DatabaseInstance.H2) {
             return new dk.lessismore.nojpa.db.statements.h2.H2DeleteStatement();
-        } else if(databaseInstance == DatabaseInstance.ORACLE) {
-            return new dk.lessismore.nojpa.db.statements.oracle.OracleDeleteStatement();
+//        } else if(databaseInstance == DatabaseInstance.ORACLE) {
+//            return new dk.lessismore.nojpa.db.statements.oracle.OracleDeleteStatement();
         } else {
             return new MySqlDeleteStatement();
         }
@@ -84,8 +84,8 @@ public class SQLStatementFactory {
     public static SelectSQLStatement getSelectSQLStatement() {
         if(databaseInstance == DatabaseInstance.H2) {
             return new dk.lessismore.nojpa.db.statements.h2.H2SelectStatement();
-        } else if(databaseInstance == DatabaseInstance.ORACLE) {
-            return new dk.lessismore.nojpa.db.statements.oracle.OracleSelectStatement();
+//        } else if(databaseInstance == DatabaseInstance.ORACLE) {
+//            return new dk.lessismore.nojpa.db.statements.oracle.OracleSelectStatement();
         } else {
             return new MySqlSelectStatement();
         }
@@ -95,8 +95,8 @@ public class SQLStatementFactory {
         log.debug("getCreateSQLStatement() :: log = " + databaseInstance);
         if(databaseInstance == DatabaseInstance.H2) {
             return new dk.lessismore.nojpa.db.statements.h2.H2CreateStatement();
-        } else if(databaseInstance == DatabaseInstance.ORACLE) {
-            return new dk.lessismore.nojpa.db.statements.oracle.OracleCreateStatement();
+//        } else if(databaseInstance == DatabaseInstance.ORACLE) {
+//            return new dk.lessismore.nojpa.db.statements.oracle.OracleCreateStatement();
         } else {
             return new MySqlCreateStatement();
         }
@@ -106,8 +106,8 @@ public class SQLStatementFactory {
         log.debug("getDropSQLStatement() :: log = " + databaseInstance);
         if(databaseInstance == DatabaseInstance.H2) {
             return new dk.lessismore.nojpa.db.statements.h2.H2DropStatement();
-        } else if(databaseInstance == DatabaseInstance.ORACLE) {
-            return new dk.lessismore.nojpa.db.statements.oracle.OracleDropStatement();
+//        } else if(databaseInstance == DatabaseInstance.ORACLE) {
+//            return new dk.lessismore.nojpa.db.statements.oracle.OracleDropStatement();
         } else {
             return new MySqlDropStatement();
         }
@@ -116,8 +116,8 @@ public class SQLStatementFactory {
     public static LeafExpression getLeafExpression() {
         if(databaseInstance == DatabaseInstance.H2) {
             return new dk.lessismore.nojpa.db.statements.h2.H2LeafExpression();
-        } else if(databaseInstance == DatabaseInstance.ORACLE) {
-            return new dk.lessismore.nojpa.db.statements.oracle.OracleLeafExpression();
+//        } else if(databaseInstance == DatabaseInstance.ORACLE) {
+//            return new dk.lessismore.nojpa.db.statements.oracle.OracleLeafExpression();
         } else {
             return new MySqlLeafExpression();
         }
@@ -126,8 +126,8 @@ public class SQLStatementFactory {
     public static ContainerExpression getContainerExpression() {
         if(databaseInstance == DatabaseInstance.H2) {
             return new dk.lessismore.nojpa.db.statements.h2.H2ContainerExpression();
-        } else if(databaseInstance == DatabaseInstance.ORACLE) {
-            return new dk.lessismore.nojpa.db.statements.oracle.OracleContainerExpression();
+//        } else if(databaseInstance == DatabaseInstance.ORACLE) {
+//            return new dk.lessismore.nojpa.db.statements.oracle.OracleContainerExpression();
         } else {
             return new MySqlContainerExpression();
         }

@@ -45,7 +45,7 @@ public class XmlSerializer implements Serializer {
     public <T> T unserialize(String serializedString) {
         if(serializedString == null){ return null; }
 //        log.debug("START: Will now unserialize:\n------------------------");
-        log.trace(serializedString != null && serializedString.length() > 300 ? serializedString.substring(0, 300) + "...zz...": serializedString);
+        log.trace(serializedString != null && serializedString.indexOf('\n') != -1 ? serializedString.substring(0, serializedString.indexOf('\n')) + "...zz...": serializedString);
 //        log.debug("END: ------------------------");
         return (T) xstream.fromXML(serializedString);
 //        try {

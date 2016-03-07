@@ -36,6 +36,7 @@ public abstract class AbstractObserver {
         } catch (IOException e) {
             log.debug("Connection error: "+ e.getMessage());
             setConnectionError(e);
+            throw new RuntimeException(e);
         }
     }
 

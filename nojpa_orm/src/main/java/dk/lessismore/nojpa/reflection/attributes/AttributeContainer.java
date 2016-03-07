@@ -84,7 +84,7 @@ public class AttributeContainer {
         Method[] methods = getTargetClass().getMethods();
         //Handle get Methods.
         for(int i = 0; i < methods.length; i++) {
-            log.debug(getTargetClass().getName() + ": Current Method: " + methods[i].getName());
+//            log.debug(getTargetClass().getName() + ": Current Method: " + methods[i].getName());
             Method method = methods[i];
             if(ClassAnalyser.isValidGetMethod(method)) {
                 String attributeName = ClassAnalyser.getAttributeNameFromMethod(method);

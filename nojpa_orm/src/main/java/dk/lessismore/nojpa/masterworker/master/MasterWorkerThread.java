@@ -44,7 +44,7 @@ public class MasterWorkerThread extends Thread {
                     masterServer.setRunMethodRemoteResultMessage(runMethodRemoteResultMessage);
                 } else if(clientRequest instanceof JobResultMessage) {
                     JobResultMessage jobResultMessage = (JobResultMessage) clientRequest;
-                    masterServer.setResult(jobResultMessage);
+                    masterServer.setResult(jobResultMessage, serverLink);
                 } else {
                     log.warn("Don't know message from worker = " + clientRequest);
                 }

@@ -9,4 +9,5 @@ public class ThreadPoolJob {
 
 
     public String fullPathToStoreFile = null;
+    public String id = null;
 }

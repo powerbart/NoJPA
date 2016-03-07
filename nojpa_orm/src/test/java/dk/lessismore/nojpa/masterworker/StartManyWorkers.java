@@ -10,7 +10,7 @@ import java.util.*;
 
 public class StartManyWorkers {
 
-    private static int workerAmount = 1;
+    private static int workerAmount = 10;
     List<? extends Class<? extends Executor>> executorClasses = Arrays.asList(SumExecutor.class, ToUpperExecutor.class, ToLowerExecutor.class);
 
     public static void main(String[] args) {

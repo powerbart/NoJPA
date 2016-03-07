@@ -1,15 +1,19 @@
 package dk.lessismore.nojpa.pool.threadpool;
 
 
+import dk.lessismore.nojpa.utils.SuperIO;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.File;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 /**
  * Created by IntelliJ IDEA.
- * User: bart
+ * User: bart..
  * Date: 26-09-2007
  * Time: 00:23:03
  */
@@ -115,10 +119,17 @@ public class MEMThreadPool<E extends ThreadPoolJob> {
         }
     }
 
+    static int ids = 0;
     protected class MyWorker extends Thread {
 
         boolean shouldRun = true;
         boolean doingWork = false;
+
+        final int id;
+
+        public MyWorker(){
+            id = ids;
+        }
 
 
         public void run() {
@@ -131,7 +142,7 @@ public class MEMThreadPool<E extends ThreadPoolJob> {
                 E job = getNextJob();
                 if(job == null){
                     try {
-                        setName("MEMThreadPool-Worker");
+                        setName("MEMThreadPool-Worker-"+ id);
                         synchronized(this){
                             wait(100);
                         }
@@ -139,8 +150,10 @@ public class MEMThreadPool<E extends ThreadPoolJob> {
 
                     }
                 } else {
+                    setName("W_"+ id + "_" + Calendar.getInstance().get(Calendar.HOUR) + "_"  + (new File(job.fullPathToStoreFile)).getName());
+                    File statusFile = new File(job.fullPathToStoreFile);
                     try {
-                        setName("MEMThreadPool-Worker-" + (new File(job.fullPathToStoreFile)).getName());
+                        SuperIO.writeTextToFile(statusFile, "" + new Date());
                         doingWork = true;
                         if(maxRunningTimeInMillis > 0){
                             WatchWorker watchWorker = new WatchWorker(this);
@@ -165,6 +178,7 @@ public class MEMThreadPool<E extends ThreadPoolJob> {
                     } catch (Exception e) {
                         log.error("Some error :: " +e, e);
                     } finally {
+                        statusFile.delete();
                         doingWork = false;
                     }
                 }

@@ -51,7 +51,7 @@ public class WorkerPool {
         }
 
         if (stepEntry == null) {
-            log.warn("No applicable or compatible worker in pool for executor: "+executorClass);
+            log.warn("No applicable or compatible worker in pool(size:"+ pool.size() +") for executor: "+executorClass);
         } else {
             stepEntry.idle = false;
         }
@@ -65,6 +65,15 @@ public class WorkerPool {
             return false;
         }
         return entry.idle;
+    }
+
+    public void setIdle(boolean idle, ServerLink worker) {
+        WorkerEntry entry = pool.get(worker);
+        if (entry == null) {
+            log.error("Worker does not exists - setIdle");
+            return;
+        }
+        entry.idle = idle;
     }
 
     public void updateWorkerHealth(double systemLoad, double vmMemoryUsage, Map<String, Double> diskUsages, ServerLink serverLink) {

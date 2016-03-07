@@ -8,7 +8,13 @@ public class SumExecutor extends Executor<Long, String> {
             Long sum = Long.parseLong(sumString);
             sum += i;
             sumString = sum.toString();
-            setProgress(((double)i)/n);
+            setProgress(((double) i) / n);
+            System.out.println("*** RUN("+ n +") " + getProgress());
+            try {
+                Thread.sleep(5);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
         //throw new NullPointerException("Just Kidding");
         return sumString;

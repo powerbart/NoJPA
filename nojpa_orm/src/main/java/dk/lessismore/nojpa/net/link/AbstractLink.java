@@ -204,9 +204,19 @@ public abstract class AbstractLink {
     public void close() {
         try {
             stopPinger();
-            if (in != null) in.close();
-            if (out != null) out.close();
-            if (socket != null) socket.close();
+            if (in != null){
+                in.close();
+            }
+            if (out != null){
+                out.close();
+            }
+            if (socket != null){
+                try {
+                    socket.shutdownInput();
+                    socket.shutdownOutput();
+                } catch (Exception ee){}
+                socket.close();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
