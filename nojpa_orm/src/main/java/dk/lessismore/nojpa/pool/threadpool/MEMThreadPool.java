@@ -13,7 +13,7 @@ import java.util.LinkedList;
 
 /**
  * Created by IntelliJ IDEA.
- * User: bart
+ * User: bart..
  * Date: 26-09-2007
  * Time: 00:23:03
  */
