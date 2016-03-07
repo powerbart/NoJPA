@@ -125,7 +125,7 @@ public class JobPool {
         JobEntry jobEntry = pool.get(jobID);
         if (jobEntry != null) {
             jobEntry.result = result;
-            removeWorker(jobEntry);
+//            removeWorker(jobEntry);
             fireOnResult(jobEntry, result);
         } else {
             log.error("Trying to set result for job not in pool");
@@ -141,7 +141,7 @@ public class JobPool {
     }
 
     public void jobTaken(JobEntry jobEntry, ServerLink worker) {
-        System.out.println(" * JOB TAKEN: "+jobEntry);
+        log.debug(" * JOB TAKEN: "+jobEntry);
         setWorker(jobEntry, worker);
         queue.remove(jobEntry);
         fireOnStatus(jobEntry);

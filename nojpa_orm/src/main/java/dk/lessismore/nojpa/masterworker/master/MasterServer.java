@@ -65,11 +65,13 @@ public class MasterServer {
     }
 
     synchronized void stopListen(ServerLink client) {
+        log.trace("stopListen: " + client);
         jobPool.removeListener(client);
         notifyObservers();
     }
 
     synchronized public void queueJob(JobMessage jobMessage) {
+        log.trace("queueJob: " + jobMessage);
         jobPool.addJob(jobMessage);
         runJobIfNecessaryAndPossible();
         notifyObservers();
@@ -78,18 +80,21 @@ public class MasterServer {
 
     // Worker services
     synchronized public void registerWorker(String[] knownClasses, ServerLink serverLink) {
+        log.trace("registerWorker: " + serverLink);
         workerPool.addWorker(knownClasses, serverLink);
         runJobIfNecessaryAndPossible();
         notifyObservers();
     }
 
     synchronized public void unregisterWorker(ServerLink serverLink) {
+        log.trace("unregisterWorker: " + serverLink);
         jobPool.requeueJobIfRunning(serverLink);
         workerPool.removeWorker(serverLink);
         notifyObservers();
     }
 
     synchronized public void updateWorkerHealth(HealthMessage healthMessage, ServerLink serverLink) {
+        log.trace("updateWorkerHealth: " + serverLink);
         boolean applicableBefore = workerPool.applicable(serverLink);
         workerPool.updateWorkerHealth(healthMessage.getSystemLoad(), healthMessage.getVmMemoryUsage(),
                 healthMessage.getDiskUsages(), serverLink);
@@ -101,6 +106,7 @@ public class MasterServer {
     }
 
     synchronized public void updateJobProgress(JobProgressMessage jobProgressMessage) {
+        log.trace("updateJobProgress: " + jobProgressMessage);
         jobPool.updateJobProgress(jobProgressMessage.getJobID(), jobProgressMessage.getProgress());
         notifyObservers();
     }
@@ -109,19 +115,23 @@ public class MasterServer {
 
     synchronized public void setRunMethodRemoteResultMessage(RunMethodRemoteResultMessage runMethodRemoteResultMessage) {
         //storeResult(result); TODO
+        log.trace("setRunMethodRemoteResultMessage: " + runMethodRemoteResultMessage);
         jobPool.setRunMethodRemoteResultMessage(runMethodRemoteResultMessage);
         notifyObservers();
     }
 
     synchronized public void setResult(JobResultMessage result, ServerLink serverLink) {
+        log.trace("setResult: " + serverLink);
         storeResult(result);
         jobPool.setResult(result);
         workerPool.setIdle(true, serverLink);
+        runJobIfNecessaryAndPossible();
     }
 
 
     // Observer services
     public void registerObserver(ServerLink serverLink) {
+        log.trace("registerObserver: " + serverLink);
         addObserver(serverLink);
         //notifyObservers();
     }
@@ -130,16 +140,19 @@ public class MasterServer {
 
     // Local stuff
     private void addObserver(ServerLink serverLink) {
+        log.trace("addObserver: " + serverLink);
         observers.add(serverLink);
     }
 
     private void removeObserver(ServerLink serverLink) {
+        log.trace("removeObserver: " + serverLink);
         observers.remove(serverLink);
     }
 
 
     long lastUpdate = System.currentTimeMillis();
     void notifyObservers() {
+        log.trace("notifyObservers: ");
         long now = System.currentTimeMillis();
         if(now - lastUpdate < 1000 * 1){
             return;
@@ -168,6 +181,7 @@ public class MasterServer {
     }
 
     public void acceptClientConnection(ServerSocket serverSocket) {
+        log.trace("acceptClientConnection: " + serverSocket);
         ServerLink serverLink = acceptConnection(serverSocket);
         if (serverLink != null) {
             new MasterClientThread(this, serverLink).start();
@@ -176,6 +190,7 @@ public class MasterServer {
     }
 
     public void acceptWorkerConnection(ServerSocket serverSocket) {
+        log.trace("acceptWorkerConnection: " + serverSocket);
         ServerLink serverLink = acceptConnection(serverSocket);
         if (serverLink != null) {
             new MasterWorkerThread(this, serverLink).start();
@@ -184,6 +199,7 @@ public class MasterServer {
     }
 
     public void acceptObserverConnection(ServerSocket serverSocket) {
+        log.trace("acceptObserverConnection: " + serverSocket);
         ServerLink serverLink = acceptConnection(serverSocket);
         if (serverLink != null) {
             new MasterObserverThread(this, serverLink).start();
@@ -191,6 +207,7 @@ public class MasterServer {
     }
 
     private ServerLink acceptConnection(ServerSocket serverSocket) {
+        log.trace("acceptConnection: " + serverSocket);
         try {
             Socket socket;
             socket = serverSocket.accept();
@@ -205,6 +222,7 @@ public class MasterServer {
     }
 
     private File getStoredResultFile(String jobID) {
+        log.trace("getStoredResultFile: " + jobID);
         String resultDirName = properties.getStoreResultDir();
         File resultDir = new File(resultDirName);
         if (! resultDir.isDirectory()) {
@@ -219,6 +237,7 @@ public class MasterServer {
     }
 
     private void storeResult(JobResultMessage result) {
+        log.trace("storeResult: " + result);
         File resultFile = getStoredResultFile(result.getJobID());
         if (resultFile == null) return;
         try {
@@ -230,6 +249,7 @@ public class MasterServer {
     }
 
     private JobResultMessage restoreResult(String jobID) {
+        log.trace("restoreResult: " + jobID);
         File resultFile = getStoredResultFile(jobID);
         if (resultFile == null) return null;
         try {
@@ -241,6 +261,7 @@ public class MasterServer {
     }
 
     synchronized private void runJobIfNecessaryAndPossible() {
+        log.trace("runJobIfNecessaryAndPossible");
         System.out.println(jobPool.toString() + workerPool.toString());
         final JobPool.JobEntry jobEntry = jobPool.firstJob();
         if (jobEntry == null) {
@@ -268,6 +289,7 @@ public class MasterServer {
     }
 
     public void restartAllWorkers() {
+        log.trace("restartAllWorkers");
         Map.Entry<ServerLink, WorkerPool.WorkerEntry>[] entries = workerPool.pool.entrySet().toArray(new Map.Entry[workerPool.pool.size()]);
         for(int i = 0; i < entries.length; i++){
             log.debug("restartAllWorkers("+ i +"/"+ entries.length +")");

@@ -51,7 +51,7 @@ public class WorkerPool {
         }
 
         if (stepEntry == null) {
-            log.warn("No applicable or compatible worker in pool for executor: "+executorClass);
+            log.warn("No applicable or compatible worker in pool(size:"+ pool.size() +") for executor: "+executorClass);
         } else {
             stepEntry.idle = false;
         }
