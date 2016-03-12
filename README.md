@@ -24,3 +24,4 @@ History of activity
 https://github.com/NoJPA-LESS-IS-MORE/NoJPA/graphs/contributors
 
 
+Have fun :-) 
