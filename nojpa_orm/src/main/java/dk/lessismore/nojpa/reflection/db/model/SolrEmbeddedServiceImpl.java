@@ -7,33 +7,36 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.core.CoreContainer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.annotation.PreDestroy;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
 /**
- * Created by seb on 7/23/14.
+ * Created by niakoi on 16/3/16.
  */
-public class SolrServiceImpl implements SolrService {
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(SolrServiceImpl.class);
-
-    private static CoreContainer coreContainer;
+public class SolrEmbeddedServiceImpl implements SolrService {
 
     private static TranslateService translateService = null;
     private static Locale[] locales = null;
 
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
-    private SolrClient server;
+    private static CoreContainer coreContainer;
+
+    protected SolrClient client;
     private String coreName = "";
     private boolean cleanOnStartup;
 
-    public SolrServiceImpl() {
-        log.debug("[ : constructor]:HIT:");
+    public SolrEmbeddedServiceImpl() {
     }
-    public void setCoreName(String coreName) {
+
+    public SolrEmbeddedServiceImpl(String coreName) {
+        log.warn("[ : constructor]:HIT:" + coreName);
         this.coreName = coreName;
     }
 
@@ -41,25 +44,25 @@ public class SolrServiceImpl implements SolrService {
         this.cleanOnStartup = cleanOnStartup;
     }
 
-    @Override
-    public void addTranslateService(TranslateService translateService, Locale... locales) {
-        SolrServiceImpl.translateService = translateService;
-        SolrServiceImpl.locales = locales;
-    }
-
     public SolrClient getServer() {
-        synchronized (this){
-            if(server == null){
+        synchronized (this) {
+            if (client == null) {
                 startup();
             }
         }
-        return server;
+        return client;
     }
 
+    @Override
     public String getName() {
         return coreName;
     }
 
+    @Override
+    public void addTranslateService(TranslateService translateService, Locale... locales) {
+        SolrEmbeddedServiceImpl.translateService = translateService;
+        SolrEmbeddedServiceImpl.locales = locales;
+    }
 
     protected void startup() {
         log.debug("[void : (" + coreName + ")startup]:HIT: " + this);
@@ -68,12 +71,12 @@ public class SolrServiceImpl implements SolrService {
                 File f = getSolrXml();
                 log.debug("[ : config ]:: " + f);
                 coreContainer = new CoreContainer(f.getParentFile().getAbsolutePath());  //
+                log.debug("[ : config ]:: loading container on " + coreContainer.getCoreRootDirectory());
                 coreContainer.load();
-//                coreContainer.load(f.getParentFile().getAbsolutePath(), f);
             }
-            if (server == null) {
+            if (client == null) {
                 log.debug("[ : cores]:getting " + coreName + " core: " + coreContainer.getCoreNames());
-                server = new EmbeddedSolrServer(coreContainer, coreName);
+                client = new EmbeddedSolrServer(coreContainer, coreName);
             }
 
             if (cleanOnStartup) {
@@ -85,13 +88,13 @@ public class SolrServiceImpl implements SolrService {
         }
     }
 
-    public void index(SolrInputDocument solrInputDocument){
+    public void index(SolrInputDocument solrInputDocument) {
         if (solrInputDocument == null) {
             log.error("index()::solrInputDocument is null");
             return;
         }
         try {
-            server.add(solrInputDocument);
+            client.add(solrInputDocument);
         } catch (SolrServerException e) {
             log.error("[void : (" + coreName + ")index]: SolrServerException: " + e.getMessage(), e);
         } catch (IOException e) {
@@ -103,8 +106,8 @@ public class SolrServiceImpl implements SolrService {
     @Override
     public QueryResponse query(SolrQuery query) {
         try {
-            if(server != null){
-                return server.query(query);
+            if (client != null) {
+                return client.query(query);
             } else {
                 log.error("query() ... server is null ... This is okay doing startup ...");
                 return null;
@@ -119,7 +122,7 @@ public class SolrServiceImpl implements SolrService {
     public void commit() {
         try {
             log.debug("[void : (" + coreName + ")commit]:COMMIT");
-            server.commit();
+            client.commit();
         } catch (SolrServerException e) {
             log.error("[void : (" + coreName + ")commit]: SolrServerException: " + e.getMessage(), e);
         } catch (IOException e) {
@@ -130,7 +133,7 @@ public class SolrServiceImpl implements SolrService {
     @Override
     public void optimize() {
         try {
-            server.optimize(false, false, 4);
+            client.optimize(false, false, 4);
         } catch (SolrServerException e) {
             log.error("[void : (" + coreName + ")optimize]: SolrServerException: " + e.getMessage(), e);
         } catch (IOException e) {
@@ -141,7 +144,7 @@ public class SolrServiceImpl implements SolrService {
     @Override
     public void delete(String id) {
         try {
-            server.deleteById(id);
+            client.deleteById(id);
         } catch (SolrServerException e) {
             log.error("[ void: (" + coreName + ")deleteByID(" + id + ") ]: SolrServerException deleteByID index: " + e.getMessage(), e);
         } catch (IOException e) {
@@ -152,10 +155,8 @@ public class SolrServiceImpl implements SolrService {
     @Override
     public void deleteAll() {
         try {
-            server.deleteByQuery("*:*");
-        } catch (SolrServerException e) {
-            log.error("[ void: (" + coreName + ")deleteAll index: " + e.getMessage(), e);
-        } catch (IOException e) {
+            client.deleteByQuery("*:*");
+        } catch (Exception e) {
             log.error("[ void: (" + coreName + ")deleteAll index: " + e.getMessage(), e);
         }
     }
@@ -164,7 +165,7 @@ public class SolrServiceImpl implements SolrService {
     public void empty() {
         try {
             log.debug("[void : (" + coreName + ")empty]:EMPTY : ");
-            server.deleteByQuery("*:*");
+            client.deleteByQuery("*:*");
             commit();
         } catch (SolrServerException e) {
             log.error("[ void: (" + coreName + ")empty ]: SolrServerException empty index: " + e.getMessage(), e);
@@ -176,7 +177,7 @@ public class SolrServiceImpl implements SolrService {
     @Override
     public NamedList<Object> request(SolrRequest req) {
         try {
-            return server.request(req);
+            return client.request(req);
         } catch (SolrServerException e) {
             log.error("[] void: (" + coreName + ")request ]: SolrServerException request: " + e.getMessage(), e);
         } catch (IOException e) {
@@ -185,8 +186,9 @@ public class SolrServiceImpl implements SolrService {
         return null;
     }
 
-    @Override
-    public void destroy() {
+    @PreDestroy
+    public void destroy() throws IOException {
+        log.debug("closing down solr [{}]", getName());
         coreContainer.shutdown();
     }
 
@@ -210,4 +212,5 @@ public class SolrServiceImpl implements SolrService {
         }
         return null;
     }
+
 }
