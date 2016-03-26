@@ -137,14 +137,14 @@ public class MEMThreadPool<E extends ThreadPoolJob> {
             while(running && shouldRun){
                 try{
                     if(++debugCounter % 5000 == 0){
-                        log.debug("Checking for new job debugCounter("+ debugCounter +")");
+//                        log.debug("Checking for new job debugCounter("+ debugCounter +")");
                     }
                 E job = getNextJob();
                 if(job == null){
                     try {
                         setName("MEMThreadPool-Worker-"+ id);
                         synchronized(this){
-                            wait(100);
+                            wait(200);
                         }
                     } catch (InterruptedException e) {
 
