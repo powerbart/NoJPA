@@ -5,7 +5,10 @@ import dk.lessismore.nojpa.db.methodquery.MQL;
 import dk.lessismore.nojpa.db.methodquery.NList;
 import dk.lessismore.nojpa.db.methodquery.NQL;
 import dk.lessismore.nojpa.db.methodquery.NStats;
-import dk.lessismore.nojpa.db.testmodel.*;
+import dk.lessismore.nojpa.db.testmodel.Address;
+import dk.lessismore.nojpa.db.testmodel.Car;
+import dk.lessismore.nojpa.db.testmodel.Person;
+import dk.lessismore.nojpa.db.testmodel.PersonStatus;
 import dk.lessismore.nojpa.reflection.db.DatabaseCreator;
 import dk.lessismore.nojpa.reflection.db.DbObjectVisitor;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
@@ -15,20 +18,19 @@ import dk.lessismore.nojpa.reflection.db.model.SolrServiceImpl;
 import dk.lessismore.nojpa.reflection.translate.LessismoreTranslateServiceImpl;
 import dk.lessismore.nojpa.utils.Pair;
 import junit.framework.Assert;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.FacetField;
-import org.apache.solr.client.solrj.response.PivotField;
 import org.apache.solr.client.solrj.response.QueryResponse;
-import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.params.FacetParams;
-import org.apache.solr.common.util.NamedList;
-import org.apache.solr.common.util.SimpleOrderedMap;
 import org.junit.Test;
 
-import java.util.*;
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by seb on 7/23/14.
@@ -1032,7 +1034,7 @@ public class NQLTest {
 
 
     @Test
-    public void testAnnotation() throws SolrServerException {
+    public void testAnnotation() throws SolrServerException, IOException {
         String[] descs = new String[]{"Næste generationer danske Person Formel 1-håb er allerede i støbeskeen", "12-årige PersNoah Watt allerede", "gokart-juniormesterskaber personi 2015, EM, VM", "person allerede", "Det koster en hulens masse penge at køre det store program"};
         DatabaseCreator.createDatabase("dk.lessismore.nojpa.db.testmodel");
         SolrServiceImpl solrService = new SolrServiceImpl();
@@ -1102,7 +1104,7 @@ public class NQLTest {
         }
         System.out.println(" ============================= ");
         {
-            SolrServer solrServer = ModelObjectSearchService.solrServer(Person.class);
+            SolrClient solrServer = ModelObjectSearchService.solrServer(Person.class);
             SolrQuery solrQuery = new SolrQuery("(_Person_countOfCars__INT:[0 TO *]) ( (_Person_fun___da_TXT:( generationer AND allerede AND tiger )) )");
             solrQuery.setFields("*, score, _explain_");
             QueryResponse queryResponse = solrServer.query(solrQuery);

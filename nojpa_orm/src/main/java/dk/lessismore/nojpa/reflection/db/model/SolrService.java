@@ -1,13 +1,14 @@
 package dk.lessismore.nojpa.reflection.db.model;
 
 import dk.lessismore.nojpa.reflection.translate.TranslateService;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
-import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.util.NamedList;
 
+import java.io.IOException;
 import java.util.Locale;
 
 /**
@@ -19,10 +20,9 @@ public interface SolrService {
     void addTranslateService(TranslateService translateService, Locale... locales);
 
 
-    SolrServer getServer();
+    SolrClient getServer();
 
     String getName();
-    public void startup();
 
     void index(SolrInputDocument solrInputDocument);
     QueryResponse query(SolrQuery query);
@@ -33,6 +33,8 @@ public interface SolrService {
     void optimize();
     void delete(String id);
     void empty();
-    void destroy();
+    void destroy() throws IOException;
     void deleteAll();
+    void setCleanOnStartup(boolean cleanOnStartup);
+
 }

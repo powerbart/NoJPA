@@ -8,7 +8,8 @@ import dk.lessismore.nojpa.reflection.db.DbObjectVisitor;
 import dk.lessismore.nojpa.reflection.db.annotations.SearchField;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttribute;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttributeContainer;
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrInputDocument;
 
@@ -32,17 +33,16 @@ public class ModelObjectSearchService {
 
     public static boolean trace = false;
 
-    private static HashMap<String, SolrServer> servers = new HashMap<String, SolrServer>();
+    private static HashMap<String, SolrClient> servers = new HashMap<String, SolrClient>();
 
     //TODO: Should be StreamingUpdateSolrServer
 //    @Deprecated
-    public static void addSolrServer(Class className, SolrServer solrServer){
+    public static void addSolrServer(Class className, SolrClient solrServer){
         log.info("Adding solrServer("+ solrServer +") for class("+ className.getSimpleName() +")");
         servers.put(className.getSimpleName(), solrServer);
     }
 
     public static void addSolrServer(Class className, SolrService solrServer){
-        solrServer.startup();
         log.info("Adding solrServer("+ solrServer +") for class("+ className.getSimpleName() +")");
         servers.put(className.getSimpleName(), solrServer.getServer());
     }
@@ -55,7 +55,7 @@ public class ModelObjectSearchService {
 
     public static void deleteAll(Class aClass) {
         try {
-            SolrServer solrServer = servers.get(aClass.getSimpleName());
+            SolrClient solrServer = servers.get(aClass.getSimpleName());
             solrServer.deleteByQuery("*:*");
         } catch (SolrServerException e) {
             log.error("Some ERROR-1 when deleting all: " + e, e);
@@ -68,7 +68,7 @@ public class ModelObjectSearchService {
 
     public static <T extends ModelObjectInterface> void delete(T object) {
         ModelObject modelObject = (ModelObject) object;
-        SolrServer solrServer = servers.get(modelObject.getInterface().getSimpleName());
+        SolrClient solrServer = servers.get(modelObject.getInterface().getSimpleName());
         try {
             solrServer.deleteById(object.getObjectID(), AUTO_COMMIT_MS);
         } catch (SolrServerException e) {
@@ -79,14 +79,14 @@ public class ModelObjectSearchService {
     }
 
 
-    public static <T extends ModelObjectInterface> SolrServer solrServer(T object) {
+    public static <T extends ModelObjectInterface> SolrClient solrServer(T object) {
         ModelObject modelObject = (ModelObject) object;
-        SolrServer solrServer = servers.get(modelObject.getInterface().getSimpleName());
+        SolrClient solrServer = servers.get(modelObject.getInterface().getSimpleName());
         return solrServer;
     }
 
-    public static <T extends ModelObjectInterface> SolrServer solrServer(Class<T> aClass) {
-        SolrServer solrServer = servers.get(aClass.getSimpleName());
+    public static <T extends ModelObjectInterface> SolrClient solrServer(Class<T> aClass) {
+        SolrClient solrServer = servers.get(aClass.getSimpleName());
         return solrServer;
     }
 
@@ -115,7 +115,7 @@ public class ModelObjectSearchService {
 
 //            log.debug("DEBUG-TRACE Adding (" + modelObject.getInterface().getSimpleName() + ")[" + object + "]", new Exception("DEBUG-TRACE"));
 
-            SolrServer solrServer = servers.get(modelObject.getInterface().getSimpleName());
+            SolrClient solrServer = servers.get(modelObject.getInterface().getSimpleName());
             if(solrServer == null){
                 log.fatal("Cant find a solrServer for class("+ modelObject.getInterface().getSimpleName() +")");
             }
@@ -152,7 +152,7 @@ public class ModelObjectSearchService {
             }
 
             ModelObject modelObject = (ModelObject) object;
-            SolrServer solrServer = servers.get(modelObject.getInterface().getSimpleName());
+            SolrClient solrServer = servers.get(modelObject.getInterface().getSimpleName());
             if(solrServer == null){
                 log.fatal("Cant find a solrServer for class("+ modelObject.getInterface().getSimpleName() +")");
             }
@@ -172,7 +172,7 @@ public class ModelObjectSearchService {
         }
     }
 
-    public static <T extends ModelObjectInterface> void put(T object, String prefix, HashMap<String, String> storedObjects, SolrServer solrServer, SolrInputDocument solrObj) {
+    public static <T extends ModelObjectInterface> void put(T object, String prefix, HashMap<String, String> storedObjects, SolrClient solrServer, SolrInputDocument solrObj) {
         addAttributesToSolrDocument(object, prefix, storedObjects, solrServer, solrObj);
         try {
             solrServer.add(solrObj, AUTO_COMMIT_MS);
@@ -183,7 +183,7 @@ public class ModelObjectSearchService {
         }
     }
 
-    private static <T extends ModelObjectInterface> void addAttributesToSolrDocument(T object, String prefix, HashMap<String, String> storedObjects, SolrServer solrServer, SolrInputDocument solrObj) {
+    private static <T extends ModelObjectInterface> void addAttributesToSolrDocument(T object, String prefix, HashMap<String, String> storedObjects, SolrClient solrServer, SolrInputDocument solrObj) {
         ModelObject modelObject = (ModelObject) object;
         DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(modelObject.getInterface());
         String objectIDInSolr = (prefix.length() == 0 ? "" : prefix + "_") + "objectID" + (prefix.length() == 0 ? "" : "__ID");
@@ -339,7 +339,7 @@ public class ModelObjectSearchService {
 
     public static <T extends ModelObjectInterface> void commit(T object) {
         ModelObject modelObject = (ModelObject) object;
-        SolrServer solrServer = servers.get(modelObject.getInterface().getSimpleName());
+        SolrClient solrServer = servers.get(modelObject.getInterface().getSimpleName());
         try {
             solrServer.commit();
         } catch (SolrServerException e) {
@@ -350,7 +350,7 @@ public class ModelObjectSearchService {
     }
 
     public static <T extends ModelObjectInterface> void commit(Class<T> modelObjectClass) {
-        SolrServer solrServer = servers.get(modelObjectClass.getSimpleName());
+        SolrClient solrServer = servers.get(modelObjectClass.getSimpleName());
         try {
             solrServer.commit();
         } catch (SolrServerException e) {
