@@ -14,8 +14,11 @@
     <artifactId>nojpa_solr</artifactId>
 
 
-    <dependencies>
+    <properties>
+        <solr.version>5.5.0</solr.version>
+    </properties>
 
+    <dependencies>
 
         <dependency>
             <groupId>nojpa</groupId>
@@ -34,14 +37,12 @@
             <groupId>org.apache.solr</groupId>
             <artifactId>solr-solrj</artifactId>
             <version>${solr.version}</version>
-            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.solr</groupId>
             <artifactId>solr-core</artifactId>
             <version>${solr.version}</version>
-            <scope>provided</scope>
         </dependency>
 
     </dependencies>
