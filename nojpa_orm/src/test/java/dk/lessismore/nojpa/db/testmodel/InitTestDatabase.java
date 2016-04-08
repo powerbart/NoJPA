@@ -1,7 +1,6 @@
 package dk.lessismore.nojpa.db.testmodel;
 
 import dk.lessismore.nojpa.db.methodquery.MQL;
-import dk.lessismore.nojpa.db.methodquery.NQL;
 import dk.lessismore.nojpa.reflection.db.DatabaseCreator;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;

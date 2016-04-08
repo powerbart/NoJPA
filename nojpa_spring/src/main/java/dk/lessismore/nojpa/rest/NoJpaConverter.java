@@ -1,8 +1,8 @@
 package dk.lessismore.nojpa.rest;
 
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,7 +16,7 @@ import java.util.Set;
  */
 public class NoJpaConverter implements GenericConverter {
 
-    protected Log log = LogFactory.getLog(getClass());
+    protected Logger log = LoggerFactory.getLogger(getClass());
 
     private NoJpaFormatter formatter;
 

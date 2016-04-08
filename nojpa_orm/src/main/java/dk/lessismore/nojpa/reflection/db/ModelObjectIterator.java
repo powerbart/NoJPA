@@ -1,6 +1,5 @@
 package dk.lessismore.nojpa.reflection.db;
 
-import dk.lessismore.nojpa.reflection.db.model.ModelObject;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import org.apache.log4j.Logger;
 import dk.lessismore.nojpa.utils.MaxSizeMap;

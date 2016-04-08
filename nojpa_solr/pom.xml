@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>nojpa</artifactId>
+        <groupId>nojpa</groupId>
+        <version>0.2-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <name>NoJPA common project</name>
+
+    <packaging>jar</packaging>
+    <artifactId>nojpa_solr</artifactId>
+
+
+    <dependencies>
+
+
+        <dependency>
+            <groupId>nojpa</groupId>
+            <artifactId>nojpa_orm</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>nojpa</groupId>
+            <artifactId>nojpa_translate</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- solrj dependencies -->
+        <dependency>
+            <groupId>org.apache.solr</groupId>
+            <artifactId>solr-solrj</artifactId>
+            <version>${solr.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.solr</groupId>
+            <artifactId>solr-core</artifactId>
+            <version>${solr.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+    </dependencies>
+
+</project>

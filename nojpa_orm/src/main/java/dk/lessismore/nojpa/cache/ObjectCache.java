@@ -1,7 +1,6 @@
 package dk.lessismore.nojpa.cache;
 
 import dk.lessismore.nojpa.reflection.db.model.ModelObject;
-import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectProxy;
 import dk.lessismore.nojpa.reflection.util.ClassAnalyser;
 import dk.lessismore.nojpa.resources.PropertyResources;

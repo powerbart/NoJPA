@@ -11,7 +11,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import dk.lessismore.nojpa.reflection.util.*;
 import dk.lessismore.nojpa.reflection.db.model.ModelObject;
-import dk.lessismore.nojpa.utils.Strings;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * This class can access an attribute in a class with get and set methods.
@@ -92,8 +92,8 @@ public class MethodAttribute extends Attribute {
         String error = String.format("%s %s(%s) cannot be invoked on %s",
                 method.getReturnType().getSimpleName(),
                 method.getName(),
-                Strings.separateBy(parameterTypes, ", "),
-                arguments == null ? "null" : Strings.separateBy(arguments, ", "));
+                StringUtils.join(parameterTypes, ", "),
+                arguments == null ? "null" : StringUtils.join(arguments, ", "));
         log.error(error, e);
     }
 

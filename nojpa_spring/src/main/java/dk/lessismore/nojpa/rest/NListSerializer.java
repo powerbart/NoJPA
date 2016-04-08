@@ -6,13 +6,9 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import dk.lessismore.nojpa.db.methodquery.NList;
-import org.apache.commons.lang.ArrayUtils;
-import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Created by seb on 19/1/15.

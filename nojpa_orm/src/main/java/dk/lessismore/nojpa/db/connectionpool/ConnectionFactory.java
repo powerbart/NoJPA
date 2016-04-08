@@ -6,7 +6,6 @@ import java.sql.*;
 import java.util.Enumeration;
 
 import dk.lessismore.nojpa.resources.*;
-import dk.lessismore.nojpa.utils.Strings;
 import org.apache.log4j.Logger;
 
 /**
@@ -85,12 +84,12 @@ public class ConnectionFactory implements ResourceFactory {
         if(poolName == null) {
             if(resources.gotResource("databaseName")) {
                 dbName = resources.getString("databaseName");
-                dbName = Strings.replace("$NOW", "" + System.currentTimeMillis(), dbName);
+                dbName = dbName.replace("$NOW", "" + System.currentTimeMillis());
             }
         } else {
             if(resources.gotResource(poolName +".databaseName")) {
                 dbName = resources.getString(poolName + ".databaseName");
-                dbName = Strings.replace("$NOW", "" + System.currentTimeMillis(), dbName);
+                dbName = dbName.replace("$NOW", "" + System.currentTimeMillis());
             }
         }
         return dbName;

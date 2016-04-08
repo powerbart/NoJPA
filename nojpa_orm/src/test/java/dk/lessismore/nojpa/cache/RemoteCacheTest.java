@@ -3,7 +3,6 @@ package dk.lessismore.nojpa.cache;
 import dk.lessismore.nojpa.db.methodquery.MQL;
 import dk.lessismore.nojpa.db.testmodel.InitTestDatabase;
 import dk.lessismore.nojpa.db.testmodel.Person;
-import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
 import dk.lessismore.nojpa.utils.MaxSizeArray;
 import org.junit.Assert;

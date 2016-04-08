@@ -3,12 +3,6 @@ package dk.lessismore.nojpa.reflection.db.model;
 import dk.lessismore.nojpa.cache.ObjectArrayCache;
 import dk.lessismore.nojpa.cache.ObjectCache;
 import dk.lessismore.nojpa.cache.ObjectCacheFactory;
-import dk.lessismore.nojpa.db.LimResultSet;
-import dk.lessismore.nojpa.db.SQLStatementExecutor;
-import dk.lessismore.nojpa.db.methodquery.MQL;
-import dk.lessismore.nojpa.db.statements.SQLStatementFactory;
-import dk.lessismore.nojpa.db.statements.SelectSQLStatement;
-import dk.lessismore.nojpa.db.statements.WhereSQLStatement;
 import dk.lessismore.nojpa.reflection.db.annotations.ModelObjectMethodListener;
 import dk.lessismore.nojpa.reflection.util.ClassAnalyser;
 import dk.lessismore.nojpa.utils.MaxSizeMap;
@@ -26,7 +20,6 @@ import javax.persistence.Id;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationHandler;
-import java.sql.ResultSet;
 import java.util.*;
 
 /**

@@ -14,7 +14,9 @@ import dk.lessismore.nojpa.reflection.db.model.ModelObject;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.db.statements.SelectSqlStatementCreator;
 import dk.lessismore.nojpa.utils.Pair;
-import dk.lessismore.nojpa.utils.Strings;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
@@ -28,8 +30,7 @@ import java.util.*;
  */
 public class MQL {
 
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(MQL.class);
-
+    private static final Logger log = LoggerFactory.getLogger(MQL.class);
 
     public static <T extends ModelObjectInterface,S extends ModelObjectInterface> boolean isNull(T realModelObject, T sourceMock, S[] arrayMock) {
         List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
@@ -85,7 +86,7 @@ public class MQL {
                 if(t != null){
                     toReturn.add(t);
                 } else {
-                    log.fatal("You are calling selectByIDs("+ aClass.getSimpleName() +") with objectIDs["+ i +"] .. which does not exists!!!! ", new Exception() );
+                    log.error("FATAL: You are calling selectByIDs("+ aClass.getSimpleName() +") with objectIDs["+ i +"] .. which does not exists!!!! ", new Exception() );
                 }
             }
             return toReturn.toArray((T[]) Array.newInstance(aClass, toReturn.size()));
@@ -103,7 +104,7 @@ public class MQL {
                 if(t != null){
                     toReturn.add(t);
                 } else {
-                    log.fatal("You are calling selectByIDs("+ aClass.getSimpleName() +") with objectIDs["+ i +"] .. which does not exists!!!! ", new Exception() );
+                    log.error("FATAL: You are calling selectByIDs("+ aClass.getSimpleName() +") with objectIDs["+ i +"] .. which does not exists!!!! ", new Exception() );
                 }
             }
             return toReturn;
@@ -876,7 +877,7 @@ public class MQL {
                         "Called: " + methodName);
             }
             if( args != null && args.length > 0) {
-                String argString = Strings.separateBy(args, ", ");
+                String argString = StringUtils.join(args, ", ");
                 throw new IllegalArgumentException(String.format("Only no-arg-get-methods may be called " +
                         "on this db instance. Called: %s(%s)", methodName, argString));
             }
