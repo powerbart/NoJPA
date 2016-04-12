@@ -224,7 +224,9 @@ public class DbObjectWriter {
 
                     //Remove cache entry from other hosts
                     //TODO: PropertyTest if this works :-)
-                    ObjectCacheRemote.removeFromRemoteCache(modelObject);
+
+                    // TODO remove comment, after making ObjectCacheRemote not implementing servlet related things
+//                    ObjectCacheRemote.removeFromRemoteCache(modelObject);
                 }
 
                 insertSQLStatement.addTableName(dbAttributeContainer.getTableName());
