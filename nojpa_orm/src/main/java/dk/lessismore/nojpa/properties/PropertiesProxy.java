@@ -277,7 +277,7 @@ public class PropertiesProxy implements InvocationHandler {
 
     private synchronized void addListener(PropertiesListener listener) {
         listeners.add(listener);
-        startThread();
+        //Don't want to reload the properties all the time.... startThread();
     }
 
     private synchronized void removeListener(PropertiesListener listener) {
