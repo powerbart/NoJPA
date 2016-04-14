@@ -193,9 +193,6 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
             }
 
             DbStrip dbStrip = method.getAnnotation(DbStrip.class);
-            if (value != null) {
-                value = ((String) value).replaceAll("[^\\u0000-\\u02B8\\u0390-\\u057F]", "");     //asd
-            }
             if(dbStrip != null && object != null){
                 if(!dbStrip.stripItHard() && !dbStrip.stripItSoft()) {
                     setAssociationWithOutAnyFilters((String) value, name);
