@@ -56,7 +56,9 @@ public abstract class AbstractLink {
     public synchronized void write(Object o) throws IOException {
         String serializedObject = serializer.serialize(o);
         totalWriteBytes += serializedObject.length();
-        log.debug("Writing: " + o + " totalReadBytes("+ totalReadBytes +") totalWriteBytes("+ totalWriteBytes +")");
+        if(!o.getClass().equals(Ping.class)){
+            log.debug("Writing: " + o + " totalReadBytes("+ totalReadBytes +") totalWriteBytes("+ totalWriteBytes +")");
+        }
         out.write((serializedObject + SEPARATOR).getBytes());
         out.flush();
     }
