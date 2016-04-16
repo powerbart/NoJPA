@@ -56,9 +56,9 @@ public abstract class AbstractLink {
     public synchronized void write(Object o) throws IOException {
         String serializedObject = serializer.serialize(o);
         totalWriteBytes += serializedObject.length();
-        if(!o.getClass().equals(Ping.class)){
-            log.debug("Writing: " + o + " totalReadBytes("+ totalReadBytes +") totalWriteBytes("+ totalWriteBytes +")");
-        }
+//        if(!o.getClass().equals(Ping.class)){
+//            log.debug("Writing: " + o + " totalReadBytes("+ totalReadBytes +") totalWriteBytes("+ totalWriteBytes +")");
+//        }
         out.write((serializedObject + SEPARATOR).getBytes());
         out.flush();
     }
@@ -139,7 +139,7 @@ public abstract class AbstractLink {
             if (! receivedObjects.isEmpty()) {
                 Object recivedObject = receivedObjects.getFirst();
                 receivedObjects.removeFirst();
-                log.debug("Reading: " + recivedObject);
+//                log.debug("Reading: " + recivedObject);
                 return recivedObject;
             } else {
                 byte[] buffer = new byte[4 * 1024];
