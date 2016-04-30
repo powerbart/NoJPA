@@ -16,7 +16,9 @@ public class SumExecutor extends Executor<Long, String> {
                 e.printStackTrace();
             }
         }
-        //throw new NullPointerException("Just Kidding");
+        if(n % 2 == 0){
+            throw new NullPointerException("Just Kidding");
+        }
         return sumString;
     }
 }

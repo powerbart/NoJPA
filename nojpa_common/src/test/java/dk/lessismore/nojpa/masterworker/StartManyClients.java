@@ -50,12 +50,22 @@ public class StartManyClients {
 
     private void startSumClient(int n) {
         Thread.currentThread().setName("T-" + n);
-        JobHandle<String> jobHandle = MasterService.runJob(SumExecutor.class, 100l);
+        String name = Thread.currentThread().getName();
+        try {
+            System.out.println(name +":1");
+            JobHandle<String> jobHandle = MasterService.runJob(SumExecutor.class, 100l);
+            System.out.println(name +":2");
 //        jobHandle.addJobListener(new VerboseListener(n));
-        System.out.format("%d: RESULT: %s\n", n, jobHandle.getResult());
-        System.out.println("Start closing " + n);
-        jobHandle.close();
-        System.out.println("End closing " + n);
+            System.out.format("%d: RESULT: %s\n", n, jobHandle.getResult());
+            System.out.println(name +":3");
+            System.out.println("Start closing " + n);
+            jobHandle.close();
+            System.out.println(name +":4");
+            System.out.println("End closing " + n);
+        } catch (Exception e){
+            System.out.println(name + ": We got an Exception *****************************");
+            e.printStackTrace();
+        }
     }
 
     private void startToUpperClient(int n) {

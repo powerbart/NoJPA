@@ -261,6 +261,30 @@ public class DNSServerLookup {
 
     }
 
+    public static void listDNS(String hostName) throws Exception {
+        Hashtable env = new Hashtable();
+        env.put("java.naming.factory.initial", "com.sun.jndi.dns.DnsContextFactory");
+        DirContext ictx = new InitialDirContext(env);
+
+        Attributes attrs = ictx.getAttributes(hostName, new String[]{"NS"});
+//        Attributes attrs = ictx.getAttributes(hostName);
+
+        NamingEnumeration<? extends Attribute> namingEnumeration = attrs.getAll();
+
+        for(int i = 0; namingEnumeration.hasMore() ; i++){
+            Attribute attribute = namingEnumeration.next();
+            NamingEnumeration en = attribute.getAll();
+
+            ArrayList records = new ArrayList();
+            while (en.hasMore()) {
+                System.out.println(hostName + "->" + en.next());
+            }
+
+
+        }
+
+    }
+
 
     private static final MaxSizeMaxTimeMap ipCache = new MaxSizeMaxTimeMap(500, 60 * 60);
     public static List<String> lookupIp(String hostName) throws Exception {
@@ -307,21 +331,22 @@ public class DNSServerLookup {
     }
 
     public static void main(String[] args) throws Exception {
-        System.out.println("----------------------------------------");
-        debugLookupIp("geo.less-is-more.dk");
-        System.out.println("----------------------------------------");
-        debugLookupIp("webpartner.dk");
-        System.out.println("----------------------------------------");
-        debugLookupIp("less-is-more.dk");
-        System.out.println("----------------------------------------");
-        debugLookupIp("webpartner.dk");
-        System.out.println("----------------------------------------");
-        debugLookupIp("smtp.webpartner.dk");
-        System.out.println("----------------------------------------");
-        debugLookupIp("yahoo.com");
-        System.out.println("----------------------------------------");
+//        System.out.println("----------------------------------------");
+//        debugLookupIp("geo.less-is-more.dk");
+//        System.out.println("----------------------------------------");
+//        debugLookupIp("webpartner.dk");
+//        System.out.println("----------------------------------------");
+//        debugLookupIp("less-is-more.dk");
+//        System.out.println("----------------------------------------");
+//        debugLookupIp("webpartner.dk");
+//        System.out.println("----------------------------------------");
+//        debugLookupIp("smtp.webpartner.dk");
+//        System.out.println("----------------------------------------");
+//        debugLookupIp("yahoo.com");
+//        System.out.println("----------------------------------------");
 
-
+//        listDNS("google.com");
+        listDNS("telegraph.co.uk");
 
 
     }
