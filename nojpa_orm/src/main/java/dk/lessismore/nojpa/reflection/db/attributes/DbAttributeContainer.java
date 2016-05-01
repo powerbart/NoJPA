@@ -1,6 +1,7 @@
 package dk.lessismore.nojpa.reflection.db.attributes;
 
 import dk.lessismore.nojpa.reflection.attributes.*;
+import dk.lessismore.nojpa.reflection.db.DbClassReflector;
 import dk.lessismore.nojpa.reflection.db.model.*;
 
 import java.util.*;
@@ -137,7 +138,7 @@ public class DbAttributeContainer {
                     dbAttribute.setPrimaryKey(false);
                 }
 
-                getDbAttributes().put(attribute.getAttributeName(), dbAttribute);
+                getDbAttributes().put(attribute.getInlineAttributeName() != null ? attribute.getInlineAttributeName() : attribute.getAttributeName(), dbAttribute);
             }
         }
 
@@ -165,7 +166,19 @@ public class DbAttributeContainer {
     }
 
     public boolean setAttributeValue(Object objectToSetOn, DbAttribute attribute, Object value) {
-        return attributeContainer.setAttributeValue(objectToSetOn, attribute.getAttributeName(), value);
+        if(attribute.getInlineAttributeName() != null){
+            Object parentValue = attributeContainer.getAttributeValue(objectToSetOn, attribute.getInlineParentName());
+            DbAttributeContainer parentDbAttributeContainer = DbClassReflector.getDbAttributeContainer(attribute.getInlineParentClass());
+            if(parentValue == null){
+                parentValue = ModelObjectService.create(attribute.getInlineParentClass());
+                attributeContainer.setAttributeValue(objectToSetOn, attribute.getInlineParentName(), parentValue);
+            }
+            log.debug("SETTING: parentValue("+ parentValue +")/"+ attribute.getInlineParentClass() +" att("+ attribute.getInlineParentName() +") -> " + value);
+            return parentDbAttributeContainer.setAttributeValue(parentValue, attribute.getInlineChildName(), value);
+
+        } else {
+            return attributeContainer.setAttributeValue(objectToSetOn, attribute.getAttributeName(), value);
+        }
     }
 
     public boolean setAttributeValue(Object objectToSetOn, String attributeName, Object value) {
@@ -173,7 +186,16 @@ public class DbAttributeContainer {
     }
 
     public Object getAttributeValue(Object objectToGetFrom, DbAttribute attribute) {
-        return attributeContainer.getAttributeValue(objectToGetFrom, attribute.getAttributeName());
+        if(attribute.getInlineAttributeName() != null){
+            Object parentValue = attributeContainer.getAttributeValue(objectToGetFrom, attribute.getInlineParentName());
+            if(parentValue != null){
+                DbAttributeContainer parentDbAttributeContainer = DbClassReflector.getDbAttributeContainer(((ModelObject)parentValue).getInterface());
+                return parentDbAttributeContainer.getAttributeValue(parentValue, attribute.getInlineChildName());
+            }
+            return null;
+        } else {
+            return attributeContainer.getAttributeValue(objectToGetFrom, attribute.getAttributeName());
+        }
     }
 
     public Object getAttributeValue(Object objectToGetFrom, String attributeName) {

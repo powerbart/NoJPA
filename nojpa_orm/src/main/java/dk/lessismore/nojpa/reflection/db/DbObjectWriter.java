@@ -283,7 +283,10 @@ public class DbObjectWriter {
             DbAttribute dbAttribute = (DbAttribute) iterator.next();
             String attributeName = dbAttribute.getAttributeName();
             //If its not an association attribute.
-            if (!dbAttribute.isAssociation()) {
+            if(dbAttribute.getInlineAttributeName() != null){
+                Object value = dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
+                addAttributeValueToStatement(dbAttribute, insertSQLStatement, value);
+            } else if (!dbAttribute.isAssociation()) {
 //TODO:                if(dbAttribute.isTranslatedAssociation()){
 //                    ((ModelObject) modelObject).getProxyObject().
 //                } else {
@@ -306,13 +309,21 @@ public class DbObjectWriter {
 //                if (value != null) {
 //                    associationId = value.getPrimaryKeyValue();
 //                }
-                insertSQLStatement.addAttributeValue(attributeName, modelObject.getSingleAssociationID(attributeName));
+                if(!dbAttribute.isInlineInterface()) {
+                    insertSQLStatement.addAttributeValue(attributeName, modelObject.getSingleAssociationID(attributeName));
+                }
             }
         }
     }
 
     private static void addAttributeValueToStatement(DbAttribute dbAttribute, InsertSQLStatement insertSQLStatement, Object value) {
-        String attributeName = dbAttribute.getAttributeName();
+        if(dbAttribute.isInlineInterface()){
+            return;
+        }
+
+
+
+        String attributeName = dbAttribute.getInlineAttributeName() != null ? dbAttribute.getInlineAttributeName() : dbAttribute.getAttributeName();
         if (value != null) {
             //Convert the value to the equivalent data type.
             int type = dbAttribute.getDataType().getType();
@@ -397,6 +408,10 @@ public class DbObjectWriter {
             //If its an association attribute.
             if (dbAttribute.isAssociation()) {
 
+                if(dbAttribute.isInlineInterface()){
+                    //log.debug("saveAssociations:2:(" + attributeName + ") continue ... not in cache.  for " + modelObject.getClass().getSimpleName() + " ID:" + modelObject);
+                    continue;
+                }
                 if(!modelObject.containsAssociationInCache(attributeName)){
                     //log.debug("saveAssociations:2:(" + attributeName + ") continue ... not in cache.  for " + modelObject.getClass().getSimpleName() + " ID:" + modelObject);
                     continue;

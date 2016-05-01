@@ -1,6 +1,7 @@
 package dk.lessismore.nojpa.reflection.db.attributes;
 
 import dk.lessismore.nojpa.reflection.attributes.*;
+import dk.lessismore.nojpa.reflection.db.annotations.DbInline;
 import dk.lessismore.nojpa.reflection.db.model.*;
 import dk.lessismore.nojpa.db.*;
 
@@ -176,6 +177,26 @@ public class DbAttribute implements Serializable {
 
     public String getAttributeName() {
         return attribute.getAttributeName();
+    }
+
+    public boolean isInlineInterface() {
+        return attribute.getAttributeClass().getAnnotation(DbInline.class) != null;
+    }
+
+    public String getInlineAttributeName() {
+        return attribute.getInlineAttributeName();
+    }
+
+    public String getInlineParentName() {
+        return attribute.getInlineParentName();
+    }
+
+    public Class getInlineParentClass() {
+        return attribute.getInlineParentClass();
+    }
+
+    public String getInlineChildName() {
+        return attribute.getInlineChildName();
     }
 
     /**

@@ -292,8 +292,13 @@ public class DbObjectReader {
                 DbAttribute dbAttribute = (DbAttribute) iterator.next();
 //                log.debug("Adding to object("+ objectToFillInto +")." + dbAttribute.getAttributeName());
                 //If this attribute is an singel association.
+                String attributeName = dbAttribute.getInlineAttributeName() != null ? dbAttribute.getInlineAttributeName() : dbAttribute.getAttributeName();
                 if (dbAttribute.isAssociation() && !dbAttribute.isMultiAssociation()) {
-                    String attributeName = dbAttribute.getAttributeName();
+                    if(dbAttribute.isInlineInterface()){
+                        continue;
+                    }
+
+
 
                     //String newAttributePath = AssociationConstrain.addAttributeToPath(attributePath, attributeName);
                     //if(associationConstrain.isNotAllowedAssociation(attributeName)) {
@@ -312,7 +317,6 @@ public class DbObjectReader {
                 //If this attribute is not an association
                 else if (!dbAttribute.isAssociation()) {
                     Object value = null;
-                    String attributeName = dbAttribute.getAttributeName();
                     value = readObjectFromResultSet(dbAttribute, resultSet);
 //                    log.debug("Adding to object("+ objectToFillInto +")." + dbAttribute.getAttributeName() + "("+ value +")");
                     if (value != null && !("" + value).equals("null")) {
@@ -338,7 +342,7 @@ public class DbObjectReader {
     private static Object readObjectFromResultSet(DbAttribute dbAttribute, ResultSet resultSet) throws java.sql.SQLException {
         Object value = null;
 
-        String name = dbAttribute.getAttributeName();
+        String name = dbAttribute.getInlineAttributeName() != null ? dbAttribute.getInlineAttributeName() : dbAttribute.getAttributeName();
 //        int attributeIndex = resultSet.findColumn(dbAttribute.getAttributeName()); //dbAttribute.getColumnIndex();
 //        if (attributeIndex == -1) {
 //            attributeIndex = resultSet.findColumn(dbAttribute.getAttributeName());

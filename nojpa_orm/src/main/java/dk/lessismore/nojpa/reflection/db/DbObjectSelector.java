@@ -191,8 +191,8 @@ public class DbObjectSelector {
             for (Iterator iterator = dbAttributeContainer.getDbAttributes().values().iterator(); iterator.hasNext();) {
                 DbAttribute dbAttribute = (DbAttribute) iterator.next();
                 //If the attribute is not an multi association.
-                if(!dbAttribute.isMultiAssociation()){
-                    sqlNameQuery = (sqlNameQuery == null ? "" : sqlNameQuery + ", ") + (dbAttributeContainer.getTableName() + "." + dbAttribute.getAttributeName());
+                if(!dbAttribute.isMultiAssociation() && !dbAttribute.isInlineInterface()){
+                    sqlNameQuery = (sqlNameQuery == null ? "" : sqlNameQuery + ", ") + (dbAttributeContainer.getTableName() + "." + (dbAttribute.getInlineAttributeName() != null ? dbAttribute.getInlineAttributeName() : dbAttribute.getAttributeName()) );
                 }
             }
             //log.debug("selectObjectsFromDb:1.4");

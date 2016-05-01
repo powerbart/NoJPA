@@ -1,5 +1,6 @@
 package dk.lessismore.nojpa.reflection.attributes;
 
+import dk.lessismore.nojpa.reflection.db.annotations.DbInline;
 import dk.lessismore.nojpa.reflection.db.annotations.DbStrip;
 import dk.lessismore.nojpa.reflection.db.annotations.SearchField;
 import dk.lessismore.nojpa.reflection.visitors.*;
@@ -25,10 +26,17 @@ public abstract class Attribute {
     private SearchField searchFieldAnnotation;
     private DbStrip dbStripAnnotation;
 
+    protected String inlineAttributeName = null;
+    protected String inlineParentName = null;
+    protected Class inlineParentClass = null;
+    protected String inlineChildName = null;
+//    protected boolean isInlineInterface = false;
+
     public Attribute() {}
 
     public Attribute(Class parentClass) {
         _parentClass = parentClass;
+//        isInlineInterface = _parentClass.getAnnotation(DbInline.class) != null;
     }
 
     /**
@@ -55,6 +63,41 @@ public abstract class Attribute {
      */
     protected abstract boolean setAttributeValuePlain(Object objectToSetOn, Object value) ;
 
+//    public boolean isInlineInterface() {
+//        return isInlineInterface;
+//    }
+
+    public String getInlineAttributeName() {
+        return inlineAttributeName;
+    }
+
+    public void setInlineAttributeName(String inlineAttributeName) {
+        this.inlineAttributeName = inlineAttributeName;
+    }
+
+    public String getInlineParentName() {
+        return inlineParentName;
+    }
+
+    public void setInlineParentName(String inlineParentName) {
+        this.inlineParentName = inlineParentName;
+    }
+
+    public Class getInlineParentClass() {
+        return inlineParentClass;
+    }
+
+    public void setInlineParentClass(Class inlineParentClass) {
+        this.inlineParentClass = inlineParentClass;
+    }
+
+    public String getInlineChildName() {
+        return inlineChildName;
+    }
+
+    public void setInlineChildName(String inlineChildName) {
+        this.inlineChildName = inlineChildName;
+    }
 
     public abstract Annotation[] getDeclaredAnnotations();
 

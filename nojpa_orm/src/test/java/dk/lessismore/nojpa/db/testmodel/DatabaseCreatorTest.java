@@ -1,13 +1,17 @@
 package dk.lessismore.nojpa.db.testmodel;
 
+import dk.lessismore.nojpa.cache.ObjectCacheFactory;
+import dk.lessismore.nojpa.db.methodquery.MQL;
 import dk.lessismore.nojpa.reflection.db.DatabaseCreator;
 
 import dk.lessismore.nojpa.reflection.db.DbClassReflector;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttribute;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttributeContainer;
+import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created : by IntelliJ IDEA.
@@ -28,6 +32,39 @@ public class DatabaseCreatorTest {
     @Test
     public void alterCreateTablesSingle() throws Exception {
         DatabaseCreator.alterTableToThisClass(Address.class);
+    }
+
+    @Test
+    public void testDbCreateInline() throws Exception {
+        Class<Address> addressClass = Address.class;
+        List<Class> l = new ArrayList<Class>();
+        l.add(addressClass);
+        DatabaseCreator.createDatabase(l);
+
+        Address address = ModelObjectService.create(Address.class);
+        address.setArea("MyArea");
+        {
+            Phone phone = ModelObjectService.create(Phone.class);
+            phone.setFunnyD(232d);
+            phone.setNumber("MyNumberRocks!");
+            address.setA(phone);
+        }
+        {
+            Phone phone = ModelObjectService.create(Phone.class);
+            phone.setFunnyD(123d);
+            phone.setNumber("B-For-Big!");
+            address.setB(phone);
+        }
+        ModelObjectService.save(address);
+        {
+            ObjectCacheFactory.getInstance().getObjectCache(Address.class).clear();
+            ObjectCacheFactory.getInstance().getObjectCache(Phone.class).clear();
+            Address mock = MQL.mock(Address.class);
+            List<Address> myArea = MQL.select(mock).where(mock.getArea(), MQL.Comp.EQUAL, "MyArea").getList();
+            System.out.println(myArea.size());
+        }
+
+
     }
 
     @Test

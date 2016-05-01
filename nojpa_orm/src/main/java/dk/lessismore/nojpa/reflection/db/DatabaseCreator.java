@@ -7,6 +7,7 @@ import dk.lessismore.nojpa.db.statements.CreateSQLStatement;
 import dk.lessismore.nojpa.db.statements.DropSQLStatement;
 import dk.lessismore.nojpa.db.statements.SQLStatement;
 import dk.lessismore.nojpa.db.statements.SQLStatementFactory;
+import dk.lessismore.nojpa.reflection.db.annotations.DbInline;
 import dk.lessismore.nojpa.reflection.db.annotations.IgnoreFromTableCreation;
 import dk.lessismore.nojpa.reflection.db.annotations.IndexClass;
 import dk.lessismore.nojpa.reflection.db.annotations.IndexField;
@@ -107,7 +108,9 @@ public class DatabaseCreator {
         for (Iterator iterator = attributeContainer.getDbAttributes().values().iterator(); iterator.hasNext();) {
             DbAttribute dbAttribute = (DbAttribute) iterator.next();
 
-            if (!dbAttribute.isAssociation()) {
+            if(dbAttribute.getInlineAttributeName() != null) {
+                statement.addAttribute(dbAttribute.getInlineAttributeName(), new DbDataType(dbAttribute));
+            } else if (!dbAttribute.isAssociation()) {
                 //This is not an association.
 
                 String attributeName = dbAttribute.getAttributeName();
@@ -171,7 +174,9 @@ public class DatabaseCreator {
                     associationTable.addPrimaryKey(/*"target_id"*/targetName);
                     tables.add(associationTable);
                 } else {
-                    statement.addAttribute(dbAttribute.getAttributeName(), new DbDataType(dbAttribute));
+                    if(!dbAttribute.isInlineInterface()) {
+                        statement.addAttribute(dbAttribute.getAttributeName(), new DbDataType(dbAttribute));
+                    }
                 }
             }
 

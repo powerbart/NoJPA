@@ -1,5 +1,6 @@
 package dk.lessismore.nojpa.db.testmodel;
 
+import dk.lessismore.nojpa.reflection.db.annotations.DbInline;
 import dk.lessismore.nojpa.reflection.db.annotations.IndexField;
 import dk.lessismore.nojpa.reflection.db.annotations.SearchField;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
@@ -20,4 +21,14 @@ public interface Address extends ModelObjectInterface {
     @IndexField
     int getZip();
     void setZip(int zip);
+
+
+    Phone getA();
+    void setA(Phone phone);
+
+    Phone getB();
+    void setB(Phone phone);
+
+
+
 }

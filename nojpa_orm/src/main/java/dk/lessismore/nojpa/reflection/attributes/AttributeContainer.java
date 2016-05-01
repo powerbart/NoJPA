@@ -4,6 +4,7 @@ import java.util.*;
 import java.lang.reflect.*;
 import java.lang.annotation.Annotation;
 
+import dk.lessismore.nojpa.reflection.db.annotations.DbInline;
 import dk.lessismore.nojpa.reflection.db.annotations.DbStrip;
 import dk.lessismore.nojpa.reflection.db.annotations.SearchField;
 import dk.lessismore.nojpa.reflection.db.model.ModelObject;
@@ -71,7 +72,12 @@ public class AttributeContainer {
      */
     public void findAttributes(Class targetClass) {
         _targetClass = targetClass;
-        findAttributesFromMethods();
+        findAttributesFromMethods(getTargetClass().getMethods());
+    }
+
+    protected void findDeclaredAttributes(Class targetClass) {
+        _targetClass = targetClass;
+        findAttributesFromMethods(getTargetClass().getDeclaredMethods());
     }
 
 
@@ -79,9 +85,9 @@ public class AttributeContainer {
      * This method analyses the class, and findes the attributes in it; from the
      * get and set methods in the class.
      */
-    protected void findAttributesFromMethods() {
+    protected void findAttributesFromMethods(Method[] methods) {
         //Get public methods.
-        Method[] methods = getTargetClass().getMethods();
+//        Method[] methods = getTargetClass().getMethods();
         //Handle get Methods.
         for(int i = 0; i < methods.length; i++) {
 //            log.debug(getTargetClass().getName() + ": Current Method: " + methods[i].getName());
@@ -96,8 +102,30 @@ public class AttributeContainer {
                     //This attribute has not been made before. We make it.
                     methodAttribute = new MethodAttribute();
                     methodAttribute.setGetMethod(method);
+                    if(method.getReturnType().isAnnotationPresent(DbInline.class)){
+                        log.debug("We have DbInline");
+                        getAttributes().put(methodAttribute.getAttributeName(), methodAttribute); //Adding the normal attribute
 
-                    getAttributes().put(methodAttribute.getAttributeName(), methodAttribute);
+                        AttributeContainer inlineAttributeContainer = new AttributeContainer();
+                        inlineAttributeContainer.findDeclaredAttributes(method.getReturnType());
+                        Map<String, Attribute> inlineAttributes = inlineAttributeContainer.getAttributes();
+
+                        for(Iterator<Map.Entry<String, Attribute>> iterator = inlineAttributes.entrySet().iterator(); iterator.hasNext(); ){
+                            Map.Entry<String, Attribute> inline = iterator.next();
+
+                            Attribute att = inline.getValue();
+                            att.setInlineAttributeName(methodAttribute.getAttributeName()+ "_" + att.getAttributeName());
+                            att.setInlineParentName(methodAttribute.getAttributeName());
+                            att.setInlineParentClass(method.getReturnType());
+                            att.setInlineChildName(att.getAttributeName());
+                            getAttributes().put(att.getInlineAttributeName(), att);
+                        }
+                    } else {
+                        getAttributes().put(methodAttribute.getAttributeName(), methodAttribute);
+                    }
+
+
+
                 } else if(attribute instanceof MethodAttribute) {
                     methodAttribute = (MethodAttribute)attribute;
                     methodAttribute.setGetMethod(method);
@@ -265,7 +293,7 @@ public class AttributeContainer {
             }
         }
 
-
+        log.debug("att: ("+ attribute +") -> " + value);
         return attribute.setAttributeValue(objectToSetOn, value);
     }
 
