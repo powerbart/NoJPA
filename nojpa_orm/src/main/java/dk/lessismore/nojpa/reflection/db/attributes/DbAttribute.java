@@ -10,7 +10,7 @@ import java.io.*;
 import java.lang.annotation.Annotation;
 
 /**
- * This represents an attribute in an database table. It is a wrap around the standard
+ * This represents an attribute in an database table. It is a wrap around the standard... 
  * <tt>Attribute</tt> class; but adds a lot of new features; which is only interresting
  * when talking about tables. This is:
  * <ul>
