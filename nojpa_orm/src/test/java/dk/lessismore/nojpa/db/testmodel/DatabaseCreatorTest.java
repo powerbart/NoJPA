@@ -64,6 +64,13 @@ public class DatabaseCreatorTest {
             System.out.println(myArea.size());
         }
 
+        {
+            ObjectCacheFactory.getInstance().getObjectCache(Address.class).clear();
+            ObjectCacheFactory.getInstance().getObjectCache(Phone.class).clear();
+            Address mock = MQL.mock(Address.class);
+            List<Address> myArea = MQL.select(mock).where(mock.getA().getNumber(), MQL.Comp.EQUAL, "MyNumberRocks!").getList();
+            System.out.println(myArea.size());
+        }
 
     }
 
