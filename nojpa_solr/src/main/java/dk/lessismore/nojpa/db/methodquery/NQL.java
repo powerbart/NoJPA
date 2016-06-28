@@ -505,7 +505,7 @@ public class NQL {
 //
 
 
-        private void buildQuery(){
+        public SolrQuery buildQuery(){
             StringBuilder builder = new StringBuilder();
             solrQuery.setQuery("*:*");
             for (int i = 0; i < rootConstraints.size(); i++) {
@@ -533,6 +533,8 @@ public class NQL {
                 log.debug("Will sort by " + orderByAttribute + " with " + this.orderByORDER);
                 solrQuery.addSort(this.orderByAttribute, this.orderByORDER == Order.ASC ? SolrQuery.ORDER.asc : SolrQuery.ORDER.desc);
             }
+
+            return solrQuery;
         }
 
 
