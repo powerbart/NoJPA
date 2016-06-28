@@ -1357,7 +1357,7 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
         }
         return name;
     }
-
+//...
     public static String charFilter(String name) {
         if (name != null) {
             return charFilterSoft(name).replaceAll("/|&|'|<|>|;|\\\\", "");
