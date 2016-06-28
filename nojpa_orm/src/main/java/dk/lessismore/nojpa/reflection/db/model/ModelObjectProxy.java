@@ -1360,14 +1360,20 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
 
     public static String charFilter(String name) {
         if (name != null) {
-            return name.replaceAll("'|\"", "`").replaceAll("/|&|'|<|>|;|\\\\", "");
+            return charFilterSoft(name).replaceAll("/|&|'|<|>|;|\\\\", "");
         }
         return name;
     }
 
+
+    public static void main(String[] args) {
+        System.out.println(charFilterSoft("fuck\\asfd"));
+    }
+
     public static String charFilterSoft(String name) {
         if (name != null) {
-            return name.replaceAll("'|\"", "`");
+            name = name.replaceAll("[^\\u0000-\\u02B8\\u0390-\\u057F]", "");
+            return name.replaceAll("'|\"|\\\\", "`");
         }
         return name;
     }
