@@ -359,6 +359,24 @@ public class DatabaseCreator {
         return subTypesList;
     }
 
+    public static ArrayList<Class> getSubtypes(Class rootClass) {
+        log.debug("------------ Getting all children of MOI for class: " + rootClass.getCanonicalName());
+        Reflections reflections = new Reflections(new ConfigurationBuilder()
+                .setUrls(ClasspathHelper.forClass(rootClass))
+                .setScanners(new SubTypesScanner(),
+                        new TypeAnnotationsScanner(),
+                        new ResourcesScanner()));
+        ArrayList<Class> annoList = new ArrayList<Class>();
+        annoList.addAll(reflections.getTypesAnnotatedWith(IgnoreFromTableCreation.class));
+        log.debug("annoList.size()::" + annoList.size());
+        ArrayList<Class> subTypesList = new ArrayList<Class>();
+        subTypesList.addAll(reflections.getSubTypesOf(ModelObjectInterface.class));
+        log.debug("getSubtypes: removing because it's annotated with @IgnoreFromTableCreation clazz = " + annoList);
+        subTypesList.removeAll(annoList);
+        log.debug("getSubtypes: found types: " + subTypesList);
+        return subTypesList;
+    }
+
 
     public static void createDatabase(List<Class> clazzes) {
         createDatabase(clazzes, null);
