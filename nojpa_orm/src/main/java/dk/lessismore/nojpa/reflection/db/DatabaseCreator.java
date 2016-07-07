@@ -325,6 +325,13 @@ public class DatabaseCreator {
         }
     }
 
+    public static void alterDatabase(Class clazz) throws Exception {
+        ArrayList<Class> subTypesList = getSubtypes(clazz);
+        for(int i = 0; i < subTypesList.size(); i++){
+            alterTableToThisClass(subTypesList.get(i));
+        }
+    }
+
     public static void checkDatabase(String rootPackage) {
         ArrayList<Class> subTypesList = getSubtypes(rootPackage);
         //TODO:  check the Database(subTypesList);
@@ -333,10 +340,18 @@ public class DatabaseCreator {
     public static void createDatabase(String rootPackage) {
         createDatabase(rootPackage, null);
     }
+    public static void createDatabase(Class clazz) {
+        createDatabase(clazz, null);
+    }
 
 
     public static void createDatabase(String rootPackage, Class[] ignores) {
         ArrayList<Class> subTypesList = getSubtypes(rootPackage);
+        createDatabase(subTypesList, ignores);
+    }
+
+    public static void createDatabase(Class clazz, Class[] ignores) {
+        ArrayList<Class> subTypesList = getSubtypes(clazz);
         createDatabase(subTypesList, ignores);
     }
 
