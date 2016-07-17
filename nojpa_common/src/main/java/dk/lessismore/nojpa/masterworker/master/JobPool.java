@@ -42,10 +42,12 @@ public class JobPool {
 
 
     public void addJob(JobMessage job) {
-        JobEntry jobEntry = new JobEntry(job);
-        pool.put(job.getJobID(), jobEntry);
-        queue.add(jobEntry);
-        log.debug("Added job: "+ jobEntry);
+        if(pool.get(job.getJobID()) == null) {
+            JobEntry jobEntry = new JobEntry(job);
+            pool.put(job.getJobID(), jobEntry);
+            queue.add(jobEntry);
+            log.debug("Added job: " + jobEntry);
+        }
     }
 
 

@@ -10,6 +10,7 @@ import dk.lessismore.nojpa.concurrency.WaitForValue;
 import dk.lessismore.nojpa.utils.Pair;
 import org.apache.log4j.Logger;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 
 public class JobHandle<O> {
@@ -19,7 +20,7 @@ public class JobHandle<O> {
     private final JobHandleToMasterProtocol<O> jm;
     private final Class<? extends Executor> implementationClass;
     private final Object jobData;
-    private final String jobID = GuidFactory.getInstance().makeGuid();
+    private String jobID = GuidFactory.getInstance().makeGuid();
     private boolean closed = false;
 
     // Default job values
@@ -37,6 +38,13 @@ public class JobHandle<O> {
      * @param jobData Input for the executor class's run method.
      */
     public JobHandle(JobHandleToMasterProtocol<O> jm, Class<? extends Executor> executorClass, Object jobData) {
+        try{
+            Method getIDMethod = jobData.getClass().getMethod("getID");
+            Object id =  getIDMethod.invoke(jobData, null);
+            if(id != null && (("" + id).length() > 2)){
+                jobID = "" + id;
+            }
+        } catch (Exception e){}
         this.jm = jm;
         this.implementationClass = executorClass;
         this.jobData = jobData;
