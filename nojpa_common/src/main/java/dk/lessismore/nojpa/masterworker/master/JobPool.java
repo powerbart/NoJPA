@@ -319,7 +319,7 @@ public class JobPool {
 
         private String getSimpleName(String name) {
             if(name == null || name.indexOf(".") == -1) return "" + name;
-            return name.substring(name.lastIndexOf('.'));
+            return name.substring(name.lastIndexOf('.')+1);
         }
 
     }
@@ -391,8 +391,8 @@ public class JobPool {
             builder.append(jobEntry.toString());
             builder.append("\n");
         }
-        builder.append("LAST-RESULT: "+ (lastResult != null ? "" + lastResult.getTime() : " -NO RESULTS.... yet...! "));
-        builder.append("queue.size(): "+ queue.size());
+        builder.append("LAST-RESULT: "+ (lastResult != null ? "" + lastResult.getTime() : " -NO RESULTS.... yet...! ") + '\n');
+        builder.append("queue.size(): "+ queue.size() + '\n');
         return builder.toString();
     }
 }
