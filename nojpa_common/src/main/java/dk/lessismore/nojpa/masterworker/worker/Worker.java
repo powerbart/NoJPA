@@ -1,6 +1,7 @@
 package dk.lessismore.nojpa.masterworker.worker;
 
 import dk.lessismore.nojpa.concurrency.WaitForValue;
+import dk.lessismore.nojpa.masterworker.exceptions.WorkerExecutionException;
 import dk.lessismore.nojpa.masterworker.executor.Executor;
 import dk.lessismore.nojpa.masterworker.master.MasterProperties;
 import dk.lessismore.nojpa.net.link.ClientLink;
@@ -28,6 +29,7 @@ public class Worker {
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(Worker.class);
     private static final long SEND_PROGRESS_INTERVAL = 10 * 1000;
     private static final long SEND_HEALTH_INTERVAL = 120 * 1000;
+    private static final int  MAX_SAME_PROGRESS = 10;
     private final List<? extends Class<? extends Executor>> supportedExecutors;
     private static final double CRITICAL_VM_MEMORY_USAGE = 0.95;
     private final Serializer serializer;
@@ -126,6 +128,11 @@ public class Worker {
                     }
                 } else {
                     sameProgress++;
+                    if(sameProgress > MAX_SAME_PROGRESS){
+                        log.debug("This is a job that haven't had any progress the last "+ (sameProgress * 10) +"sec - we will kill it...");
+                        resultMessage.setException(new WorkerExecutionException("Too long time"), serializer);
+                        break;
+                    }
                 }
                 try {
                     log.debug("sameProgress: " + sameProgress);
@@ -153,6 +160,11 @@ public class Worker {
                 linkAndThreads.clientLink.close();
                 linkAndThreads.stopThreads();
                 break; //exit
+            }
+
+            if(sameProgress > MAX_SAME_PROGRESS){
+                stop = true;
+                break;
             }
 //            stop = true;
 //            break;
