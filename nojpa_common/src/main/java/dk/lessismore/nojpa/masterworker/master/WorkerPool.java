@@ -164,7 +164,7 @@ public class WorkerPool {
             }
             for (String mountPoint: diskUsages.keySet()) {
                 double usage = diskUsages.get(mountPoint);
-                if (usage > properties.getWorkerCriticalDiskUsage()) {
+                if (usage > properties.getWorkerCriticalDiskUsage() && !mountPoint.equals("/dev")) {
                     return "Disk usage on disk mounted on : "+ mountPoint + " is to high: " + usage;
                 }
             }
