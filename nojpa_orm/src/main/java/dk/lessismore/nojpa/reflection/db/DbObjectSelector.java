@@ -36,7 +36,7 @@ public class DbObjectSelector {
     }
 
 
-
+    private static int countNumberOfVisit = 0;
     public static void iterateObjectsFromDb(Class targetClass, SelectSQLStatement selectSqlStatement, AssociationConstrain associationConstrain, boolean cache, boolean loadAll, int intervalStart, int intervalEnd, DbObjectVisitor visitor) {
         log.debug("Now running the REAL visitor :-) iterateObjectsFromDb(..., cache("+ cache +"), loadAll("+ loadAll +"), intervalStart("+ intervalStart +"), intervalEnd("+ intervalEnd +"), visitor("+ visitor.getClass().getSimpleName() +")) ");
         LimResultSet limSet = null;
@@ -82,7 +82,9 @@ public class DbObjectSelector {
                             ModelObject modelObject = DbObjectReader.readObjectFromDb(objectId, targetClass, associationConstrain, limSet);
 //                            log.debug("iterateObjectsFromDb :: 4");
                             if (modelObject != null){
-                                log.debug("Now calling the visitor.visit ... visitor("+ visitor +")");
+                                if(countNumberOfVisit++ % 75 == 0) {
+                                    log.debug("Now calling the visitor.visit ... visitor(" + visitor + ")");
+                                }
                                 visitor.visit(modelObject);
 
                             }
