@@ -39,11 +39,16 @@ public class WorkerPool {
         for (WorkerEntry entry: pool.values()) {
             String inapplicableReason = entry.notApplicableReason();
             if (inapplicableReason != null) {
-                //log.info("Worker not applicable: " + inapplicableReason);
+//                if(!inapplicableReason.equals("Worker is busy")){
+                    log.debug("Worker("+ entry +") not applicable: " + inapplicableReason);
+//                }
                 continue;
             }
             if (entry.knownClasses.contains(executorClass)) {
                 if (stepEntry == null || entry.healthierThan(stepEntry)) {
+                    if(stepEntry != null){
+                        log.debug("PreSelectedWorker("+ stepEntry +") losses to NewSelectedWorker("+ entry +")");
+                    }
                     stepEntry = entry;
                 }
             }

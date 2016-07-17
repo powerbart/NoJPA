@@ -121,6 +121,9 @@ public class JobPool {
 
 
     Calendar lastResult;
+    long resultTotalCounter = 0;
+    long resultLast100Time = 0;
+    long resultStartTime = System.currentTimeMillis();
     public void setResult(JobResultMessage result) {
         if (result == null) {
             log.error("Result must be a non-null value");
@@ -132,6 +135,9 @@ public class JobPool {
         if (jobEntry != null) {
             jobEntry.result = result;
             last5SuccesJobs.add(jobEntry);
+            if(resultTotalCounter++ % 100 == 0){
+                resultLast100Time = System.currentTimeMillis();
+            }
 //            removeWorker(jobEntry);
             fireOnResult(jobEntry, result);
         } else {
@@ -393,8 +399,12 @@ public class JobPool {
             builder.append(jobEntry.toString());
             builder.append("\n");
         }
-        builder.append("LAST-RESULT: "+ (lastResult != null ? "" + lastResult.getTime() : " -NO RESULTS.... yet...! ") + '\n');
-        builder.append("queue.size(): "+ queue.size() + '\n');
+        builder.append("STATS: ");
+        builder.append("Last-success(" +  (lastResult != null ? "" + lastResult.getTime() : " -NO RESULTS.... yet...! ") +") ");
+        builder.append("queue.size("+ queue.size() +") ");
+        builder.append("TOTAL("+ resultTotalCounter +") ");
+        builder.append("LAST-"+ (resultTotalCounter % 100) +"-AVG("+ ((System.currentTimeMillis() - resultLast100Time)/(resultTotalCounter % 100)) +") ");
+        builder.append('\n');
         return builder.toString();
     }
 }
