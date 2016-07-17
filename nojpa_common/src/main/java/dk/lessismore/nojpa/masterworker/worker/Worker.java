@@ -111,8 +111,10 @@ public class Worker {
             log.debug("Waiting for calculation to end...");
 
             double progress = -1.0;
+            int sameProgress = 0;
             while(linkAndThreads.jobThread.isAlive() && linkAndThreads.clientLink.isWorking()) {
                 if(linkAndThreads.executor.getProgress() != progress) {
+                    sameProgress = 0;
                     progress = linkAndThreads.executor.getProgress();
                     log.debug("Working: "+(progress*100) + "%");
                     try {
@@ -122,9 +124,14 @@ public class Worker {
                         linkAndThreads.clientLink.close();
                         break;
                     }
+                } else {
+                    sameProgress++;
                 }
                 try {
+                    log.debug("sameProgress: " + sameProgress);
+                    log.debug("Will: linkAndThreads.jobThread.join(SEND_PROGRESS_INTERVAL); - START");
                     linkAndThreads.jobThread.join(SEND_PROGRESS_INTERVAL);
+                    log.debug("Will: linkAndThreads.jobThread.join(SEND_PROGRESS_INTERVAL); - END");
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
