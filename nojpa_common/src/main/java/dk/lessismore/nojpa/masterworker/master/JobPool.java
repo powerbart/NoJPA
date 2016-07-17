@@ -9,6 +9,7 @@ import dk.lessismore.nojpa.masterworker.messages.observer.ObserverJobMessage;
 import dk.lessismore.nojpa.masterworker.JobStatus;
 import dk.lessismore.nojpa.masterworker.exceptions.WorkerExecutionException;
 import dk.lessismore.nojpa.properties.PropertiesProxy;
+import dk.lessismore.nojpa.utils.MaxSizeArray;
 
 import java.util.*;
 import java.text.SimpleDateFormat;
@@ -24,6 +25,7 @@ public class JobPool {
     private final Map<ServerLink, String> workerMap = new HashMap<ServerLink, String>();
     private final Map<String, JobEntry> pool = new HashMap<String, JobEntry>();
     private final SortedSet<JobEntry> queue = new TreeSet<JobEntry>(new PriorityComparator());
+    private final MaxSizeArray<JobEntry> last5SuccesJobs = new MaxSizeArray<JobEntry>(5);
     private final MessageSender.FailureHandler failureHandler = new MessageSender.FailureHandler() {
         public void onFailure(ServerLink client) {
             removeListener(client);
@@ -116,15 +118,18 @@ public class JobPool {
     }
 
 
+    Calendar lastResult;
     public void setResult(JobResultMessage result) {
         if (result == null) {
             log.error("Result must be a non-null value");
             return;
         }
+        lastResult = Calendar.getInstance();
         String jobID = result.getJobID();
         JobEntry jobEntry = pool.get(jobID);
         if (jobEntry != null) {
             jobEntry.result = result;
+            last5SuccesJobs.add(jobEntry);
 //            removeWorker(jobEntry);
             fireOnResult(jobEntry, result);
         } else {
@@ -142,6 +147,7 @@ public class JobPool {
 
     public void jobTaken(JobEntry jobEntry, ServerLink worker) {
         log.debug(" * JOB TAKEN: "+jobEntry);
+        jobEntry.jobTakenDate = Calendar.getInstance();
         setWorker(jobEntry, worker);
         queue.remove(jobEntry);
         fireOnStatus(jobEntry);
@@ -213,6 +219,7 @@ public class JobPool {
     }
 
     private void fireOnResult(JobEntry jobEntry, JobResultMessage result) {
+        jobEntry.jobDoneDate = Calendar.getInstance();
         if (jobEntry.clients == null || jobEntry.clients.isEmpty()) return;
         for (ServerLink client: getListeningClientsCloned(jobEntry)) {
             MessageSender.sendResultToClient(result, client, failureHandler);
@@ -255,6 +262,8 @@ public class JobPool {
         public double progress = 0;
         public double priority = 1;
         public Calendar date = Calendar.getInstance();
+        public Calendar jobTakenDate = null;
+        public Calendar jobDoneDate = null;
         public ServerLink worker;
         public int workerFailureCount = 0;
 
@@ -286,7 +295,7 @@ public class JobPool {
 
         @Override
         public String toString() {
-            return String.format("{Job-%s:%s status=%s, result=%s progress=%s, priority=%s, rerun=%s, date=%s}",
+            return String.format("{Job-%s:%s status=%s, result=%s progress=%s, priority=%s, rerun=%s,  w=%s, created=%s, taken=%s, result=%s}",
                     getSimpleName(jobMessage.getExecutorClassName()),
                     jobMessage.getJobID(),
                     getStatus(),
@@ -294,7 +303,10 @@ public class JobPool {
                     progress,
                     priority,
                     workerFailureCount,
-                    (new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss")).format(date.getTime())
+                    (worker != null ? "" + worker.getOtherHost() +":"+ worker.getOtherPort() : "null"),
+                    (new SimpleDateFormat("yyyyMMMdd HH:mm:ss")).format(date.getTime()),
+                    (jobTakenDate != null ? (new SimpleDateFormat("MMMdd HH:mm:ss")).format(jobTakenDate.getTime()) : "-"),
+                    (jobDoneDate != null ? (new SimpleDateFormat("MMMdd HH:mm:ss")).format(jobDoneDate.getTime()) : "-")
                     );
         }
 
@@ -307,9 +319,7 @@ public class JobPool {
 
         private String getSimpleName(String name) {
             if(name == null || name.indexOf(".") == -1) return "" + name;
-            String[] tokens = name.split(".");
-            if (tokens.length > 1) return tokens[tokens.length-1];
-            else return name;
+            return name.substring(name.lastIndexOf('.'));
         }
 
     }
@@ -374,6 +384,15 @@ public class JobPool {
             builder.append(jobEntry.toString());
             builder.append("\n");
         }
+        builder.append("LAST-5-RESULTS:\n");
+        for (Iterator<JobEntry> iterator = last5SuccesJobs.iterator(); iterator.hasNext(); ) {
+            JobEntry jobEntry = iterator.next();
+            builder.append("  ");
+            builder.append(jobEntry.toString());
+            builder.append("\n");
+        }
+        builder.append("LAST-RESULT: "+ (lastResult != null ? "" + lastResult.getTime() : " -NO RESULTS.... yet...! "));
+        builder.append("queue.size(): "+ queue.size());
         return builder.toString();
     }
 }
