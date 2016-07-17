@@ -403,7 +403,7 @@ public class JobPool {
         builder.append("Last-success(" +  (lastResult != null ? "" + lastResult.getTime() : " -NO RESULTS.... yet...! ") +") ");
         builder.append("queue.size("+ queue.size() +") ");
         builder.append("TOTAL("+ resultTotalCounter +") ");
-        builder.append("LAST-"+ (resultTotalCounter % 100) +"-AVG("+ ((System.currentTimeMillis() - resultLast100Time)/(resultTotalCounter % 100)) +") ");
+        builder.append("LAST-"+ (resultTotalCounter % 100) +"-AVG("+ ((System.currentTimeMillis() - resultLast100Time)/(1+(resultTotalCounter % 100))) +") ");
         builder.append('\n');
         return builder.toString();
     }
