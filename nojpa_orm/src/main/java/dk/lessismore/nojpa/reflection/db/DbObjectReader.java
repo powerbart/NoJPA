@@ -260,7 +260,7 @@ public class DbObjectReader {
 
                 //If the attribute is not an multi association.
                 if (!dbAttribute.isMultiAssociation()) {
-                    sqlNameQuery = (sqlNameQuery == null ? "" : sqlNameQuery + ", ") + (dbAttributeContainer.getTableName() + "." + dbAttribute.getAttributeName());
+                    sqlNameQuery = (sqlNameQuery == null ? "" : sqlNameQuery + ", ") + (dbAttributeContainer.getTableName() + "." + (dbAttribute.getInlineAttributeName() != null ? dbAttribute.getInlineAttributeName() : dbAttribute.getAttributeName()));
                 }
             }
             dbAttributeContainer.setSqlNameQuery(sqlNameQuery);

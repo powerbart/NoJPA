@@ -38,7 +38,8 @@ public class DbClassReflector {
     }
     public static DbAttributeContainer getDbAttributeContainer(Object object) {
         // TODO make this fix more general
-        Class cls;
+        int dummy = 2+2;
+        Class cls = object.getClass();
         if (Proxy.isProxyClass(object.getClass())) {
             cls =((ModelObject) object).getInterface();
         } else {

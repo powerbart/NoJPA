@@ -56,13 +56,13 @@ public class DatabaseCreatorTest {
             address.setB(phone);
         }
         ModelObjectService.save(address);
-        {
-            ObjectCacheFactory.getInstance().getObjectCache(Address.class).clear();
-            ObjectCacheFactory.getInstance().getObjectCache(Phone.class).clear();
-            Address mock = MQL.mock(Address.class);
-            List<Address> myArea = MQL.select(mock).where(mock.getArea(), MQL.Comp.EQUAL, "MyArea").getList();
-            System.out.println(myArea.size());
-        }
+//        {
+//            ObjectCacheFactory.getInstance().getObjectCache(Address.class).clear();
+//            ObjectCacheFactory.getInstance().getObjectCache(Phone.class).clear();
+//            Address mock = MQL.mock(Address.class);
+//            List<Address> myArea = MQL.select(mock).where(mock.getArea(), MQL.Comp.EQUAL, "MyArea").getList();
+//            System.out.println(myArea.size());
+//        }
 
         {
             ObjectCacheFactory.getInstance().getObjectCache(Address.class).clear();
