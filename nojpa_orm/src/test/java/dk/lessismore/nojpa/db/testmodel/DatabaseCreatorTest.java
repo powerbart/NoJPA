@@ -26,6 +26,7 @@ public class DatabaseCreatorTest {
     public void testCreateTables() {
         ArrayList<Class> cs = new ArrayList<Class>();
         cs.add(Address.class);
+        cs.add(XGlue.class);
         DatabaseCreator.createDatabase(cs);
     }
 
