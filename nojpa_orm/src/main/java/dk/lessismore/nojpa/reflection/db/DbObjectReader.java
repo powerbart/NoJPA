@@ -1,5 +1,6 @@
 package dk.lessismore.nojpa.reflection.db;
 
+import dk.lessismore.nojpa.reflection.db.annotations.DbInline;
 import dk.lessismore.nojpa.reflection.db.attributes.*;
 import dk.lessismore.nojpa.db.statements.*;
 import dk.lessismore.nojpa.db.*;
@@ -143,6 +144,8 @@ public class DbObjectReader {
             }
 //            log.debug("readObjectFromDb:1 "  + objectId);
 
+
+
             DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(targetClass);
             if (dbAttributeContainer == null) {
                 log.error("We do not have a container that match this class. We can not continue." , new Exception());
@@ -155,6 +158,10 @@ public class DbObjectReader {
                 log.debug("readObjectFromDb: We have been here before; and can safely return this model object.");
                 //log.debug("Loop found. using allready created object. ");
                 return (T) modelObject;
+            }
+
+            if(targetClass.getAnnotation(DbInline.class) != null){
+                return null;
             }
             //log.debug("readObjectFromDb:3 "  + objectId);
             //Construct an instance of the modelObject.

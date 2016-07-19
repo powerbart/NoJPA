@@ -56,14 +56,31 @@ public class DatabaseCreatorTest {
             phone.setNumber("B-For-Big!");
             address.setB(phone);
         }
+        {
+            Address addressN = ModelObjectService.create(Address.class);
+            addressN.setArea("NothingArea");
+            ModelObjectService.save(addressN);
+
+        }
         ModelObjectService.save(address);
-//        {
-//            ObjectCacheFactory.getInstance().getObjectCache(Address.class).clear();
-//            ObjectCacheFactory.getInstance().getObjectCache(Phone.class).clear();
-//            Address mock = MQL.mock(Address.class);
-//            List<Address> myArea = MQL.select(mock).where(mock.getArea(), MQL.Comp.EQUAL, "MyArea").getList();
-//            System.out.println(myArea.size());
-//        }
+
+        ObjectCacheFactory.getInstance().getObjectCache(Address.class).clear();
+        ObjectCacheFactory.getInstance().getObjectCache(Phone.class).clear();
+        System.out.println("------------- START");
+        List<Address> list = MQL.select(Address.class).getList();
+        for(Address a : list){
+            System.out.printf("a->" + (a.getA() != null ? a.getA().getNumber() : "null"));
+
+        }
+        System.out.println("------------- END");
+
+        {
+            ObjectCacheFactory.getInstance().getObjectCache(Address.class).clear();
+            ObjectCacheFactory.getInstance().getObjectCache(Phone.class).clear();
+            Address mock = MQL.mock(Address.class);
+            List<Address> myArea = MQL.select(mock).where(mock.getArea(), MQL.Comp.EQUAL, "MyArea").getList();
+            System.out.println(myArea.size());
+        }
 
         {
             ObjectCacheFactory.getInstance().getObjectCache(Address.class).clear();

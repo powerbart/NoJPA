@@ -186,15 +186,25 @@ public class DbAttributeContainer {
     }
 
     public Object getAttributeValue(Object objectToGetFrom, DbAttribute attribute) {
+        //log.debug("getAttributeValue:X1 attribute.getClassName(" + attribute.getClassName() + "), attribute.getAttribute(" + attribute.getAttribute() + "), attribute.getInlineAttributeName(" + attribute.getInlineAttributeName() + ")");
         if(attribute.getInlineAttributeName() != null){
+            //log.debug("getAttributeValue:X2");
             Object parentValue = attributeContainer.getAttributeValue(objectToGetFrom, attribute.getInlineParentName());
+            //log.debug("getAttributeValue:X3");
             if(parentValue != null){
+                //log.debug("getAttributeValue:X4");
                 DbAttributeContainer parentDbAttributeContainer = DbClassReflector.getDbAttributeContainer(((ModelObject)parentValue).getInterface());
-                return parentDbAttributeContainer.getAttributeValue(parentValue, attribute.getInlineChildName());
+                //log.debug("getAttributeValue:X5");
+                Object attributeValue = parentDbAttributeContainer.getAttributeValue(parentValue, attribute.getInlineChildName());
+                //log.debug("getAttributeValue:X6");
+                return attributeValue;
             }
             return null;
         } else {
-            return attributeContainer.getAttributeValue(objectToGetFrom, attribute.getAttributeName());
+            //log.debug("getAttributeValue:X7");
+            Object attributeValue = attributeContainer.getAttributeValue(objectToGetFrom, attribute.getAttributeName());
+            //log.debug("getAttributeValue:X8");
+            return attributeValue;
         }
     }
 
