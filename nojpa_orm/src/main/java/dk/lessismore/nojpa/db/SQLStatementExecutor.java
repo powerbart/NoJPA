@@ -125,10 +125,10 @@ public class SQLStatementExecutor {
             try {
                 connection = (Connection) ConnectionPoolFactory.getPool().getFromPool();
                 log.debug("Will update with:::" + sqlStatement.replaceAll("\n", " "));
-                long start = System.nanoTime();
+                long start = System.currentTimeMillis();
                 statement = connection.createStatement();
                 statement.execute(sqlStatement);
-                long end = System.nanoTime();
+                long end = System.currentTimeMillis();
                 long time = end - start;
                 totalTime = totalTime + time;
                 totalCounter++;
@@ -200,12 +200,12 @@ public class SQLStatementExecutor {
             Statement statement = null;
             try {
                 connection = (Connection) ConnectionPoolFactory.getPool().getFromPool();
-                long start = System.nanoTime();
+                long start = System.currentTimeMillis();
                 statement = connection.createStatement();
                 log.debug("Will update with:" + sqlStatement.replaceAll("\n", " "));
                 statement.execute(sqlStatement);
 
-                long end = System.nanoTime();
+                long end = System.currentTimeMillis();
                 long time = end - start;
                 totalTime = totalTime + time;
                 totalCounter++;
@@ -252,10 +252,10 @@ public class SQLStatementExecutor {
 //                    log.debug("DEBUG-TRACE", new Exception("DEBUG"));
                 //}
                 connection = (Connection) ConnectionPoolFactory.getPool().getFromPool();
-                long start = System.nanoTime();
+                long start = System.currentTimeMillis();
                 statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
                 resultSet = statement.executeQuery(sqlStatement);
-                long end = System.nanoTime();
+                long end = System.currentTimeMillis();
                 long time = end - start;
                 totalTime = totalTime + time;
                 totalCounter++;
@@ -335,12 +335,12 @@ public class SQLStatementExecutor {
                 //log.debug("doQuery: Will run preparedStatement: " + initStatement);
                 connection = (Connection) ConnectionPoolFactory.getPool().getFromPool();
 
-                long start = System.nanoTime();
+                long start = System.currentTimeMillis();
                 statement = connection.prepareStatement(initStatement, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
                 log.debug("doQuery: Will run: " + initStatement.replaceAll("\n", " "));
                 preSQLStatement.makeStatementReadyToExcute(statement);
                 resultSet = statement.executeQuery();
-                long end = System.nanoTime();
+                long end = System.currentTimeMillis();
                 long time = end - start;
                 totalTime = totalTime + time;
                 totalCounter++;
@@ -372,7 +372,7 @@ public class SQLStatementExecutor {
     static long start = 0L;
 
     public static void print(String str) {
-        log.debug(str + " " + (System.nanoTime() - start));
+        log.debug(str + " " + (System.currentTimeMillis() - start));
     }
 
     public static void printOutCpuStats(){
@@ -384,16 +384,16 @@ public class SQLStatementExecutor {
 
 
     public static void main(String[] args) throws Exception {
-        start = System.nanoTime();
+        start = System.currentTimeMillis();
         for(int j = 0; j < 10; j++){
-            long microStart = System.nanoTime();
+            long microStart = System.currentTimeMillis();
             print("START " + j);
             LimResultSet s = doQuery("select * from _Order where creationDate > '2006-04-01'");
             ResultSet resultSet = s.getResultSet();
             for(int i = 0; resultSet.next(); i++) {
               resultSet.getString("number");
             }
-            print("END " + (System.nanoTime() - microStart)+" " +  j);
+            print("END " + (System.currentTimeMillis() - microStart)+" " +  j);
         }
         print("ENDS ");
 
