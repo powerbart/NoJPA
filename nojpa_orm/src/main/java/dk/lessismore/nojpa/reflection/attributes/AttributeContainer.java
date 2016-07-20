@@ -293,7 +293,7 @@ public class AttributeContainer {
             }
         }
 
-        log.debug("att: ("+ attribute +") -> " + value);
+        //log.debug("att: ("+ attribute +") -> " + value);
         return attribute.setAttributeValue(objectToSetOn, value);
     }
 

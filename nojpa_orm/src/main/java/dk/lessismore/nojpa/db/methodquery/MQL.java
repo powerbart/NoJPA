@@ -8,11 +8,13 @@ import dk.lessismore.nojpa.reflection.db.DbClassReflector;
 import dk.lessismore.nojpa.reflection.db.DbObjectReader;
 import dk.lessismore.nojpa.reflection.db.DbObjectSelector;
 import dk.lessismore.nojpa.reflection.db.DbObjectVisitor;
+import dk.lessismore.nojpa.reflection.db.annotations.DbInline;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttribute;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttributeContainer;
 import dk.lessismore.nojpa.reflection.db.model.ModelObject;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.db.statements.SelectSqlStatementCreator;
+import dk.lessismore.nojpa.reflection.util.ClassAnalyser;
 import dk.lessismore.nojpa.utils.Pair;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -872,6 +874,9 @@ public class MQL {
                 return isMock(arg) && ((MockExtra) proxy).mockExtra_getSourceClass().equals(
                         ((MockExtra) arg).mockExtra_getSourceClass());
             }
+            if (methodName.equals("toString")) {
+                return "MockOf("+ sourceClass.getSimpleName() +")";
+            }
             if( ! methodName.startsWith("get")) {
                 throw new IllegalArgumentException("Only get-methods may be called on this db instance. " +
                         "Called: " + methodName);
@@ -946,7 +951,14 @@ public class MQL {
             attributeName = "objectID";
         } else {
             sourceClass = proxy.mockExtra_getSourceClass();
-            attributeName = fieldName(method);
+            if(sourceClass.getAnnotation(DbInline.class) != null){
+                Class first = mockSequence.get(0).getSecond().getDeclaringClass();
+                String secondName = ClassAnalyser.getAttributeNameFromMethod(mockSequence.get(0).getSecond());
+                attributeName = secondName +"_"+  fieldName(method);
+                sourceClass = first;
+            } else {
+                attributeName = fieldName(method);
+            }
         }
         return new Pair<Class, String>(sourceClass, attributeName);
     }
@@ -965,7 +977,7 @@ public class MQL {
             Method method = pair.getSecond();
             String field = fieldName(method);
             Class fieldType = method.getReturnType();
-            if (fieldType.isArray() || ModelObjectInterface.class.isAssignableFrom(fieldType)) {
+            if (fieldType.isArray() || (ModelObjectInterface.class.isAssignableFrom(fieldType) && fieldType.getAnnotation(DbInline.class) == null)) {
                 joints.add(new Pair<Class, String>(((MockExtra)mock).mockExtra_getSourceClass(), field));
             }
         }
@@ -984,7 +996,9 @@ public class MQL {
     public static String makeAttributeIdentifier(Class sourceClass, String attributeName) {
         DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(sourceClass);
         DbAttribute dbAttribute = dbAttributeContainer.getDbAttribute(attributeName);
-        return dbAttributeContainer.getTableName()+"."+dbAttribute.getAttributeName();
+        boolean isInlineInterface = dbAttribute.isInlineInterface();
+        String toReturn = dbAttributeContainer.getTableName() + "." + (!isInlineInterface && !attributeName.contains("_") ? dbAttribute.getAttributeName() : dbAttribute.getInlineAttributeName());
+        return toReturn;
     }
 
 

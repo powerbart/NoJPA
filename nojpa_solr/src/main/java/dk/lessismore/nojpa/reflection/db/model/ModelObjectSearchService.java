@@ -183,6 +183,7 @@ public class ModelObjectSearchService {
     }
 
     private static <T extends ModelObjectInterface> void addAttributesToSolrDocument(T object, String prefix, HashMap<String, String> storedObjects, SolrClient solrServer, SolrInputDocument solrObj) {
+        //log.debug("addAttributesToSolrDocument:X0");
         ModelObject modelObject = (ModelObject) object;
         DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(modelObject.getInterface());
         String objectIDInSolr = (prefix.length() == 0 ? "" : prefix + "_") + "objectID" + (prefix.length() == 0 ? "" : "__ID");
@@ -190,30 +191,45 @@ public class ModelObjectSearchService {
             log.trace("Adding solr-row: objectIDInSolr(" + objectIDInSolr + ")->" + object.getObjectID());
             solrObj.addField(objectIDInSolr, object.getObjectID());
         }
+        //log.debug("addAttributesToSolrDocument:X1");
         for (Iterator iterator = dbAttributeContainer.getDbAttributes().values().iterator(); iterator.hasNext();) {
+            //log.debug("addAttributesToSolrDocument:X2");
             DbAttribute dbAttribute = (DbAttribute) iterator.next();
             SearchField searchField = dbAttribute.getAttribute().getAnnotation(SearchField.class);
             if(searchField != null) {
+                //log.debug("addAttributesToSolrDocument:X3");
                 if(!dbAttribute.isAssociation()) {
+                    //log.debug("addAttributesToSolrDocument:X4");
                     Object value = null;
                     value = dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
+                    //log.debug("addAttributesToSolrDocument:X5");
                     addAttributeValueToStatement(dbAttribute, solrObj, value, prefix);
+                    //log.debug("addAttributesToSolrDocument:X6");
                 } else if (!dbAttribute.isMultiAssociation()) {
+                    //log.debug("addAttributesToSolrDocument:X7");
                     ModelObjectInterface value = (ModelObjectInterface) dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
+                    //log.debug("addAttributesToSolrDocument:X8");
                     addAttributeValueToStatement(dbAttribute, solrObj, value, prefix);
+                    //log.debug("addAttributesToSolrDocument:X9");
                     if(value != null && !storedObjects.containsKey(value.getObjectID())){
+                        //log.debug("addAttributesToSolrDocument:X10");
                         storedObjects.put(value.getObjectID(), value.getObjectID());
+                        //log.debug("addAttributesToSolrDocument:X11");
                         put(value, dbAttribute.getSolrAttributeName(prefix), storedObjects, solrServer, solrObj);
+                        //log.debug("addAttributesToSolrDocument:X12");
                     }
 //                    solrObj.addField(attributeName, modelObject.getSingleAssociationID(attributeName));
                 } else { //isMultiAssociation
                     if(dbAttribute.getAttributeClass().isEnum() || dbAttribute.getAttributeClass().isPrimitive()){
+                        //log.debug("addAttributesToSolrDocument:X13");
                         Object objects = dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
 //                        String attributeName = dbAttribute.getAttributeName();
                         String solrAttributeName = dbAttribute.getSolrAttributeName(prefix);
                         solrObj.addField(solrAttributeName, objects);
+                        //log.debug("addAttributesToSolrDocument:X4");
 
                     } else {
+                        //log.debug("addAttributesToSolrDocument:X15");
                         ModelObjectInterface[] vs = (ModelObjectInterface[]) dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
                         HashMap<String, ArrayList<Object>> values = new HashMap<String, ArrayList<Object>>();
                         for(int i = 0; vs != null && i < vs.length; i++){
@@ -231,6 +247,7 @@ public class ModelObjectSearchService {
                             log.trace("Adding_to_array.size " + solrArrayName + "("+ (objects == null ? "-1" : (objects.size() == 1 ? ""+ objects.get(0) : ""+ objects.size())) +")");
                             solrObj.addField(solrArrayName, objects);
                         }
+                        //log.debug("addAttributesToSolrDocument:X16");
                     }
                 }
             }

@@ -1,6 +1,7 @@
 package dk.lessismore.nojpa.masterworker.worker;
 
 import dk.lessismore.nojpa.concurrency.WaitForValue;
+import dk.lessismore.nojpa.masterworker.exceptions.WorkerExecutionException;
 import dk.lessismore.nojpa.masterworker.executor.Executor;
 import dk.lessismore.nojpa.masterworker.master.MasterProperties;
 import dk.lessismore.nojpa.net.link.ClientLink;
@@ -28,6 +29,7 @@ public class Worker {
     private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(Worker.class);
     private static final long SEND_PROGRESS_INTERVAL = 10 * 1000;
     private static final long SEND_HEALTH_INTERVAL = 120 * 1000;
+    private static final int  MAX_SAME_PROGRESS = 3;
     private final List<? extends Class<? extends Executor>> supportedExecutors;
     private static final double CRITICAL_VM_MEMORY_USAGE = 0.95;
     private final Serializer serializer;
@@ -111,8 +113,10 @@ public class Worker {
             log.debug("Waiting for calculation to end...");
 
             double progress = -1.0;
+            int sameProgress = 0;
             while(linkAndThreads.jobThread.isAlive() && linkAndThreads.clientLink.isWorking()) {
                 if(linkAndThreads.executor.getProgress() != progress) {
+                    sameProgress = 0;
                     progress = linkAndThreads.executor.getProgress();
                     log.debug("Working: "+(progress*100) + "%");
                     try {
@@ -122,9 +126,19 @@ public class Worker {
                         linkAndThreads.clientLink.close();
                         break;
                     }
+                } else {
+                    sameProgress++;
+                    if(sameProgress > MAX_SAME_PROGRESS){
+                        log.debug("This is a job that haven't had any progress the last "+ (sameProgress * 10) +"sec - we will kill it...");
+                        resultMessage.setException(new WorkerExecutionException("Too long time"), serializer);
+                        break;
+                    }
                 }
                 try {
+                    log.debug("sameProgress: " + sameProgress);
+                    log.debug("Will: linkAndThreads.jobThread.join(SEND_PROGRESS_INTERVAL); - START");
                     linkAndThreads.jobThread.join(SEND_PROGRESS_INTERVAL);
+                    log.debug("Will: linkAndThreads.jobThread.join(SEND_PROGRESS_INTERVAL); - END");
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -146,6 +160,11 @@ public class Worker {
                 linkAndThreads.clientLink.close();
                 linkAndThreads.stopThreads();
                 break; //exit
+            }
+
+            if(sameProgress > MAX_SAME_PROGRESS){
+                stop = true;
+                break;
             }
 //            stop = true;
 //            break;

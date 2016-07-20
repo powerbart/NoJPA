@@ -181,6 +181,7 @@ public class DbAttribute implements Serializable {
 
     public boolean isInlineInterface() {
         return attribute.getAttributeClass().getAnnotation(DbInline.class) != null;
+//Shouldn't be: (because the creation of database breaks... )        return attribute.getDeclaringClass().getAnnotation(DbInline.class) != null;
     }
 
     public String getInlineAttributeName() {

@@ -39,11 +39,16 @@ public class WorkerPool {
         for (WorkerEntry entry: pool.values()) {
             String inapplicableReason = entry.notApplicableReason();
             if (inapplicableReason != null) {
-                //log.info("Worker not applicable: " + inapplicableReason);
+//                if(!inapplicableReason.equals("Worker is busy")){
+                    log.debug("Worker("+ entry +") not applicable: " + inapplicableReason);
+//                }
                 continue;
             }
             if (entry.knownClasses.contains(executorClass)) {
                 if (stepEntry == null || entry.healthierThan(stepEntry)) {
+                    if(stepEntry != null){
+                        log.debug("PreSelectedWorker("+ stepEntry +") losses to NewSelectedWorker("+ entry +")");
+                    }
                     stepEntry = entry;
                 }
             }
@@ -157,12 +162,12 @@ public class WorkerPool {
             if (vmMemoryUsage > properties.getWorkerCriticalVmMemoryUsage()) {
                 return "Memory usage in VM too high: "+ vmMemoryUsage;
             }
-            for (String mountPoint: diskUsages.keySet()) {
-                double usage = diskUsages.get(mountPoint);
-                if (usage > properties.getWorkerCriticalDiskUsage()) {
-                    return "Disk usage on disk mounted on : "+ mountPoint + " is to high: " + usage;
-                }
-            }
+//            for (String mountPoint: diskUsages.keySet()) {
+//                double usage = diskUsages.get(mountPoint);
+//                if (usage > properties.getWorkerCriticalDiskUsage() && !mountPoint.startsWith("/Vol") && !mountPoint.startsWith("/mnt") && !mountPoint.equals("/home") && !mountPoint.equals("/net") && !mountPoint.equals("/dev") && !mountPoint.equals("0")) {
+//                    return "v2: Disk usage on disk mounted on : "+ mountPoint + " is to high: " + usage;
+//                }
+//            }
             return null; // worker is applicable
         }
 
