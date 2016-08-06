@@ -64,31 +64,44 @@ public class DatabaseCreatorTest {
         }
         ModelObjectService.save(address);
 
-        ObjectCacheFactory.getInstance().getObjectCache(Address.class).clear();
-        ObjectCacheFactory.getInstance().getObjectCache(Phone.class).clear();
-        System.out.println("------------- START");
-        List<Address> list = MQL.select(Address.class).getList();
-        for(Address a : list){
-            System.out.printf("a->" + (a.getA() != null ? a.getA().getNumber() : "null"));
-
-        }
-        System.out.println("------------- END");
-
         {
             ObjectCacheFactory.getInstance().getObjectCache(Address.class).clear();
             ObjectCacheFactory.getInstance().getObjectCache(Phone.class).clear();
-            Address mock = MQL.mock(Address.class);
-            List<Address> myArea = MQL.select(mock).where(mock.getArea(), MQL.Comp.EQUAL, "MyArea").getList();
-            System.out.println(myArea.size());
+            System.out.println("------------- START");
+            List<Address> list = MQL.select(Address.class).getList();
+            for (Address a : list) {
+                System.out.printf("a->" + (a.getA() != null ? a.getA().getNumber() : "null"));
+
+            }
+            System.out.println("------------- END");
+
+            {
+                ObjectCacheFactory.getInstance().getObjectCache(Address.class).clear();
+                ObjectCacheFactory.getInstance().getObjectCache(Phone.class).clear();
+                Address mock = MQL.mock(Address.class);
+                List<Address> myArea = MQL.select(mock).where(mock.getArea(), MQL.Comp.EQUAL, "MyArea").getList();
+                System.out.println(myArea.size());
+            }
+
+            {
+                ObjectCacheFactory.getInstance().getObjectCache(Address.class).clear();
+                ObjectCacheFactory.getInstance().getObjectCache(Phone.class).clear();
+                Address mock = MQL.mock(Address.class);
+                List<Address> myArea = MQL.select(mock).where(mock.getA().getNumber(), MQL.Comp.EQUAL, "MyNumberRocks!").getList();
+                System.out.println(myArea.size());
+            }
+        }
+        {
+            System.out.println("------------- Adding to Solr START");
+            List<Address> list = MQL.select(Address.class).getList();
+            for (Address a : list) {
+                System.out.printf("a->" + (a.getA() != null ? a.getA().getNumber() : "null"));
+
+
+            }
+            System.out.println("------------- Adding to Solr END");
         }
 
-        {
-            ObjectCacheFactory.getInstance().getObjectCache(Address.class).clear();
-            ObjectCacheFactory.getInstance().getObjectCache(Phone.class).clear();
-            Address mock = MQL.mock(Address.class);
-            List<Address> myArea = MQL.select(mock).where(mock.getA().getNumber(), MQL.Comp.EQUAL, "MyNumberRocks!").getList();
-            System.out.println(myArea.size());
-        }
 
     }
 

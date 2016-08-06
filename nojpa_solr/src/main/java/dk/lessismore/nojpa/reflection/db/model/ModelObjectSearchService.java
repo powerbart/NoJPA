@@ -196,7 +196,7 @@ public class ModelObjectSearchService {
             //log.debug("addAttributesToSolrDocument:X2");
             DbAttribute dbAttribute = (DbAttribute) iterator.next();
             SearchField searchField = dbAttribute.getAttribute().getAnnotation(SearchField.class);
-            if(searchField != null) {
+            if(searchField != null && dbAttribute.getInlineAttributeName() == null) {
                 //log.debug("addAttributesToSolrDocument:X3");
                 if(!dbAttribute.isAssociation()) {
                     //log.debug("addAttributesToSolrDocument:X4");

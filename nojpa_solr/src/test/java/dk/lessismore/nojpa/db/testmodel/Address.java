@@ -22,10 +22,11 @@ public interface Address extends ModelObjectInterface {
     int getZip();
     void setZip(int zip);
 
-
+    @SearchField
     Phone getA();
     void setA(Phone phone);
 
+    @SearchField
     Phone getB();
     void setB(Phone phone);
 

@@ -5,10 +5,7 @@ import dk.lessismore.nojpa.db.methodquery.MQL;
 import dk.lessismore.nojpa.db.methodquery.NList;
 import dk.lessismore.nojpa.db.methodquery.NQL;
 import dk.lessismore.nojpa.db.methodquery.NStats;
-import dk.lessismore.nojpa.db.testmodel.Address;
-import dk.lessismore.nojpa.db.testmodel.Car;
-import dk.lessismore.nojpa.db.testmodel.Person;
-import dk.lessismore.nojpa.db.testmodel.PersonStatus;
+import dk.lessismore.nojpa.db.testmodel.*;
 import dk.lessismore.nojpa.reflection.db.DatabaseCreator;
 import dk.lessismore.nojpa.reflection.db.DbObjectVisitor;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
@@ -27,10 +24,7 @@ import org.apache.solr.common.SolrDocument;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.Calendar;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 /**
  * Created by seb on 7/23/14.
@@ -60,9 +54,110 @@ public class NQLTest {
             ModelObjectSearchService.put(person);
 
         }
-
-
     }
+
+
+    @Test
+    public void testDbCreateInlineWithSolr() throws Exception {
+        Class<Address> addressClass = Address.class;
+        List<Class> l = new ArrayList<Class>();
+        l.add(addressClass);
+        DatabaseCreator.createDatabase(l);
+
+        SolrServiceImpl solrService = new SolrServiceImpl();
+        solrService.setCoreName("nojpa");
+        solrService.setCleanOnStartup(true);
+
+        ModelObjectSearchService.addSolrServer(Address.class, solrService.getServer());
+
+
+        Address address = ModelObjectService.create(Address.class);
+        address.setArea("MyArea");
+        {
+            Phone phone = ModelObjectService.create(Phone.class);
+            phone.setFunnyD(232d);
+            phone.setNumber("MyNumberRocks!");
+            address.setA(phone);
+        }
+        {
+            Phone phone = ModelObjectService.create(Phone.class);
+            phone.setFunnyD(123d);
+            phone.setNumber("B-For-Big!");
+            address.setB(phone);
+        }
+//        {
+//            Address addressN = ModelObjectService.create(Address.class);
+//            addressN.setArea("NothingArea");
+//            ModelObjectService.save(addressN);
+//
+//        }
+        ModelObjectService.save(address);
+
+        {
+            ObjectCacheFactory.getInstance().getObjectCache(Address.class).clear();
+            ObjectCacheFactory.getInstance().getObjectCache(Phone.class).clear();
+            System.out.println("------------- START");
+            List<Address> list = MQL.select(Address.class).getList();
+            for (Address a : list) {
+                System.out.printf("a->" + (a.getA() != null ? a.getA().getNumber() : "null"));
+
+            }
+            System.out.println("------------- END");
+
+            {
+                ObjectCacheFactory.getInstance().getObjectCache(Address.class).clear();
+                ObjectCacheFactory.getInstance().getObjectCache(Phone.class).clear();
+                Address mock = MQL.mock(Address.class);
+                List<Address> myArea = MQL.select(mock).where(mock.getArea(), MQL.Comp.EQUAL, "MyArea").getList();
+                System.out.println(myArea.size());
+            }
+
+            {
+                ObjectCacheFactory.getInstance().getObjectCache(Address.class).clear();
+                ObjectCacheFactory.getInstance().getObjectCache(Phone.class).clear();
+                Address mock = MQL.mock(Address.class);
+                List<Address> myArea = MQL.select(mock).where(mock.getA().getNumber(), MQL.Comp.EQUAL, "MyNumberRocks!").getList();
+                System.out.println(myArea.size());
+            }
+        }
+        {
+            System.out.println("------------- Adding to Solr START");
+            List<Address> list = MQL.select(Address.class).getList();
+            for (Address a : list) {
+                System.out.printf("a->" + (a.getA() != null ? a.getA().getNumber() : "null"));
+                ModelObjectSearchService.put(a);
+
+            }
+            System.out.println("------------- Adding to Solr END");
+        }
+        ModelObjectSearchService.commit(Address.class);
+        {
+            System.out.println("------------- Getting from Solr START");
+            Address mock = NQL.mock(Address.class);
+            NList<Address> list = NQL.search(mock).getList();
+            for (Address a : list) {
+                System.out.printf("a->" + (a.getA() != null ? a.getA().getNumber() : "null"));
+
+            }
+            System.out.println("------------- Getting from Solr END");
+        }
+        {
+            System.out.println("------------- Getting specific START");
+            Address mock = NQL.mock(Address.class);
+            NList<Address> list = NQL.search(mock).search(mock.getA().getFunnyD(), NQL.Comp.EQUAL_OR_GREATER, 200d).getList();
+            for (Address a : list) {
+                System.out.printf("a->" + (a.getA() != null ? a.getA().getNumber() : "null"));
+
+            }
+            System.out.println("------------- Getting specific Solr END");
+        }
+
+
+    } //_Address_a__ID_Phone_funnyD__DOUBLE
+      //_Address_a__ID_Phone_funnyD__DOUBLE
+
+
+
 
 
     @Test
