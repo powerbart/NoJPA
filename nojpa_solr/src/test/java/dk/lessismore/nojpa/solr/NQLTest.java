@@ -15,6 +15,7 @@ import dk.lessismore.nojpa.reflection.db.model.SolrServiceImpl;
 import dk.lessismore.nojpa.reflection.translate.LessismoreTranslateServiceImpl;
 import dk.lessismore.nojpa.utils.Pair;
 import junit.framework.Assert;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -55,6 +56,96 @@ public class NQLTest {
 
         }
     }
+
+
+    @Test
+    public void testDbCreateInlineWithVisitor() throws Exception {
+        Class<Address> addressClass = Address.class;
+        List<Class> l = new ArrayList<Class>();
+        l.add(addressClass);
+        DatabaseCreator.createDatabase(l);
+
+        SolrServiceImpl solrService = new SolrServiceImpl();
+        solrService.setCoreName("nojpa");
+        solrService.setCleanOnStartup(true);
+
+        ModelObjectSearchService.addSolrServer(Address.class, solrService.getServer());
+
+
+        Address address = ModelObjectService.create(Address.class);
+        address.setArea("MyArea");
+        {
+            Phone phone = ModelObjectService.create(Phone.class);
+            phone.setFunnyD(232d);
+            phone.setNumber("MyNumberRocks!");
+            address.setA(phone);
+        }
+        {
+            Phone phone = ModelObjectService.create(Phone.class);
+            phone.setFunnyD(123d);
+            phone.setNumber("B-For-Big!");
+            address.setB(phone);
+        }
+//        {
+//            Address addressN = ModelObjectService.create(Address.class);
+//            addressN.setArea("NothingArea");
+//            ModelObjectService.save(addressN);
+//
+//        }
+        ModelObjectService.save(address);
+
+        {
+            ObjectCacheFactory.getInstance().getObjectCache(Address.class).clear();
+            ObjectCacheFactory.getInstance().getObjectCache(Phone.class).clear();
+            System.out.println("------------- START");
+            List<Address> list = MQL.select(Address.class).getList();
+            for (Address a : list) {
+                System.out.printf("a->" + (a.getA() != null ? a.getA().getNumber() : "null"));
+
+            }
+            System.out.println("------------- END");
+
+            {
+                ObjectCacheFactory.getInstance().getObjectCache(Address.class).clear();
+                ObjectCacheFactory.getInstance().getObjectCache(Phone.class).clear();
+                Address mock = MQL.mock(Address.class);
+                List<Address> myArea = MQL.select(mock).where(mock.getArea(), MQL.Comp.EQUAL, "MyArea").getList();
+                System.out.println(myArea.size());
+            }
+
+            {
+                ObjectCacheFactory.getInstance().getObjectCache(Address.class).clear();
+                ObjectCacheFactory.getInstance().getObjectCache(Phone.class).clear();
+                Address mock = MQL.mock(Address.class);
+                List<Address> myArea = MQL.select(mock).where(mock.getA().getNumber(), MQL.Comp.EQUAL, "MyNumberRocks!").getList();
+                System.out.println(myArea.size());
+            }
+            {
+
+                Address mAddress = MQL.mock(Address.class);
+                MQL.select(mAddress).where(mAddress.getCreationDate(), MQL.Comp.EQUAL_OR_GREATER, Calendar.getInstance()).visit(new DbObjectVisitor() {
+                    @Override
+                    public void visit(ModelObjectInterface m) {
+                        System.out.println("visiting ... ");
+                    }
+
+                    @Override
+                    public void setDone(boolean b) {
+
+                    }
+
+                    @Override
+                    public boolean getDone() {
+                        return false;
+                    }
+                });
+
+
+            }
+
+        }
+    }
+
 
 
     @Test
