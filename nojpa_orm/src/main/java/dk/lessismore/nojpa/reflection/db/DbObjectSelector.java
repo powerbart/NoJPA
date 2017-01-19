@@ -317,9 +317,9 @@ public class DbObjectSelector {
                 return 0;
             }
         } catch(Exception e){
-            log.error("countObjectsFromDb: "+ e, e);
+            log.error("countObjectsFromDb: SQL("+ selectSqlStatement +") "+ e, e);
             e.printStackTrace();
-            throw new RuntimeException("countObjectsFromDb:" +  e);
+            throw new RuntimeException("countObjectsFromDb SQL("+ selectSqlStatement +"):" +  e);
         } finally {
             if(limSet != null) limSet.close();
         }

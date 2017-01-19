@@ -364,30 +364,30 @@ public class SuperIO {
 
 
     public static void main(String[] args) throws IOException {
-        String fileName = "/tmp/uploaddir/700k.csv";
-        for(int i = 0; i < 10; i++){
-            long n = System.currentTimeMillis();
-            int i1 = countLines(new File(fileName));
-            System.out.println("loop:end:("+ i1 +"):" + i + " -- " + (System.currentTimeMillis() - n));
-        }
-
-        for(int i = 0; i < 10; i++){
-            long n = System.currentTimeMillis();
-            FileInputStream fr = new FileInputStream(fileName);
-            int readLength = 1;
-            byte[] bytes = new byte[2 * 1024];
-            int countNewLines = 0;
-            while(readLength > 0){
-                readLength = fr.read(bytes, 0, bytes.length);
-                for(int j = 0; j < readLength; j++){
-                    if(bytes[j] == '\n'){
-                        countNewLines++;
-                    }
+        String infileName = "/Users/seb/Downloads/LarsRonnedal.pdf";
+        String outfileName = "/Users/seb/Downloads/LarsRonnedal-2.pdf";
+        FileInputStream fr = new FileInputStream(infileName);
+        FileOutputStream out = new FileOutputStream(outfileName);
+        int readLength = 1;
+        byte[] bytes = new byte[64];
+        int counter = 0;
+        while(readLength != -1){
+            readLength = fr.read(bytes, 0, bytes.length);
+            if(readLength != -1) {
+                String s = new String(bytes, 0, readLength);
+                if(s.contains("(Lars R\\370nnedal)")){
+                    System.out.println(counter++ + ":" + s);
+                    s.replace("Lars", "Sebastian");
+                } else {
+                    //System.out.println(counter++ + ":NONE");
                 }
+                //out.write(s.getBytes());
+                out.write(bytes, 0, readLength);
             }
-            fr.close();
-            System.out.println("loop:end:("+ countNewLines +"):" + i + " -- " + (System.currentTimeMillis() - n));
         }
+        out.flush();
+        out.close();
+        fr.close();
 
 
 
