@@ -163,7 +163,7 @@ public class WorkerPool {
         }
 
         public String getIdleTime(){
-            return timeToString(idle ? (totalIdleTime + (System.currentTimeMillis() - lastIdleStart)) : totalIdleTime);
+            return timeToString(idle && totalCountOfJobs > 1 ? (totalIdleTime + (System.currentTimeMillis() - lastIdleStart)) : totalIdleTime);
         }
 
         public String getJobTime(){
@@ -212,7 +212,7 @@ public class WorkerPool {
                     totalCountOfSuccesJobs,
                     totalCountOfJobs,
                     (((double) totalCountOfSuccesJobs)/ ((double) totalCountOfJobs)),
-                    vmMemoryUsage,
+                    printNice("" + vmMemoryUsage),
                     health(),
                     getTimeSinceLastJob()
             );
