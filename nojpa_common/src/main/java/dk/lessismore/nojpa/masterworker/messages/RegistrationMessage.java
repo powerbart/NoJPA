@@ -23,7 +23,7 @@ public class RegistrationMessage {
 
     public RegistrationMessage() {
         try {
-            hostname = InetAddress.getLocalHost().getHostName();
+            hostname = InetAddress.getLocalHost().toString();
         } catch (Exception e) {
             e.printStackTrace();
         }

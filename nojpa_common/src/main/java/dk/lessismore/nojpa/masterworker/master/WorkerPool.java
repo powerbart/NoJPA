@@ -124,7 +124,10 @@ public class WorkerPool {
     }
 
 
+    static int TOTAL_COUNT_OF_INSTANCE = 1;
     class WorkerEntry  {
+
+
 
         private final String debugNameOfWorker;
 
@@ -133,6 +136,7 @@ public class WorkerPool {
             this.debugNameOfWorker = debugNameOfWorker;
             this.serverLink = serverLink;
             this.idle = true;
+            this.myID = TOTAL_COUNT_OF_INSTANCE++;
         }
 
         public Set<String> knownClasses;
@@ -141,10 +145,11 @@ public class WorkerPool {
         public double vmMemoryUsage = 0;
         public Map<String, Double> diskUsages = new HashMap<String, Double>();
         public boolean idle;
+        private final int myID;
 
         public long rebootTime = System.currentTimeMillis();
         public long lastJobStart = -1;
-        public long lastIdleStart = -1;
+        public long lastIdleStart = System.currentTimeMillis();
         public long totalIdleTime = 0;
         public long totalJobTime = 0;
         public long totalCountOfJobs = 1; //Should always be 1 (divide by zero)
@@ -163,7 +168,8 @@ public class WorkerPool {
         }
 
         public String getIdleTime(){
-            return timeToString(idle && totalCountOfJobs > 1 ? (totalIdleTime + (System.currentTimeMillis() - lastIdleStart)) : totalIdleTime);
+//            return timeToString(idle && totalCountOfJobs > 1 ? (totalIdleTime + (System.currentTimeMillis() - lastIdleStart)) : totalIdleTime);
+            return timeToString(totalIdleTime + (System.currentTimeMillis() - lastIdleStart));
         }
 
         public String getJobTime(){
@@ -177,46 +183,95 @@ public class WorkerPool {
 
 
         private String timeToString(long l){
-            long SEC = 60 * 1000;
+            long SEC = 1000;
             long MIN = 60 * SEC;
             long HOUR = 60 * MIN;
             long DAY = 24 * HOUR;
 
             if(l / DAY > 1){
-                return printNice("" + (((double)l) / ((double) DAY))) + "d";
+                return printNice((((double)l) / ((double) DAY))) + "d";
             }
             if(l / HOUR > 1){
-                return printNice("" + (((double)l) / ((double) HOUR))) + "h";
+                return printNice((((double)l) / ((double) HOUR))) + "h";
             }
             if(l / MIN > 1){
-                return printNice("" + (((double)l) / ((double) HOUR))) + "m";
+                return printNice((((double)l) / ((double) MIN))) + "m";
             }
-            return printNice("" + (((double)l) / ((double) HOUR))) + "s";
+            return printNice((((double)l) / ((double) SEC))) + "s";
         }
 
+        public int getMyID() {
+            return myID;
+        }
 
         public double health() {
             return systemLoad;
         }
 
+
+
         @Override
         public String toString() {
-            return String.format(
-                    "{Worker: idle=%s load=%s, %s@%s:%s JobTime:%s IdleTime:%s jobs(%s/%s)=%s vmMemory=%s health=%s TimeSinceLastJob(%s)}",
-                    idle,
-                    printNice("" + systemLoad),
-                    (debugNameOfWorker != null && debugNameOfWorker.length() > 7 ? debugNameOfWorker : serverLink.getOtherHost()),
-                    serverLink.getOtherHost(),
-                    serverLink.getOtherPort(),
-                    getJobTime(),
-                    getIdleTime(),
-                    totalCountOfSuccesJobs,
-                    totalCountOfJobs,
-                    (((double) totalCountOfSuccesJobs)/ ((double) totalCountOfJobs)),
-                    printNice("" + vmMemoryUsage),
-                    health(),
-                    getTimeSinceLastJob()
-            );
+            return
+                    "{" + rightAlign("Worker["+ myID +"]:", 12) + rightAlign(" idle="+ idle, 11) + rightAlign("load="+ printNice("" + systemLoad), 10) +" "+
+                            (debugNameOfWorker != null && debugNameOfWorker.length() > 7 ? debugNameOfWorker : serverLink.getOtherHost())
+                            +" JobTime:"+ getJobTime() +" IdleTime:"+ getIdleTime() +" jobs("+ totalCountOfSuccesJobs
+                            +") succes("+ printNice("" + (((double) totalCountOfSuccesJobs)/ ((double) totalCountOfJobs)))
+                            +") job/sec("+ printNice("" + (((double)(System.currentTimeMillis() - rebootTime))/ ((double) totalCountOfJobs))) +") LastJob("+  getTimeSinceLastJob() +")}"
+
+            ;
+        }
+
+
+        public String listRow() {
+            return
+                    "{" + rightAlign(""+ myID +"", 10)
+                            + rightAlign(""+ idle, 8)
+                            + rightAlign(""+ printNice(systemLoad), 8)
+                            + rightAlign(""+ printNice("" + (debugNameOfWorker != null && debugNameOfWorker.length() > 7 ? debugNameOfWorker : serverLink.getOtherHost())), 32)
+                            + rightAlign(""+ (getJobTime()), 8)
+                            + rightAlign(""+ (getIdleTime()), 8)
+                            + rightAlign(""+ timeToString(System.currentTimeMillis() - rebootTime), 8)
+                            + rightAlign(""+ timeToString(System.currentTimeMillis() - lastJobStart), 8)
+                            + rightAlign(""+ printNice((((double) totalCountOfSuccesJobs)/ ((double) totalCountOfJobs))), 8)
+                            + rightAlign(""+ printNice(totalCountOfSuccesJobs), 13)
+                            + rightAlign(""+ printNice((((double)(System.currentTimeMillis() - rebootTime))/ (((double) totalCountOfJobs) * 1000))), 17)
+                    + "}"
+                    ;
+        }
+
+        public String listTitle() {
+            return
+                    "{" + rightAlign("Worker", 10)
+                            + rightAlign("idle", 8)
+                            + rightAlign("Load", 8)
+                            + rightAlign("Name", 32)
+                            + rightAlign("JobT", 8)
+                            + rightAlign("IdleT", 8)
+                            + rightAlign("TotalT", 8)
+                            + rightAlign("LastJ", 8)
+                            + rightAlign("Succes", 8)
+                            + rightAlign("Count", 13)
+                            + rightAlign("J/sec", 17)
+                            + "}"
+                    ;
+        }
+
+        private String rightAlign(String s, int totalSpace){
+            int length = s.length();
+            if(length > totalSpace){
+                return s;
+            } else {
+                totalSpace = totalSpace - length;
+                for(int i = 0; i < totalSpace; i++){
+                    s = " " + s;
+                }
+                return s;
+            }
+        }
+
+        private String printNice(Number s){
+            return String.format("%.02f", s.floatValue());
         }
 
         private String printNice(String s){
@@ -258,9 +313,14 @@ public class WorkerPool {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("---------------------------------- WorkerPool ----------------------------------\n");
+        boolean first = true;
         for (WorkerEntry workerEntry: pool.values()) {
-            builder.append("  ");
-            builder.append(workerEntry.toString());
+            if(first){
+                first = false;
+                builder.append(workerEntry.listTitle());
+                builder.append("\n");
+            }
+            builder.append(workerEntry.listRow());
             builder.append("\n");
         }
         return builder.toString();
