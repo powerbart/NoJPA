@@ -24,9 +24,18 @@ public class RegistrationMessage {
     public RegistrationMessage() {
         try {
             hostname = InetAddress.getLocalHost().getHostName();
-        } catch (UnknownHostException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
+        if(hostname.equals("Unknown") || hostname.equals("localhost")){
+            try {
+                hostname = System.getenv("HOST");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+
         try {
             folder = System.getenv("PWD");
             if(folder != null && folder.indexOf("/") != -1){
