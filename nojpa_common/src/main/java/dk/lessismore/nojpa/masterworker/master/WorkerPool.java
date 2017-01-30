@@ -202,10 +202,11 @@ public class WorkerPool {
         @Override
         public String toString() {
             return String.format(
-                    "{Worker: idle=%s load=%s, %s:%s JobTime:%s IdleTime:%s jobs(%s/%s)=%s vmMemory=%s health=%s TimeSinceLastJob(%s)}",
+                    "{Worker: idle=%s load=%s, %s@%s:%s JobTime:%s IdleTime:%s jobs(%s/%s)=%s vmMemory=%s health=%s TimeSinceLastJob(%s)}",
                     idle,
                     printNice("" + systemLoad),
                     (debugNameOfWorker != null && debugNameOfWorker.length() > 7 ? debugNameOfWorker : serverLink.getOtherHost()),
+                    serverLink.getOtherHost(),
                     serverLink.getOtherPort(),
                     getJobTime(),
                     getIdleTime(),
@@ -219,7 +220,7 @@ public class WorkerPool {
         }
 
         private String printNice(String s){
-            return s != null && s.length() > 5 ? s.substring(0, 5) : s;
+            return s != null && s.length() > 4 ? s.substring(0, 4) : s;
         }
 
 
