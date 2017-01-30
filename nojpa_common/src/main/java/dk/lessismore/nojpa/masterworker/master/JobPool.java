@@ -11,6 +11,7 @@ import dk.lessismore.nojpa.masterworker.exceptions.WorkerExecutionException;
 import dk.lessismore.nojpa.properties.PropertiesProxy;
 import dk.lessismore.nojpa.utils.MaxSizeArray;
 
+import java.io.File;
 import java.util.*;
 import java.text.SimpleDateFormat;
 import java.io.IOException;
@@ -243,6 +244,11 @@ public class JobPool {
             queue.remove(jobEntry);
             log.debug("Removed job: "+ jobEntry);
         }
+        File storedResultFile = MasterServer.getStoredResultFile(jobID);
+        if(storedResultFile != null && storedResultFile.exists()){
+            storedResultFile.delete();
+        }
+
     }
 
     @SuppressWarnings("unchecked cast")
@@ -279,6 +285,10 @@ public class JobPool {
             this.sequenceNumber = jobEntrySequenceNumberCounter;
             jobEntrySequenceNumberCounter++;
             this.jobMessage = jobMessage;
+        }
+
+        public String getJobID(){
+            return jobMessage.getJobID();
         }
 
 
@@ -377,6 +387,9 @@ public class JobPool {
 
     @Override
     public String toString() {
+        Calendar oneHour = Calendar.getInstance();
+        oneHour.add(Calendar.HOUR, -1);
+
         StringBuilder builder = new StringBuilder();
         builder.append("---------------------------------- JobPool ----------------------------------\n");
         builder.append("IN QUEUE:\n");
@@ -386,12 +399,25 @@ public class JobPool {
             builder.append("\n");
         }
         builder.append("OTHERS:\n");
+        List<String> jobsToRemove = new ArrayList<String>();
         for (JobEntry jobEntry: pool.values()) {
             if (queue.contains(jobEntry)) continue;
             builder.append("  ");
             builder.append(jobEntry.toString());
             builder.append("\n");
+            if(jobEntry.getStatus() == JobStatus.DONE && jobEntry.jobDoneDate != null && jobEntry.jobDoneDate.before(oneHour)){
+                jobsToRemove.add(jobEntry.getJobID());
+            }
         }
+        for(String sid : jobsToRemove){
+            try {
+                removeJob(sid);
+            } catch (Exception e){
+                log.error("Some error: "+ e, e);
+            }
+        }
+
+
         builder.append("LAST-5-RESULTS:\n");
         for (Iterator<JobEntry> iterator = last5SuccesJobs.iterator(); iterator.hasNext(); ) {
             JobEntry jobEntry = iterator.next();

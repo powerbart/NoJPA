@@ -1,5 +1,7 @@
 package dk.lessismore.nojpa.masterworker.master;
 
+import dk.lessismore.nojpa.masterworker.SystemHealth;
+import dk.lessismore.nojpa.masterworker.messages.RegistrationMessage;
 import org.apache.log4j.Logger;
 import dk.lessismore.nojpa.net.link.ServerLink;
 import dk.lessismore.nojpa.masterworker.messages.observer.ObserverWorkerMessage;
@@ -14,8 +16,8 @@ public class WorkerPool {
     private static org.apache.log4j.Logger log = Logger.getLogger(WorkerPool.class);
     Map<ServerLink, WorkerEntry> pool = new HashMap<ServerLink, WorkerEntry>();
 
-    public void addWorker(String[] knownClasses, ServerLink serverLink) {
-        WorkerEntry workerEntry = new WorkerEntry(knownClasses, serverLink);
+    public void addWorker(RegistrationMessage registrationMessage, ServerLink serverLink) {
+        WorkerEntry workerEntry = new WorkerEntry(registrationMessage.getHostname()+ ":" + registrationMessage.getFolder(), registrationMessage.getKnownClasses(), serverLink);
         pool.put(workerEntry.serverLink, workerEntry);
     }
 
@@ -61,6 +63,10 @@ public class WorkerPool {
             stepEntry.idle = false;
         }
         return stepEntry;
+    }
+
+    public WorkerEntry getWorkerEntry(ServerLink worker) {
+        return pool.get(worker);
     }
 
     public boolean isIdle(ServerLink worker) {
@@ -120,8 +126,11 @@ public class WorkerPool {
 
     class WorkerEntry  {
 
-        private WorkerEntry(String[] knownClasses, ServerLink serverLink) {
+        private final String debugNameOfWorker;
+
+        private WorkerEntry(String debugNameOfWorker, String[] knownClasses, ServerLink serverLink) {
             this.knownClasses = new HashSet<String>(Arrays.asList(knownClasses));
+            this.debugNameOfWorker = debugNameOfWorker;
             this.serverLink = serverLink;
             this.idle = true;
         }
@@ -133,16 +142,86 @@ public class WorkerPool {
         public Map<String, Double> diskUsages = new HashMap<String, Double>();
         public boolean idle;
 
+        public long rebootTime = System.currentTimeMillis();
+        public long lastJobStart = -1;
+        public long lastIdleStart = -1;
+        public long totalIdleTime = 0;
+        public long totalJobTime = 0;
+        public long totalCountOfJobs = 1; //Should always be 1 (divide by zero)
+        public long totalCountOfSuccesJobs = 0;
+
+        public void jobReturnedStats() {
+            lastIdleStart = System.currentTimeMillis();
+            totalCountOfSuccesJobs++;
+            totalJobTime = totalJobTime + (System.currentTimeMillis() - lastJobStart);
+        }
+
+        public void jobTakenStats() {
+            lastJobStart = System.currentTimeMillis();
+            totalCountOfJobs++;
+            totalIdleTime = totalIdleTime + (System.currentTimeMillis() - lastIdleStart);
+        }
+
+        public String getIdleTime(){
+            return timeToString(idle ? (totalIdleTime + (System.currentTimeMillis() - lastIdleStart)) : totalIdleTime);
+        }
+
+        public String getJobTime(){
+            return timeToString(idle ? totalJobTime : (totalJobTime + (System.currentTimeMillis() - lastJobStart)));
+        }
+
+        public String getTimeSinceLastJob(){
+            return timeToString(idle && totalCountOfJobs > 1 ?  (System.currentTimeMillis() - lastJobStart) : 0);
+        }
+
+
+
+        private String timeToString(long l){
+            long SEC = 60 * 1000;
+            long MIN = 60 * SEC;
+            long HOUR = 60 * MIN;
+            long DAY = 24 * HOUR;
+
+            if(l / DAY > 1){
+                return printNice("" + (((double)l) / ((double) DAY))) + "d";
+            }
+            if(l / HOUR > 1){
+                return printNice("" + (((double)l) / ((double) HOUR))) + "h";
+            }
+            if(l / MIN > 1){
+                return printNice("" + (((double)l) / ((double) HOUR))) + "m";
+            }
+            return printNice("" + (((double)l) / ((double) HOUR))) + "s";
+        }
+
+
         public double health() {
             return systemLoad;
         }
 
         @Override
         public String toString() {
-            return String.format("{Worker: %s:%S idle=%s, load=%s, vmMemory=%s, health=%s}",
-                    serverLink.getOtherHost(), serverLink.getOtherPort(),
-                    idle, systemLoad, vmMemoryUsage, health());
+            return String.format(
+                    "{Worker: idle=%s load=%s, %s:%s JobTime:%s IdleTime:%s jobs(%s/%s)=%s vmMemory=%s health=%s TimeSinceLastJob(%s)}",
+                    idle,
+                    printNice("" + systemLoad),
+                    (debugNameOfWorker != null && debugNameOfWorker.length() > 7 ? debugNameOfWorker : serverLink.getOtherHost()),
+                    serverLink.getOtherPort(),
+                    getJobTime(),
+                    getIdleTime(),
+                    totalCountOfSuccesJobs,
+                    totalCountOfJobs,
+                    (((double) totalCountOfSuccesJobs)/ ((double) totalCountOfJobs)),
+                    vmMemoryUsage,
+                    health(),
+                    getTimeSinceLastJob()
+            );
         }
+
+        private String printNice(String s){
+            return s != null && s.length() > 5 ? s.substring(0, 5) : s;
+        }
+
 
         public boolean healthierThan(WorkerEntry entry) {
             return this.health() > entry.health();

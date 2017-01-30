@@ -79,9 +79,9 @@ public class MasterServer {
 
 
     // Worker services
-    synchronized public void registerWorker(String[] knownClasses, ServerLink serverLink) {
+    synchronized public void registerWorker(RegistrationMessage registrationMessage , ServerLink serverLink) {
         log.trace("registerWorker: " + serverLink);
-        workerPool.addWorker(knownClasses, serverLink);
+        workerPool.addWorker(registrationMessage, serverLink);
         runJobIfNecessaryAndPossible();
         notifyObservers();
     }
@@ -125,6 +125,8 @@ public class MasterServer {
         storeResult(result);
         jobPool.setResult(result);
         workerPool.setIdle(true, serverLink);
+        WorkerPool.WorkerEntry workerEntry = workerPool.getWorkerEntry(serverLink);
+        workerEntry.jobReturnedStats();
         runJobIfNecessaryAndPossible();
     }
 
@@ -221,7 +223,7 @@ public class MasterServer {
         }
     }
 
-    private File getStoredResultFile(String jobID) {
+    protected static File getStoredResultFile(String jobID) {
         log.trace("getStoredResultFile: " + jobID);
         String resultDirName = properties.getStoreResultDir();
         File resultDir = new File(resultDirName);
@@ -239,6 +241,9 @@ public class MasterServer {
     private void storeResult(JobResultMessage result) {
         log.trace("storeResult: " + result);
         File resultFile = getStoredResultFile(result.getJobID());
+        if(!resultFile.getParentFile().exists()){
+            resultFile.getParentFile().mkdirs();
+        }
         if (resultFile == null) return;
         try {
             storeSerializer.store(result, resultFile);
@@ -262,7 +267,9 @@ public class MasterServer {
 
     synchronized private void runJobIfNecessaryAndPossible() {
         log.trace("runJobIfNecessaryAndPossible");
+        System.out.println("---------------------------------- Master Status ---------------------------------- START");
         System.out.println(jobPool.toString() + workerPool.toString());
+        System.out.println("---------------------------------- Master Status ---------------------------------- ENDS");
         final JobPool.JobEntry jobEntry = jobPool.firstJob();
         if (jobEntry == null) {
             log.debug("No Job in queue to run");
@@ -275,8 +282,9 @@ public class MasterServer {
             log.debug("No available worker to run job");
             return;
         }
-        log.debug("Fond worker to run job: "+ workerEntry);
+        log.debug("Found worker to run job: "+ workerEntry);
         jobPool.jobTaken(jobEntry, workerEntry.serverLink);
+        workerEntry.jobTakenStats();
 
 
         MessageSender.send(jobEntry.jobMessage, workerEntry.serverLink, new MessageSender.FailureHandler() {

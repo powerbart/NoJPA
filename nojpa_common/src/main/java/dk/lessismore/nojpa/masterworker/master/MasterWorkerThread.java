@@ -32,7 +32,7 @@ public class MasterWorkerThread extends Thread {
                     serverLink.write(new PongMessage());
                 } else if(clientRequest instanceof RegistrationMessage) {
                     RegistrationMessage registrationMessage = (RegistrationMessage) clientRequest;
-                    masterServer.registerWorker(registrationMessage.getKnownClasses(), serverLink);
+                    masterServer.registerWorker(registrationMessage, serverLink);
                 } else if(clientRequest instanceof HealthMessage) {
                     HealthMessage healthMessage = (HealthMessage) clientRequest;
                     masterServer.updateWorkerHealth(healthMessage, serverLink);
