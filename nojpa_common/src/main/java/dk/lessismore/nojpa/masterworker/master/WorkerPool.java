@@ -228,7 +228,7 @@ public class WorkerPool {
                     "{" + rightAlign(""+ myID +"", 10)
                             + rightAlign(""+ idle, 8)
                             + rightAlign(""+ printNice(systemLoad), 8)
-                            + rightAlign(""+ printNice("" + (debugNameOfWorker != null && debugNameOfWorker.length() > 7 ? debugNameOfWorker : serverLink.getOtherHost())), 32)
+                            + rightAlign(""+ ("" + (debugNameOfWorker != null && debugNameOfWorker.length() > 7 ? debugNameOfWorker : serverLink.getOtherHost())), 32)
                             + rightAlign(""+ (getJobTime()), 8)
                             + rightAlign(""+ (getIdleTime()), 8)
                             + rightAlign(""+ timeToString(System.currentTimeMillis() - rebootTime), 8)
