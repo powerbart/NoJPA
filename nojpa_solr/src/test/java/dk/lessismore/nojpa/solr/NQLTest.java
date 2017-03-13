@@ -15,13 +15,14 @@ import dk.lessismore.nojpa.reflection.db.model.SolrServiceImpl;
 import dk.lessismore.nojpa.reflection.translate.LessismoreTranslateServiceImpl;
 import dk.lessismore.nojpa.utils.Pair;
 import junit.framework.Assert;
-import org.apache.commons.lang3.time.DateUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.FacetField;
+import org.apache.solr.client.solrj.response.IntervalFacet;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
+import org.apache.solr.client.solrj.response.RangeFacet;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -387,7 +388,6 @@ public class NQLTest {
                 for (int k = 0; k < response.getFacetFields().size(); k++) {
                     FacetField facetField = response.getFacetFields().get(k);
                     System.out.println("--------------------------- START");
-                    System.out.println("facetField.getGap = " + facetField.getGap());
                     System.out.println("facetField.getName() = " + facetField.getName());
                     System.out.println("facetField.getValueCount() = " + facetField.getValueCount());
                     List<FacetField.Count> facetFieldValues = facetField.getValues();
@@ -398,7 +398,26 @@ public class NQLTest {
                         System.out.println("c.getCount() = " + c.getCount());
                         System.out.println("c.getFacetField() = " + c.getFacetField());
                     }
+                    System.out.println("--------------------------- END");
+                }
+                for (int k = 0; k < response.getIntervalFacets().size(); k++) {
+                    IntervalFacet facetField = response.getIntervalFacets().get(k);
+                    System.out.println("--------------------------- START");
+                    System.out.println("facetField.getField() = " + facetField.getField());
+                    System.out.println("facetField.getIntervals() = " + facetField.getIntervals());
+                    System.out.println("--------------------------- END");
+                }
+                for (int k = 0; k < response.getFacetRanges().size(); k++) {
+                    RangeFacet facetField = response.getFacetRanges().get(k);
+                    System.out.println("--------------------------- START");
+                    System.out.println("facetField.getName() = " + facetField.getName());
+                    System.out.println("facetField.getBefore() = " + facetField.getBefore());
+                    System.out.println("facetField.getAfter() = " + facetField.getAfter());
+                    System.out.println("facetField.getGap() = " + facetField.getGap());
+                    System.out.println("facetField.getStart() = " + facetField.getStart());
                     System.out.println("facetField.getEnd() = " + facetField.getEnd());
+                    System.out.println("facetField.getBetween() = " + facetField.getBetween());
+                    System.out.println("facetField.getCounts() = " + facetField.getCounts());
                     System.out.println("--------------------------- END");
                 }
             }
@@ -421,7 +440,6 @@ public class NQLTest {
                 for (int k = 0; k < response.getFacetFields().size(); k++) {
                     FacetField facetField = response.getFacetFields().get(k);
                     System.out.println("--------------------------- START");
-                    System.out.println("facetField.getGap = " + facetField.getGap());
                     System.out.println("facetField.getName() = " + facetField.getName());
                     System.out.println("facetField.getValueCount() = " + facetField.getValueCount());
                     List<FacetField.Count> facetFieldValues = facetField.getValues();
@@ -432,7 +450,6 @@ public class NQLTest {
                         System.out.println("c.getCount() = " + c.getCount());
                         System.out.println("c.getFacetField() = " + c.getFacetField());
                     }
-                    System.out.println("facetField.getEnd() = " + facetField.getEnd());
                     System.out.println("--------------------------- END");
                 }
             }
