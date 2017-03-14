@@ -4,10 +4,7 @@ import dk.lessismore.nojpa.cache.ObjectCache;
 import dk.lessismore.nojpa.cache.ObjectCacheFactory;
 import dk.lessismore.nojpa.db.LimResultSet;
 import dk.lessismore.nojpa.db.statements.*;
-import dk.lessismore.nojpa.reflection.db.DbClassReflector;
-import dk.lessismore.nojpa.reflection.db.DbObjectReader;
-import dk.lessismore.nojpa.reflection.db.DbObjectSelector;
-import dk.lessismore.nojpa.reflection.db.DbObjectVisitor;
+import dk.lessismore.nojpa.reflection.db.*;
 import dk.lessismore.nojpa.reflection.db.annotations.DbInline;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttribute;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttributeContainer;
@@ -817,6 +814,23 @@ public class MQL {
         }
 
         public void visit(DbObjectVisitor visitor, int interval){
+            log.debug("Will run: DbObjectSelector.iterateObjectsFromDb(selectClass, statement, visitor)");
+            statement.addExpression(getExpressionAddJoins());
+            int count = this.getCount();
+            for(int i = 0; i < count; ) {
+                this.limit(i, i + interval);
+                DbObjectSelector.iterateObjectsFromDb(selectClass, statement, visitor);
+                i = i + interval;
+            }
+        }
+
+        public void visit(DbObjectVisitorFunction visitor){
+            log.debug("Will run: DbObjectSelector.iterateObjectsFromDb(selectClass, statement, visitor)");
+            statement.addExpression(getExpressionAddJoins());
+            DbObjectSelector.iterateObjectsFromDb(selectClass, statement, visitor);
+        }
+
+        public void visit(DbObjectVisitorFunction visitor, int interval){
             log.debug("Will run: DbObjectSelector.iterateObjectsFromDb(selectClass, statement, visitor)");
             statement.addExpression(getExpressionAddJoins());
             int count = this.getCount();

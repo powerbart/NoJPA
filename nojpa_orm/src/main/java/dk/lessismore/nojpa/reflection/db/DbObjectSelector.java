@@ -27,6 +27,11 @@ public class DbObjectSelector {
         iterateObjectsFromDb(targetClass, selectSqlStatement, new AssociationConstrain(), true, true, 0,0, visitor);
     }
 
+    public static void iterateObjectsFromDb(Class targetClass, SelectSQLStatement selectSqlStatement, DbObjectVisitorFunction visitor) {
+        log.debug("Will run: iterateObjectsFromDb");
+        iterateObjectsFromDb(targetClass, selectSqlStatement, new AssociationConstrain(), true, true, 0,0, visitor);
+    }
+
     public static <T> T[] asDistinctArrray(List list, Class<T> typeOfArray){
         if(list == null || list.isEmpty()) return null;
         HashSet set = new HashSet();
@@ -101,6 +106,71 @@ public class DbObjectSelector {
             if (limSet != null) limSet.close();
             log.debug("will call visit.setDone true");
             visitor.setDone(true);
+        }
+
+    }
+    public static void iterateObjectsFromDb(Class targetClass, SelectSQLStatement selectSqlStatement, AssociationConstrain associationConstrain, boolean cache, boolean loadAll, int intervalStart, int intervalEnd, DbObjectVisitorFunction visitor) {
+        log.debug("Now running the REAL visitor :-) iterateObjectsFromDb(..., cache("+ cache +"), loadAll("+ loadAll +"), intervalStart("+ intervalStart +"), intervalEnd("+ intervalEnd +"), visitor("+ visitor.getClass().getSimpleName() +")) ");
+        LimResultSet limSet = null;
+        try {
+//            log.debug("iterateObjectsFromDb:1");
+            if (!ModelObjectInterface.class.isAssignableFrom(targetClass)) {
+                log.fatal("This is not a model object. We can not continue.");
+                return;
+            }
+//            log.debug("iterateObjectsFromDb:2");
+            DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(targetClass);
+            String sqlNameQuery = null;
+//            log.debug("iterateObjectsFromDb:3");
+            if (dbAttributeContainer.getSqlNameQuery() == null) {
+                for (Iterator iterator = dbAttributeContainer.getDbAttributes().values().iterator(); iterator.hasNext();)
+                {
+                    DbAttribute dbAttribute = (DbAttribute) iterator.next();
+                    //If the attribute is not an multi association.
+                    if (!dbAttribute.isMultiAssociation())
+                        sqlNameQuery = (sqlNameQuery == null ? "" : sqlNameQuery + ", ") + (dbAttributeContainer.getTableName() + "." + (dbAttribute.getInlineAttributeName() != null ? dbAttribute.getInlineAttributeName() : dbAttribute.getAttributeName()));
+                }
+                dbAttributeContainer.setSqlNameQuery(sqlNameQuery);
+            } else {
+                sqlNameQuery = dbAttributeContainer.getSqlNameQuery();
+            }
+//            log.debug("iterateObjectsFromDb:4");
+            selectSqlStatement.addAttributeName(sqlNameQuery);
+//            log.debug("iterateObjectsFromDb:5");
+            // ****************************************
+            limSet = SQLStatementExecutor.doQuery(selectSqlStatement);
+//            log.debug("iterateObjectsFromDb:6");
+            ResultSet resultSet = limSet != null ? limSet.getResultSet() : null;
+//            log.debug("iterateObjectsFromDb :: 1");
+            if (resultSet != null) {
+                try {
+//                    log.debug("iterateObjectsFromDb :: 2");
+                    //Load each of the objects.
+                    for (int i = 0; resultSet.next(); i++) {
+//                        log.debug("iterateObjectsFromDb :: 3");
+                        if (loadAll || (i >= intervalStart && i < intervalEnd)) {
+                            String objectId = resultSet.getString(dbAttributeContainer.getPrimaryKeyAttribute().getAttributeName());
+
+                            ModelObject modelObject = DbObjectReader.readObjectFromDb(objectId, targetClass, associationConstrain, limSet);
+//                            log.debug("iterateObjectsFromDb :: 4");
+                            if (modelObject != null){
+                                if(countNumberOfVisit++ % 75 == 0) {
+                                    log.debug("Now calling the visitor.visit ... visitor(" + visitor + ")");
+                                }
+                                visitor.visit(modelObject);
+
+                            }
+                        } else if (!loadAll && i >= intervalEnd)
+                            break;
+                    }
+                } catch (Exception e) {
+                    log.error("iterateObjectsFromDb: (1) Corrupt result set from db in object selector or visitor exception for: " + targetClass.getName(), e);
+                }
+            }
+        } catch (Exception e) {
+            log.error("iterateObjectsFromDb:Some error " + e, e);
+        } finally {
+            if (limSet != null) limSet.close();
         }
 
     }
