@@ -1,7 +1,11 @@
 package dk.lessismore.nojpa.db.connectionpool;
 
-import dk.lessismore.nojpa.pool.*;
-import dk.lessismore.nojpa.resources.*;
+import dk.lessismore.nojpa.pool.ResourcePool;
+import dk.lessismore.nojpa.resources.PropertyResources;
+import dk.lessismore.nojpa.resources.Resources;
+import dk.lessismore.nojpa.resources.SystemPropertyResources;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Properties;
@@ -17,7 +21,7 @@ import java.util.Properties;
  */
 public class ConnectionPoolFactory  {
 
-    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(ConnectionPoolFactory.class);
+    private static final Logger log = LoggerFactory.getLogger(ConnectionPoolFactory.class);
 
     private static Resources resources;
     private static ResourcePool connectionPool = null;

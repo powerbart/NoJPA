@@ -6,7 +6,8 @@
  */
 package dk.lessismore.nojpa.resources;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,8 +20,7 @@ import java.util.Map;
  */
 public class PropertyService {
 
-	private static final Logger log =
-		Logger.getLogger(PropertyService.class);
+	private static final Logger log = LoggerFactory.getLogger(PropertyService.class);
 
 	private static PropertyService instance = null;
 	private static Map propertyResourcesNames = new HashMap();

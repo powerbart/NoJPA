@@ -1,9 +1,13 @@
 package dk.lessismore.nojpa.reflection;
 
-import java.util.*;
-
-import dk.lessismore.nojpa.reflection.attributes.*;
+import dk.lessismore.nojpa.reflection.attributes.Attribute;
+import dk.lessismore.nojpa.reflection.attributes.AttributeContainer;
 import dk.lessismore.nojpa.reflection.db.model.ModelObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This class is a factory which contains all of the reflected classes.
@@ -18,7 +22,7 @@ import dk.lessismore.nojpa.reflection.db.model.ModelObject;
  */
 public class ClassReflector {
 
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(ClassReflector.class);
+    private static final Logger log = LoggerFactory.getLogger(ClassReflector.class);
 
     /**
      * Cached reflected classes. key=classPath, value=AttributeContainer.

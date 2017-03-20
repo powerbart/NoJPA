@@ -1,24 +1,36 @@
 package dk.lessismore.nojpa.masterworker.master;
 
-import dk.lessismore.nojpa.net.link.ServerLink;
-import dk.lessismore.nojpa.masterworker.messages.JobResultMessage;
+import dk.lessismore.nojpa.masterworker.JobStatus;
+import dk.lessismore.nojpa.masterworker.exceptions.WorkerExecutionException;
 import dk.lessismore.nojpa.masterworker.messages.JobMessage;
+import dk.lessismore.nojpa.masterworker.messages.JobResultMessage;
 import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteBeanMessage;
 import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteResultMessage;
 import dk.lessismore.nojpa.masterworker.messages.observer.ObserverJobMessage;
-import dk.lessismore.nojpa.masterworker.JobStatus;
-import dk.lessismore.nojpa.masterworker.exceptions.WorkerExecutionException;
+import dk.lessismore.nojpa.net.link.ServerLink;
 import dk.lessismore.nojpa.properties.PropertiesProxy;
 import dk.lessismore.nojpa.utils.MaxSizeArray;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.*;
-import java.text.SimpleDateFormat;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 public class JobPool {
 
-    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(JobPool.class);
+    private static final Logger log = LoggerFactory.getLogger(JobPool.class);
     private static final MasterProperties properties = PropertiesProxy.getInstance(MasterProperties.class);
 
     static private int jobEntrySequenceNumberCounter = 0;

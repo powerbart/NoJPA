@@ -3,24 +3,33 @@ package dk.lessismore.nojpa.reflection.db.model;
 import dk.lessismore.nojpa.cache.ObjectArrayCache;
 import dk.lessismore.nojpa.cache.ObjectCache;
 import dk.lessismore.nojpa.cache.ObjectCacheFactory;
-import dk.lessismore.nojpa.reflection.db.annotations.ModelObjectMethodListener;
-import dk.lessismore.nojpa.reflection.util.ClassAnalyser;
-import dk.lessismore.nojpa.utils.MaxSizeMap;
-import dk.lessismore.nojpa.utils.Pair;
-import org.apache.log4j.Logger;
-import dk.lessismore.nojpa.reflection.db.*;
-import dk.lessismore.nojpa.reflection.db.annotations.DbStrip;
-import dk.lessismore.nojpa.reflection.db.attributes.DbAttribute;
-import dk.lessismore.nojpa.reflection.db.attributes.DbAttributeContainer;
 import dk.lessismore.nojpa.guid.GuidFactory;
 import dk.lessismore.nojpa.properties.Default;
 import dk.lessismore.nojpa.properties.PropertiesProxy;
+import dk.lessismore.nojpa.reflection.db.AssociationConstrain;
+import dk.lessismore.nojpa.reflection.db.DbClassReflector;
+import dk.lessismore.nojpa.reflection.db.DbObjectDeleter;
+import dk.lessismore.nojpa.reflection.db.DbObjectReader;
+import dk.lessismore.nojpa.reflection.db.DbObjectWriter;
+import dk.lessismore.nojpa.reflection.db.annotations.DbStrip;
+import dk.lessismore.nojpa.reflection.db.annotations.ModelObjectMethodListener;
+import dk.lessismore.nojpa.reflection.db.attributes.DbAttribute;
+import dk.lessismore.nojpa.reflection.db.attributes.DbAttributeContainer;
+import dk.lessismore.nojpa.reflection.util.ClassAnalyser;
+import dk.lessismore.nojpa.utils.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.persistence.Id;
-import java.lang.reflect.Proxy;
-import java.lang.reflect.Method;
 import java.lang.reflect.InvocationHandler;
-import java.util.*;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.StringTokenizer;
 
 /**
  * This dynamically implements the getters and setters as well as various other ModelObject methods.
@@ -268,7 +277,7 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
     // THE REST IS COPIED FROM REUSABLE V3
 
     private transient static final Object THE_NULL_OBJECT = new Object();
-    private transient static final org.apache.log4j.Logger log = Logger.getLogger(ModelObjectProxy.class);
+    private transient static final Logger log = LoggerFactory.getLogger(ModelObjectProxy.class);
     protected transient Calendar creationDate = Calendar.getInstance();
     protected transient Calendar lastModified = Calendar.getInstance();
     protected transient Calendar lastAccessed = Calendar.getInstance();

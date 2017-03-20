@@ -10,6 +10,8 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import dk.lessismore.nojpa.reflection.db.model.ModelObject;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -21,8 +23,8 @@ import java.lang.reflect.Method;
  * Time: 11:38 PM
  */
 public class NoJpaSerializer extends JsonSerializer<ModelObjectInterface> {
-    private PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy strategy = new PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy();
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(NoJpaSerializer.class);
+    private PropertyNamingStrategy.SnakeCaseStrategy strategy = new PropertyNamingStrategy.SnakeCaseStrategy();
+    private static final Logger log = LoggerFactory.getLogger(NoJpaSerializer.class);
 
     @Override
     public void serialize(ModelObjectInterface value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonProcessingException {

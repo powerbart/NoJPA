@@ -1,24 +1,31 @@
 package dk.lessismore.nojpa.masterworker.client;
 
-import dk.lessismore.nojpa.masterworker.master.MasterProperties;
-import dk.lessismore.nojpa.masterworker.messages.*;
-import dk.lessismore.nojpa.net.link.ClientLink;
+import dk.lessismore.nojpa.masterworker.JobStatus;
 import dk.lessismore.nojpa.masterworker.exceptions.MasterUnreachableException;
 import dk.lessismore.nojpa.masterworker.executor.Executor;
-import dk.lessismore.nojpa.masterworker.JobStatus;
-import dk.lessismore.nojpa.serialization.Serializer;
+import dk.lessismore.nojpa.masterworker.master.MasterProperties;
+import dk.lessismore.nojpa.masterworker.messages.JobListenMessage;
+import dk.lessismore.nojpa.masterworker.messages.JobMessage;
+import dk.lessismore.nojpa.masterworker.messages.KillMessage;
+import dk.lessismore.nojpa.masterworker.messages.RestartAllWorkersMessage;
+import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteBeanMessage;
+import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteResultMessage;
+import dk.lessismore.nojpa.masterworker.messages.StopMessage;
+import dk.lessismore.nojpa.net.link.ClientLink;
 import dk.lessismore.nojpa.properties.PropertiesProxy;
-import org.apache.log4j.Logger;
+import dk.lessismore.nojpa.serialization.Serializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.net.ConnectException;
 
 public class JobHandleToMasterProtocol<O> {
 
     private static final MasterProperties properties = PropertiesProxy.getInstance(MasterProperties.class);
-    private static Logger log = Logger.getLogger(JobHandleToMasterProtocol.class);
+    private static final Logger log = LoggerFactory.getLogger(JobHandleToMasterProtocol.class);
 
     private ClientLink clientLink = null;
     private Set<JobListener<O>> listeners = new CopyOnWriteArraySet<JobListener<O>>();

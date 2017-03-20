@@ -7,15 +7,12 @@ import dk.lessismore.nojpa.db.statements.CreateSQLStatement;
 import dk.lessismore.nojpa.db.statements.DropSQLStatement;
 import dk.lessismore.nojpa.db.statements.SQLStatement;
 import dk.lessismore.nojpa.db.statements.SQLStatementFactory;
-import dk.lessismore.nojpa.reflection.db.annotations.DbInline;
 import dk.lessismore.nojpa.reflection.db.annotations.IgnoreFromTableCreation;
 import dk.lessismore.nojpa.reflection.db.annotations.IndexClass;
 import dk.lessismore.nojpa.reflection.db.annotations.IndexField;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttribute;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttributeContainer;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
-import dk.lessismore.nojpa.resources.PropertyResources;
-import dk.lessismore.nojpa.resources.Resources;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
 import org.reflections.scanners.SubTypesScanner;
@@ -23,12 +20,20 @@ import org.reflections.scanners.TypeAnnotationsScanner;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.reflections.util.FilterBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * This class can analyse an object and make a create sql statement that match the
@@ -39,7 +44,7 @@ import java.util.*;
  */
 public class DatabaseCreator {
 
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(DatabaseCreator.class);
+    private static final Logger log = LoggerFactory.getLogger(DatabaseCreator.class);
 
     public DatabaseCreator() { }
 
@@ -364,7 +369,7 @@ public class DatabaseCreator {
                         new TypeAnnotationsScanner(),
                         new ResourcesScanner()));
         ArrayList<Class> annoList = new ArrayList<Class>();
-        annoList.addAll(reflections.getTypesAnnotatedWith(IgnoreFromTableCreation.class));
+        annoList.addAll(reflections.getTypesAnnotatedWith(IgnoreFromTableCreation.class, true));
         log.debug("annoList.size()::" + annoList.size());
         ArrayList<Class> subTypesList = new ArrayList<Class>();
         subTypesList.addAll(reflections.getSubTypesOf(ModelObjectInterface.class));
@@ -382,7 +387,7 @@ public class DatabaseCreator {
                         new TypeAnnotationsScanner(),
                         new ResourcesScanner()));
         ArrayList<Class> annoList = new ArrayList<Class>();
-        annoList.addAll(reflections.getTypesAnnotatedWith(IgnoreFromTableCreation.class));
+        annoList.addAll(reflections.getTypesAnnotatedWith(IgnoreFromTableCreation.class, true));
         log.debug("annoList.size()::" + annoList.size());
         ArrayList<Class> subTypesList = new ArrayList<Class>();
         subTypesList.addAll(reflections.getSubTypesOf(ModelObjectInterface.class));

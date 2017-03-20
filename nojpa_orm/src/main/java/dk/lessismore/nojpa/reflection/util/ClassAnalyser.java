@@ -1,9 +1,13 @@
 package dk.lessismore.nojpa.reflection.util;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.*;
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Locale;
+import java.util.Vector;
 
 /**
  * This class is a doggy bag; for all different kind of util methods which is nice
@@ -14,7 +18,7 @@ import java.lang.reflect.*;
  */
 public class ClassAnalyser {
 
-    private transient static final Logger log = Logger.getLogger(ClassAnalyser.class);
+    private static final Logger log = LoggerFactory.getLogger(ClassAnalyser.class);
 
 
     public ClassAnalyser() {}
@@ -211,7 +215,7 @@ public class ClassAnalyser {
                 return c;
             } catch(Exception e){
                 final String message = "Cant find implementation for " + someInterface + " in : " + newFullClassName;
-                log.fatal(message);
+                log.error(message);
                 throw new RuntimeException(message);
             }
         } else {

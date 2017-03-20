@@ -3,6 +3,8 @@ package dk.lessismore.nojpa.cache;
 import dk.lessismore.nojpa.db.methodquery.MQL;
 import dk.lessismore.nojpa.reflection.db.model.ModelObject;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -15,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class GlobalLockService {
 
-    final private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(GlobalLockService.class);
+    private static final Logger log = LoggerFactory.getLogger(GlobalLockService.class);
 
     private final static GlobalLockService me = new GlobalLockService();
 

@@ -1,15 +1,23 @@
 package dk.lessismore.nojpa.reflection.db;
 
-import dk.lessismore.nojpa.reflection.db.attributes.*;
-import dk.lessismore.nojpa.db.statements.*;
-import dk.lessismore.nojpa.db.*;
+import dk.lessismore.nojpa.cache.ObjectCacheFactory;
+import dk.lessismore.nojpa.db.LimResultSet;
+import dk.lessismore.nojpa.db.SQLStatementExecutor;
+import dk.lessismore.nojpa.db.statements.DeleteSQLStatement;
+import dk.lessismore.nojpa.db.statements.SQLStatementFactory;
+import dk.lessismore.nojpa.db.statements.SelectSQLStatement;
+import dk.lessismore.nojpa.db.statements.WhereSQLStatement;
+import dk.lessismore.nojpa.reflection.db.attributes.DbAttribute;
+import dk.lessismore.nojpa.reflection.db.attributes.DbAttributeContainer;
 import dk.lessismore.nojpa.reflection.db.model.ModelObject;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.*;
-import java.sql.*;
-
-import dk.lessismore.nojpa.cache.*;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * This class can delete one model object from the database, or a selection of objects.
@@ -23,7 +31,7 @@ import dk.lessismore.nojpa.cache.*;
  */
 public class DbObjectDeleter {
 
-    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(DbObjectDeleter.class);
+    private static final Logger log = LoggerFactory.getLogger(DbObjectDeleter.class);
 
     /**
      * The method deletes the selected objects from the database recursivly (all associations

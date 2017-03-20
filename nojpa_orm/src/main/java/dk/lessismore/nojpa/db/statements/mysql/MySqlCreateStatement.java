@@ -1,9 +1,16 @@
 package dk.lessismore.nojpa.db.statements.mysql;
 
-import dk.lessismore.nojpa.db.statements.*;
-import dk.lessismore.nojpa.db.*;
+import dk.lessismore.nojpa.db.DbDataType;
+import dk.lessismore.nojpa.db.statements.CreateSQLStatement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,7 +22,7 @@ import java.util.regex.Pattern;
  */
 public class MySqlCreateStatement extends MySqlStatement implements CreateSQLStatement {
 
-    private final static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(MySqlCreateStatement.class);
+    private static final Logger log = LoggerFactory.getLogger(MySqlCreateStatement.class);
 
     private List<String> attributes = null;
     private List<String> primaryKeys = null;
@@ -84,6 +91,7 @@ public class MySqlCreateStatement extends MySqlStatement implements CreateSQLSta
             statement.append(")");
         }
         statement.append("\n\n");
+        Set<String> indexNames = new HashSet<String>();
         for (int i = 0; namesToIndex != null && i < namesToIndex.length; i++) {
             String indexName = "_";
             String indexFullName = (getTableNames().get(0) + "," + namesToIndex[i]);//;
@@ -101,6 +109,9 @@ public class MySqlCreateStatement extends MySqlStatement implements CreateSQLSta
             //log.debug("makeStatement: indexName = " + indexName);
 //            log.debug("makeStatement() : i = " + namesToIndex[i] + " with name: " + indexName);
 
+            if (!indexNames.add(indexName)) {
+                indexName = indexName + "_" + UUID.randomUUID().toString().replaceAll("-", "");
+            }
             statement.append(", INDEX " + indexName + " ( " + namesToIndex[i] + ")");
 
 //            statement.append(" " + namesToIndex[i]);

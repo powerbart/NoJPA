@@ -1,12 +1,13 @@
 package dk.lessismore.nojpa.reflection.db;
 
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
-import org.apache.log4j.Logger;
 import dk.lessismore.nojpa.utils.MaxSizeMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Calendar;
+import java.util.Iterator;
 
 /**
  * Created : by IntelliJ IDEA.
@@ -28,8 +29,7 @@ public class ModelObjectIterator<M extends ModelObjectInterface> implements Iter
     }
 
 
-
-    private static Logger log = Logger.getLogger(ModelObjectIterator.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelObjectIterator.class);
 
 
     private Calendar lastModified = Calendar.getInstance();

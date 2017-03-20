@@ -1,29 +1,30 @@
 package dk.lessismore.nojpa.db.proxy;
 
-import dk.lessismore.nojpa.db.methodquery.MQL;
-import dk.lessismore.nojpa.db.model.MrRich;
-import dk.lessismore.nojpa.reflection.db.model.*;
-import dk.lessismore.nojpa.reflection.db.DatabaseCreator;
-
-import static dk.lessismore.nojpa.db.methodquery.MQL.Comp.*;
-import dk.lessismore.nojpa.db.statements.SQLStatement;
 import dk.lessismore.nojpa.db.SQLStatementExecutor;
+import dk.lessismore.nojpa.db.methodquery.MQL;
 import dk.lessismore.nojpa.db.model.Company;
+import dk.lessismore.nojpa.db.model.MrRich;
 import dk.lessismore.nojpa.db.model.Person;
+import dk.lessismore.nojpa.db.statements.SQLStatement;
+import dk.lessismore.nojpa.reflection.db.DatabaseCreator;
+import dk.lessismore.nojpa.reflection.db.model.ModelObject;
+import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
+import dk.lessismore.nojpa.reflection.db.model.ModelObjectProxy;
+import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.util.Calendar;
-import java.util.List;
 import java.util.LinkedList;
+import java.util.List;
 
-import org.apache.log4j.Logger;
-import org.junit.Test;
-import org.junit.BeforeClass;
-
-import static org.junit.Assert.*;
+import static dk.lessismore.nojpa.db.methodquery.MQL.Comp.EQUAL;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class ModelObjectProxyTest {
 
-    private static final Logger log = Logger.getLogger(ModelObjectProxyTest.class);
     @Test
     public void dummyTest() {
         assertTrue(true);

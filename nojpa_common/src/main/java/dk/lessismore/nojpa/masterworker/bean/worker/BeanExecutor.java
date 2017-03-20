@@ -5,6 +5,9 @@ import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteBeanMessage;
 import dk.lessismore.nojpa.masterworker.messages.NewRemoteBeanMessage;
 import dk.lessismore.nojpa.masterworker.bean.RemoteBeanInterface;
 import dk.lessismore.nojpa.guid.GuidFactory;
+import dk.lessismore.nojpa.reflection.db.DbObjectSelector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 
@@ -14,7 +17,7 @@ import java.lang.reflect.Method;
  */
 public class BeanExecutor extends Executor<NewRemoteBeanMessage, Object> {
 
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(BeanExecutor.class);
+    private static final Logger log = LoggerFactory.getLogger(BeanExecutor.class);
 
     private boolean done = false;
     private RemoteBeanInterface objectToRunOn = null;

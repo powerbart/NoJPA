@@ -1,12 +1,14 @@
 package dk.lessismore.nojpa.db.connectionpool;
 
 import dk.lessismore.nojpa.db.statements.SQLStatementFactory;
-import dk.lessismore.nojpa.pool.factories.*;
-import java.sql.*;
-import java.util.Enumeration;
+import dk.lessismore.nojpa.pool.factories.ResourceFactory;
+import dk.lessismore.nojpa.resources.PropertyResources;
+import dk.lessismore.nojpa.resources.Resources;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import dk.lessismore.nojpa.resources.*;
-import org.apache.log4j.Logger;
+import java.sql.Connection;
+import java.sql.DriverManager;
 
 /**
  * This class can make an instance of an database connection. The database properties
@@ -26,7 +28,7 @@ import org.apache.log4j.Logger;
  */
 public class ConnectionFactory implements ResourceFactory {
 
-    private static org.apache.log4j.Logger log = Logger.getLogger(ConnectionFactory.class);
+    private static final Logger log = LoggerFactory.getLogger(ConnectionFactory.class);
     private static Resources resources;
 
     private String ip = "localhost";

@@ -1,32 +1,40 @@
 package dk.lessismore.nojpa.masterworker.worker;
 
 import dk.lessismore.nojpa.concurrency.WaitForValue;
-import dk.lessismore.nojpa.masterworker.exceptions.WorkerExecutionException;
-import dk.lessismore.nojpa.masterworker.executor.Executor;
-import dk.lessismore.nojpa.masterworker.master.MasterProperties;
-import dk.lessismore.nojpa.net.link.ClientLink;
-import dk.lessismore.nojpa.serialization.XmlSerializer;
-import dk.lessismore.nojpa.serialization.Serializer;
-import dk.lessismore.nojpa.masterworker.messages.RegistrationMessage;
-import dk.lessismore.nojpa.masterworker.messages.HealthMessage;
-import dk.lessismore.nojpa.masterworker.messages.*;
-import dk.lessismore.nojpa.masterworker.*;
+import dk.lessismore.nojpa.masterworker.SystemHealth;
 import dk.lessismore.nojpa.masterworker.bean.worker.BeanExecutor;
 import dk.lessismore.nojpa.masterworker.exceptions.JobDoesNotExistException;
 import dk.lessismore.nojpa.masterworker.exceptions.MasterUnreachableException;
+import dk.lessismore.nojpa.masterworker.exceptions.WorkerExecutionException;
+import dk.lessismore.nojpa.masterworker.executor.Executor;
+import dk.lessismore.nojpa.masterworker.master.MasterProperties;
+import dk.lessismore.nojpa.masterworker.messages.HealthMessage;
+import dk.lessismore.nojpa.masterworker.messages.JobMessage;
+import dk.lessismore.nojpa.masterworker.messages.JobProgressMessage;
+import dk.lessismore.nojpa.masterworker.messages.JobResultMessage;
+import dk.lessismore.nojpa.masterworker.messages.KillMessage;
+import dk.lessismore.nojpa.masterworker.messages.RegistrationMessage;
+import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteBeanMessage;
+import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteResultMessage;
+import dk.lessismore.nojpa.masterworker.messages.StopMessage;
+import dk.lessismore.nojpa.net.link.ClientLink;
 import dk.lessismore.nojpa.properties.PropertiesProxy;
+import dk.lessismore.nojpa.serialization.Serializer;
+import dk.lessismore.nojpa.serialization.XmlSerializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.List;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.nio.channels.ClosedChannelException;
+import java.util.Arrays;
+import java.util.List;
 
 
 public class Worker {
 
     private static final MasterProperties properties = PropertiesProxy.getInstance(MasterProperties.class);
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(Worker.class);
+    private static final Logger log = LoggerFactory.getLogger(Worker.class);
     private static final long SEND_PROGRESS_INTERVAL = 10 * 1000;
     private static final long SEND_HEALTH_INTERVAL = 120 * 1000;
     private static final int  MAX_SAME_PROGRESS = 3;

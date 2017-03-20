@@ -4,6 +4,8 @@ import dk.lessismore.nojpa.cache.ObjectCacheRemote;
 import dk.lessismore.nojpa.reflection.db.model.ModelObject;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.utils.MaxSizeArray;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.OutputStream;
 import java.net.Socket;
@@ -20,7 +22,7 @@ import java.net.Socket;
 // Each server should only resend the message if they haven't see the ID before
 public class ObjectCacheRemotePostThread extends Thread {
 
-    final private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(ObjectCacheRemotePostThread.class);
+    private static final Logger log = LoggerFactory.getLogger(ObjectCacheRemotePostThread.class);
 
     private final MaxSizeArray<String> toPost = new MaxSizeArray<String>(1000);
     private ObjectCacheRemote.RemoteHost host;

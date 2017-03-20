@@ -1,14 +1,16 @@
 package dk.lessismore.nojpa.masterworker.bean;
 
-import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
-import dk.lessismore.nojpa.masterworker.bean.client.JobListener;
-import dk.lessismore.nojpa.masterworker.bean.client.JobHandle;
-import dk.lessismore.nojpa.masterworker.bean.client.MasterService;
 import dk.lessismore.nojpa.masterworker.JobStatus;
-import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteBeanMessage;
-import dk.lessismore.nojpa.masterworker.messages.NewRemoteBeanMessage;
-import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteResultMessage;
+import dk.lessismore.nojpa.masterworker.bean.client.JobHandle;
+import dk.lessismore.nojpa.masterworker.bean.client.JobListener;
+import dk.lessismore.nojpa.masterworker.bean.client.MasterService;
 import dk.lessismore.nojpa.masterworker.bean.worker.BeanExecutor;
+import dk.lessismore.nojpa.masterworker.messages.NewRemoteBeanMessage;
+import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteBeanMessage;
+import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteResultMessage;
+import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -22,7 +24,7 @@ import java.lang.reflect.Proxy;
  */
 public class RemoteBeanService implements InvocationHandler {
 
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(RemoteBeanService.class);
+    private static final Logger log = LoggerFactory.getLogger(RemoteBeanService.class);
 
 
     public static <I extends RemoteBeanInterface, E extends BeanExecutor> I newRemoteBean(Class<I> beanInterface, Class<E> beanExecutor) {

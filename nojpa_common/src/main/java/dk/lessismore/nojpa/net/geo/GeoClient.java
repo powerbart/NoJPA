@@ -3,6 +3,8 @@ package dk.lessismore.nojpa.net.geo;
 import dk.lessismore.nojpa.utils.MaxSizeWeakMap;
 import org.apache.http.client.fluent.Request;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created with IntelliJ IDEA.
@@ -10,7 +12,7 @@ import org.json.JSONObject;
  */
 public class GeoClient {
 
-    final private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(GeoClient.class);
+    private static final Logger log = LoggerFactory.getLogger(GeoClient.class);
 
 
     public static class Geo {

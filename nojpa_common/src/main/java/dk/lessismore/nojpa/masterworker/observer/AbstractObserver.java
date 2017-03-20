@@ -1,11 +1,12 @@
 package dk.lessismore.nojpa.masterworker.observer;
 
 import dk.lessismore.nojpa.masterworker.master.MasterProperties;
-import dk.lessismore.nojpa.net.link.ClientLink;
 import dk.lessismore.nojpa.masterworker.messages.observer.ObserverRegistrationMessage;
 import dk.lessismore.nojpa.masterworker.messages.observer.UpdateMessage;
+import dk.lessismore.nojpa.net.link.ClientLink;
 import dk.lessismore.nojpa.properties.PropertiesProxy;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Calendar;
@@ -13,7 +14,7 @@ import java.util.Calendar;
 public abstract class AbstractObserver {
 
     private static final MasterProperties properties = PropertiesProxy.getInstance(MasterProperties.class);
-    private static final Logger log = org.apache.log4j.Logger.getLogger(AbstractObserver.class);
+    private static final Logger log = LoggerFactory.getLogger(AbstractObserver.class);
     private ObserverCallbackThread callbackThread;
     private final String host;
     private final int port;

@@ -1,7 +1,11 @@
 package dk.lessismore.nojpa.reflection.db.model;
 
 import dk.lessismore.nojpa.reflection.translate.TranslateService;
-import org.apache.solr.client.solrj.*;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrRequest;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrInputDocument;
@@ -68,9 +72,8 @@ public class SolrEmbeddedServiceImpl implements SolrService {
         log.debug("[void : (" + coreName + ")startup]:HIT: " + this);
         try {
             if (coreContainer == null) {
-                File f = getSolrXml();
-                log.debug("[ : config ]:: " + f);
-                coreContainer = new CoreContainer(f.getParentFile().getAbsolutePath());  //
+                String solrHome = getSolrHome();
+                coreContainer = new CoreContainer(solrHome);
                 log.debug("[ : config ]:: loading container on " + coreContainer.getCoreRootDirectory());
                 coreContainer.load();
             }
@@ -204,13 +207,12 @@ public class SolrEmbeddedServiceImpl implements SolrService {
     }
 
 
-    public File getSolrXml() {
-        try {
-            return new File(getClass().getResource("/solr/solr.xml").getFile());
-        } catch (Exception e) {
-            log.error("[File : getSolrXml]: can't get solr xml resource: " + e.getMessage(), e);
+    public String getSolrHome() {
+        String solrHome = System.getProperty("solr.home");
+        if (StringUtils.isEmpty(solrHome)) {
+            solrHome = new File("./solr-config").getAbsolutePath();
         }
-        return null;
+        return solrHome;
     }
 
 }
