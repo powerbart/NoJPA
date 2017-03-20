@@ -1,7 +1,10 @@
 package dk.lessismore.nojpa.db.statements.h2;
 
-import dk.lessismore.nojpa.db.statements.*;
-import org.apache.log4j.Logger;
+import dk.lessismore.nojpa.db.statements.ContainerExpression;
+import dk.lessismore.nojpa.db.statements.Expression;
+import dk.lessismore.nojpa.db.statements.LeafExpression;
+import dk.lessismore.nojpa.db.statements.PreparedSQLStatement;
+import dk.lessismore.nojpa.db.statements.WhereSQLStatement;
 
 import java.util.Calendar;
 import java.util.LinkedList;
@@ -14,8 +17,6 @@ import java.util.List;
  * @version 1.0 25-7-02
  */
 public class H2WhereStatement extends H2Statement implements WhereSQLStatement {
-
-    private final static Logger log = Logger.getLogger(H2WhereStatement.class);
 
     protected ContainerExpression basicContainerExpression = new H2ContainerExpression();
     protected ContainerExpression containerExpression = new H2ContainerExpression();

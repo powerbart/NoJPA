@@ -2,6 +2,8 @@ package dk.lessismore.nojpa.db.statements.h2;
 
 import dk.lessismore.nojpa.db.statements.PreparedSQLStatement;
 import dk.lessismore.nojpa.db.statements.SelectSQLStatement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -15,7 +17,7 @@ import java.util.List;
  * @version 1.0 25-7-02
  */
 public class H2SelectStatement extends H2WhereStatement implements SelectSQLStatement {
-    private final static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(H2SelectStatement.class);
+    private static final Logger log = LoggerFactory.getLogger(H2SelectStatement.class);
 
     protected List attributeNames = null;
     protected ArrayList<String> sortAttributeNameList = new ArrayList<String>();

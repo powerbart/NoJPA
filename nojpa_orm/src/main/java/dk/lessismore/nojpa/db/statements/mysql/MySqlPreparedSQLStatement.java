@@ -1,9 +1,14 @@
 package dk.lessismore.nojpa.db.statements.mysql;
 
-import dk.lessismore.nojpa.db.statements.*;
+import dk.lessismore.nojpa.db.statements.LeafExpression;
+import dk.lessismore.nojpa.db.statements.PreparedSQLStatement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.*;
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Mysql statement implementation
@@ -13,7 +18,7 @@ import java.sql.*;
  */
 public class MySqlPreparedSQLStatement implements PreparedSQLStatement {
 
-    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(MySqlPreparedSQLStatement.class);
+    private static final Logger log = LoggerFactory.getLogger(MySqlPreparedSQLStatement.class);
     private List listOfLeafs = new LinkedList();
 
     public void addLeafExpression(LeafExpression expression) {

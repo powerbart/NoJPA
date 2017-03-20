@@ -1,19 +1,34 @@
 package dk.lessismore.nojpa.reflection.attributes;
 
-import java.util.*;
-import java.lang.reflect.*;
-import java.lang.annotation.Annotation;
-
 import dk.lessismore.nojpa.reflection.db.annotations.DbInline;
 import dk.lessismore.nojpa.reflection.db.annotations.DbStrip;
 import dk.lessismore.nojpa.reflection.db.annotations.SearchField;
 import dk.lessismore.nojpa.reflection.db.model.ModelObject;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
-import dk.lessismore.nojpa.reflection.util.*;
-import dk.lessismore.nojpa.reflection.visitors.*;
-import dk.lessismore.nojpa.utils.Pair;
+import dk.lessismore.nojpa.reflection.util.ClassAnalyser;
+import dk.lessismore.nojpa.reflection.visitors.AttributeContainerVisitor;
+import dk.lessismore.nojpa.reflection.visitors.AttributeVisitor;
+import dk.lessismore.nojpa.reflection.visitors.GetAttributeNamesVisitor;
+import dk.lessismore.nojpa.reflection.visitors.GetAttributeValueVisitor;
+import dk.lessismore.nojpa.reflection.visitors.GetAttributeVisitor;
+import dk.lessismore.nojpa.reflection.visitors.SetAttributeValueVisitor;
 import dk.lessismore.nojpa.utils.GenericComparator;
-import org.apache.log4j.Logger;
+import dk.lessismore.nojpa.utils.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Vector;
 
 /**
  * This class can reflect a generic class; and identify the attributes which the class has. It
@@ -32,7 +47,7 @@ import org.apache.log4j.Logger;
  */
 public class AttributeContainer {
 
-    private static final org.apache.log4j.Logger log = Logger.getLogger(AttributeContainer.class);
+    private static final Logger log = LoggerFactory.getLogger(AttributeContainer.class);
 
 
 
@@ -264,7 +279,7 @@ public class AttributeContainer {
 
         Attribute attribute = getAttribute(attributeName);
         if(attribute == null){
-            log.fatal("We don't know ("+ attributeName +") on " + _targetClass.getSimpleName());
+            log.error("We don't know ("+ attributeName +") on " + _targetClass.getSimpleName());
             for(Iterator<String> iterator = _attributes.keySet().iterator(); iterator.hasNext(); ){
                 log.info("Attribute on " + _targetClass.getSimpleName() + " is: " + iterator.next());
             }

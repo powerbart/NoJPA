@@ -1,17 +1,23 @@
 package dk.lessismore.nojpa.properties;
 
 import dk.lessismore.nojpa.resources.Resources;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.*;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.lang.reflect.Array;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 // Design decisions:
 // - It is designed to fit most existing property files.
@@ -34,7 +40,7 @@ import java.net.URL;
  * @see #getInstance(Class)
  */
 public class PropertiesProxy implements InvocationHandler {
-    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(PropertiesProxy.class);
+    private static final Logger log = LoggerFactory.getLogger(PropertiesProxy.class);
     private static final long CHECK_INTERVAL = 60000L;
     private static final String POSTFIX = "Properties";
     private static final Pattern ARRAY_PATTERN = Pattern.compile(

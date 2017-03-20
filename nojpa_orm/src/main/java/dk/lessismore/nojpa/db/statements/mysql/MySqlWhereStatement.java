@@ -1,9 +1,14 @@
 package dk.lessismore.nojpa.db.statements.mysql;
 
-import dk.lessismore.nojpa.db.statements.*;
-import org.apache.log4j.Logger;
+import dk.lessismore.nojpa.db.statements.ContainerExpression;
+import dk.lessismore.nojpa.db.statements.Expression;
+import dk.lessismore.nojpa.db.statements.LeafExpression;
+import dk.lessismore.nojpa.db.statements.PreparedSQLStatement;
+import dk.lessismore.nojpa.db.statements.WhereSQLStatement;
 
-import java.util.*;
+import java.util.Calendar;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Mysql statement implementation
@@ -12,8 +17,6 @@ import java.util.*;
  * @version 1.0 25-7-02
  */
 public class MySqlWhereStatement extends MySqlStatement implements WhereSQLStatement {
-
-    private final static Logger log = Logger.getLogger(MySqlWhereStatement.class);
 
     protected ContainerExpression basicContainerExpression = new MySqlContainerExpression();
     protected ContainerExpression containerExpression = new MySqlContainerExpression();

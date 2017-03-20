@@ -1,31 +1,38 @@
 package dk.lessismore.nojpa.db.methodquery;
 
+import dk.lessismore.nojpa.cache.ObjectCacheFactory;
 import dk.lessismore.nojpa.db.statements.ContainerExpression;
 import dk.lessismore.nojpa.db.statements.SQLStatementFactory;
 import dk.lessismore.nojpa.db.statements.SelectSQLStatement;
 import dk.lessismore.nojpa.db.statements.WhereSQLStatement;
+import dk.lessismore.nojpa.db.testmodel.Address;
+import dk.lessismore.nojpa.db.testmodel.Car;
+import dk.lessismore.nojpa.db.testmodel.Company;
+import dk.lessismore.nojpa.db.testmodel.Cpr;
+import dk.lessismore.nojpa.db.testmodel.InitTestDatabase;
+import dk.lessismore.nojpa.db.testmodel.Person;
 import dk.lessismore.nojpa.reflection.db.DbObjectSelector;
+import dk.lessismore.nojpa.reflection.db.DbObjectVisitor;
+import dk.lessismore.nojpa.reflection.db.model.ModelObject;
+import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
+import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
 import dk.lessismore.nojpa.reflection.db.statements.SelectSqlStatementCreator;
 import org.junit.Assert;
 import org.junit.Test;
-import static org.junit.Assert.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import dk.lessismore.nojpa.db.testmodel.*;
-import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
-import dk.lessismore.nojpa.reflection.db.model.ModelObject;
-import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
-import dk.lessismore.nojpa.reflection.db.DbObjectVisitor;
-import dk.lessismore.nojpa.cache.ObjectCacheFactory;
-
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
-import java.util.ArrayList;
+
+import static org.junit.Assert.assertEquals;
 
 
 public class MQTest {
 
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(MQTest.class);
+    private static final Logger log = LoggerFactory.getLogger(MQTest.class);
 
     //TODO:
     //METHOD: @PreInterceptor

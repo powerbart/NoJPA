@@ -1,8 +1,9 @@
 package dk.lessismore.nojpa.masterworker.observer;
 
-import dk.lessismore.nojpa.net.link.ClientLink;
 import dk.lessismore.nojpa.masterworker.messages.observer.UpdateMessage;
-import org.apache.log4j.Logger;
+import dk.lessismore.nojpa.net.link.ClientLink;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
@@ -10,7 +11,7 @@ import java.nio.channels.ClosedChannelException;
 
 public class ObserverCallbackThread extends Thread {
 
-    private static org.apache.log4j.Logger log = Logger.getLogger(ObserverCallbackThread.class);
+    private static final Logger log = LoggerFactory.getLogger(ObserverCallbackThread.class);
     private final ClientLink master;
     private final AbstractObserver observer;
 

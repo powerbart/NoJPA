@@ -9,6 +9,8 @@ import dk.lessismore.nojpa.utils.TimerWithPrinter;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created with IntelliJ IDEA.
@@ -16,9 +18,7 @@ import org.junit.Test;
  */
 public class SimpleCacheTest {
 
-
-    final private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(RemoteCacheTest.class);
-
+    private static final Logger log = LoggerFactory.getLogger(SimpleCacheTest.class);
 
     @BeforeClass
     public static void initDatabase() {

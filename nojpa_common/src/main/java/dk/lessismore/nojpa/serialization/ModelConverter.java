@@ -1,23 +1,28 @@
 package dk.lessismore.nojpa.serialization;
 
-import com.thoughtworks.xstream.converters.*;
+import com.thoughtworks.xstream.converters.ConversionException;
+import com.thoughtworks.xstream.converters.Converter;
+import com.thoughtworks.xstream.converters.MarshallingContext;
+import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.mapper.Mapper;
 import dk.lessismore.nojpa.db.methodquery.MQL;
-import dk.lessismore.nojpa.reflection.util.ReflectionUtil;
 import dk.lessismore.nojpa.reflection.attributes.Attribute;
 import dk.lessismore.nojpa.reflection.attributes.AttributeContainer;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
+import dk.lessismore.nojpa.reflection.util.ReflectionUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Proxy;
 import java.lang.reflect.Array;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 
 public class ModelConverter implements Converter {
 
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(ModelConverter.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelConverter.class);
 
     private final static String OBJECT_ID_FILED_NAME = "objectID";
     private ClassLoader classLoader;

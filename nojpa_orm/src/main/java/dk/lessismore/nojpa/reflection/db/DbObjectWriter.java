@@ -1,16 +1,34 @@
 package dk.lessismore.nojpa.reflection.db;
 
-import dk.lessismore.nojpa.reflection.db.attributes.*;
-import dk.lessismore.nojpa.reflection.db.model.*;
-import dk.lessismore.nojpa.db.statements.*;
-import dk.lessismore.nojpa.db.*;
+import dk.lessismore.nojpa.cache.ObjectCacheFactory;
+import dk.lessismore.nojpa.db.DbDataType;
+import dk.lessismore.nojpa.db.LimResultSet;
+import dk.lessismore.nojpa.db.SQLStatementExecutor;
+import dk.lessismore.nojpa.db.statements.DeleteSQLStatement;
+import dk.lessismore.nojpa.db.statements.InsertSQLStatement;
+import dk.lessismore.nojpa.db.statements.SQLStatementFactory;
+import dk.lessismore.nojpa.db.statements.SelectSQLStatement;
+import dk.lessismore.nojpa.db.statements.UpdateSQLStatement;
+import dk.lessismore.nojpa.db.statements.WhereSQLStatement;
+import dk.lessismore.nojpa.reflection.attributeconverters.AttributeConverter;
+import dk.lessismore.nojpa.reflection.attributeconverters.AttributeConverterFactory;
+import dk.lessismore.nojpa.reflection.db.attributes.DbAttribute;
+import dk.lessismore.nojpa.reflection.db.attributes.DbAttributeContainer;
+import dk.lessismore.nojpa.reflection.db.model.ModelObject;
+import dk.lessismore.nojpa.reflection.db.model.ModelObjectComparator;
+import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 //import dk.lessismore.reusable_v4.db.pooling.*;
-import dk.lessismore.nojpa.reflection.attributeconverters.*;
-
-import java.util.*;
-import java.sql.*;
-
-import dk.lessismore.nojpa.cache.*;
 
 /**
  * This class can write an object, which extends the ModelObject class, to a table
@@ -38,7 +56,7 @@ import dk.lessismore.nojpa.cache.*;
  */
 public class DbObjectWriter {
 
-    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(DbObjectWriter.class);
+    private static final Logger log = LoggerFactory.getLogger(DbObjectWriter.class);
 
     static {
         log.debug("NoJPA_version:0.1");

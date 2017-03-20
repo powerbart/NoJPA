@@ -1,10 +1,12 @@
 package dk.lessismore.nojpa.pool;
 
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Queue {
 
-    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(Queue.class);
+	private static final Logger log = LoggerFactory.getLogger(Queue.class);
 
     private QueueElement firstElement = null;
     private int countOfElements = 0;

@@ -1,9 +1,22 @@
 package dk.lessismore.nojpa.utils;
 
-import java.util.*;
-import java.io.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import org.apache.log4j.Logger;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -16,7 +29,7 @@ import org.apache.log4j.Logger;
  */
 public class SuperIO {
 
-    private final static org.apache.log4j.Logger log = Logger.getLogger(SuperIO.class);
+    private static final Logger log = LoggerFactory.getLogger(SuperIO.class);
 
     public static boolean writeTextToFile(String fileName, StringBuffer content) {
         return writeTextToFile(fileName, content.toString(), false);

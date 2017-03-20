@@ -1,18 +1,20 @@
 package dk.lessismore.nojpa.masterworker.master;
 
 import dk.lessismore.nojpa.masterworker.JobStatus;
-import dk.lessismore.nojpa.masterworker.messages.JobStatusMessage;
 import dk.lessismore.nojpa.masterworker.messages.JobProgressMessage;
 import dk.lessismore.nojpa.masterworker.messages.JobResultMessage;
+import dk.lessismore.nojpa.masterworker.messages.JobStatusMessage;
 import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteResultMessage;
 import dk.lessismore.nojpa.net.link.ServerLink;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 
 public class MessageSender {
 
-    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(MessageSender.class);
+    private static final Logger log = LoggerFactory.getLogger(MessageSender.class);
 
     public static void sendStatusToClient(String jobID, JobStatus jobStatus, ServerLink client, FailureHandler failureHandler) {
         JobStatusMessage statusMessage = new JobStatusMessage(jobID, jobStatus);

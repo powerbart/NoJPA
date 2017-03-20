@@ -1,7 +1,17 @@
 package dk.lessismore.nojpa.resources;
-import java.util.*;
-import java.net.*;
-import java.io.*;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * This class represents the resources in a property file. The class can be
@@ -20,7 +30,7 @@ import java.io.*;
  */
 public class PropertyResources extends Resources {
 
-    private final static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(PropertyResources.class);
+    private static final Logger log = LoggerFactory.getLogger(PropertyResources.class);
     /**
      * The property file.
      */

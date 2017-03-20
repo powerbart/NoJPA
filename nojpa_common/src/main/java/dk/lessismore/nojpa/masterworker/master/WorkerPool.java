@@ -1,19 +1,25 @@
 package dk.lessismore.nojpa.masterworker.master;
 
-import dk.lessismore.nojpa.masterworker.SystemHealth;
 import dk.lessismore.nojpa.masterworker.messages.RegistrationMessage;
-import org.apache.log4j.Logger;
-import dk.lessismore.nojpa.net.link.ServerLink;
 import dk.lessismore.nojpa.masterworker.messages.observer.ObserverWorkerMessage;
+import dk.lessismore.nojpa.net.link.ServerLink;
 import dk.lessismore.nojpa.properties.PropertiesProxy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class WorkerPool {
 
     private static final MasterProperties properties = PropertiesProxy.getInstance(MasterProperties.class);
 
-    private static org.apache.log4j.Logger log = Logger.getLogger(WorkerPool.class);
+    private static final Logger log = LoggerFactory.getLogger(WorkerPool.class);
     Map<ServerLink, WorkerEntry> pool = new HashMap<ServerLink, WorkerEntry>();
 
     public void addWorker(RegistrationMessage registrationMessage, ServerLink serverLink) {

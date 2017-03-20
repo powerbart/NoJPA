@@ -8,6 +8,8 @@ import dk.lessismore.nojpa.utils.MaxSizeArray;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -18,7 +20,7 @@ import java.util.List;
  */
 public class RemoteCacheTest {
 
-    final private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(RemoteCacheTest.class);
+    private static final Logger log = LoggerFactory.getLogger(RemoteCacheTest.class);
 
 
     @BeforeClass

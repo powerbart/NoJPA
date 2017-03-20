@@ -1,9 +1,13 @@
 package dk.lessismore.nojpa.db;
 
-import dk.lessismore.nojpa.guid.*;
+import dk.lessismore.nojpa.guid.GuidFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Calendar;
 
 /**
  * @author LESS-IS-MORE
@@ -11,7 +15,7 @@ import java.util.*;
  */
 public class LimResultSet {
 
-    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(LimResultSet.class);
+    private static final Logger log = LoggerFactory.getLogger(LimResultSet.class);
 
     private final static Object toSync = new Object();
 

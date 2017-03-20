@@ -1,15 +1,20 @@
 package dk.lessismore.nojpa.reflection.attributes;
 
-import dk.lessismore.nojpa.reflection.db.annotations.DbInline;
+import dk.lessismore.nojpa.reflection.ClassReflector;
+import dk.lessismore.nojpa.reflection.attributeconverters.AttributeConverter;
+import dk.lessismore.nojpa.reflection.attributeconverters.AttributeConverterFactory;
 import dk.lessismore.nojpa.reflection.db.annotations.DbStrip;
 import dk.lessismore.nojpa.reflection.db.annotations.SearchField;
-import dk.lessismore.nojpa.reflection.visitors.*;
-import dk.lessismore.nojpa.reflection.*;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
-import dk.lessismore.nojpa.reflection.util.*;
-import dk.lessismore.nojpa.reflection.attributeconverters.*;
-import java.util.*;
+import dk.lessismore.nojpa.reflection.util.ClassAnalyser;
+import dk.lessismore.nojpa.reflection.visitors.AttributeContainerVisitor;
+import dk.lessismore.nojpa.reflection.visitors.AttributeVisitor;
+import dk.lessismore.nojpa.reflection.visitors.DbValueVisitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.annotation.Annotation;
+import java.util.Calendar;
 
 /**
  * This class represents an reflected attribute in a class. It is abstract because the attribute can
@@ -20,7 +25,7 @@ import java.lang.annotation.Annotation;
  */
 public abstract class Attribute {
 
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(Attribute.class);
+    private static final Logger log = LoggerFactory.getLogger(Attribute.class);
     protected boolean translatedAssociation = false;
     protected boolean unique = false;
     private SearchField searchFieldAnnotation;

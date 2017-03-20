@@ -1,21 +1,22 @@
 package dk.lessismore.nojpa.masterworker.client;
 
+import dk.lessismore.nojpa.concurrency.WaitForValue;
+import dk.lessismore.nojpa.guid.GuidFactory;
 import dk.lessismore.nojpa.masterworker.JobStatus;
+import dk.lessismore.nojpa.masterworker.exceptions.JobHandleClosedException;
+import dk.lessismore.nojpa.masterworker.executor.Executor;
 import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteBeanMessage;
 import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteResultMessage;
-import dk.lessismore.nojpa.masterworker.executor.Executor;
-import dk.lessismore.nojpa.masterworker.exceptions.JobHandleClosedException;
-import dk.lessismore.nojpa.guid.GuidFactory;
-import dk.lessismore.nojpa.concurrency.WaitForValue;
 import dk.lessismore.nojpa.utils.Pair;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
 public class JobHandle<O> {
 
-    private static Logger log = org.apache.log4j.Logger.getLogger(JobHandle.class);
+    private static final Logger log = LoggerFactory.getLogger(JobHandle.class);
 
     private final JobHandleToMasterProtocol<O> jm;
     private final Class<? extends Executor> implementationClass;

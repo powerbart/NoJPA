@@ -5,12 +5,14 @@ import dk.lessismore.nojpa.reflection.ClassReflector;
 import dk.lessismore.nojpa.reflection.attributes.AttributeContainer;
 import dk.lessismore.nojpa.reflection.db.annotations.ModelObjectLifeCycleListener;
 import dk.lessismore.nojpa.reflection.util.ReflectionUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 
 public class ModelObjectService {
 
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(ModelObjectService.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelObjectService.class);
 
 
 

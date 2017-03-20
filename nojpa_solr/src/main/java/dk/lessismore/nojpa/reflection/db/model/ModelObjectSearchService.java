@@ -11,12 +11,18 @@ import dk.lessismore.nojpa.reflection.db.attributes.DbAttributeContainer;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrInputDocument;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.TimeZone;
 
 /**
  * Created : with IntelliJ IDEA.
@@ -24,7 +30,7 @@ import java.util.*;
  */
 public class ModelObjectSearchService {
 
-    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(ModelObjectSearchService.class);
+    private static final Logger log = LoggerFactory.getLogger(ModelObjectSearchService.class);
 
 
     public static int AUTO_COMMIT_MS = 300;
@@ -116,7 +122,7 @@ public class ModelObjectSearchService {
 
             SolrClient solrServer = servers.get(modelObject.getInterface().getSimpleName());
             if(solrServer == null){
-                log.fatal("Cant find a solrServer for class("+ modelObject.getInterface().getSimpleName() +")");
+                log.error("Cant find a solrServer for class("+ modelObject.getInterface().getSimpleName() +")");
             }
             SolrInputDocument solrObj = new SolrInputDocument();
             addAttributesToSolrDocument(object, "", new HashMap<String, String>(), solrServer, solrObj);
@@ -153,7 +159,7 @@ public class ModelObjectSearchService {
             ModelObject modelObject = (ModelObject) object;
             SolrClient solrServer = servers.get(modelObject.getInterface().getSimpleName());
             if(solrServer == null){
-                log.fatal("Cant find a solrServer for class("+ modelObject.getInterface().getSimpleName() +")");
+                log.error("Cant find a solrServer for class("+ modelObject.getInterface().getSimpleName() +")");
             }
             SolrInputDocument solrObj = new SolrInputDocument();
             addAttributesToSolrDocument(object, "", new HashMap<String, String>(), solrServer, solrObj);

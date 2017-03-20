@@ -1,14 +1,16 @@
 package dk.lessismore.nojpa.utils;
 
-import java.util.*;
-import java.lang.reflect.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import org.apache.log4j.Logger;
+import java.lang.reflect.Method;
+import java.util.Calendar;
+import java.util.Comparator;
 
 
 public class GenericComparator<T> implements Comparator<T> {
 
-    private final static org.apache.log4j.Logger log = Logger.getLogger(GenericComparator.class);
+    private static final Logger log = LoggerFactory.getLogger(GenericComparator.class);
 
     private Method getMethod = null;
     //private Class someClass = null;
@@ -98,7 +100,7 @@ public class GenericComparator<T> implements Comparator<T> {
 
 
     public static void main(String[] args) throws Exception {
-        log.fatal("Hej med dig");
+        log.error("Hej med dig");
         log.debug("deeededed hej med dig");
 
 //        class Tester {

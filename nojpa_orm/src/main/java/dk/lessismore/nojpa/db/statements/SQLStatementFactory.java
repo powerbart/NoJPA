@@ -1,7 +1,15 @@
 package dk.lessismore.nojpa.db.statements;
 
-import dk.lessismore.nojpa.resources.*;
-import dk.lessismore.nojpa.db.statements.mysql.*;
+import dk.lessismore.nojpa.db.statements.mysql.MySqlContainerExpression;
+import dk.lessismore.nojpa.db.statements.mysql.MySqlCreateStatement;
+import dk.lessismore.nojpa.db.statements.mysql.MySqlDeleteStatement;
+import dk.lessismore.nojpa.db.statements.mysql.MySqlDropStatement;
+import dk.lessismore.nojpa.db.statements.mysql.MySqlInsertStatement;
+import dk.lessismore.nojpa.db.statements.mysql.MySqlLeafExpression;
+import dk.lessismore.nojpa.db.statements.mysql.MySqlSelectStatement;
+import dk.lessismore.nojpa.db.statements.mysql.MySqlUpdateStatement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is an factory which can make instances of different sql statements,
@@ -13,9 +21,7 @@ import dk.lessismore.nojpa.db.statements.mysql.*;
  */
 public class SQLStatementFactory {
 
-
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(SQLStatementFactory.class);
-
+    private static final Logger log = LoggerFactory.getLogger(SQLStatementFactory.class);
 
 
     public static enum DatabaseInstance {

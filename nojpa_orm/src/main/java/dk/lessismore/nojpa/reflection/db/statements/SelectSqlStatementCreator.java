@@ -1,13 +1,16 @@
 package dk.lessismore.nojpa.reflection.db.statements;
 
-import dk.lessismore.nojpa.reflection.db.attributes.*;
-import dk.lessismore.nojpa.reflection.db.*;
+import dk.lessismore.nojpa.db.statements.SQLStatementFactory;
+import dk.lessismore.nojpa.db.statements.SelectSQLStatement;
+import dk.lessismore.nojpa.db.statements.WhereSQLStatement;
+import dk.lessismore.nojpa.reflection.db.AssociationTable;
+import dk.lessismore.nojpa.reflection.db.DbClassReflector;
+import dk.lessismore.nojpa.reflection.db.attributes.DbAttribute;
+import dk.lessismore.nojpa.reflection.db.attributes.DbAttributeContainer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import dk.lessismore.nojpa.db.statements.*;
-
-import java.util.*;
-
-import org.apache.log4j.Logger;
+import java.util.Calendar;
 
 /**
  * This class is a wrap around a sql select statement. It makes it easier to make
@@ -18,7 +21,7 @@ import org.apache.log4j.Logger;
  */
 public class SelectSqlStatementCreator  {
 
-    private static final org.apache.log4j.Logger log = Logger.getLogger(SelectSqlStatementCreator.class);
+    private static final Logger log = LoggerFactory.getLogger(SelectSqlStatementCreator.class);
 
     private SelectSQLStatement selectSQLStatement = null;
 

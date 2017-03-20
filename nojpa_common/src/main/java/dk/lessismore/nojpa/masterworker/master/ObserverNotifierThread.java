@@ -1,10 +1,11 @@
 package dk.lessismore.nojpa.masterworker.master;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ObserverNotifierThread extends Thread {
 
-    private static final Logger log = Logger.getLogger(ObserverNotifierThread.class);
+    private static final Logger log = LoggerFactory.getLogger(ObserverNotifierThread.class);
     private final MasterServer masterServer;
     private static final long NOTIFY_INTERVAL = 10000;
     private boolean running = true;

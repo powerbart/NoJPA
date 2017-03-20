@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import dk.lessismore.nojpa.db.methodquery.NList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,8 +16,8 @@ import java.util.ArrayList;
  * Created by seb on 19/1/15.
  */
 public class NListSerializer extends JsonSerializer<NList> {
-    private PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy strategy = new PropertyNamingStrategy.LowerCaseWithUnderscoresStrategy();
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(NoJpaSerializer.class);
+    private PropertyNamingStrategy.SnakeCaseStrategy strategy = new PropertyNamingStrategy.SnakeCaseStrategy();
+    private static final Logger log = LoggerFactory.getLogger(NoJpaSerializer.class);
 
     @Override
     public void serialize(NList nList, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonProcessingException {

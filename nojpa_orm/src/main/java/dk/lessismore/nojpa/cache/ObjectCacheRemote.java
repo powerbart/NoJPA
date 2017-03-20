@@ -6,6 +6,8 @@ import dk.lessismore.nojpa.net.Server;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.resources.PropertyResources;
 import dk.lessismore.nojpa.resources.PropertyService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -17,7 +19,7 @@ import java.util.List;
  */
 public class ObjectCacheRemote implements ServletContextListener {
 
-    final private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(ObjectCacheRemote.class);
+    private static final Logger log = LoggerFactory.getLogger(ObjectCacheRemote.class);
 
     public static String clusterFilenameForTest = null;
 
