@@ -1,9 +1,10 @@
 package dk.lessismore.nojpa.db.testmodel;
 
-import dk.lessismore.nojpa.db.methodquery.MQL;
 import dk.lessismore.nojpa.reflection.db.DatabaseCreator;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,8 +12,7 @@ import java.util.List;
 
 public class InitTestDatabase {
 
-
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(InitTestDatabase.class);
+    private static final Logger log = LoggerFactory.getLogger(InitTestDatabase.class);
 
     public static void createTables() {
         DatabaseCreator.createDatabase("dk.lessismore.nojpa.db.testmodel");

@@ -1,10 +1,18 @@
 package dk.lessismore.nojpa.reflection.db.attributes;
 
-import dk.lessismore.nojpa.reflection.attributes.*;
+import dk.lessismore.nojpa.reflection.attributes.Attribute;
+import dk.lessismore.nojpa.reflection.attributes.AttributeContainer;
 import dk.lessismore.nojpa.reflection.db.DbClassReflector;
-import dk.lessismore.nojpa.reflection.db.model.*;
+import dk.lessismore.nojpa.reflection.db.model.ModelObject;
+import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
+import dk.lessismore.nojpa.reflection.db.model.ModelObjectProxy;
+import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * This class is a wrap around the <tt>AttributeContainer</tt>. It represents an class
@@ -22,7 +30,7 @@ import java.util.*;
  */
 public class DbAttributeContainer {
 
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(DbAttributeContainer.class);
+    private static final Logger log = LoggerFactory.getLogger(DbAttributeContainer.class);
 
     /**
      * The table name which this container maps to.
@@ -102,7 +110,7 @@ public class DbAttributeContainer {
         //We check to see if this object is an sub class of the modelObject class.
         //If not we are not able to analyse it.!!
         if (!ModelObjectInterface.class.isAssignableFrom(attributeContainer.getTargetClass())) {
-            log.fatal("setAttributeContainer :: This is no modelclass " + attributeContainer.getTargetClass().getName() + " ... Mayby use " + attributeContainer.getTargetClass().getName() + "Impl ????");
+            log.error("setAttributeContainer :: This is no modelclass " + attributeContainer.getTargetClass().getName() + " ... Mayby use " + attributeContainer.getTargetClass().getName() + "Impl ????");
             throw new RuntimeException("AttributeContainer :: This is no modelclass " + attributeContainer.getTargetClass().getName()  + " ... Mayby use " + attributeContainer.getTargetClass().getName() + "Impl ????");
         }
 
@@ -112,11 +120,11 @@ public class DbAttributeContainer {
             modelObject = (ModelObject) ModelObjectProxy.create(attributeContainer.getTargetClass());
 
             if (modelObject == null) {
-                log.fatal("setAttributeContainer :: modelObject == null");
+                log.error("setAttributeContainer :: modelObject == null");
                 return false;
             }
         } catch (Exception e) {
-            log.fatal("setAttributeContainer :: Some exp 1 for " + attributeContainer.getTargetClass().getName() + " " + e.toString());
+            log.error("setAttributeContainer :: Some exp 1 for " + attributeContainer.getTargetClass().getName() + " " + e.toString());
             e.printStackTrace();
             return false;
         }

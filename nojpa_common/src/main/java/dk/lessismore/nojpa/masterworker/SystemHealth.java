@@ -1,20 +1,21 @@
 package dk.lessismore.nojpa.masterworker;
 
-import org.apache.log4j.Logger;
 import dk.lessismore.nojpa.masterworker.executor.SumExecutor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.lang.management.OperatingSystemMXBean;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
-import java.io.InputStream;
-import java.io.IOException;
-import java.util.StringTokenizer;
-import java.util.Map;
+import java.lang.management.OperatingSystemMXBean;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.StringTokenizer;
 
 public class SystemHealth {
 
-    private static final Logger log = Logger.getLogger(SystemHealth.class);
+    private static final Logger log = LoggerFactory.getLogger(SystemHealth.class);
 
     private static OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.getOperatingSystemMXBean();
     private static MemoryMXBean heapBean = ManagementFactory.getMemoryMXBean();

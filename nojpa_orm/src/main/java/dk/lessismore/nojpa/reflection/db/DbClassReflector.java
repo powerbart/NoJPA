@@ -7,7 +7,8 @@ import dk.lessismore.nojpa.reflection.db.model.ModelObject;
 import dk.lessismore.nojpa.reflection.db.attributes.*;
 import dk.lessismore.nojpa.reflection.*;
 import dk.lessismore.nojpa.reflection.attributes.*;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is a factory which contains the different DbAttributeContainer.
@@ -18,7 +19,7 @@ import org.apache.log4j.Logger;
  */
 public class DbClassReflector {
 
-    private static final org.apache.log4j.Logger log = Logger.getLogger(DbClassReflector.class);
+    private static final Logger log = LoggerFactory.getLogger(DbClassReflector.class);
 
     /**
      * The DbAttributeContainers. (key=classname, value=DbAttributeContainer)

@@ -1,24 +1,38 @@
 package dk.lessismore.nojpa.masterworker.master;
 
 import dk.lessismore.nojpa.masterworker.exceptions.JobDoesNotExistException;
-import dk.lessismore.nojpa.masterworker.messages.*;
+import dk.lessismore.nojpa.masterworker.messages.HealthMessage;
+import dk.lessismore.nojpa.masterworker.messages.JobMessage;
+import dk.lessismore.nojpa.masterworker.messages.JobProgressMessage;
+import dk.lessismore.nojpa.masterworker.messages.JobResultMessage;
+import dk.lessismore.nojpa.masterworker.messages.KillMessage;
+import dk.lessismore.nojpa.masterworker.messages.RegistrationMessage;
+import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteBeanMessage;
+import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteResultMessage;
 import dk.lessismore.nojpa.masterworker.messages.observer.UpdateMessage;
 import dk.lessismore.nojpa.net.link.ServerLink;
 import dk.lessismore.nojpa.properties.PropertiesListener;
 import dk.lessismore.nojpa.properties.PropertiesProxy;
 import dk.lessismore.nojpa.serialization.Serializer;
 import dk.lessismore.nojpa.serialization.XmlSerializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 public class MasterServer {
 
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(MasterServer.class);
+    private static final Logger log = LoggerFactory.getLogger(MasterServer.class);
     private static final MasterProperties properties = PropertiesProxy.getInstance(MasterProperties.class);
     static {
         properties.addListener(new PropertiesListener() {

@@ -1,10 +1,16 @@
 package dk.lessismore.nojpa.masterworker.bean.client;
 
+import dk.lessismore.nojpa.masterworker.JobStatus;
+import dk.lessismore.nojpa.masterworker.messages.JobProgressMessage;
+import dk.lessismore.nojpa.masterworker.messages.JobResultMessage;
+import dk.lessismore.nojpa.masterworker.messages.JobStatusMessage;
+import dk.lessismore.nojpa.masterworker.messages.PingMessage;
+import dk.lessismore.nojpa.masterworker.messages.PongMessage;
+import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteResultMessage;
 import dk.lessismore.nojpa.net.link.ClientLink;
 import dk.lessismore.nojpa.serialization.Serializer;
-import dk.lessismore.nojpa.masterworker.messages.*;
-import dk.lessismore.nojpa.masterworker.JobStatus;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
@@ -12,7 +18,7 @@ import java.nio.channels.ClosedChannelException;
 
 public class ClientCallbackThread<O> extends Thread {
 
-    private static Logger log = org.apache.log4j.Logger.getLogger(ClientCallbackThread.class);
+    private static final Logger log = LoggerFactory.getLogger(ClientCallbackThread.class);
     private final ClientLink cp;
     private final JobHandleToMasterProtocol<O> jm;
     private final Serializer serializer;

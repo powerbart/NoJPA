@@ -1,8 +1,14 @@
 package dk.lessismore.nojpa.db.statements.mysql;
 
-import dk.lessismore.nojpa.db.statements.*;
+import dk.lessismore.nojpa.db.statements.PreparedSQLStatement;
+import dk.lessismore.nojpa.db.statements.SelectSQLStatement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Mysql statement implementation
@@ -11,7 +17,7 @@ import java.util.*;
  * @version 1.0 25-7-02
  */
 public class MySqlSelectStatement extends MySqlWhereStatement implements SelectSQLStatement {
-    private final static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(MySqlSelectStatement.class);
+    private static final Logger log = LoggerFactory.getLogger(MySqlSelectStatement.class);
 
     protected List attributeNames = null;
     protected ArrayList<String> sortAttributeNameList = new ArrayList<String>();

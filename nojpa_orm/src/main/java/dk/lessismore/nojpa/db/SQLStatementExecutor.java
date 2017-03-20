@@ -1,14 +1,20 @@
 package dk.lessismore.nojpa.db;
 
-import dk.lessismore.nojpa.db.statements.*;
-import dk.lessismore.nojpa.db.statements.mysql.*;
-import dk.lessismore.nojpa.db.connectionpool.*;
+import dk.lessismore.nojpa.db.connectionpool.ConnectionPoolFactory;
+import dk.lessismore.nojpa.db.statements.PreparedSQLStatement;
+import dk.lessismore.nojpa.db.statements.SelectSQLStatement;
+import dk.lessismore.nojpa.db.statements.mysql.MySqlPreparedSQLStatement;
 import dk.lessismore.nojpa.resources.PropertyResources;
 import dk.lessismore.nojpa.resources.PropertyService;
 import dk.lessismore.nojpa.utils.EventCounter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.sql.*;
-import java.io.*;
+import java.io.FileWriter;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.List;
 
 /**
@@ -32,7 +38,7 @@ public class SQLStatementExecutor {
 
 
 
-    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(SQLStatementExecutor.class);
+    private static final Logger log = LoggerFactory.getLogger(SQLStatementExecutor.class);
     private static boolean updateSqlToFile = false;
     private static boolean selectSqlToFile = false;
     private static boolean enableUpdateDbConnection = true;

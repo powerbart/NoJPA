@@ -1,8 +1,15 @@
 package dk.lessismore.nojpa.net;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.net.*;
+import java.net.BindException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 /**
  * Created : by IntelliJ IDEA.
@@ -21,7 +28,7 @@ public class Server  extends Thread {
     private String bindAddress = null;
 
 
-    final private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(Server.class);
+    private static final Logger log = LoggerFactory.getLogger(Server.class);
 
     public Server(Class serverThreadClass, Object initParams, String bindAddress, int port) {
         this.bindAddress = bindAddress;
@@ -62,7 +69,6 @@ public class Server  extends Thread {
         } catch (BindException e) {
             String s = "Error when binding on IP("+ bindAddress +"), port("+ port +") ";
             log.error(s + e.toString(), e);
-            log.fatal(s + e.toString(), e);
             e.printStackTrace();
             System.out.print(s);
             System.err.print(s);

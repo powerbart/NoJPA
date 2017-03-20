@@ -2,6 +2,8 @@ package dk.lessismore.nojpa.cache;
 
 import dk.lessismore.nojpa.reflection.db.model.ModelObject;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,7 +15,8 @@ import java.util.Map;
  * @version 1.0 21-5-2
  */
 public class ObjectCacheFactory {
-    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(ObjectCacheFactory.class);
+
+    private static final Logger log = LoggerFactory.getLogger(ObjectCacheFactory.class);
     private static Object lock = new Object();
 
     /**

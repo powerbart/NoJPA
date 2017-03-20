@@ -1,9 +1,15 @@
 package dk.lessismore.nojpa.masterworker.master;
 
-import dk.lessismore.nojpa.net.link.ServerLink;
-import dk.lessismore.nojpa.masterworker.messages.*;
-import dk.lessismore.nojpa.masterworker.messages.RegistrationMessage;
 import dk.lessismore.nojpa.masterworker.messages.HealthMessage;
+import dk.lessismore.nojpa.masterworker.messages.JobProgressMessage;
+import dk.lessismore.nojpa.masterworker.messages.JobResultMessage;
+import dk.lessismore.nojpa.masterworker.messages.PingMessage;
+import dk.lessismore.nojpa.masterworker.messages.PongMessage;
+import dk.lessismore.nojpa.masterworker.messages.RegistrationMessage;
+import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteResultMessage;
+import dk.lessismore.nojpa.net.link.ServerLink;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
@@ -11,7 +17,7 @@ import java.nio.channels.ClosedChannelException;
 
 public class MasterWorkerThread extends Thread {
 
-    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(MasterWorkerThread.class);
+    private static final Logger log = LoggerFactory.getLogger(MasterWorkerThread.class);
     private final ServerLink serverLink;
     private final MasterServer masterServer;
 

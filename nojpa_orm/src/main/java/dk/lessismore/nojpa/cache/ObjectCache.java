@@ -5,8 +5,9 @@ import dk.lessismore.nojpa.reflection.db.model.ModelObjectProxy;
 import dk.lessismore.nojpa.reflection.util.ClassAnalyser;
 import dk.lessismore.nojpa.resources.PropertyResources;
 import dk.lessismore.nojpa.resources.Resources;
-import dk.lessismore.nojpa.utils.MaxSizeMap;
 import dk.lessismore.nojpa.utils.MaxSizeMaxTimeMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
@@ -19,7 +20,7 @@ import java.util.Map;
  */
 public class ObjectCache implements ObjectCacheInterface {
 
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(ObjectCache.class);
+    private static final Logger log = LoggerFactory.getLogger(ObjectCache.class);
 
     //private Object mySync = new Object();
 

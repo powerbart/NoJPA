@@ -1,17 +1,19 @@
 package dk.lessismore.nojpa.reflection.util;
 
-import dk.lessismore.nojpa.resources.PropertyService;
-import dk.lessismore.nojpa.resources.PropertyResources;
+import dk.lessismore.nojpa.reflection.ClassReflector;
+import dk.lessismore.nojpa.reflection.attributes.Attribute;
+import dk.lessismore.nojpa.reflection.attributes.AttributeContainer;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
-import dk.lessismore.nojpa.reflection.attributes.AttributeContainer;
-import dk.lessismore.nojpa.reflection.attributes.Attribute;
-import dk.lessismore.nojpa.reflection.ClassReflector;
-//import dk.lessismore.reusable_v4.generichtmladmin.htmlclassannotations.ListViewShortSelectLabel;
+import dk.lessismore.nojpa.resources.PropertyResources;
+import dk.lessismore.nojpa.resources.PropertyService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Vector;
-import java.util.List;
 import java.lang.reflect.Method;
+import java.util.List;
+
+//import dk.lessismore.reusable_v4.generichtmladmin.htmlclassannotations.ListViewShortSelectLabel;
 
 /**
  * Created : by IntelliJ IDEA.
@@ -22,7 +24,7 @@ import java.lang.reflect.Method;
  */
 public class ReflectionUtil {
 
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(ReflectionUtil.class);
+    private static final Logger log = LoggerFactory.getLogger(ReflectionUtil.class);
 
 
     static String[] model_packages = null;

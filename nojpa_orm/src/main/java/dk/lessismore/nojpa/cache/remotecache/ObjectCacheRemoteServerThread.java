@@ -5,6 +5,8 @@ import dk.lessismore.nojpa.cache.ObjectCache;
 import dk.lessismore.nojpa.cache.ObjectCacheFactory;
 import dk.lessismore.nojpa.cache.ObjectCacheRemote;
 import dk.lessismore.nojpa.utils.MaxSizeArray;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -21,7 +23,7 @@ import java.util.StringTokenizer;
  */
 public class ObjectCacheRemoteServerThread extends Thread {
 
-    final private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(ObjectCacheRemoteServerThread.class);
+    private static final Logger log = LoggerFactory.getLogger(ObjectCacheRemoteServerThread.class);
 
     static MaxSizeArray<ObjectCacheRemoteServerThread> allCurrentThreads = new MaxSizeArray<ObjectCacheRemoteServerThread>(32);
 
@@ -53,7 +55,7 @@ public class ObjectCacheRemoteServerThread extends Thread {
     long lastRemoveCounter = -1;
     long lastLockCounter = -1;
     long lastUnlockCounter = -1;
-    
+
     private void validateRemoveCounter(String number){
         try{
             long n = Long.parseLong(number);

@@ -1,12 +1,17 @@
 package dk.lessismore.nojpa.reflection.db.model;
 
 import dk.lessismore.nojpa.reflection.translate.TranslateService;
-import org.apache.solr.client.solrj.*;
+import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrRequest;
+import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.core.CoreContainer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,7 +22,7 @@ import java.util.Locale;
  * Created by seb on 7/23/14.
  */
 public class SolrServiceImpl implements SolrService {
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(SolrServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(SolrServiceImpl.class);
 
     private static CoreContainer coreContainer;
 

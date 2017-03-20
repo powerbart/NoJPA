@@ -1,16 +1,27 @@
 package dk.lessismore.nojpa.reflection.db;
 
+import dk.lessismore.nojpa.cache.ObjectCacheFactory;
+import dk.lessismore.nojpa.db.DbDataType;
+import dk.lessismore.nojpa.db.LimResultSet;
+import dk.lessismore.nojpa.db.SQLStatementExecutor;
+import dk.lessismore.nojpa.db.statements.SQLStatementFactory;
+import dk.lessismore.nojpa.db.statements.SelectSQLStatement;
+import dk.lessismore.nojpa.db.statements.WhereSQLStatement;
 import dk.lessismore.nojpa.reflection.db.annotations.DbInline;
-import dk.lessismore.nojpa.reflection.db.attributes.*;
-import dk.lessismore.nojpa.db.statements.*;
-import dk.lessismore.nojpa.db.*;
-import dk.lessismore.nojpa.reflection.db.model.*;
+import dk.lessismore.nojpa.reflection.db.attributes.DbAttribute;
+import dk.lessismore.nojpa.reflection.db.attributes.DbAttributeContainer;
+import dk.lessismore.nojpa.reflection.db.model.ModelObject;
+import dk.lessismore.nojpa.reflection.db.model.ModelObjectProxy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.*;
-import java.sql.*;
-
-import dk.lessismore.nojpa.cache.*;
-import org.apache.log4j.Logger;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * This class can read an tupel from a database into a model object which match the
@@ -27,7 +38,7 @@ import org.apache.log4j.Logger;
  */
 public class DbObjectReader {
 
-    private static org.apache.log4j.Logger log = Logger.getLogger(DbObjectReader.class);
+    private static final Logger log = LoggerFactory.getLogger(DbObjectReader.class);
 
     public DbObjectReader() {
     }
@@ -330,7 +341,7 @@ public class DbObjectReader {
                         if (dbAttributeContainer.setAttributeValue(objectToFillInto, dbAttribute, value)) {
                             //log.debug("Read attribute="+attributeName);
                         } else {
-                            log.fatal("Failed at attribute=" + attributeName + " " + value + " " + value.getClass() + " on " + objectToFillInto + " with " + dbAttribute);
+                            log.error("Failed at attribute=" + attributeName + " " + value + " " + value.getClass() + " on " + objectToFillInto + " with " + dbAttribute);
                             //return false;
                         }
                     }

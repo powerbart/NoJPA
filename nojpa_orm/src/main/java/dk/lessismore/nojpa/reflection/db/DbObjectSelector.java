@@ -1,12 +1,22 @@
 package dk.lessismore.nojpa.reflection.db;
 
-import dk.lessismore.nojpa.reflection.db.attributes.*;
-import dk.lessismore.nojpa.db.statements.*;
-import dk.lessismore.nojpa.reflection.db.statements.*;
-import dk.lessismore.nojpa.db.*;
-import dk.lessismore.nojpa.reflection.db.model.*;
-import java.util.*;
-import java.sql.*;
+import dk.lessismore.nojpa.db.LimResultSet;
+import dk.lessismore.nojpa.db.SQLStatementExecutor;
+import dk.lessismore.nojpa.db.statements.SelectSQLStatement;
+import dk.lessismore.nojpa.reflection.db.attributes.DbAttribute;
+import dk.lessismore.nojpa.reflection.db.attributes.DbAttributeContainer;
+import dk.lessismore.nojpa.reflection.db.model.ModelObject;
+import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
+import dk.lessismore.nojpa.reflection.db.statements.SelectSqlStatementCreator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * This class can execute an select sql statement; and load each of the objects which
@@ -20,7 +30,7 @@ import java.sql.*;
  */
 public class DbObjectSelector {
 
-    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(DbObjectSelector.class);
+    private static final Logger log = LoggerFactory.getLogger(DbObjectSelector.class);
 
     public static void iterateObjectsFromDb(Class targetClass, SelectSQLStatement selectSqlStatement, DbObjectVisitor visitor) {
         log.debug("Will run: iterateObjectsFromDb");
@@ -48,7 +58,7 @@ public class DbObjectSelector {
         try {
 //            log.debug("iterateObjectsFromDb:1");
             if (!ModelObjectInterface.class.isAssignableFrom(targetClass)) {
-                log.fatal("This is not a model object. We can not continue.");
+                log.error("This is not a model object. We can not continue.");
                 return;
             }
 //            log.debug("iterateObjectsFromDb:2");
@@ -115,7 +125,7 @@ public class DbObjectSelector {
         try {
 //            log.debug("iterateObjectsFromDb:1");
             if (!ModelObjectInterface.class.isAssignableFrom(targetClass)) {
-                log.fatal("This is not a model object. We can not continue.");
+                log.error("This is not a model object. We can not continue.");
                 return;
             }
 //            log.debug("iterateObjectsFromDb:2");

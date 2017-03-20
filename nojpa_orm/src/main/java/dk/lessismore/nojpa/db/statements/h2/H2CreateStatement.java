@@ -2,6 +2,8 @@ package dk.lessismore.nojpa.db.statements.h2;
 
 import dk.lessismore.nojpa.db.DbDataType;
 import dk.lessismore.nojpa.db.statements.CreateSQLStatement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -17,7 +19,7 @@ import java.util.regex.Pattern;
  */
 public class H2CreateStatement extends H2Statement implements CreateSQLStatement {
 
-    private final static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(H2CreateStatement.class);
+    private static final Logger log = LoggerFactory.getLogger(H2CreateStatement.class);
 
     private List<String> attributes = null;
     private List<String> primaryKeys = null;

@@ -3,18 +3,20 @@ package dk.lessismore.nojpa.net.link;
 
 import dk.lessismore.nojpa.serialization.Serializer;
 import dk.lessismore.nojpa.serialization.XmlSerializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.OutputStream;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.LinkedList;
 import java.nio.channels.ClosedChannelException;
+import java.util.LinkedList;
 
 public abstract class AbstractLink {
 
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(AbstractLink.class);
+    private static final Logger log = LoggerFactory.getLogger(AbstractLink.class);
 
     protected Socket socket = null;
     protected OutputStream out = null;

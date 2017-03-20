@@ -1,6 +1,12 @@
 package dk.lessismore.nojpa.resources;
 
-import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.StringTokenizer;
 
 /**
  * A resource is an attribute with a name and a string value. The resource can have different
@@ -16,7 +22,7 @@ import java.util.*;
  */
 abstract public class Resources {
 
-    private static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(Resources.class);
+    private static Logger log = LoggerFactory.getLogger(Resources.class);
 
     public Resources() { }
 

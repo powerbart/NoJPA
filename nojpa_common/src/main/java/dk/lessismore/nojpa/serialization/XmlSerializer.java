@@ -2,12 +2,19 @@ package dk.lessismore.nojpa.serialization;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class XmlSerializer implements Serializer {
 
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(XmlSerializer.class);
+    private static final Logger log = LoggerFactory.getLogger(XmlSerializer.class);
 
     protected final XStream xstream = new XStream() {
             protected MapperWrapper wrapMapper(MapperWrapper next) {

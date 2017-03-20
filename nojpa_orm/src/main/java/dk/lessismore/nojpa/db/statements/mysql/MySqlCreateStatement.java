@@ -1,9 +1,13 @@
 package dk.lessismore.nojpa.db.statements.mysql;
 
-import dk.lessismore.nojpa.db.statements.*;
-import dk.lessismore.nojpa.db.*;
+import dk.lessismore.nojpa.db.DbDataType;
+import dk.lessismore.nojpa.db.statements.CreateSQLStatement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,7 +19,7 @@ import java.util.regex.Pattern;
  */
 public class MySqlCreateStatement extends MySqlStatement implements CreateSQLStatement {
 
-    private final static org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(MySqlCreateStatement.class);
+    private static final Logger log = LoggerFactory.getLogger(MySqlCreateStatement.class);
 
     private List<String> attributes = null;
     private List<String> primaryKeys = null;

@@ -1,15 +1,14 @@
 package dk.lessismore.nojpa.reflection.translate;
 
-import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.fluent.Request;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -23,7 +22,7 @@ import java.util.List;
  */
 public class LessismoreTranslateServiceImpl implements TranslateService {
 
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(LessismoreTranslateServiceImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(LessismoreTranslateServiceImpl.class);
 
 
     private String googleAPIkey = null;
