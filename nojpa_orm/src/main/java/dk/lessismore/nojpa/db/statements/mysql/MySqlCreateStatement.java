@@ -110,7 +110,7 @@ public class MySqlCreateStatement extends MySqlStatement implements CreateSQLSta
 //            log.debug("makeStatement() : i = " + namesToIndex[i] + " with name: " + indexName);
 
             if (!indexNames.add(indexName)) {
-                indexName = indexName + "_" + UUID.randomUUID().toString();
+                indexName = indexName + "_" + UUID.randomUUID().toString().replaceAll("-", "");
             }
             statement.append(", INDEX " + indexName + " ( " + namesToIndex[i] + ")");
 
