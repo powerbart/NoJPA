@@ -369,7 +369,7 @@ public class DatabaseCreator {
                         new TypeAnnotationsScanner(),
                         new ResourcesScanner()));
         ArrayList<Class> annoList = new ArrayList<Class>();
-        annoList.addAll(reflections.getTypesAnnotatedWith(IgnoreFromTableCreation.class));
+        annoList.addAll(reflections.getTypesAnnotatedWith(IgnoreFromTableCreation.class, true));
         log.debug("annoList.size()::" + annoList.size());
         ArrayList<Class> subTypesList = new ArrayList<Class>();
         subTypesList.addAll(reflections.getSubTypesOf(ModelObjectInterface.class));
