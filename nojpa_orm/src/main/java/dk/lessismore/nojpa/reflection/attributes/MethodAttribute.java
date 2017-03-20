@@ -1,17 +1,20 @@
 package dk.lessismore.nojpa.reflection.attributes;
 
-import java.lang.reflect.*;
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
+import dk.lessismore.nojpa.reflection.db.model.ModelObject;
+import dk.lessismore.nojpa.reflection.util.ClassAnalyser;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
-
-import com.google.common.base.Function;
-import com.google.common.collect.Lists;
-import dk.lessismore.nojpa.reflection.util.*;
-import dk.lessismore.nojpa.reflection.db.model.ModelObject;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * This class can access an attribute in a class with get and set methods.
@@ -21,7 +24,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class MethodAttribute extends Attribute {
 
-    private static final org.apache.log4j.Logger log = org.apache.log4j.Logger.getLogger(MethodAttribute.class);
+    private static final Logger log = LoggerFactory.getLogger(MethodAttribute.class);
     /**
      * The set method.
      */
