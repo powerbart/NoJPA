@@ -5,9 +5,12 @@ import dk.lessismore.nojpa.db.statements.CreateSQLStatement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -88,6 +91,7 @@ public class MySqlCreateStatement extends MySqlStatement implements CreateSQLSta
             statement.append(")");
         }
         statement.append("\n\n");
+        Set<String> indexNames = new HashSet<String>();
         for (int i = 0; namesToIndex != null && i < namesToIndex.length; i++) {
             String indexName = "_";
             String indexFullName = (getTableNames().get(0) + "," + namesToIndex[i]);//;
@@ -105,6 +109,9 @@ public class MySqlCreateStatement extends MySqlStatement implements CreateSQLSta
             //log.debug("makeStatement: indexName = " + indexName);
 //            log.debug("makeStatement() : i = " + namesToIndex[i] + " with name: " + indexName);
 
+            if (!indexNames.add(indexName)) {
+                indexName = indexName + "_" + UUID.randomUUID().toString();
+            }
             statement.append(", INDEX " + indexName + " ( " + namesToIndex[i] + ")");
 
 //            statement.append(" " + namesToIndex[i]);
