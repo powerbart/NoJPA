@@ -1,13 +1,12 @@
 package dk.lessismore.nojpa.reflection.translate;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,11 +69,9 @@ public class GoogleTranslateServiceImpl implements TranslateService {
         log.debug("response from google: " + cache);
 
 
-        JSONParser parser = new JSONParser();
-        JSONObject responseJSON = (JSONObject) parser.parse(cache.toString());
-        JSONObject code = (JSONObject) responseJSON.get("code");
+        JsonNode jsonNode = new ObjectMapper().reader().readTree(cache.toString());
 
-        int statusCode = Integer.parseInt(code.toString());
+        int statusCode = jsonNode.get("code").intValue();
         if(statusCode == 403){
             log.warn("Google dont like us anymore ... :-( " + cache);
             return null;
@@ -83,10 +80,7 @@ public class GoogleTranslateServiceImpl implements TranslateService {
                 log.trace("Translated text '" + originalText + "', response: " + cache);
             }
         }
-        JSONObject data = (JSONObject) responseJSON.get("data");
-        JSONArray translations = (JSONArray) data.get("translations");
-        JSONObject translation = ((JSONObject) translations.get(0));
-        String translatedText = (String) translation.get("translatedText");
+        String translatedText = jsonNode.get("data").get("translations").get(0).get("translatedText").textValue();
 
         totalCharactersTranslated = totalCharactersTranslated + originalText.length();
 

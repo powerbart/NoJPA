@@ -1,5 +1,7 @@
 package dk.lessismore.nojpa.reflection.translate;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -8,8 +10,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.ContentEncodingHttpClient;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,13 +86,11 @@ public class LessismoreApiTranslateServiceImpl  implements TranslateService {
         while ((line = rd.readLine()) != null) {
             cache.append(line);
         }
-        JSONParser parser = new JSONParser();
-        JSONObject responseJSON = (JSONObject) parser.parse(cache.toString());
+
+        JsonNode jsonNode = new ObjectMapper().reader().readTree(cache.toString());
 
         long end = System.currentTimeMillis();
-
-        String code = (String) responseJSON.get("code");
-        String translatedText = (String) responseJSON.get("translatedText");
+        String translatedText = jsonNode.get("translatedText").textValue();
         log.debug("Running translate: uniqueID("+ uniqueID +") TIME["+ (end - start) +"] src("+ srcLang2Char +") dest("+ destLang2Char +") originalText("+ originalText +") translated_text(" + translatedText +")");
         return translatedText;
     }
