@@ -29,6 +29,16 @@
             <name>NoJPA Repository</name>
             <url>http://maven.less-is-more.dk</url>
         </repository>
+        <repository>
+            <id>publicmaven</id>
+            <name>Public Repository</name>
+            <url>http://repo1.maven.org/maven2</url>
+        </repository>
+	 <repository>
+            <id>mvnrepository</id>
+            <name>mvnrepository</name>
+            <url>http://www.mvnrepository.com</url>
+         </repository>
     </repositories>
 
     <dependencies>
@@ -150,5 +160,25 @@
             </plugin>
         </plugins>
     </build>
+
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <version>2.9</version>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>dependencies</report>
+              <report>project-team</report>
+              <report>license</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+    </plugins>
+  </reporting>
 
 </project>
