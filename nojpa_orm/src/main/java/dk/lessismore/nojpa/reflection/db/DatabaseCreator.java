@@ -13,6 +13,7 @@ import dk.lessismore.nojpa.reflection.db.annotations.IndexField;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttribute;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttributeContainer;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
+import org.apache.commons.lang3.StringUtils;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
 import org.reflections.scanners.SubTypesScanner;
@@ -29,11 +30,17 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This class can analyse an object and make a create sql statement that match the
@@ -49,17 +56,24 @@ public class DatabaseCreator {
     public DatabaseCreator() { }
 
 
-    private static String[] getIndexFromClass(Class targetClass){
-        LinkedHashSet<String> indices = new LinkedHashSet<String>();
+    private static Map<String, String> getIndexFromClass(Class targetClass){
+        LinkedHashMap<String, String> indices = new LinkedHashMap<>();
         if (!ModelObjectInterface.class.isAssignableFrom(targetClass)) {
             // it is not a ModelObjectInterface derivate
-            return new String[0];
+            return Collections.emptyMap();
         }
         for (Method method : targetClass.getMethods()) {
             for (Annotation anno : method.getAnnotations()) {
                 if (anno.annotationType().equals(IndexField.class)) {
-                    if(!method.getReturnType().isArray()){
-                        indices.add(getFieldName(method.getName()));
+                    if(!method.getReturnType().isArray()) {
+                        IndexField indexField = (IndexField) anno;
+                        String indexName;
+                        if (StringUtils.isNotEmpty(indexField.value())) {
+                            indexName = indexField.value();
+                        } else {
+                            indexName = getIndexName(targetClass.getSimpleName(), method.getName());
+                        }
+                        indices.put(getFieldName(method.getName()), indexName);
                     } else {
                         log.warn("Will ignore index on " + targetClass.getSimpleName() + "." + method.getName());
                     }
@@ -68,17 +82,19 @@ public class DatabaseCreator {
         }
         for (Annotation classAnno : targetClass.getAnnotations()) {
             if (classAnno instanceof IndexClass) {
-                indices.addAll(Arrays.asList(((IndexClass)classAnno).indices()));
+                for (String idx : ((IndexClass) classAnno).value()) {
+                    indices.put(idx, getIndexName(targetClass.getSimpleName(), idx));
+                }
             }
         }
-        return indices.toArray(new String[indices.size()]);
+        return indices;
     }
 
     public static List<SQLStatement> makeTableFromClass(Class targetClass) {
-        String[] indices = getIndexFromClass( targetClass );
+        Map<String, String> indices = getIndexFromClass( targetClass );
         String logMsg = "Will create table for class " + targetClass.getCanonicalName() + " with indices [";
 
-        for (String index: indices) {
+        for (String index: indices.values()) {
             logMsg += " '" + index + "'";
         }
         logMsg += "]";
@@ -88,7 +104,7 @@ public class DatabaseCreator {
     }
 
 
-    public static List<SQLStatement> makeTableFromClass(Class targetClass, String[] namesToIndex) {
+    public static List<SQLStatement> makeTableFromClass(Class targetClass, Map<String, String> namesToIndex) {
         List<SQLStatement> tables = new LinkedList<SQLStatement>();
         //log.debug("makeTableFromClass : 1");
         DbAttributeContainer attributeContainer = DbClassReflector.getDbAttributeContainer(targetClass);
@@ -107,7 +123,7 @@ public class DatabaseCreator {
         //log.debug("makeTableFromClass : 5");
         statement.addTableName(attributeContainer.getTableName());
 
-        statement.addIndex(namesToIndex);
+        statement.setNamesToIndex(namesToIndex);
 
         //Loop through the attributes, and add them one by one.
         for (Iterator iterator = attributeContainer.getDbAttributes().values().iterator(); iterator.hasNext();) {
@@ -201,7 +217,7 @@ public class DatabaseCreator {
 
         if (limSet == null) {
             log.debug("No table for this class ... Creating new " + targetClass);
-            List list = makeTableFromClass(targetClass, new String[]{"creationDate"});
+            List list = makeTableFromClass(targetClass, Collections.emptyMap());
             Iterator iterator = list.iterator();
             for (int i = 0; iterator.hasNext(); i++) {
                 String tableStr = ((SQLStatement) iterator.next()).makeStatement();
@@ -423,7 +439,21 @@ public class DatabaseCreator {
 		return methodName.substring(3, 4).toLowerCase() + methodName.substring(4);
 	}
 
-
+    private static String getIndexName(String tableName, String idx) {
+        String indexName = "_";
+        String indexFullName = tableName + "," + idx;
+        Pattern p = Pattern.compile("[A-Z ,]{1}[a-z]*");
+        Matcher m = p.matcher(indexFullName);
+        while(m.find()) {
+            String group = m.group().replaceAll(" |,", "");
+            if (group.length() > 3) {
+                indexName += group.substring(0, 3);
+            } else {
+                indexName += group;
+            }
+        }
+        return indexName;
+    }
 
     public static void main(String[] args) throws Exception {
         DatabaseCreator.checkDatabase(args[0]);

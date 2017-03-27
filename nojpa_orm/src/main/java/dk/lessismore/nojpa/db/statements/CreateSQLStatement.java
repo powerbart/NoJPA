@@ -2,6 +2,8 @@ package dk.lessismore.nojpa.db.statements;
 
 import dk.lessismore.nojpa.db.*;
 
+import java.util.Map;
+
 /**
  * This interface defines the functionality of an create sql statement.
  *
@@ -27,5 +29,5 @@ public interface CreateSQLStatement extends SQLStatement {
 
     public void addPrimaryKey(String attributeName);
 
-    public void addIndex(String[] namesToIndex);
+    public void setNamesToIndex(Map<String, String> namesToIndex);
 }

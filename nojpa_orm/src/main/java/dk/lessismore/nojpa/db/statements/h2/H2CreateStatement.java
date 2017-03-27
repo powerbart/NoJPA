@@ -5,9 +5,11 @@ import dk.lessismore.nojpa.db.statements.CreateSQLStatement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,7 +25,7 @@ public class H2CreateStatement extends H2Statement implements CreateSQLStatement
 
     private List<String> attributes = null;
     private List<String> primaryKeys = null;
-    private String[] namesToIndex = null;
+    private Map<String, String> namesToIndex = Collections.emptyMap();
 
     public List<String> getAttributes() {
         if (attributes == null) {
@@ -32,7 +34,7 @@ public class H2CreateStatement extends H2Statement implements CreateSQLStatement
         return attributes;
     }
 
-    public void addIndex(String[] namesToIndex) {
+    public void setNamesToIndex(Map<String, String> namesToIndex) {
         this.namesToIndex = namesToIndex;
     }
 
@@ -86,24 +88,6 @@ public class H2CreateStatement extends H2Statement implements CreateSQLStatement
                 statement.append((String) iterator.next());
             }
             statement.append(")");
-        }
-        statement.append("\n\n");
-        for (int i = 0; namesToIndex != null && i < namesToIndex.length; i++) {
-            String indexName = "_";
-            String indexFullName = (getTableNames().get(0) + "," + namesToIndex[i]);//;
-            //log.debug("makeStatement: indexFullName = " + indexFullName);
-            Pattern p = Pattern.compile("[A-Z ,]{1}[a-z]*");
-            Matcher m = p.matcher(indexFullName);
-            while(m.find()) {
-                String group = m.group().replaceAll(" |,", "");
-                if (group.length() > 3) {
-                    indexName += group.substring(0, 3);
-                } else {
-                    indexName += group;
-                }
-            }
-
-//            statement.append(", INDEX " + indexName + " ( " + namesToIndex[i] + ")");
         }
         statement.append("\n)");// CHARACTER SET utf8 COLLATE utf8_bin");
 //        statement.append("\n) ENGINE=MyISAM");// CHARACTER SET utf8 COLLATE utf8_bin");

@@ -5,10 +5,12 @@ import dk.lessismore.nojpa.db.statements.CreateSQLStatement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -26,22 +28,22 @@ public class MySqlCreateStatement extends MySqlStatement implements CreateSQLSta
 
     private List<String> attributes = null;
     private List<String> primaryKeys = null;
-    private String[] namesToIndex = null;
+    private Map<String, String> namesToIndex = Collections.emptyMap();
 
     public List<String> getAttributes() {
         if (attributes == null) {
-            attributes = new LinkedList<String>();
+            attributes = new LinkedList<>();
         }
         return attributes;
     }
 
-    public void addIndex(String[] namesToIndex) {
+    public void setNamesToIndex(Map<String, String> namesToIndex) {
         this.namesToIndex = namesToIndex;
     }
 
     public List<String> getPrimaryKeys() {
         if (primaryKeys == null) {
-            primaryKeys = new LinkedList<String>();
+            primaryKeys = new LinkedList<>();
         }
         return primaryKeys;
     }
@@ -91,47 +93,12 @@ public class MySqlCreateStatement extends MySqlStatement implements CreateSQLSta
             statement.append(")");
         }
         statement.append("\n\n");
-        Set<String> indexNames = new HashSet<String>();
-        for (int i = 0; namesToIndex != null && i < namesToIndex.length; i++) {
-            String indexName = "_";
-            String indexFullName = (getTableNames().get(0) + "," + namesToIndex[i]);//;
-            //log.debug("makeStatement: indexFullName = " + indexFullName);
-            Pattern p = Pattern.compile("[A-Z ,]{1}[a-z]*");
-            Matcher m = p.matcher(indexFullName);
-            while(m.find()) {
-                String group = m.group().replaceAll(" |,", "");
-                if (group.length() > 3) {
-                    indexName += group.substring(0, 3);
-                } else {
-                    indexName += group;
-                }
-            }
-            //log.debug("makeStatement: indexName = " + indexName);
-//            log.debug("makeStatement() : i = " + namesToIndex[i] + " with name: " + indexName);
 
-            if (!indexNames.add(indexName)) {
-                indexName = indexName + "_" + UUID.randomUUID().toString().replaceAll("-", "");
-            }
-            statement.append(", INDEX " + indexName + " ( " + namesToIndex[i] + ")");
-
-//            statement.append(" " + namesToIndex[i]);
-//            if (i == namesToIndex.length - 1) {
-//                statement.append(")");
-//            } else {
-//                statement.append(",");
-//            }
+        for (String index : namesToIndex.keySet()) {
+            String indexName = namesToIndex.get(index);
+            statement.append(", INDEX " + indexName + " ( " + index + ")");
         }
-//        for (int i = 0; namesToIndex != null && i < namesToIndex.length; i++) {
-//            if (i == 0) {
-//                statement.append(", INDEX " + getTableNames().get(0) + namesToIndex[i] + " ( ");
-//            }
-//            statement.append(" " + namesToIndex[i]);
-//            if (i == namesToIndex.length - 1) {
-//                statement.append(")");
-//            } else {
-//                statement.append(",");
-//            }
-//        }
+
         // TODO set charset and collation as parameter
         // TODO http://stackoverflow.com/questions/2876789/case-insensitive-for-sql-like-wildcard-statement
         statement.append("\n) ENGINE=MyISAM");// CHARACTER SET utf8 COLLATE utf8_bin");

@@ -15,6 +15,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface IndexClass {
 
-	String[] indices();
-	
+	String[] value();
+
 }

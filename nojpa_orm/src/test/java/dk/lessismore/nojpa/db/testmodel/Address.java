@@ -1,10 +1,12 @@
 package dk.lessismore.nojpa.db.testmodel;
 
 import dk.lessismore.nojpa.reflection.db.annotations.DbInline;
+import dk.lessismore.nojpa.reflection.db.annotations.IndexClass;
 import dk.lessismore.nojpa.reflection.db.annotations.IndexField;
 import dk.lessismore.nojpa.reflection.db.annotations.SearchField;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 
+@IndexClass("street,zip")
 public interface Address extends ModelObjectInterface {
 
     @SearchField
@@ -18,7 +20,7 @@ public interface Address extends ModelObjectInterface {
     void setArea(String area);
 
     @SearchField
-    @IndexField
+    @IndexField("zip_index_custom_name")
     int getZip();
     void setZip(int zip);
 
