@@ -168,9 +168,10 @@ public class ResourcePool {
                         } catch (Exception e) {
                         }
                         //log.error("getFromPool:2.1 - wait - ends");
-                        if (countOfWait++ > 2) {
+                        if (countOfWait++ > 5 * 60 * 5) { //Waiting to 5 mins ...
                             //log.error("getFromPool:2.1 - addNew - starts");
                             addNew();
+                            countOfWait = 0;
                             //log.error("getFromPool:2.1 - addNew - ends");
                         }
                         //log.debug("getFromPool:2.2");
