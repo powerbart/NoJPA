@@ -150,7 +150,7 @@ public class SQLStatementExecutor {
                 return true;
 
             } catch (Exception e) {
-                log.error("Update/Insert sql execution failed \nstmt=" + sqlStatement, e);
+                log.warn("Update/Insert sql execution failed (will try to recover) \nstmt=" + sqlStatement, e);
                 try {
                     if (statement != null) {
                         statement.close();
@@ -170,6 +170,7 @@ public class SQLStatementExecutor {
                     ConnectionPoolFactory.getPool().putBackInPool(connection);
                     return true;
                 } catch (Exception ex) {
+                    log.error("Update/Insert sql execution failed 2nd try (GIVING UP) \nstmt=" + sqlStatement, e);
                     try {
                         if (statement != null) {
                             statement.close();
