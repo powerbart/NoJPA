@@ -1,6 +1,7 @@
 package dk.lessismore.nojpa.db.statements.mysql;
 
 import dk.lessismore.nojpa.db.statements.*;
+import dk.lessismore.nojpa.utils.Pair;
 
 import java.util.*;
 
@@ -69,33 +70,53 @@ public class MySqlUpdateStatement extends MySqlInsertStatement implements Update
         getWhereStatement().addExpression(condition, expression);
     }
 
+
+
+
+    @Override
+    protected void preCheck(){
+        super.preCheck();
+        if (getAttributeValuesAndTypes().isEmpty()) {
+            throw new RuntimeException("Can't make insert statement without attribute values");
+        }
+    }
+
+
+    @Override
+    public String makePreparedStatement(PreparedSQLStatement preSQLStatement) {
+        preCheck();
+        StringBuilder statement = new StringBuilder();
+        statement.append("UPDATE ").append(getTableNames().get(0)).append(" SET ");
+        if (!getAttributeValuesAndTypes().isEmpty()) {
+            Iterator iterator = getAttributeValuesAndTypes().keySet().iterator();
+            for (int i = 0; iterator.hasNext(); i++) {
+                if (i > 0) {
+                    statement.append(", ");
+                }
+                statement.append(" ").append(iterator.next()).append("=?");
+            }
+        }
+        statement.append(" ");
+        statement.append(getWhereStatement().makeStatement());
+//        statement.append(getWhereStatement().makePreparedStatement(preSQLStatement));
+        return statement.toString();
+    }
+
     public String makeStatement() {
-
-        if (getTableNames().isEmpty()) {
-            throw new RuntimeException("Carnt make insert statement without tablename");
-        }
-        if (getAttributeValues().isEmpty()) {
-            throw new RuntimeException("Carnt make insert statement without attribute values");
-        }
-
+        preCheck();
 
         StringBuilder statement = new StringBuilder();
-        statement.append("update");
-        Iterator iterator = getTableNames().iterator();
-        for (int i = 0; iterator.hasNext(); i++) {
-            if (i > 0) {
-                statement.append(", ");
-            }
-            statement.append("\n\t").append(iterator.next());
-        }
-        statement.append("\nset");
-        iterator = getAttributeValues().keySet().iterator();
+        statement.append("update ");
+        statement.append(tableList());
+        statement.append("\nset ");
+        Iterator<String> iterator = getAttributeValuesAndTypes().keySet().iterator();
         for (int i = 0; iterator.hasNext(); i++) {
             if (i > 0) {
                 statement.append(",");
             }
             String attributeName = (String) iterator.next();
-            String attributeValue = (String) getAttributeValues().get(attributeName);
+            Pair<Object, Class> objectClassPair = getAttributeValuesAndTypes().get(attributeName);
+            String attributeValue = (String) MySqlUtil.convertToSql(objectClassPair.getFirst(), objectClassPair.getSecond());
             statement.append("\n\t").append(attributeName).append(" = ").append(attributeValue);
         }
         statement.append("\n").append(getWhereStatement().makeStatement());

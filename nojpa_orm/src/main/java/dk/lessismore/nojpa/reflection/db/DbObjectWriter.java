@@ -177,7 +177,6 @@ public class DbObjectWriter {
         if (writeProtected || deep <= 0) {
             return true;
         }
-
         DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(modelObject.getInterface());
         if (dbAttributeContainer != null) {
 
@@ -218,18 +217,6 @@ public class DbObjectWriter {
                 //The object is new or dirty and we have to save it back to the database !
 
                 deep = DEFAULT_DEEP;
-//                //TODO: Check if Method is there .... before calling it ....                 modelObject.setLastModified(Calendar.getInstance());
-//                System.out.println("modelObject.getClass() = " + modelObject.getClass());
-//                System.out.println("modelObject.getProxyObject().getClass() = " + modelObject.getProxyObject().getClass());
-//                try {
-//                    System.out.println("modelObject.getInterface() = " + modelObject.getInterface());
-//
-//                    Method setLastModified = modelObject.getInterface().getMethod("getLastModified");
-//                    System.out.println("setLastModified = " + setLastModified);
-//                } catch (NoSuchMethodException e) {
-//                    e.printStackTrace();
-//                }
-
                 InsertSQLStatement insertSQLStatement = null;
                 if (modelObject.isNew()) {
                     //Its new. we must make a insertstatement.
@@ -251,7 +238,7 @@ public class DbObjectWriter {
 
                 saveAttributeValues(modelObject, dbAttributeContainer, insertSQLStatement);
                 if (!writeProtected) {
-                    successfull = SQLStatementExecutor.doUpdate(insertSQLStatement.makeStatement());
+                    successfull = SQLStatementExecutor.doUpdate(insertSQLStatement, dbAttributeContainer.containsLob());
                 } else {
                     successfull = true;
                 }
@@ -305,19 +292,14 @@ public class DbObjectWriter {
                 Object value = dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
                 addAttributeValueToStatement(dbAttribute, insertSQLStatement, value);
             } else if (!dbAttribute.isAssociation()) {
-//TODO:                if(dbAttribute.isTranslatedAssociation()){
-//                    ((ModelObject) modelObject).getProxyObject().
-//                } else {
-                    Object value = null;
-                    if(attributeName.equals("lastModified")){
-                        value = Calendar.getInstance();
-                        dbAttributeContainer.setAttributeValue(modelObject.getProxyObject(), dbAttribute, value);
-                    } else {
-                        value = dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
-                    }
-//                log.debug("saveAttributeValues: for " + dbAttribute.getAttributeName() + "("+ value +") on " + modelObject );
-                    addAttributeValueToStatement(dbAttribute, insertSQLStatement, value);
-//                }
+                Object value = null;
+                if(attributeName.equals("lastModified")){
+                    value = Calendar.getInstance();
+                    dbAttributeContainer.setAttributeValue(modelObject.getProxyObject(), dbAttribute, value);
+                } else {
+                    value = dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
+                }
+                addAttributeValueToStatement(dbAttribute, insertSQLStatement, value);
             }
             //If its an singel association we must save its id as a string
             else if (!dbAttribute.isMultiAssociation()) {
@@ -346,12 +328,13 @@ public class DbObjectWriter {
             //Convert the value to the equivalent data type.
             int type = dbAttribute.getDataType().getType();
             switch (type) {
+                case DbDataType.DB_CLOB:
                 case DbDataType.DB_CHAR:
                 case DbDataType.DB_VARCHAR:
                     String valueStr = null;
                     if (value instanceof String) {
                         valueStr = (String) value;
-                        if (valueStr.length() > dbAttribute.getNrOfCharacters()) {
+                        if (valueStr.length() > dbAttribute.getNrOfCharacters() && type != DbDataType.DB_CLOB) {
                             String message = "Trunc : on " + dbAttribute.getAttributeClass().getSimpleName() + "." + dbAttribute.getAttributeName() + " db-size(" + dbAttribute.getNrOfCharacters() + ") value-size(" + valueStr.length() + ")";
                             log.error(message, new Exception(message));
                             valueStr = valueStr.substring(0, dbAttribute.getNrOfCharacters());

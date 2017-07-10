@@ -282,4 +282,8 @@ public class DbAttribute implements Serializable {
     public boolean isTranslatedAssociation() {
         return attribute.isTranslatedAssociation();
     }
+
+    public boolean isLongTextClob() {
+        return attribute.isLongTextClob();
+    }
 }

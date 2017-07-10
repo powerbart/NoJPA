@@ -241,4 +241,8 @@ public class DbAttributeContainer {
         }
         return attributes;
     }
+
+    public boolean containsLob() {
+        return attributeContainer.containsLob();
+    }
 }

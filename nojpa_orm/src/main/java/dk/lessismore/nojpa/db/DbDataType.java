@@ -1,5 +1,6 @@
 package dk.lessismore.nojpa.db;
 
+import dk.lessismore.nojpa.reflection.db.annotations.LongTextClob;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttribute;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttributeContainer;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
@@ -115,6 +116,8 @@ public class DbDataType implements Serializable {
             type = DB_DOUBLE;
         else if(attributeClass.equals(Boolean.TYPE))
             type = DB_BOOLEAN;
+        else if(attributeClass.equals(String.class) && dbAttribute.isLongTextClob())
+            type = DB_CLOB;
         else if(attributeClass.equals(String.class))
             type = DB_VARCHAR;
         else if(attributeClass.equals(Calendar.class))

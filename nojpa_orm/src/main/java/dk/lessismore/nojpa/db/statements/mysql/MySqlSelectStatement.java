@@ -19,19 +19,19 @@ import java.util.List;
 public class MySqlSelectStatement extends MySqlWhereStatement implements SelectSQLStatement {
     private static final Logger log = LoggerFactory.getLogger(MySqlSelectStatement.class);
 
-    protected List attributeNames = null;
-    protected ArrayList<String> sortAttributeNameList = new ArrayList<String>();
-    protected ArrayList<String> groupAttributeNameList = new ArrayList<String>();
-    protected int limitStart = -1;
-    protected int limitEnd = -1;
+    private List<String> attributeNames = null;
+    private ArrayList<String> sortAttributeNameList = new ArrayList<String>();
+    private ArrayList<String> groupAttributeNameList = new ArrayList<String>();
+    private int limitStart = -1;
+    private int limitEnd = -1;
 //    protected String groupByTablename = null;
 //    protected String groupByName = null;
     protected String having = null;
 
 
-    protected List getAttributeNames() {
+    private List<String> getAttributeNames() {
         if (attributeNames == null) {
-            attributeNames = new LinkedList();
+            attributeNames = new LinkedList<String>();
         }
         return attributeNames;
     }
@@ -88,37 +88,15 @@ public class MySqlSelectStatement extends MySqlWhereStatement implements SelectS
     }
 
     public String makeStatement() {
-//        log.debug("makeStatement() -START-START-START-START-START");
-
-        if (getTableNames().isEmpty()) {
-            throw new RuntimeException("Cant make statement without tablename");
-        }
+        preCheck();
 
         StringBuilder statement = new StringBuilder();
-        statement.append("select");
-        if (!getAttributeNames().isEmpty()) {
-            Iterator iterator = getAttributeNames().iterator();
-            for (int i = 0; iterator.hasNext(); i++) {
-                if (i > 0) {
-                    statement.append(", ");
-                }
-                statement.append("\n\t").append(iterator.next());
-            }
-        } else {
-            statement.append("\n\t*");
-        }
+        statement.append("select ");
+        statement.append(makeList(getAttributeNames().iterator()));
 
-        statement.append("\nfrom");
-        Iterator iterator = getTableNames().iterator();
-        for (int i = 0; iterator.hasNext(); i++) {
-            if (i > 0) {
-                statement.append(", ");
-            }
-            statement.append("\n\t").append(iterator.next());
-        }
-//        log.debug("makeStatement() super.makeStatement() - START");
+        statement.append("\nfrom ");
+        statement.append(tableList());
         statement.append("\n").append(super.makeStatement());
-//        log.debug("makeStatement() super.makeStatement() - START");
 
         for (int i = 0; !groupAttributeNameList.isEmpty() && i < groupAttributeNameList.size(); i++) {
             if(i == 0){
@@ -150,33 +128,14 @@ public class MySqlSelectStatement extends MySqlWhereStatement implements SelectS
     }
 
     public String makePreparedStatement(PreparedSQLStatement preparedSQLStatement) {
-
-        if (getTableNames().isEmpty()) {
-            throw new RuntimeException("Cant make statement without tablename");
-        }
+        preCheck();
 
         StringBuilder statement = new StringBuilder();
-        statement.append("select");
-        if (!getAttributeNames().isEmpty()) {
-            Iterator iterator = getAttributeNames().iterator();
-            for (int i = 0; iterator.hasNext(); i++) {
-                if (i > 0) {
-                    statement.append(", ");
-                }
-                statement.append("\n\t").append(iterator.next());
-            }
-        } else {
-            statement.append("\n\t*");
-        }
+        statement.append("select ");
+        statement.append(makeList(getAttributeNames().iterator()));
 
-        statement.append("\nfrom");
-        Iterator iterator = getTableNames().iterator();
-        for (int i = 0; iterator.hasNext(); i++) {
-            if (i > 0) {
-                statement.append(", ");
-            }
-            statement.append("\n\t").append(iterator.next());
-        }
+        statement.append("\nfrom ");
+        statement.append(tableList());
         statement.append("\n").append(super.makePreparedStatement(preparedSQLStatement));
 
         for (int i = 0; !groupAttributeNameList.isEmpty() && i < groupAttributeNameList.size(); i++) {

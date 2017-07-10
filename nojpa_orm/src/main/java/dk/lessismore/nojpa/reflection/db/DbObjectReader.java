@@ -370,6 +370,7 @@ public class DbObjectReader {
 
             //Convert the data type to the class type.
             switch (dbAttribute.getDataType().getType()) {
+                case DbDataType.DB_CLOB:
                 case DbDataType.DB_CHAR:
                 case DbDataType.DB_VARCHAR:
                     value = resultSet.getString(name);

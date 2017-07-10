@@ -35,6 +35,7 @@ public abstract class Attribute {
     protected String inlineParentName = null;
     protected Class inlineParentClass = null;
     protected String inlineChildName = null;
+    private boolean longTextClob;
 //    protected boolean isInlineInterface = false;
 
     public Attribute() {}
@@ -315,5 +316,13 @@ public abstract class Attribute {
 
     public void setDbStripAnnotation(DbStrip dbStripAnnotation) {
         this.dbStripAnnotation = dbStripAnnotation;
+    }
+
+    public boolean isLongTextClob() {
+        return longTextClob;
+    }
+
+    public void setLongTextClob(boolean longTextClob) {
+        this.longTextClob = longTextClob;
     }
 }

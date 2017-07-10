@@ -1,5 +1,9 @@
 package dk.lessismore.nojpa.db.statements.mysql;
 
+import dk.lessismore.nojpa.db.SQLStatementExecutor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.*;
 import java.text.*;
 
@@ -12,6 +16,30 @@ import java.text.*;
  */
 public class MySqlUtil {
 
+    private static Logger log = LoggerFactory.getLogger(MySqlUtil.class);
+
+    public static String convertToSql(Object value, Class type) {
+        if(type.equals(Integer.class)){
+            return MySqlUtil.convertToSql((Integer) value);
+        } else if(type.equals(Double.class)){
+            return MySqlUtil.convertToSql((Double) value);
+        } else if(type.equals(Float.class)){
+            return MySqlUtil.convertToSql((Float) value);
+        } else if(type.equals(Long.class)){
+            return MySqlUtil.convertToSql((Long) value);
+        } else if(type.equals(Boolean.class)){
+            return MySqlUtil.convertToSql((Boolean) value);
+        } else if(type.equals(Calendar.class)){
+            return MySqlUtil.convertToSql((Calendar) value);
+        } else if(type.equals(String.class)){
+            return MySqlUtil.convertToSql((String) value);
+        } else {
+            throw new RuntimeException("Don't know what to do with type("+ type +")->("+ value +") ");
+        }
+    }
+    
+    
+    
     public static String convertToSql(boolean value) {
         return "" + value;
     }
@@ -95,7 +123,7 @@ public class MySqlUtil {
     }
 
     public static String convertToPreparedSql(String value) {
-        return "" + value;
+        return value;
     }
 
     public static String convertToPreparedSql(String[] values) {

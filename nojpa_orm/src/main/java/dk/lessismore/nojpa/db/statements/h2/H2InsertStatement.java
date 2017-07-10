@@ -1,6 +1,8 @@
 package dk.lessismore.nojpa.db.statements.h2;
 
 import dk.lessismore.nojpa.db.statements.InsertSQLStatement;
+import dk.lessismore.nojpa.db.statements.PreparedSQLStatement;
+import dk.lessismore.nojpa.utils.Pair;
 
 import java.util.Calendar;
 import java.util.HashMap;
@@ -23,6 +25,11 @@ public class H2InsertStatement extends H2Statement implements InsertSQLStatement
 
     public void addAttributeValue(String attributeName, Object value) {
         attributeValues.put(attributeName, H2Util.convertToSql(value.toString()));
+    }
+
+    @Override
+    public Map<String, Pair<Object, Class>> getAttributeValuesAndTypes() {
+        return null;
     }
 
     public void addAttributeValue(String attributeName, int value) {
@@ -51,6 +58,11 @@ public class H2InsertStatement extends H2Statement implements InsertSQLStatement
 
     public void addAttributeValue(String attributeName, String value) {
         attributeValues.put(attributeName, H2Util.convertToSql(value));
+    }
+
+    @Override
+    public String makePreparedStatement(PreparedSQLStatement preSQLStatement) {
+        return null;
     }
 
     public String makeStatement() {

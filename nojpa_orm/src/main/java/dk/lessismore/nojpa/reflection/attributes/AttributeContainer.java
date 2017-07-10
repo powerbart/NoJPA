@@ -1,5 +1,6 @@
 package dk.lessismore.nojpa.reflection.attributes;
 
+import dk.lessismore.nojpa.reflection.db.annotations.LongTextClob;
 import dk.lessismore.nojpa.reflection.db.annotations.DbInline;
 import dk.lessismore.nojpa.reflection.db.annotations.DbStrip;
 import dk.lessismore.nojpa.reflection.db.annotations.SearchField;
@@ -66,6 +67,12 @@ public class AttributeContainer {
 
     public Class getTargetClass() {
         return _targetClass;
+    }
+
+    private boolean containsLob = false;
+
+    public boolean containsLob() {
+        return containsLob;
     }
 
     /**
@@ -136,6 +143,10 @@ public class AttributeContainer {
                             getAttributes().put(att.getInlineAttributeName(), att);
                         }
                     } else {
+                        if(method.isAnnotationPresent(LongTextClob.class)){
+                            containsLob = true;
+                            methodAttribute.setLongTextClob(true);
+                        }
                         getAttributes().put(methodAttribute.getAttributeName(), methodAttribute);
                     }
 
@@ -195,7 +206,6 @@ public class AttributeContainer {
                 }
             }
         }
-	//log.debug("findAttributesFromMethods:7");
         //Remove the method attributes which has different class types for the set and get method.
         final Collection<Attribute> attributeCollection = getAttributes().values();
         Attribute[] atts = attributeCollection.toArray(new Attribute[attributeCollection.size()]);

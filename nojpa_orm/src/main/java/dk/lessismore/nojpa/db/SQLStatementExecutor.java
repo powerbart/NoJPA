@@ -1,12 +1,15 @@
 package dk.lessismore.nojpa.db;
 
 import dk.lessismore.nojpa.db.connectionpool.ConnectionPoolFactory;
+import dk.lessismore.nojpa.db.statements.InsertSQLStatement;
 import dk.lessismore.nojpa.db.statements.PreparedSQLStatement;
 import dk.lessismore.nojpa.db.statements.SelectSQLStatement;
 import dk.lessismore.nojpa.db.statements.mysql.MySqlPreparedSQLStatement;
+import dk.lessismore.nojpa.db.statements.mysql.MySqlUtil;
 import dk.lessismore.nojpa.resources.PropertyResources;
 import dk.lessismore.nojpa.resources.PropertyService;
 import dk.lessismore.nojpa.utils.EventCounter;
+import dk.lessismore.nojpa.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +18,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.List;
+import java.util.*;
 
 /**
  * This class can execute an sql statement. It uses a connection pool of mysql connections.
@@ -27,23 +30,10 @@ import java.util.List;
  */
 public class SQLStatementExecutor {
 
-    static {
-        try{
-            SQLStatementExecutor.doQuery("select 1+1;");
-        } catch (Exception e){
-            System.out.println("Some ERROR when warming up.... " + e);
-            e.printStackTrace();
-        }
-    }
 
 
 
-    private static final Logger log = LoggerFactory.getLogger(SQLStatementExecutor.class);
-    private static boolean updateSqlToFile = false;
-    private static boolean selectSqlToFile = false;
-    private static boolean enableUpdateDbConnection = true;
-    private static boolean enableSelectDbConnection = true;
-    private static FileWriter sqlFileWriter = null;
+    private static Logger log = LoggerFactory.getLogger(SQLStatementExecutor.class);
     public static boolean debugMode = false;
     public static boolean debugCpuMode = false; //true  = memory leak
     private static EventCounter eventCounter = new EventCounter();
@@ -54,19 +44,18 @@ public class SQLStatementExecutor {
 
 
     static {
+        log = LoggerFactory.getLogger(SQLStatementExecutor.class);
         PropertyResources websiteResources = PropertyService.getInstance().getPropertyResources(SQLStatementExecutor.class);
         if (websiteResources.getString("debug") != null && websiteResources.getBoolean("debug")) {
             debugMode = true;
         } else {
             debugMode = false;
         }
-        if (websiteResources.getString("updateSqlToFile") != null && websiteResources.getBoolean("updateSqlToFile")) {
-            updateSqlToFile = true;
-        } else {
-            updateSqlToFile = false;
-        }
-        if (websiteResources.getString("sqlFileName") != null) {
-            setSqlFileName(websiteResources.getString("sqlFileName"));
+        try{
+            SQLStatementExecutor.doQuery("select 1+1;");
+        } catch (Exception e){
+            System.out.println("Some ERROR when warming up.... " + e);
+            e.printStackTrace();
         }
     }
 
@@ -74,251 +63,194 @@ public class SQLStatementExecutor {
 
     public static EventCounter getEventCounter(){ return eventCounter; }
 
-    private static long lastConnectionUsed = 0;
-
-    public static void setUpdateSqlToFile(boolean updateSqlToFile) {
-        SQLStatementExecutor.updateSqlToFile = updateSqlToFile;
+    private static void close(AutoCloseable... autoCloseables) throws Exception {
+        for(AutoCloseable a : autoCloseables){
+            if(a != null){ a.close(); }
+        }
     }
 
-    public static void setSelectSqlToFile(boolean selectSqlToFile) {
-        SQLStatementExecutor.selectSqlToFile = selectSqlToFile;
+    public static boolean doUpdate(InsertSQLStatement insertSQLStatement) {
+        return doUpdate(insertSQLStatement, false);
     }
 
-    public static void setEnableUpdateDbConnection(boolean enableUpdateDbConnection) {
-        SQLStatementExecutor.enableUpdateDbConnection = enableUpdateDbConnection;
-    }
+    public static boolean doUpdate(InsertSQLStatement insertSQLStatement, boolean containsLob) {
+        if(debugMode && !containsLob){
+            return doUpdate(insertSQLStatement.makeStatement());
+        } else {
+            Connection connection = null;
+            PreparedStatement statement = null;
+            try {
+                PreparedSQLStatement preSQLStatement = new MySqlPreparedSQLStatement();
+                String initStatement = insertSQLStatement.makePreparedStatement(preSQLStatement);
+                String debugLogStatement = insertSQLStatement.makeStatement().replaceAll("\n", " ");
+                log.debug("Will update with preparedStatement:1::" + debugLogStatement);
+                long start = System.currentTimeMillis();
+                connection = (Connection) ConnectionPoolFactory.getPool().getFromPool();
+                statement = connection.prepareStatement(initStatement);
 
-    public static void setEnableSelectDbConnection(boolean enableSelectDbConnection) {
-        SQLStatementExecutor.enableSelectDbConnection = enableSelectDbConnection;
-    }
+                Iterator<Map.Entry<String, Pair<Object, Class>>> iterator = insertSQLStatement.getAttributeValuesAndTypes().entrySet().iterator();
+                for(int i = 1; iterator.hasNext(); i++){
+                    Map.Entry<String, Pair<Object, Class>> next = iterator.next();
+                    if(next.getValue().getSecond().equals(Integer.class)){
+                        statement.setInt(i, (Integer) next.getValue().getFirst());
+                    } else if(next.getValue().getSecond().equals(Double.class)){
+                        statement.setDouble(i, (Double) next.getValue().getFirst());
+                    } else if(next.getValue().getSecond().equals(Float.class)){
+                        statement.setFloat(i, (Float) next.getValue().getFirst());
+                    } else if(next.getValue().getSecond().equals(Long.class)){
+                        statement.setLong(i, (Long) next.getValue().getFirst());
+                    } else if(next.getValue().getSecond().equals(Boolean.class)){
+                        statement.setBoolean(i, (Boolean) next.getValue().getFirst());
+                    } else if(next.getValue().getSecond().equals(Calendar.class)){
+                        statement.setTimestamp(i, new java.sql.Timestamp(((Calendar) next.getValue().getFirst()).getTimeInMillis()), (Calendar) next.getValue().getFirst());
+                    } else if(next.getValue().getSecond().equals(String.class)){
+                        statement.setString(i, (String) next.getValue().getFirst());
+                    } else {
+                        log.error("Don't know what to do with type("+ next.getValue().getSecond() +")->("+ next.getValue().getFirst() +") with insert-statement("+ debugLogStatement +")");
+                    }
+                }
 
-    public static void setSqlFileName(String sqlFileName) {
-        try {
-            if (sqlFileWriter != null) {
+
+                log.debug("Will update with preparedStatement:2::" + initStatement);
+
+                statement.executeUpdate();
+
+                long end = System.currentTimeMillis();
+                long time = end - start;
+                totalTime = totalTime + time;
+                totalCounter++;
+//                log.debug("**************** AVG-TIME("+ (totalTime / totalCounter) +") count("+ totalCounter +") totalTime("+ totalTime +") lastTime("+ time +")");
+
+
+                if(debugCpuMode) {
+                    eventCounter.newEvent(debugLogStatement, end - start);
+                    eventCounter.newEvent("insert", end - start);
+                }
+                ConnectionPoolFactory.getPool().putBackInPool(connection);
+                return true;
+            } catch (Exception e) {
+                log.error("Update/Insert sql execution failed 2nd try (GIVING UP) \nstmt=" + insertSQLStatement, e);
                 try {
-                    sqlFileWriter.close();
-                    sqlFileWriter = null;
-                } catch (Exception e) {
-                    log.error("Could not close old sql output file: " + sqlFileName, e);
+                    close(statement, connection);
+                    ConnectionPoolFactory.getPool().addNew();
+                } catch (Exception exp) {
+                    log.warn("Trying to close connection because of error ..." + exp.toString());
+                }
+                return false;
+            } finally {
+                try {
+                    close(statement);
+                } catch (Exception ex) {
+                    //Nothing
                 }
             }
-            sqlFileWriter = new FileWriter(sqlFileName);
-        } catch (Exception e) {
-            log.error("Could not create sql output file: " + sqlFileName, e);
-            sqlFileWriter = null;
         }
     }
 
-
-    public static void addSqlStatementToSqlFile(String sqlStatement) {
-        try {
-            if (sqlFileWriter != null) {
-                sqlFileWriter.write(sqlStatement + ";\n");
-                sqlFileWriter.flush();
-            }
-        } catch (Exception e) {
-            log.error("Failed sql write", e);
-        }
-    }
 
     public static boolean doUpdate(String sqlStatement) {
-        if (updateSqlToFile) {
-            addSqlStatementToSqlFile(sqlStatement.replaceAll("\n", " "));
-        }
-        if (enableUpdateDbConnection) {
-            Connection connection = null;
-            Statement statement = null;
-            try {
-                connection = (Connection) ConnectionPoolFactory.getPool().getFromPool();
-                log.debug("Will update with:::" + sqlStatement.replaceAll("\n", " "));
-                long start = System.currentTimeMillis();
-                statement = connection.createStatement();
-                statement.execute(sqlStatement);
-                long end = System.currentTimeMillis();
-                long time = end - start;
-                totalTime = totalTime + time;
-                totalCounter++;
+        Connection connection = null;
+        Statement statement = null;
+        try {
+            connection = (Connection) ConnectionPoolFactory.getPool().getFromPool();
+            log.debug("Will update with:::" + sqlStatement.replaceAll("\n", " "));
+            long start = System.currentTimeMillis();
+            statement = connection.createStatement();
+            statement.execute(sqlStatement);
+            long end = System.currentTimeMillis();
+            long time = end - start;
+            totalTime = totalTime + time;
+            totalCounter++;
 //                log.debug("**************** AVG-TIME("+ (totalTime / totalCounter) +") count("+ totalCounter +") totalTime("+ totalTime +") lastTime("+ time +")");
 
 
-                if(debugCpuMode) {
-                    eventCounter.newEvent(sqlStatement.replaceAll("\n", " "), end - start);
-                    eventCounter.newEvent("insert", end - start);
-                }
-                statement.close();
+            if(debugCpuMode) {
+                eventCounter.newEvent(sqlStatement.replaceAll("\n", " "), end - start);
+                eventCounter.newEvent("insert", end - start);
+            }
+            ConnectionPoolFactory.getPool().putBackInPool(connection);
+            return true;
+        } catch (Exception e) {
+            log.warn("Update/Insert sql execution failed (will try to recover) \nstmt=" + sqlStatement, e);
+            try {
+                close(statement, connection);
+                ConnectionPoolFactory.getPool().addNew();
+            } catch (Exception ex) {
+                log.warn("Trying to close connection because of error ..." + ex.toString());
+            }
+            connection = (Connection) ConnectionPoolFactory.getPool().getFromPool();
+            try {
+                statement = connection.createStatement();
+                statement.execute(sqlStatement);
                 ConnectionPoolFactory.getPool().putBackInPool(connection);
                 return true;
-
-            } catch (Exception e) {
-                log.warn("Update/Insert sql execution failed (will try to recover) \nstmt=" + sqlStatement, e);
+            } catch (Exception ex) {
+                log.error("Update/Insert sql execution failed 2nd try (GIVING UP) \nstmt=" + sqlStatement, e);
                 try {
-                    if (statement != null) {
-                        statement.close();
-                    }
-                    statement = null;
-                    if (connection != null) {
-                        connection.close();
-                    }
+                    close(statement, connection);
                     ConnectionPoolFactory.getPool().addNew();
-                } catch (Exception ex) {
-                    log.warn("Trying to close connection because of error ..." + ex.toString());
+                } catch (Exception exp) {
+                    log.warn("Trying to close connection because of error ..." + exp.toString());
                 }
-                connection = (Connection) ConnectionPoolFactory.getPool().getFromPool();
-                try {
-                    statement = connection.createStatement();
-                    statement.execute(sqlStatement);
-                    ConnectionPoolFactory.getPool().putBackInPool(connection);
-                    return true;
-                } catch (Exception ex) {
-                    log.error("Update/Insert sql execution failed 2nd try (GIVING UP) \nstmt=" + sqlStatement, e);
-                    try {
-                        if (statement != null) {
-                            statement.close();
-                        }
-                        statement = null;
-                        if (connection != null) {
-                            connection.close();
-                        }
-                        ConnectionPoolFactory.getPool().addNew();
-                    } catch (Exception exp) {
-                        log.warn("Trying to close connection because of error ..." + exp.toString());
-                    }
-                    return false;
-                }
-            } finally {
-                try {
-                    if (statement != null) {
-                        statement.close();
-                    }
-                    statement = null;
-                } catch (Exception ex) {
-                    //Nothing
-                }
+                return false;
             }
-        } else {
-            return true;
-        }
-    }
-
-    /* is used for alter index's - which properly will give a exception, because index already exists */
-    public static boolean doUpdateAndIgnoreExceptions(String sqlStatement) {
-        if (enableUpdateDbConnection) {
-            Connection connection = null;
-            Statement statement = null;
+        } finally {
             try {
-                connection = (Connection) ConnectionPoolFactory.getPool().getFromPool();
-                long start = System.currentTimeMillis();
-                statement = connection.createStatement();
-                log.debug("Will update with:" + sqlStatement.replaceAll("\n", " "));
-                statement.execute(sqlStatement);
-
-                long end = System.currentTimeMillis();
-                long time = end - start;
-                totalTime = totalTime + time;
-                totalCounter++;
-//                log.debug("**************** AVG-TIME("+ (totalTime / totalCounter) +") count("+ totalCounter +") totalTime("+ totalTime +") lastTime("+ time +")");
-
-
-                if(debugCpuMode) {
-                    eventCounter.newEvent(sqlStatement.replaceAll("\n", " "), end - start);
-                    eventCounter.newEvent("insert", end - start);
-                }
-                statement.close();
-                ConnectionPoolFactory.getPool().putBackInPool(connection);
-                return true;
-
-            } catch (Exception e) {
-                return true;
-            } finally {
-                try {
-                    if (statement != null) {
-                        statement.close();
-                    }
-                    statement = null;
-                } catch (Exception ex) {
-                    //Nothing
-                }
+                close(statement);
+            } catch (Exception ex) {
+                //Nothing
             }
-        } else {
-            return true;
         }
     }
+
+
 
     public static LimResultSet doQuery(String sqlStatement) {
-        if (selectSqlToFile) {
-            addSqlStatementToSqlFile(sqlStatement.replaceAll("\n", " "));
-        }
-        if (enableSelectDbConnection) {
-            Statement statement = null;
-            Connection connection = null;
-            ResultSet resultSet = null;
-            try {
-                //if(debugMode){
-                    //eventCounter.newEvent(sqlStatement);
-                    log.debug("doQuery: Will run: " + sqlStatement.replaceAll("\n", " "));
-//                    log.debug("DEBUG-TRACE", new Exception("DEBUG"));
-                //}
-                connection = (Connection) ConnectionPoolFactory.getPool().getFromPool();
-                long start = System.currentTimeMillis();
-                statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-                resultSet = statement.executeQuery(sqlStatement);
-                long end = System.currentTimeMillis();
-                long time = end - start;
-                totalTime = totalTime + time;
-                totalCounter++;
+        Statement statement = null;
+        Connection connection = null;
+        ResultSet resultSet = null;
+        try {
+            log.debug("doQuery: Will run: " + sqlStatement.replaceAll("\n", " "));
+            connection = (Connection) ConnectionPoolFactory.getPool().getFromPool();
+            long start = System.currentTimeMillis();
+            statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            resultSet = statement.executeQuery(sqlStatement);
+            long end = System.currentTimeMillis();
+            long time = end - start;
+            totalTime = totalTime + time;
+            totalCounter++;
 //                log.debug("**************** AVG-TIME("+ (totalTime / totalCounter) +") count("+ totalCounter +") totalTime("+ totalTime +") lastTime("+ time +")");
-
-                if(debugCpuMode) eventCounter.newEvent(sqlStatement.replaceAll("\n", " "), end - start);
+            if(debugCpuMode) eventCounter.newEvent(sqlStatement.replaceAll("\n", " "), end - start);
+            LimResultSet toReturn = new LimResultSet(resultSet, statement, sqlStatement);
+            ConnectionPoolFactory.getPool().putBackInPool(connection);
+//                log.debug("ZZZZZZZZZZ toReturn("+ toReturn +"), resultSet("+ resultSet +"), toReturn("+ toReturn +"), toReturn.getResultSet("+ ( toReturn != null ? toReturn.getResultSet() : null ) +")");
+            return toReturn;
+        } catch (Exception e) {
+            log.error("query sql execution failed \nstmt=" + sqlStatement, e);
+            try {
+                close(resultSet, statement, connection);
+                ConnectionPoolFactory.getPool().addNew();
+            } catch (Exception ex) {
+                log.error("2:Trying to close connection because of error ..." + ex.toString());
+            }
+            try {
+                connection = (Connection) ConnectionPoolFactory.getPool().getFromPool();
+                statement = connection.createStatement();
+                resultSet = statement.executeQuery(sqlStatement);
                 LimResultSet toReturn = new LimResultSet(resultSet, statement, sqlStatement);
                 ConnectionPoolFactory.getPool().putBackInPool(connection);
-//                log.debug("ZZZZZZZZZZ toReturn("+ toReturn +"), resultSet("+ resultSet +"), toReturn("+ toReturn +"), toReturn.getResultSet("+ ( toReturn != null ? toReturn.getResultSet() : null ) +")");
                 return toReturn;
-            } catch (Exception e) {
-                log.error("query sql execution failed \nstmt=" + sqlStatement, e);
+            } catch (Exception ex) {
+                log.error("Some error in doQuery " + e.toString());
                 try {
-                    if (resultSet != null) {
-                        resultSet.close();
-                    }
-                    resultSet = null;
-                    if (statement != null) {
-                        statement.close();
-                    }
-                    statement = null;
-                    if (connection != null) {
-                        connection.close();
-                    }
+                    close(resultSet, statement, connection);
                     ConnectionPoolFactory.getPool().addNew();
-                } catch (Exception ex) {
-                    log.error("2:Trying to close connection because of error ..." + ex.toString());
-                }
-                try {
-                    connection = (Connection) ConnectionPoolFactory.getPool().getFromPool();
-                    statement = connection.createStatement();
-                    resultSet = statement.executeQuery(sqlStatement);
-                    LimResultSet toReturn = new LimResultSet(resultSet, statement, sqlStatement);
-                    ConnectionPoolFactory.getPool().putBackInPool(connection);
-                    return toReturn;
-                } catch (Exception ex) {
-                    log.error("Some error in doQuery " + e.toString());
-                    try {
-                        if (resultSet != null) {
-                            resultSet.close();
-                        }
-                        resultSet = null;
-                        if (statement != null) {
-                            statement.close();
-                        }
-                        statement = null;
-                        if (connection != null) {
-                            connection.close();
-                        }
-                        ConnectionPoolFactory.getPool().addNew();
-                    } catch (Exception exp) {
-                        log.warn("2:Trying to close connection because of error ..." + exp.toString());
-                    }
+                } catch (Exception exp) {
+                    log.warn("2:Trying to close connection because of error ..." + exp.toString());
                 }
             }
         }
+
         return null;
     }
 
@@ -333,15 +265,7 @@ public class SQLStatementExecutor {
             try {
                 PreparedSQLStatement preSQLStatement = new MySqlPreparedSQLStatement();
                 String initStatement = selectSQLStatement.makePreparedStatement(preSQLStatement);
-                if (selectSqlToFile) {
-                    addSqlStatementToSqlFile(initStatement.replaceAll("\n", " "));
-                }
-                //if(debugMode){
-                //    eventCounter.newEvent(initStatement);
-                //}
-                //log.debug("doQuery: Will run preparedStatement: " + initStatement);
                 connection = (Connection) ConnectionPoolFactory.getPool().getFromPool();
-
                 long start = System.currentTimeMillis();
                 statement = connection.prepareStatement(initStatement, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
                 log.debug("doQuery: Will run: " + initStatement.replaceAll("\n", " "));
@@ -359,22 +283,43 @@ public class SQLStatementExecutor {
                 ConnectionPoolFactory.getPool().putBackInPool(connection);
                 return toReturn;
             } catch (Exception e) {
-                log.error("doQuery: query sql execution failed", e);
+                log.warn("doQuery: query sql execution failed. We will try again: " + e, e);
                 try {
-                    if (statement != null) {
-                        statement.close();
-                    }
-                    if (connection != null) {
-                        connection.close();
-                    }
+                    close(statement, connection);
                     ConnectionPoolFactory.getPool().addNew();
                 } catch (Exception ex) {
                     log.warn("2:Trying to close connection because of error ..." + ex.toString());
                 }
+                try {
+                    PreparedSQLStatement preSQLStatement = new MySqlPreparedSQLStatement();
+                    String initStatement = selectSQLStatement.makePreparedStatement(preSQLStatement);
+                    connection = (Connection) ConnectionPoolFactory.getPool().getFromPool();
+                    statement = connection.prepareStatement(initStatement, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+                    log.debug("doQuery: Will run (AGAIN): " + initStatement.replaceAll("\n", " "));
+                    preSQLStatement.makeStatementReadyToExcute(statement);
+                    resultSet = statement.executeQuery();
+                    LimResultSet toReturn = new LimResultSet(resultSet, statement, initStatement);
+                    ConnectionPoolFactory.getPool().putBackInPool(connection);
+                    return toReturn;
+                } catch (Exception exp) {
+                    log.error("doQuery: query sql execution failed (GIVING-UP-1):" + e, e);
+                    log.error("doQuery: query sql execution failed (GIVING-UP-2):" + exp, exp);
+                    try {
+                        close(statement, connection);
+                        ConnectionPoolFactory.getPool().addNew();
+                    } catch (Exception ex) {
+                        log.warn("2:Trying to close connection because of error ..." + ex.toString());
+                    }
+
+                }
+
             }
             return null;
         }
     }
+
+
+
 
     static long start = 0L;
 
@@ -406,6 +351,48 @@ public class SQLStatementExecutor {
 
 
     }
+
+
+    //    /* is used for alter index's - which properly will give a exception, because index already exists */
+//    public static boolean doUpdateAndIgnoreExceptions(String sqlStatement) {
+//        Connection connection = null;
+//        Statement statement = null;
+//        try {
+//            connection = (Connection) ConnectionPoolFactory.getPool().getFromPool();
+//            long start = System.currentTimeMillis();
+//            statement = connection.createStatement();
+//            log.debug("Will update with:" + sqlStatement.replaceAll("\n", " "));
+//            statement.execute(sqlStatement);
+//
+//            long end = System.currentTimeMillis();
+//            long time = end - start;
+//            totalTime = totalTime + time;
+//            totalCounter++;
+////                log.debug("**************** AVG-TIME("+ (totalTime / totalCounter) +") count("+ totalCounter +") totalTime("+ totalTime +") lastTime("+ time +")");
+//
+//
+//            if(debugCpuMode) {
+//                eventCounter.newEvent(sqlStatement.replaceAll("\n", " "), end - start);
+//                eventCounter.newEvent("insert", end - start);
+//            }
+//            statement.close();
+//            ConnectionPoolFactory.getPool().putBackInPool(connection);
+//            return true;
+//
+//        } catch (Exception e) {
+//            return true;
+//        } finally {
+//            try {
+//                if (statement != null) {
+//                    statement.close();
+//                }
+//                statement = null;
+//            } catch (Exception ex) {
+//                //Nothing
+//            }
+//        }
+//
+//    }
 
 
 }

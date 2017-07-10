@@ -31,11 +31,21 @@ public abstract class MySqlStatement implements SQLStatement {
 
     public abstract String makeStatement();
 
-    public String makeList(Iterator iterator) {
+    protected void preCheck(){
+        if (getTableNames().isEmpty()) {
+            throw new RuntimeException("Can't make statement without tablename");
+        }
+    }
+
+    protected String tableList() {
+        return makeList(tableNames.iterator());
+    }
+
+    protected String makeList(Iterator iterator) {
         return makeList(iterator, ", ");
     }
 
-    public String makeList(Iterator iterator, String separator) {
+    protected String makeList(Iterator iterator, String separator) {
         StringBuilder list = new StringBuilder();
 
         for (int i = 0; iterator.hasNext(); i++) {

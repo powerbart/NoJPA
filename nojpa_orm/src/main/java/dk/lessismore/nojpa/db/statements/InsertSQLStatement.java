@@ -1,5 +1,7 @@
 package dk.lessismore.nojpa.db.statements;
 
+import dk.lessismore.nojpa.utils.Pair;
+
 import java.util.*;
 
 /**
@@ -10,7 +12,7 @@ import java.util.*;
  */
 public interface InsertSQLStatement extends SQLStatement {
 
-    public void addAttributeValue(String attributeName, Object value);
+    Map<String, Pair<Object, Class>> getAttributeValuesAndTypes();
 
     public void addAttributeValue(String attributeName, int value);
 
@@ -25,4 +27,6 @@ public interface InsertSQLStatement extends SQLStatement {
     public void addAttributeValue(String attributeName, Calendar value);
 
     public void addAttributeValue(String attributeName, String value);
+
+    String makePreparedStatement(PreparedSQLStatement preSQLStatement);
 }
