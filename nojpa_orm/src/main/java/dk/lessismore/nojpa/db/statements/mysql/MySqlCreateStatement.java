@@ -105,20 +105,5 @@ public class MySqlCreateStatement extends MySqlStatement implements CreateSQLSta
         return statement.toString();
     }
 
-    public static void main(String[] args) {
 
-
-        System.out.println( "asd, asd".replaceAll(" |,", "p") );
-
-        
-//        MySqlCreateStatement c = new MySqlCreateStatement();
-//        c.addTableName("skodTable");
-//
-//        c.addAttribute("tablet", new DbDataType(DbDataType.DB_VARCHAR, 250));
-//        c.addAttribute("skod", new DbDataType(DbDataType.DB_CHAR, 50), new int[]{CreateSQLStatement.PROPERTY_NOT_NULL});
-//        c.addAttribute("knald", new DbDataType(DbDataType.DB_INT));
-//        c.addPrimaryKey("knald");
-//        c.addPrimaryKey("tablet");
-        //System.out.println(c.makeStatement());
-    }
 }
