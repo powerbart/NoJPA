@@ -183,7 +183,7 @@ public class DbObjectSelector {
     }
 
     public static List selectObjectsFromDb(Class targetClass, SelectSQLStatement selectSqlStatement, AssociationConstrain associationConstrain, boolean cache, boolean loadAll, int intervalStart, int intervalEnd) {
-        //log.debug("selectObjectsFromDb:1.0");
+        log.debug("selectObjectsFromDb:1.0");
     LimResultSet limSet  = null;
 	try{
 	    List selectedObjects = new ArrayList(128);
@@ -192,14 +192,14 @@ public class DbObjectSelector {
 		//This is not a model object. We can not continue.
 		    return selectedObjects;
 	    }
-        //log.debug("selectObjectsFromDb:1.1");
+        log.debug("selectObjectsFromDb:1.1");
 	    DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(targetClass);
 	    String sqlNameQuery = null;
-        //log.debug("selectObjectsFromDb:1.2");
+        log.debug("selectObjectsFromDb:1.2");
         if(dbAttributeContainer.getSqlNameQuery() == null){
             //NEW ************************************
 	        //log.debug("selectSqlStatement.makeStatement() = ");
-            //log.debug("selectObjectsFromDb:1.3");
+            log.debug("selectObjectsFromDb:1.3");
             for (Iterator iterator = dbAttributeContainer.getDbAttributes().values().iterator(); iterator.hasNext();) {
                 DbAttribute dbAttribute = (DbAttribute) iterator.next();
                 //If the attribute is not an multi association.
@@ -207,32 +207,32 @@ public class DbObjectSelector {
                     sqlNameQuery = (sqlNameQuery == null ? "" : sqlNameQuery + ", ") + (dbAttributeContainer.getTableName() + "." + (dbAttribute.getInlineAttributeName() != null ? dbAttribute.getInlineAttributeName() : dbAttribute.getAttributeName()) );
                 }
             }
-            //log.debug("selectObjectsFromDb:1.4");
+            log.debug("selectObjectsFromDb:1.4");
             dbAttributeContainer.setSqlNameQuery(sqlNameQuery);
-            //log.debug("selectObjectsFromDb:1.5");
+            log.debug("selectObjectsFromDb:1.5");
         } else {
 		    sqlNameQuery = dbAttributeContainer.getSqlNameQuery();
 	    }
-        //log.debug("selectObjectsFromDb:1.6");
+        log.debug("selectObjectsFromDb:1.6");
         selectSqlStatement.addAttributeName(sqlNameQuery);
-        //log.debug("selectObjectsFromDb:1.7");
+        log.debug("selectObjectsFromDb:1.7");
         // ****************************************
 	    limSet = SQLStatementExecutor.doQuery(selectSqlStatement);
-//        log.debug("selectObjectsFromDb:1.8 targetClass("+ targetClass +") limSet("+ limSet +") loadAll("+ loadAll +") intervalStart("+ intervalStart +") intervalEnd("+ intervalEnd +")");
+        log.debug("selectObjectsFromDb:1.8 targetClass("+ targetClass +") limSet("+ limSet +") loadAll("+ loadAll +") intervalStart("+ intervalStart +") intervalEnd("+ intervalEnd +")");
         ResultSet resultSet = limSet != null ? limSet.getResultSet() : null;
-	    //log.debug("selectSqlStatement :: 2");
+	    log.debug("selectSqlStatement :: 2");
 	    if(resultSet != null) {
             try {
-//                log.debug("selectObjectsFromDb :: 1.9");
+                log.debug("selectObjectsFromDb :: 1.9");
                 //Load each of the objects.
                 for(int i = 0; resultSet.next(); i++) {
-//                    log.debug("selectObjectsFromDb :: 2.0");
+                    log.debug("selectObjectsFromDb :: 2.0");
                     if(loadAll || (i >= intervalStart && i < intervalEnd) ) {
                         String objectId = resultSet.getString(dbAttributeContainer.getPrimaryKeyAttribute().getAttributeName());
-//                        log.debug("selectObjectsFromDb:2.1: targetClass("+ targetClass +") objectId("+ objectId +")");
+                        log.debug("selectObjectsFromDb:2.1: targetClass("+ targetClass +") objectId("+ objectId +")");
                         ModelObject modelObject = DbObjectReader.readObjectFromDb(objectId, targetClass, associationConstrain, limSet);
                         //log.debug("selectSqlStatement :: 5");
-//                        log.debug("selectObjectsFromDb:2.2: targetClass("+ targetClass +") modelObject("+ modelObject +")");
+                        log.debug("selectObjectsFromDb:2.2: targetClass("+ targetClass +") modelObject("+ modelObject +")");
                         if(modelObject != null){
                             selectedObjects.add(modelObject);
                         }
@@ -244,7 +244,7 @@ public class DbObjectSelector {
                 log.error("selectObjectsFromDb: (2) Corrupt result set from db in object selector " +targetClass.getName(), e);
             }
 	    }
-        //log.debug("selectSqlStatement :: 6");
+        log.debug("selectSqlStatement :: 6");
 	    return selectedObjects;
 	} catch(Exception e){
 	    log.error("Some error "+ e, e);
