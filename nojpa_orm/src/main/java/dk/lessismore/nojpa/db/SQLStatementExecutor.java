@@ -82,8 +82,7 @@ public class SQLStatementExecutor {
             try {
                 PreparedSQLStatement preSQLStatement = new MySqlPreparedSQLStatement();
                 String initStatement = insertSQLStatement.makePreparedStatement(preSQLStatement);
-                String debugLogStatement = insertSQLStatement.makeStatement().replaceAll("\n", " ");
-                log.debug("Will update with preparedStatement:1::" + debugLogStatement);
+                log.debug("Will update with preparedStatement:1::" + initStatement);
                 long start = System.currentTimeMillis();
                 connection = (Connection) ConnectionPoolFactory.getPool().getFromPool();
                 statement = connection.prepareStatement(initStatement);
@@ -106,7 +105,7 @@ public class SQLStatementExecutor {
                     } else if(next.getValue().getSecond().equals(String.class)){
                         statement.setString(i, (String) next.getValue().getFirst());
                     } else {
-                        log.error("Don't know what to do with type("+ next.getValue().getSecond() +")->("+ next.getValue().getFirst() +") with insert-statement("+ debugLogStatement +")");
+                        log.error("Don't know what to do with type("+ next.getValue().getSecond() +")->("+ next.getValue().getFirst() +") with insert-statement("+ initStatement +")");
                     }
                 }
 
@@ -119,11 +118,8 @@ public class SQLStatementExecutor {
                 long time = end - start;
                 totalTime = totalTime + time;
                 totalCounter++;
-//                log.debug("**************** AVG-TIME("+ (totalTime / totalCounter) +") count("+ totalCounter +") totalTime("+ totalTime +") lastTime("+ time +")");
-
-
                 if(debugCpuMode) {
-                    eventCounter.newEvent(debugLogStatement, end - start);
+                    eventCounter.newEvent(initStatement, end - start);
                     eventCounter.newEvent("insert", end - start);
                 }
                 ConnectionPoolFactory.getPool().putBackInPool(connection);
@@ -161,9 +157,6 @@ public class SQLStatementExecutor {
             long time = end - start;
             totalTime = totalTime + time;
             totalCounter++;
-//                log.debug("**************** AVG-TIME("+ (totalTime / totalCounter) +") count("+ totalCounter +") totalTime("+ totalTime +") lastTime("+ time +")");
-
-
             if(debugCpuMode) {
                 eventCounter.newEvent(sqlStatement.replaceAll("\n", " "), end - start);
                 eventCounter.newEvent("insert", end - start);
