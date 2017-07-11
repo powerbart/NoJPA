@@ -82,7 +82,6 @@ public class SQLStatementExecutor {
             try {
                 PreparedSQLStatement preSQLStatement = new MySqlPreparedSQLStatement();
                 String initStatement = insertSQLStatement.makePreparedStatement(preSQLStatement);
-                log.debug("Will update with preparedStatement:1::" + initStatement);
                 long start = System.currentTimeMillis();
                 connection = (Connection) ConnectionPoolFactory.getPool().getFromPool();
                 statement = connection.prepareStatement(initStatement);
@@ -109,14 +108,14 @@ public class SQLStatementExecutor {
                     }
                 }
 
-
-                log.debug("Will update with preparedStatement:2::" + initStatement);
-
-                statement.executeUpdate();
-
                 long end = System.currentTimeMillis();
                 long time = end - start;
                 totalTime = totalTime + time;
+
+                log.debug("doUpdate:Time("+ (time) +")::" + initStatement);
+
+                statement.executeUpdate();
+
                 totalCounter++;
                 if(debugCpuMode) {
                     eventCounter.newEvent(initStatement, end - start);
@@ -149,12 +148,13 @@ public class SQLStatementExecutor {
         Statement statement = null;
         try {
             connection = (Connection) ConnectionPoolFactory.getPool().getFromPool();
-            log.debug("Will update with:::" + sqlStatement.replaceAll("\n", " "));
+
             long start = System.currentTimeMillis();
             statement = connection.createStatement();
             statement.execute(sqlStatement);
             long end = System.currentTimeMillis();
             long time = end - start;
+            log.debug("doUpdate:Time("+ time +")::" + sqlStatement.replaceAll("\n", " "));
             totalTime = totalTime + time;
             totalCounter++;
             if(debugCpuMode) {
@@ -203,13 +203,13 @@ public class SQLStatementExecutor {
         Connection connection = null;
         ResultSet resultSet = null;
         try {
-            log.debug("doQuery: Will run: " + sqlStatement.replaceAll("\n", " "));
             connection = (Connection) ConnectionPoolFactory.getPool().getFromPool();
             long start = System.currentTimeMillis();
             statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             resultSet = statement.executeQuery(sqlStatement);
             long end = System.currentTimeMillis();
             long time = end - start;
+            log.debug("doQuery::Time("+ time +") " + sqlStatement.replaceAll("\n", " "));
             totalTime = totalTime + time;
             totalCounter++;
 //                log.debug("**************** AVG-TIME("+ (totalTime / totalCounter) +") count("+ totalCounter +") totalTime("+ totalTime +") lastTime("+ time +")");
@@ -261,11 +261,11 @@ public class SQLStatementExecutor {
                 connection = (Connection) ConnectionPoolFactory.getPool().getFromPool();
                 long start = System.currentTimeMillis();
                 statement = connection.prepareStatement(initStatement, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-                log.debug("doQuery: Will run: " + initStatement.replaceAll("\n", " "));
                 preSQLStatement.makeStatementReadyToExcute(statement);
                 resultSet = statement.executeQuery();
                 long end = System.currentTimeMillis();
                 long time = end - start;
+                log.debug("doQuery::Time("+ time +") " + initStatement.replaceAll("\n", " "));
                 totalTime = totalTime + time;
                 totalCounter++;
 //                log.debug("**************** AVG-TIME("+ (totalTime / totalCounter) +") count("+ totalCounter +") totalTime("+ totalTime +") lastTime("+ time +")");
