@@ -53,7 +53,7 @@ public class WorkerPool {
                 continue;
             }
             if (entry.knownClasses.contains(executorClass)) {
-                if (stepEntry == null || entry.healthierThan(stepEntry)) {
+                if (stepEntry == null || entry.lastIdleStart < stepEntry.lastIdleStart) {
                     if(stepEntry != null){
                         log.debug("PreSelectedWorker("+ stepEntry +") losses to NewSelectedWorker("+ entry +")");
                     }
