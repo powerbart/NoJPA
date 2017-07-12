@@ -237,7 +237,7 @@ public class WorkerPool {
                             + rightAlign(""+ ("" + (debugNameOfWorker != null && debugNameOfWorker.length() > 7 ? debugNameOfWorker : serverLink.getOtherHost())), 42)
                             + rightAlign(""+ (getJobTime()), 8)
                             + rightAlign(""+ (getIdleTime()), 8)
-                            + rightAlign(""+ printNice(lastIdleStart), 13)
+                            + rightAlign(""+ timeToString(lastIdleStart), 13)
                             + rightAlign(""+ timeToString(System.currentTimeMillis() - rebootTime), 8)
                             + rightAlign(""+ timeToString(System.currentTimeMillis() - lastJobStart), 8)
                             + rightAlign(""+ printNice((((double) totalCountOfSuccesJobs)/ ((double) totalCountOfJobs))), 8)
