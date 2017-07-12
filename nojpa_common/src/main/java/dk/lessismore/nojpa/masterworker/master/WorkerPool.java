@@ -223,7 +223,7 @@ public class WorkerPool {
                             (debugNameOfWorker != null && debugNameOfWorker.length() > 7 ? debugNameOfWorker : serverLink.getOtherHost())
                             +" JobTime:"+ getJobTime() +" IdleTime:"+ getIdleTime() +" jobs("+ totalCountOfSuccesJobs
                             +") succes("+ printNice("" + (((double) totalCountOfSuccesJobs)/ ((double) totalCountOfJobs)))
-                            +") job/sec("+ printNice("" + (((double)(System.currentTimeMillis() - rebootTime))/ ((double) totalCountOfJobs))) +") LastJob("+  getTimeSinceLastJob() +")}"
+                            +") job/sec("+ printNice("" + (((double)(System.currentTimeMillis() - rebootTime))/ ((double) totalCountOfJobs))) +") lastIdleStart("+ lastIdleStart +") LastJob("+  getTimeSinceLastJob() +")}"
 
             ;
         }
@@ -242,7 +242,8 @@ public class WorkerPool {
                             + rightAlign(""+ printNice((((double) totalCountOfSuccesJobs)/ ((double) totalCountOfJobs))), 8)
                             + rightAlign(""+ printNice(totalCountOfSuccesJobs), 13)
                             + rightAlign(""+ printNice((((double)(System.currentTimeMillis() - rebootTime))/ (((double) totalCountOfJobs) * 1000))), 17)
-                    + "}"
+                            + rightAlign(""+ printNice(lastIdleStart), 13)
+                            + "}"
                     ;
         }
 
@@ -259,6 +260,7 @@ public class WorkerPool {
                             + rightAlign("Succes", 8)
                             + rightAlign("Count", 13)
                             + rightAlign("J/sec", 17)
+                            + rightAlign("LastIdle", 10)
                             + "}"
                     ;
         }
