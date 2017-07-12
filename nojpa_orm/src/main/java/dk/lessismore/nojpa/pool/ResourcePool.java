@@ -164,7 +164,7 @@ public class ResourcePool {
                     try {
                         //log.error("getFromPool:2.1 - wait - start");
                         try {
-                            Thread.sleep(200);
+                            wait(200);
                         } catch (Exception e) {
                         }
                         //log.error("getFromPool:2.1 - wait - ends");
@@ -196,6 +196,11 @@ public class ResourcePool {
 	//notifyAll();
 	//log.debug("putBackInPool:: -start ");
         _pool.push(poolObj);
+        try{
+            notify();
+        } catch (Exception e){
+
+        }
 	//log.debug("putBackInPool:: -end ");
     }
 
