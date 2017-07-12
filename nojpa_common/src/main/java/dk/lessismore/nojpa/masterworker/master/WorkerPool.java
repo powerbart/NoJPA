@@ -237,30 +237,30 @@ public class WorkerPool {
                             + rightAlign(""+ ("" + (debugNameOfWorker != null && debugNameOfWorker.length() > 7 ? debugNameOfWorker : serverLink.getOtherHost())), 42)
                             + rightAlign(""+ (getJobTime()), 8)
                             + rightAlign(""+ (getIdleTime()), 8)
+                            + rightAlign(""+ printNice(lastIdleStart), 13)
                             + rightAlign(""+ timeToString(System.currentTimeMillis() - rebootTime), 8)
                             + rightAlign(""+ timeToString(System.currentTimeMillis() - lastJobStart), 8)
                             + rightAlign(""+ printNice((((double) totalCountOfSuccesJobs)/ ((double) totalCountOfJobs))), 8)
                             + rightAlign(""+ printNice(totalCountOfSuccesJobs), 13)
                             + rightAlign(""+ printNice((((double)(System.currentTimeMillis() - rebootTime))/ (((double) totalCountOfJobs) * 1000))), 17)
-                            + rightAlign(""+ printNice(lastIdleStart), 13)
                             + "}"
                     ;
         }
 
         public String listTitle() {
             return
-                    "{" + rightAlign("Worker", 10)
+                    "{" + rightAlign("Worker No", 10)
                             + rightAlign("idle", 8)
                             + rightAlign("Load", 8)
                             + rightAlign("Name", 42)
                             + rightAlign("JobT", 8)
                             + rightAlign("IdleT", 8)
+                            + rightAlign("LIdle", 13)
                             + rightAlign("TotalT", 8)
                             + rightAlign("LastJ", 8)
                             + rightAlign("Succes", 8)
                             + rightAlign("Count", 13)
                             + rightAlign("J/sec", 17)
-                            + rightAlign("LastIdle", 10)
                             + "}"
                     ;
         }
