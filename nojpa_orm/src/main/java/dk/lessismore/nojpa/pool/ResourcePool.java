@@ -164,9 +164,12 @@ public class ResourcePool {
                     try {
                         //log.error("getFromPool:2.1 - wait - start");
                         try {
-                            wait(200);
+                            log.wait(200);
                         } catch (Exception e) {
+                            log.error("waiting-X ... pool("+ _pool.size() +") : " + e);
                         }
+
+
                         //log.error("getFromPool:2.1 - wait - ends");
                         if (countOfWait++ > 5 * 60 * 5) { //Waiting to 5 mins ...
                             //log.error("getFromPool:2.1 - addNew - starts");
@@ -197,7 +200,7 @@ public class ResourcePool {
 	//log.debug("putBackInPool:: -start ");
         _pool.push(poolObj);
         try{
-            notify();
+            log.notify();
         } catch (Exception e){
 
         }
