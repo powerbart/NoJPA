@@ -200,7 +200,9 @@ public class ResourcePool {
 	//log.debug("putBackInPool:: -start ");
         _pool.push(poolObj);
         try{
-            log.notify();
+            synchronized (log) {
+                log.notify();
+            }
         } catch (Exception e){
             log.error("putBackInPool: " + e);
         }
