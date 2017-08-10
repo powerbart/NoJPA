@@ -34,7 +34,7 @@ public class ClientCallbackThread<O> extends Thread {
         try{
             while(true) {
                 Object message = cp.read();
-//                log.debug("Message recieved from Master '" + message.getClass().getSimpleName() + "' " + message);
+                log.debug("Message recieved from Master '" + message.getClass().getSimpleName() + "' " + message);
 
                 if(message instanceof PingMessage) {
                     cp.write(new PongMessage());
@@ -64,7 +64,7 @@ public class ClientCallbackThread<O> extends Thread {
         } catch (ClosedChannelException e) {
             log.info("Connection closed - stopping listening for callbacks from master: " + e, e);
             try {
-//                jm.close();
+                jm.close();
                 cp.close();
             } catch (Exception ex){
                 ex.printStackTrace();
