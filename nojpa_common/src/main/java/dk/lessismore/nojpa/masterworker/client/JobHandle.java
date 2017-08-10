@@ -27,8 +27,8 @@ public class JobHandle<O> {
     // Default job values
     private JobStatus jobStatus = JobStatus.QUEUED;
     private double jobProgress = 0;
-    private WaitForValue<Pair<O, RuntimeException>> result = new WaitForValue<Pair<O, RuntimeException>>();
-    private HashMap<String, WaitForValue<Pair<Object, RuntimeException>>> runMethodRemoteResultMap = new HashMap<String, WaitForValue<Pair<Object, RuntimeException>>>();
+    private final WaitForValue<Pair<O, RuntimeException>> result = new WaitForValue<Pair<O, RuntimeException>>();
+    private final HashMap<String, WaitForValue<Pair<Object, RuntimeException>>> runMethodRemoteResultMap = new HashMap<String, WaitForValue<Pair<Object, RuntimeException>>>();
 
 
     /**
@@ -77,6 +77,9 @@ public class JobHandle<O> {
      * @return The last known job status from master.
      */
     public JobStatus getStatus() {
+        if(jobStatus == JobStatus.DONE){
+            return jobStatus;
+        }
         if (closed) throw new JobHandleClosedException();
         return jobStatus;
     }
@@ -85,6 +88,9 @@ public class JobHandle<O> {
      * @return The last known job progress from master.
      */
     public double getProgress() {
+        if(jobStatus == JobStatus.DONE){
+            return jobProgress;
+        }
         if (closed) throw new JobHandleClosedException();
         return jobProgress;
     }
@@ -154,15 +160,27 @@ public class JobHandle<O> {
      * Checked Exception (Errors) thrown from the executed job are wrapped in a WrappedErrorException.
      */
     public O getResult() {
-        if (closed) throw new JobHandleClosedException();
-        Pair<O, RuntimeException> pair = result.getValue();
-        O value = pair.getFirst();
-        RuntimeException exception = pair.getSecond();
-        if (exception != null) {
-            throw exception;
+        if(jobStatus == JobStatus.DONE){
+            Pair<O, RuntimeException> pair = result.getValue();
+            O value = pair.getFirst();
+            RuntimeException exception = pair.getSecond();
+            if (exception != null) {
+                throw exception;
+            } else {
+                jobProgress = 1;
+                return value;
+            }
         } else {
-            jobProgress = 1;
-            return value;
+            if (closed) throw new JobHandleClosedException();
+            Pair<O, RuntimeException> pair = result.getValue();
+            O value = pair.getFirst();
+            RuntimeException exception = pair.getSecond();
+            if (exception != null) {
+                throw exception;
+            } else {
+                jobProgress = 1;
+                return value;
+            }
         }
     }
 
@@ -194,7 +212,9 @@ public class JobHandle<O> {
         if (closed) throw new JobHandleClosedException();
         closed = true;
         jm.close();
-        result.setValue(new Pair<O, RuntimeException>(null, new JobHandleClosedException()));
+        if(!result.hasValue()){
+            result.setValue(new Pair<O, RuntimeException>(null, new JobHandleClosedException()));
+        }
     }
 
 
