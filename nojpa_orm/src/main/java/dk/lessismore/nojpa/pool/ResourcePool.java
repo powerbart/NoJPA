@@ -202,7 +202,7 @@ public class ResourcePool {
         try{
             log.notify();
         } catch (Exception e){
-
+            log.error("putBackInPool: " + e);
         }
 	//log.debug("putBackInPool:: -end ");
     }
