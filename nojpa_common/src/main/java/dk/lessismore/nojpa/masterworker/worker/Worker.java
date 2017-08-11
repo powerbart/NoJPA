@@ -1,6 +1,7 @@
 package dk.lessismore.nojpa.masterworker.worker;
 
 import dk.lessismore.nojpa.concurrency.WaitForValue;
+import dk.lessismore.nojpa.concurrency.WaitForValueRepeat;
 import dk.lessismore.nojpa.masterworker.SystemHealth;
 import dk.lessismore.nojpa.masterworker.bean.worker.BeanExecutor;
 import dk.lessismore.nojpa.masterworker.exceptions.JobDoesNotExistException;
@@ -217,7 +218,7 @@ public class Worker {
         protected ClientLink clientLink = null;
         protected Thread healthReporterThread = null;
         protected Thread stopperThread = null;
-        protected WaitForValue<JobMessage> waitForValue = new WaitForValue<JobMessage>();
+        protected WaitForValueRepeat<JobMessage> waitForValue = new WaitForValueRepeat<JobMessage>();
         protected Thread jobThread = null;
         protected Executor executor = null;
         protected JobMessage maybeJob = null;

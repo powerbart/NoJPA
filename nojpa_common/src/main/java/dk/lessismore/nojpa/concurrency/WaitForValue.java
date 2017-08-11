@@ -6,10 +6,10 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class WaitForValue<V> {
 
-    private V value;
-    private final Lock lock = new ReentrantLock();
-    private final Condition condition = lock.newCondition();
-    private boolean hasValue = false;
+    protected V value;
+    protected final Lock lock = new ReentrantLock();
+    protected final Condition condition = lock.newCondition();
+    protected boolean hasValue = false;
 
     public boolean hasValue() {
         return hasValue;
