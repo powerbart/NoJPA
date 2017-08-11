@@ -135,7 +135,7 @@ public class MasterServer {
     }
 
     synchronized public void setResult(JobResultMessage result, ServerLink serverLink) {
-        log.debug("setResult: " + serverLink);
+        log.debug("setResult["+ (result != null ? result.getJobID() : "NULL") +"]: " + serverLink);
         storeResult(result);
         jobPool.setResult(result);
         workerPool.setIdle(true, serverLink);

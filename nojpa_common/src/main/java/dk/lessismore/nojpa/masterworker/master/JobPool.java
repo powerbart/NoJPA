@@ -56,10 +56,13 @@ public class JobPool {
 
     public void addJob(JobMessage job) {
         if(pool.get(job.getJobID()) == null) {
+            log.debug("Job["+ job.getJobID() +"]: START - Added job: ");
             JobEntry jobEntry = new JobEntry(job);
             pool.put(job.getJobID(), jobEntry);
             queue.add(jobEntry);
-            log.debug("Added job: " + jobEntry);
+            log.debug("Job["+ job.getJobID() +"]: END - Added job: " + jobEntry);
+        } else {
+            log.error("Job["+ job.getJobID() +"]: all ready exists in pool...! ");
         }
     }
 
@@ -154,7 +157,7 @@ public class JobPool {
 //            removeWorker(jobEntry);
             fireOnResult(jobEntry, result);
         } else {
-            log.error("Trying to set result for job not in pool");
+            log.error("["+ jobID +"]: Trying to set result for job not in pool");
         }
     }
 
@@ -240,10 +243,13 @@ public class JobPool {
     }
 
     private void fireOnResult(JobEntry jobEntry, JobResultMessage result) {
+        log.debug("fireOnResult["+ result.getJobID() +"]:START");
         jobEntry.jobDoneDate = Calendar.getInstance();
         if (jobEntry.clients == null || jobEntry.clients.isEmpty()) return;
         for (ServerLink client: getListeningClientsCloned(jobEntry)) {
+            log.debug("fireOnResult["+ result.getJobID() +"]:sendResultToClient("+ client.getOtherHost() +")-START");
             MessageSender.sendResultToClient(result, client, failureHandler);
+            log.debug("fireOnResult["+ result.getJobID() +"]:sendResultToClient("+ client.getOtherHost() +")-DONE");
             client.close();
         }
         removeJob(result.getJobID());
@@ -251,10 +257,10 @@ public class JobPool {
 
     private void removeJob(String jobID) {
         JobEntry jobEntry = pool.get(jobID);
+        log.debug("Removed job["+ jobID +"]: "+ jobEntry);
         if (jobEntry != null) {
             pool.remove(jobID);
             queue.remove(jobEntry);
-            log.debug("Removed job: "+ jobEntry);
         }
         File storedResultFile = MasterServer.getStoredResultFile(jobID);
         if(storedResultFile != null && storedResultFile.exists()){
