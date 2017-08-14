@@ -16,11 +16,11 @@ public class WaitForValue<V> {
     }
 
     public V getValue() {
+        if(value != null) return value;
         try {
             lock.lock();
             while (! hasValue) condition.awaitUninterruptibly();
-            V toReturn = value;
-            return toReturn;
+            return value;
         } finally {
             lock.unlock();
         }
