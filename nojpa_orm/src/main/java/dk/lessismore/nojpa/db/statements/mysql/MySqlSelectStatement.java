@@ -64,7 +64,9 @@ public class MySqlSelectStatement extends MySqlWhereStatement implements SelectS
     }
 
     public void addAttributeName(String attributeName) {
-        getAttributeNames().add(attributeName);
+        if(!getAttributeNames().contains(attributeName)) {
+            getAttributeNames().add(attributeName);
+        }
     }
 
     public void addAttributeName(String tableName, String attributeName) {
