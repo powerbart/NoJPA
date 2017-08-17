@@ -135,7 +135,10 @@ public class MasterServer {
         notifyObservers();
     }
 
+    static long masterworker_result_jobs_count = 0;
     synchronized public void setResult(JobResultMessage result, ServerLink serverLink) {
+        SuperIO.writeTextToFile("/tmp/masterworker_result_jobs_count", "" + (masterworker_result_jobs_count++));
+
         log.debug("setResult["+ (result != null ? result.getJobID() : "NULL") +"]: " + serverLink);
         storeResult(result);
         jobPool.setResult(result);
@@ -280,7 +283,7 @@ public class MasterServer {
         }
     }
 
-    static long countJob = 0;
+    static long masterworker_input_jobs_count = 0;
     synchronized private void runJobIfNecessaryAndPossible() {
         log.debug("runJobIfNecessaryAndPossible");
         System.out.println("---------------------------------- Master Status ---------------------------------- START");
@@ -291,7 +294,7 @@ public class MasterServer {
             log.debug("No Job in queue to run");
             return;
         }
-        SuperIO.writeTextToFile("/tmp/masterworker-count-jobs", "" + (countJob++));
+        SuperIO.writeTextToFile("/tmp/masterworker_input_jobs_count", "" + (masterworker_input_jobs_count++));
         final WorkerPool.WorkerEntry workerEntry = workerPool.getBestApplicableWorker(
                 jobEntry.jobMessage.getExecutorClassName());
         if (workerEntry == null) {

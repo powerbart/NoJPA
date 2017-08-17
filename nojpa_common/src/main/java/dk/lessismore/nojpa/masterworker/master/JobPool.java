@@ -10,6 +10,7 @@ import dk.lessismore.nojpa.masterworker.messages.observer.ObserverJobMessage;
 import dk.lessismore.nojpa.net.link.ServerLink;
 import dk.lessismore.nojpa.properties.PropertiesProxy;
 import dk.lessismore.nojpa.utils.MaxSizeArray;
+import dk.lessismore.nojpa.utils.SuperIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -242,13 +243,21 @@ public class JobPool {
         }
     }
 
+    static long masterworker_output_jobs_count = 0;
+    static long masterworker_output_error_jobs_count = 0;
+
     private void fireOnResult(JobEntry jobEntry, JobResultMessage result) {
+        SuperIO.writeTextToFile("/tmp/masterworker_output_jobs_count", "" + (masterworker_output_jobs_count++));
+
         log.debug("fireOnResult["+ result.getJobID() +"]:START");
         jobEntry.jobDoneDate = Calendar.getInstance();
         if (jobEntry.clients == null || jobEntry.clients.isEmpty()) return;
         for (ServerLink client: getListeningClientsCloned(jobEntry)) {
             log.debug("fireOnResult["+ result.getJobID() +"]:sendResultToClient("+ client.getOtherHost() +")-START");
             MessageSender.sendResultToClient(result, client, failureHandler);
+            if(result.hasException()){
+                SuperIO.writeTextToFile("/tmp/masterworker_output_error_jobs_count", "" + (masterworker_output_error_jobs_count++));
+            }
             log.debug("fireOnResult["+ result.getJobID() +"]:sendResultToClient("+ client.getOtherHost() +")-DONE");
             client.close();
         }
