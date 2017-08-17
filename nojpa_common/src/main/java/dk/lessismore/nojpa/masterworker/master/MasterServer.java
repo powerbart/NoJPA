@@ -15,6 +15,7 @@ import dk.lessismore.nojpa.properties.PropertiesListener;
 import dk.lessismore.nojpa.properties.PropertiesProxy;
 import dk.lessismore.nojpa.serialization.Serializer;
 import dk.lessismore.nojpa.serialization.XmlSerializer;
+import dk.lessismore.nojpa.utils.SuperIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -279,6 +280,7 @@ public class MasterServer {
         }
     }
 
+    static long countJob = 0;
     synchronized private void runJobIfNecessaryAndPossible() {
         log.debug("runJobIfNecessaryAndPossible");
         System.out.println("---------------------------------- Master Status ---------------------------------- START");
@@ -289,7 +291,7 @@ public class MasterServer {
             log.debug("No Job in queue to run");
             return;
         }
-
+        SuperIO.writeTextToFile("/tmp/masterworker-count-jobs", "" + (countJob++));
         final WorkerPool.WorkerEntry workerEntry = workerPool.getBestApplicableWorker(
                 jobEntry.jobMessage.getExecutorClassName());
         if (workerEntry == null) {
