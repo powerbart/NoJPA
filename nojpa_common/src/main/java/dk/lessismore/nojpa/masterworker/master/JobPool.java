@@ -250,18 +250,24 @@ public class JobPool {
         SuperIO.writeTextToFile("/tmp/masterworker_output_jobs_count", "" + (masterworker_output_jobs_count++));
 
         log.debug("fireOnResult["+ result.getJobID() +"]:START");
-        jobEntry.jobDoneDate = Calendar.getInstance();
-        if (jobEntry.clients == null || jobEntry.clients.isEmpty()) return;
-        for (ServerLink client: getListeningClientsCloned(jobEntry)) {
-            log.debug("fireOnResult["+ result.getJobID() +"]:sendResultToClient("+ client.getOtherHost() +")-START");
-            MessageSender.sendResultToClient(result, client, failureHandler);
-            if(result.hasException()){
-                SuperIO.writeTextToFile("/tmp/masterworker_output_error_jobs_count", "" + (masterworker_output_error_jobs_count++));
+        try {
+            jobEntry.jobDoneDate = Calendar.getInstance();
+            if (jobEntry.clients == null || jobEntry.clients.isEmpty()) return;
+            for (ServerLink client : getListeningClientsCloned(jobEntry)) {
+                log.debug("fireOnResult[" + result.getJobID() + "]:sendResultToClient(" + client.getOtherHost() + ")-START");
+                MessageSender.sendResultToClient(result, client, failureHandler);
+                if (result.hasException()) {
+                    SuperIO.writeTextToFile("/tmp/masterworker_output_error_jobs_count", "" + (masterworker_output_error_jobs_count++));
+                }
+                log.debug("fireOnResult[" + result.getJobID() + "]:sendResultToClient(" + client.getOtherHost() + ")-DONE");
+                client.close();
             }
-            log.debug("fireOnResult["+ result.getJobID() +"]:sendResultToClient("+ client.getOtherHost() +")-DONE");
-            client.close();
+        } catch (Exception e){
+            log.error("Some error:" + e, e);
         }
+        log.debug("fireOnResult["+ result.getJobID() +"]:BEFORE-REMOVE");
         removeJob(result.getJobID());
+        log.debug("fireOnResult["+ result.getJobID() +"]:ENDS");
     }
 
     private void removeJob(String jobID) {
