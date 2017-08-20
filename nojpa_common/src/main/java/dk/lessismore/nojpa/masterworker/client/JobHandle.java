@@ -209,10 +209,11 @@ public class JobHandle<O> {
      * close(), getResult() and addJobListener will raise JobHandleClosedException.
      */
     public void close() {
-        if (closed) throw new JobHandleClosedException();
+//        if (closed) throw new JobHandleClosedException();
         closed = true;
         jm.close();
         if(!result.hasValue()){
+            log.error("SETTING RESULT TO NULL.....!!!!");
             result.setValue(new Pair<O, RuntimeException>(null, new JobHandleClosedException()));
         }
     }
