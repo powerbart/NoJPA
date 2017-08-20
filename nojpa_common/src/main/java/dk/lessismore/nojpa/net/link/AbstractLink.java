@@ -18,6 +18,9 @@ public abstract class AbstractLink {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractLink.class);
 
+    public static boolean RUN_PINGER;
+
+
     protected Socket socket = null;
     protected OutputStream out = null;
     protected InputStream in = null;
@@ -228,11 +231,9 @@ public abstract class AbstractLink {
 
 
     public void startPinger() {
-        if (pinger == null) {
+        if (pinger == null && RUN_PINGER) {
             pinger = new Pinger();
             pinger.start();
-        } else {
-            System.out.println("Pinger all ready running");
         }
     }
 
