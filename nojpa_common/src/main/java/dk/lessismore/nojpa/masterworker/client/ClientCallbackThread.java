@@ -34,7 +34,7 @@ public class ClientCallbackThread<O> extends Thread {
         try{
             while(true) {
                 Object message = cp.read();
-                log.debug("Message recieved from Master '" + message.getClass().getSimpleName() + "' " + message);
+                log.debug("Message recieved from Master '" + message.getClass().getSimpleName() + "' ");
 
                 if(message instanceof PingMessage) {
                     cp.write(new PongMessage());
