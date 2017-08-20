@@ -135,7 +135,8 @@ public class MasterServer {
         notifyObservers();
     }
 
-    static long masterworker_result_jobs_count = 0;
+    static long masterworker_result_jobs_count = new File("/tmp/masterworker_result_jobs_count").exists() ? new Long(SuperIO.readTextFromFile("/tmp/masterworker_result_jobs_count")) : 0;
+
     synchronized public void setResult(JobResultMessage result, ServerLink serverLink) {
         SuperIO.writeTextToFile("/tmp/masterworker_result_jobs_count", "" + (masterworker_result_jobs_count++));
 
@@ -283,7 +284,8 @@ public class MasterServer {
         }
     }
 
-    static long masterworker_input_jobs_count = 0;
+    static long masterworker_input_jobs_count = new File("/tmp/masterworker_input_jobs_count").exists() ? new Long(SuperIO.readTextFromFile("/tmp/masterworker_input_jobs_count")) : 0;
+
     synchronized private void runJobIfNecessaryAndPossible() {
         log.debug("runJobIfNecessaryAndPossible");
         System.out.println("---------------------------------- Master Status ---------------------------------- START");
