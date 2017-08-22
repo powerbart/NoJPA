@@ -3,16 +3,21 @@ package dk.lessismore.nojpa.masterworker.master;
 import dk.lessismore.nojpa.properties.PropertiesProxy;
 import dk.lessismore.nojpa.resources.PropertyResources;
 import dk.lessismore.nojpa.resources.PropertyService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 
 public class Master {
 
+    private static final Logger log = LoggerFactory.getLogger(Master.class);
+
     private static final MasterProperties properties = PropertiesProxy.getInstance(MasterProperties.class);
 
     /**
      * Run Master listening on ports specified in property file.
+     *
      * @param args Not used.
      * @throws java.io.IOException
      * @throws InterruptedException
@@ -34,17 +39,31 @@ public class Master {
 
         Thread clientAcceptThread = new Thread(new Runnable() {
             public void run() {
-                while(true) server.acceptClientConnection(clientSocket);
+                while (true)
+                    try {
+                        server.acceptClientConnection(clientSocket);
+                    } catch (Exception e) {
+                        log.error("error in acceptClientConnection: {}", e.getMessage(), e);
+                    }
             }
         });
         Thread workerAcceptThread = new Thread(new Runnable() {
             public void run() {
-                while(true) server.acceptWorkerConnection(workerSocket);
+                while (true) try {
+                    server.acceptWorkerConnection(workerSocket);
+                } catch (Exception e) {
+                    log.error("error in acceptWorkerConnection: {}", e.getMessage(), e);
+                }
             }
         });
         Thread observerAcceptThread = new Thread(new Runnable() {
             public void run() {
-                while(true) server.acceptObserverConnection(observerSocket);
+                while (true)
+                    try {
+                        server.acceptObserverConnection(observerSocket);
+                    } catch (Exception e) {
+                        log.error("error in acceptObserverConnection: {}", e.getMessage(), e);
+                    }
             }
         });
 
