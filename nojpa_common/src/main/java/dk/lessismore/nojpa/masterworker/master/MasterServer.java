@@ -236,7 +236,7 @@ public class MasterServer {
             socket.setSoTimeout(1000 * 180);
             socket.setTcpNoDelay(true);
             return new ServerLink(socket);
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.warn("Socket could not be accepted", e);
             return null;
         }
