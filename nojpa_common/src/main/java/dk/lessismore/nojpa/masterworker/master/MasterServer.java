@@ -55,6 +55,10 @@ public class MasterServer {
     }
 
 
+    public void kill(String jobID){
+        //TODO:
+    }
+
     // Client services
     synchronized void startListen(String jobID, ServerLink client) {
         if (jobID == null) log.error("Can't listen to null job");
@@ -86,7 +90,8 @@ public class MasterServer {
     }
 
     synchronized public void queueJob(JobMessage jobMessage) {
-        log.debug("queueJob: " + jobMessage);
+        SuperIO.writeTextToFile("/tmp/masterworker_queue_size", "" + (jobPool.getQueueSize()));
+        log.debug("queueJob("+ jobPool.getQueueSize() +"): " + jobMessage);
         jobPool.addJob(jobMessage);
         runJobIfNecessaryAndPossible();
         notifyObservers();
@@ -109,7 +114,7 @@ public class MasterServer {
     }
 
     synchronized public void updateWorkerHealth(HealthMessage healthMessage, ServerLink serverLink) {
-        log.debug("updateWorkerHealth: " + serverLink);
+        //log.debug("updateWorkerHealth: " + serverLink);
         boolean applicableBefore = workerPool.applicable(serverLink);
         workerPool.updateWorkerHealth(healthMessage.getSystemLoad(), healthMessage.getVmMemoryUsage(),
                 healthMessage.getDiskUsages(), serverLink);
@@ -173,7 +178,7 @@ public class MasterServer {
 
     long lastUpdate = System.currentTimeMillis();
     void notifyObservers() {
-        log.debug("notifyObservers: ");
+        log.debug("notifyObservers.size("+ observers.size() +"): ");
         long now = System.currentTimeMillis();
         if(now - lastUpdate < 1000 * 1){
             return;
@@ -202,12 +207,14 @@ public class MasterServer {
     }
 
     public void acceptClientConnection(ServerSocket serverSocket) {
-        log.debug("acceptClientConnection: " + serverSocket);
+        log.debug("acceptClientConnection[1]: " + serverSocket);
         ServerLink serverLink = acceptConnection(serverSocket);
         if (serverLink != null) {
             new MasterClientThread(this, serverLink).start();
         }
+        log.debug("acceptClientConnection[2]: " + serverSocket);
         notifyObservers();
+        log.debug("acceptClientConnection[3]: " + serverSocket);
     }
 
     public void acceptWorkerConnection(ServerSocket serverSocket) {
@@ -287,7 +294,7 @@ public class MasterServer {
     static long masterworker_input_jobs_count = new File("/tmp/masterworker_input_jobs_count").exists() ? new Long(SuperIO.readTextFromFile("/tmp/masterworker_input_jobs_count")) : 0;
 
     synchronized private void runJobIfNecessaryAndPossible() {
-        log.debug("runJobIfNecessaryAndPossible");
+        log.debug("runJobIfNecessaryAndPossible jobPool("+ jobPool.getQueueSize() +")");
         System.out.println("---------------------------------- Master Status ---------------------------------- START");
         System.out.println(jobPool.toString() + workerPool.toString());
         System.out.println("---------------------------------- Master Status ---------------------------------- ENDS");

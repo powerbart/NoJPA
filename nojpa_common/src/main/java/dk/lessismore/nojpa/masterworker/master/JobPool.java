@@ -68,6 +68,11 @@ public class JobPool {
     }
 
 
+    public int getQueueSize(){
+        return queue.size();
+    }
+
+
     /**
      * Add listener for jobID if the corresponding job entry exists in pool
      * @param jobID ID for the job to listen to.

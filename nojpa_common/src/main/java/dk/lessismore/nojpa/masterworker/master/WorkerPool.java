@@ -48,7 +48,7 @@ public class WorkerPool {
             String inapplicableReason = entry.notApplicableReason();
             if (inapplicableReason != null) {
 //                if(!inapplicableReason.equals("Worker is busy")){
-                    log.debug("Worker("+ entry +") not applicable: " + inapplicableReason);
+//                    log.debug("Worker("+ entry +") not applicable: " + inapplicableReason);
 //                }
                 continue;
             }

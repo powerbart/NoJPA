@@ -1,9 +1,6 @@
 package dk.lessismore.nojpa.masterworker.master;
 
-import dk.lessismore.nojpa.masterworker.messages.JobListenMessage;
-import dk.lessismore.nojpa.masterworker.messages.JobMessage;
-import dk.lessismore.nojpa.masterworker.messages.RestartAllWorkersMessage;
-import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteBeanMessage;
+import dk.lessismore.nojpa.masterworker.messages.*;
 import dk.lessismore.nojpa.net.link.ServerLink;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +40,11 @@ public class MasterClientThread extends Thread {
                 } else if(clientRequest instanceof RunMethodRemoteBeanMessage) {
                     RunMethodRemoteBeanMessage runMethodRemoteBeanMessage = (RunMethodRemoteBeanMessage) clientRequest;
                     masterServer.runMethodRemote(runMethodRemoteBeanMessage, serverLink);
+                } else if(clientRequest instanceof KillMessage) {
+                    KillMessage killMessage = (KillMessage) clientRequest;
+                    //TODO: masterServer.kill(killMessage.getJobID())
+                    log.debug("//TODO: masterServer.kill(killMessage.getJobID()) :-) ");
+                    masterServer.kill(killMessage.getJobID());
                 } else {
                     System.out.println("Don't know .... clientRequest = " + clientRequest);
                     log.warn("Don't know clientRequest = " + clientRequest);
@@ -50,7 +52,7 @@ public class MasterClientThread extends Thread {
             }
         } catch (ClosedChannelException e) {
             log.info("Connection closed - stopping listening to client");
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("IOException - stopping listening to client", e);
         } finally {
             masterServer.stopListen(serverLink);

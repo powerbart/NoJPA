@@ -30,7 +30,7 @@ public class MasterWorkerThread extends Thread {
         try{
             while(true) {
                 Object clientRequest = serverLink.read();
-                log.debug("Got clientRequest " + clientRequest);
+                log.debug("Got clientRequest " + clientRequest.getClass().getSimpleName());
                 if (! (clientRequest instanceof HealthMessage) &&
                     ! (clientRequest instanceof JobProgressMessage))
                     log.debug("Message recieved from worker '" + clientRequest.getClass().getSimpleName() + "'");
