@@ -2,10 +2,7 @@ package dk.lessismore.nojpa.masterworker.master;
 
 import dk.lessismore.nojpa.masterworker.JobStatus;
 import dk.lessismore.nojpa.masterworker.exceptions.WorkerExecutionException;
-import dk.lessismore.nojpa.masterworker.messages.JobMessage;
-import dk.lessismore.nojpa.masterworker.messages.JobResultMessage;
-import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteBeanMessage;
-import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteResultMessage;
+import dk.lessismore.nojpa.masterworker.messages.*;
 import dk.lessismore.nojpa.masterworker.messages.observer.ObserverJobMessage;
 import dk.lessismore.nojpa.net.link.ServerLink;
 import dk.lessismore.nojpa.properties.PropertiesProxy;
@@ -275,7 +272,7 @@ public class JobPool {
         log.debug("fireOnResult["+ result.getJobID() +"]:ENDS");
     }
 
-    private void removeJob(String jobID) {
+    protected void removeJob(String jobID) {
         JobEntry jobEntry = pool.get(jobID);
         log.debug("Removed job["+ jobID +"]: "+ jobEntry);
         if (jobEntry != null) {
@@ -302,6 +299,15 @@ public class JobPool {
     private void removeWorker(JobEntry jobEntry) {
         workerMap.remove(jobEntry.worker);
         jobEntry.worker = null;
+    }
+
+    public void kill(String jobID) {
+        removeJob(jobID);
+    }
+
+    public JobEntry getJobEntry(String jobID) {
+        JobEntry jobEntry = pool.get(jobID);
+        return jobEntry;
     }
 
 

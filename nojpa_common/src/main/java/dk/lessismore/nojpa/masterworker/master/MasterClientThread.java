@@ -42,8 +42,6 @@ public class MasterClientThread extends Thread {
                     masterServer.runMethodRemote(runMethodRemoteBeanMessage, serverLink);
                 } else if(clientRequest instanceof KillMessage) {
                     KillMessage killMessage = (KillMessage) clientRequest;
-                    //TODO: masterServer.kill(killMessage.getJobID())
-                    log.debug("//TODO: masterServer.kill(killMessage.getJobID()) :-) ");
                     masterServer.kill(killMessage.getJobID());
                 } else {
                     System.out.println("Don't know .... clientRequest = " + clientRequest);

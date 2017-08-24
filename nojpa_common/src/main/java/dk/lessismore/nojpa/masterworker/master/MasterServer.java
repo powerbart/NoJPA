@@ -1,5 +1,6 @@
 package dk.lessismore.nojpa.masterworker.master;
 
+import dk.lessismore.nojpa.masterworker.JobStatus;
 import dk.lessismore.nojpa.masterworker.exceptions.JobDoesNotExistException;
 import dk.lessismore.nojpa.masterworker.messages.HealthMessage;
 import dk.lessismore.nojpa.masterworker.messages.JobMessage;
@@ -55,9 +56,6 @@ public class MasterServer {
     }
 
 
-    public void kill(String jobID){
-        //TODO:
-    }
 
     // Client services
     synchronized void startListen(String jobID, ServerLink client) {
@@ -100,6 +98,7 @@ public class MasterServer {
 
     // Worker services
     synchronized public void registerWorker(RegistrationMessage registrationMessage , ServerLink serverLink) {
+        SuperIO.writeTextToFile("/tmp/masterworker_worker_count", "" + (workerPool.getSize()));
         log.debug("registerWorker: " + serverLink);
         workerPool.addWorker(registrationMessage, serverLink);
         runJobIfNecessaryAndPossible();
@@ -107,6 +106,7 @@ public class MasterServer {
     }
 
     synchronized public void unregisterWorker(ServerLink serverLink) {
+        SuperIO.writeTextToFile("/tmp/masterworker_worker_count", "" + (workerPool.getSize()));
         log.debug("unregisterWorker: " + serverLink);
         jobPool.requeueJobIfRunning(serverLink);
         workerPool.removeWorker(serverLink);
@@ -206,7 +206,10 @@ public class MasterServer {
         }
     }
 
+    static long masterworker_client_connection_count = new File("/tmp/masterworker_client_connection_count").exists() ? new Long(SuperIO.readTextFromFile("/tmp/masterworker_client_connection_count")) : 0;
+
     public void acceptClientConnection(ServerSocket serverSocket) {
+        SuperIO.writeTextToFile("/tmp/masterworker_client_connection_count", "" + (masterworker_client_connection_count++));
         log.debug("acceptClientConnection[1]: " + serverSocket);
         ServerLink serverLink = acceptConnection(serverSocket);
         if (serverLink != null) {
@@ -322,6 +325,24 @@ public class MasterServer {
             }
         });
         notifyObservers();
+    }
+
+
+
+    public void kill(String jobID) {
+        JobPool.JobEntry jobEntry = jobPool.getJobEntry(jobID);
+        log.debug("kill job[" + jobID + "]: " + jobEntry);
+        if (jobEntry != null) {
+            if (jobEntry.worker != null && jobEntry.getStatus() == JobStatus.IN_PROGRESS) {
+                MessageSender.send(new KillMessage(), jobEntry.worker, new MessageSender.FailureHandler() {
+                    public void onFailure(ServerLink client) {
+                        log.debug("IOException while sending KillMessage to worker - removing worker");
+                    }
+                });
+                workerPool.removeWorker(jobEntry.worker);
+            }
+            jobPool.kill(jobID);
+        }
     }
 
     public void restartAllWorkers() {

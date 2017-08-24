@@ -131,6 +131,11 @@ public class WorkerPool {
 
 
     static int TOTAL_COUNT_OF_INSTANCE = 1;
+
+    public int getSize() {
+        return pool.size();
+    }
+
     class WorkerEntry  {
 
 
