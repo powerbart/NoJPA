@@ -426,7 +426,7 @@ public class JobPool {
     @Override
     public String toString() {
         Calendar oneHour = Calendar.getInstance();
-        oneHour.add(Calendar.HOUR, -1);
+        oneHour.add(Calendar.MINUTE, -10);
 
         StringBuilder builder = new StringBuilder();
         builder.append("---------------------------------- JobPool ----------------------------------\n");

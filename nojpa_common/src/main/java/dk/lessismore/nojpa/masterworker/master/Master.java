@@ -69,9 +69,16 @@ public class Master {
 
         ObserverNotifierThread observerNotifierThread = new ObserverNotifierThread(server);
 
+        clientAcceptThread.setName("clientAcceptThread");
         clientAcceptThread.start();
+
+        workerAcceptThread.setName("workerAcceptThread");
         workerAcceptThread.start();
+
+        observerAcceptThread.setName("observerAcceptThread");
         observerAcceptThread.start();
+
+        observerNotifierThread.setName("observerNotifierThread");
         observerNotifierThread.start();
 
         clientAcceptThread.join();
