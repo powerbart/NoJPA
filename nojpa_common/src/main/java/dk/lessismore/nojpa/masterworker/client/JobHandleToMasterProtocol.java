@@ -131,6 +131,7 @@ public class JobHandleToMasterProtocol<O> {
     }
 
     public void notifyResult(O result) {
+        log.debug("notifyResult for listeners.size("+ listeners.size() +")");
         for (JobListener<O> listener: listeners) {
             listener.onResult(result);
         }
@@ -143,6 +144,7 @@ public class JobHandleToMasterProtocol<O> {
     }
 
     public void notifyStatus(JobStatus status) {
+        log.debug("notifyStatus for listeners.size("+ listeners.size() +")");
         if (status.equals(JobStatus.DONE)) notifyProgress(1.0);
         for (JobListener<O> listener: listeners) {
             listener.onStatus(status);

@@ -43,6 +43,7 @@ public class ClientCallbackThread<O> extends Thread {
                     jm.notifyRunMethodRemoteResult( runMethodRemoteResultMessage );
                 } else if(message instanceof JobResultMessage) {
                     JobResultMessage<O> jobResultMessage = (JobResultMessage<O>) message;
+                    log.debug("Message is JobResultMessage ("+ jobResultMessage.getJobID() +")");
                     jm.notifyStatus(JobStatus.DONE);
                     if (jobResultMessage.hasException()) {
                         jm.notifyException(jobResultMessage.getException(serializer));
@@ -53,12 +54,14 @@ public class ClientCallbackThread<O> extends Thread {
                     }
                 } else if(message instanceof JobStatusMessage) {
                     JobStatusMessage jobStatusMessage = (JobStatusMessage) message;
+                    log.debug("Message is JobStatusMessage ("+ jobStatusMessage.getJobID() +")");
                     jm.notifyStatus(jobStatusMessage.getStatus());
                 } else if(message instanceof JobProgressMessage) {
                     JobProgressMessage jobProgressMessage = (JobProgressMessage) message;
+                    log.debug("Message is jobProgressMessage ("+ jobProgressMessage.getJobID() +")");
                     jm.notifyProgress(jobProgressMessage.getProgress());
                 } else {
-                    System.out.println("Don't know message = " + message);
+                    log.error("Don't know message = " + message);
                 }
             }
         } catch (ClosedChannelException e) {
