@@ -231,6 +231,7 @@ public class JobHandle<O> {
         }
 
         public void onResult(O value) {
+            log.debug("Setting result for jobID[" + jobID + "]");
             result.setValue(new Pair<O, RuntimeException>(value, null));
             jobProgress = 1;
             jobStatus = JobStatus.DONE;
@@ -248,6 +249,7 @@ public class JobHandle<O> {
 
 
         public void onException(RuntimeException e) {
+            log.debug("Setting exception for jobID[" + jobID + "]");
             result.setValue(new Pair<O, RuntimeException>(null, e));
             jobStatus = JobStatus.DONE;
         }
