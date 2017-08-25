@@ -39,6 +39,7 @@ public class JobPool {
     private final MaxSizeArray<JobEntry> last5SuccesJobs = new MaxSizeArray<JobEntry>(5);
     private final MessageSender.FailureHandler failureHandler = new MessageSender.FailureHandler() {
         public void onFailure(ServerLink client) {
+            log.error("Can't send message to client:" + client);
             removeListener(client);
         }
     };
@@ -83,14 +84,14 @@ public class JobPool {
             if (jobEntry.clients == null) jobEntry.clients = new HashSet<ServerLink>();
             jobEntry.clients.add(client);
             if (jobEntry.result == null) {
-                MessageSender.sendStatusToClient(jobID, jobEntry.getStatus(), client, failureHandler);
-                MessageSender.sendProgressToClient(jobID, jobEntry.progress, client, failureHandler);
+                //MessageSender.sendStatusToClient(jobID, jobEntry.getStatus(), client, failureHandler);
+                //MessageSender.sendProgressToClient(jobID, jobEntry.progress, client, failureHandler);
             } else {
                 MessageSender.sendResultToClient(jobEntry.result, client, failureHandler);
             }
             return true;
         } else {
-            log.debug("No job entry in job pool - can't add listener");
+            log.debug("No job entry in job pool - can't add listener for jobID("+ jobID +")");
             return false;
         }
     }
@@ -98,17 +99,17 @@ public class JobPool {
     public void removeListener(ServerLink client) {
         String jobID = clientMap.get(client);
         if (jobID == null) {
-            log.info("No jobID found for client - cant remove listener");
+            log.info("No jobID("+ jobID +") found for client - cant remove listener. clientMap.size("+ clientMap.size() +") pool.size("+ pool.size() +")");
             return;
         }
         clientMap.remove(client);
         JobEntry jobEntry = pool.get(jobID);
         if (jobEntry == null) {
-            log.debug("No jobEntry exist - cant remove listener");
+            log.debug("No jobEntry exist - cant remove listener for jobID("+ jobID +"). clientMap.size("+ clientMap.size() +") pool.size("+ pool.size() +")");
             return;
         }
         if (jobEntry.clients == null) {
-            log.debug("No listening clients exist - cant remove listener");
+            log.debug("No listening clients exist - cant remove listener for jobID("+ jobID +")");
             return;
         }
         jobEntry.clients.remove(client);
@@ -181,6 +182,9 @@ public class JobPool {
     }
 
     public void requeueJobIfRunning(ServerLink worker) {
+        log.debug("#################################################### requeueJobIfRunning !!!!");
+        log.debug("#################################################### requeueJobIfRunning !!!!");
+        log.debug("#################################################### requeueJobIfRunning !!!!");
         String jobID = workerMap.get(worker);
         if (jobID == null) return;
         JobEntry entry = pool.get(jobID);

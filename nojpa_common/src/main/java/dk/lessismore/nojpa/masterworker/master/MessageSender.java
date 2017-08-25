@@ -17,16 +17,19 @@ public class MessageSender {
     private static final Logger log = LoggerFactory.getLogger(MessageSender.class);
 
     public static void sendStatusToClient(String jobID, JobStatus jobStatus, ServerLink client, FailureHandler failureHandler) {
+        log.debug("sendStatusToClient("+ jobID +")");
         JobStatusMessage statusMessage = new JobStatusMessage(jobID, jobStatus);
         send(statusMessage, client, failureHandler);
     }
 
     public static void sendProgressToClient(String jobID, double progress, ServerLink client, FailureHandler failureHandler) {
+        log.debug("sendProgressToClient("+ jobID +")");
         JobProgressMessage progressMessage = new JobProgressMessage(jobID, progress);
         send(progressMessage, client, failureHandler);
     }
 
     public static void sendResultToClient(JobResultMessage result, ServerLink client, FailureHandler failureHandler) {
+        log.debug("sendResultToClient("+ result.getJobID() +")");
         send(result, client, failureHandler);
     }
 

@@ -64,18 +64,19 @@ public class MasterServer {
             boolean listenerAdded = jobPool.addListener(jobID, client);
             // No job entry in pool, look for stored results.
             if (! listenerAdded) {
-                log.debug("Trying to find stored job result");
+                log.debug("Trying to find stored job result. jobID("+ jobID +")");
                 JobResultMessage jobResultMessage = restoreResult(jobID);
                 if (jobResultMessage == null) {
-                    log.debug("No stored result found, sending back exception");
+                    log.error("No stored result found, sending back exception for jobID("+ jobID +")");
                     jobResultMessage = new JobResultMessage(jobID);
                     jobResultMessage.setMasterException(new JobDoesNotExistException());
+                } else {
+                    MessageSender.sendResultToClient(jobResultMessage, client, new MessageSender.FailureHandler() {
+                        public void onFailure(ServerLink client) {
+                            log.warn("Failed to send restored result to client");
+                        }
+                    });
                 }
-                MessageSender.sendResultToClient(jobResultMessage, client, new MessageSender.FailureHandler() {
-                    public void onFailure(ServerLink client) {
-                        log.warn("Failed to send restored result to client");
-                    }
-                });
             }
         }
         notifyObservers();
@@ -89,7 +90,7 @@ public class MasterServer {
         notifyObservers();
     }
 
-    synchronized public void queueJob(JobMessage jobMessage) {
+    public void queueJob(JobMessage jobMessage) {
         SuperIO.writeTextToFile("/tmp/masterworker_queue_size", "" + (jobPool.getQueueSize()));
         log.debug("queueJob("+ jobPool.getQueueSize() +"): " + jobMessage);
         synchronized (jobPool){
@@ -149,7 +150,7 @@ public class MasterServer {
 
     public void setRunMethodRemoteResultMessage(RunMethodRemoteResultMessage runMethodRemoteResultMessage) {
         //storeResult(result); TODO
-        log.debug("setRunMethodRemoteResultMessage: " + runMethodRemoteResultMessage);
+        log.debug("setRunMethodRemoteResultMessage: " + runMethodRemoteResultMessage.getMethodID());
         synchronized (jobPool){
             jobPool.setRunMethodRemoteResultMessage(runMethodRemoteResultMessage);
         }
@@ -288,7 +289,7 @@ public class MasterServer {
     }
 
     private void storeResult(JobResultMessage result) {
-        log.debug("storeResult: " + result);
+        log.debug("storeResult: " + result.getJobID());
         File resultFile = getStoredResultFile(result.getJobID());
         if(!resultFile.getParentFile().exists()){
             resultFile.getParentFile().mkdirs();
