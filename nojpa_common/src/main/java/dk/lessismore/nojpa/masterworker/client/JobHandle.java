@@ -251,6 +251,7 @@ public class JobHandle<O> {
         public void onException(RuntimeException e) {
             log.debug("Setting exception for jobID[" + jobID + "]");
             result.setValue(new Pair<O, RuntimeException>(null, e));
+            jobProgress = 1;
             jobStatus = JobStatus.DONE;
         }
     }
