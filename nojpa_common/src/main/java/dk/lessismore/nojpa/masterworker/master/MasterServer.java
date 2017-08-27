@@ -327,7 +327,7 @@ public class MasterServer {
             builder.append(jobPool.toString() + workerPool.toString());
             builder.append("\n");
             builder.append("---------------------------------- Master Status ---------------------------------- ENDS");
-            System.out.println(builder.toString());
+            SuperIO.writeTextToFile("/tmp/master-status", builder.toString());
         }
         synchronized (jobPool){
             final JobPool.JobEntry jobEntry = jobPool.firstJob();
