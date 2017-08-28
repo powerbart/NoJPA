@@ -147,9 +147,11 @@ public abstract class AbstractLink {
 //                log.debug("Reading: " + recivedObject);
                 return recivedObject;
             } else {
-                byte[] buffer = new byte[4 * 1024];
+                byte[] buffer = new byte[16 * 1024];
                 StringBuilder builder = new StringBuilder();
-                while (builder.lastIndexOf(SEPARATOR) != builder.length() - SEPARATOR.length()){
+                int length = 0;
+                String end = null;
+                while (end == null || length < 3 || !end.equals(SEPARATOR)){
                     int byteLength = 0;
                     try {
                         byteLength = in.read(buffer);
@@ -163,6 +165,8 @@ public abstract class AbstractLink {
                         String s = new String(buffer, 0, byteLength);
                         builder.append(s);
                     }
+                    length = builder.length();
+                    end = builder.substring(length - SEPARATOR.length());
                 }
                 String s = builder.toString();
                 int startIndex = 0;
