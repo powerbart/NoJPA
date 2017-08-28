@@ -40,6 +40,14 @@
             <version>1.4.9</version>
         </dependency>
 
+        <dependency>
+            <groupId>dk.lessismore.common</groupId>
+            <artifactId>nologger</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+
+
     </dependencies>
 
 </project>

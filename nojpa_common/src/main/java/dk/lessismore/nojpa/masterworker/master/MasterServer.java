@@ -367,7 +367,7 @@ public class MasterServer {
         synchronized (jobPool){
             jobEntry = jobPool.getJobEntry(jobID);
         }
-        log.debug("kill job[" + jobID + "]: " + jobEntry);
+        log.warn("kill job[" + jobID + "]: " + jobEntry);
         if (jobEntry != null) {
             if (jobEntry.worker != null && jobEntry.getStatus() == JobStatus.IN_PROGRESS) {
                 MessageSender.send(new KillMessage(), jobEntry.worker, new MessageSender.FailureHandler() {

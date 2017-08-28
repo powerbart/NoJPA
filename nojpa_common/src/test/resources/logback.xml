@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true">
+
+    <variable name="app_name" value="testapp" />
+    <include resource="logback.basic.xml"/>
+
+</configuration>
+
+

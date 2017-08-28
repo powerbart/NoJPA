@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<included>
+
+    <variable name="log_file_location" value="./logs/${app_name}" />
+    <variable name="log_pattern" value="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n" />
+    <variable name="log_pattern_with_date" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n" />
+
+    <!-- Console Appender -->
+
+    <appender name="console_appender" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${log_pattern}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="console" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="console_appender"/>
+        <includeCallerData>true</includeCallerData>
+        <queueSize>500</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+    </appender>
+
+
+
+    <logger name="dk.lessismore.nojpa" level="DEBUG" additivity="false">
+        <appender-ref ref="console"/>
+    </logger>
+
+
+    <logger name="org.apache.solr" level="WARN"/>
+    <logger name="org.apache.solr.update.DirectUpdateHandler2" level="INFO"/>
+
+    <!-- Root -->
+
+    <root level="DEBUG">
+        <appender-ref ref="console"/>
+    </root>
+
+</included>

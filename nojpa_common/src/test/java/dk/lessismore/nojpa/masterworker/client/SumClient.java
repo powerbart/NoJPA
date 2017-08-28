@@ -39,11 +39,12 @@ public class SumClient {
         jobHandle.addJobListener(jobListener);
         System.out.println("jobHandle.getProgress() = " + jobHandle.getProgress());
         System.out.println("jobHandle.getStatus() = " + jobHandle.getStatus());
-        System.out.println("jobHandle.getResult() = " + jobHandle.getResult());
-        System.out.println("jobHandle.getProgress() = " + jobHandle.getProgress());
-        System.out.println("jobHandle.getStatus() = " + jobHandle.getStatus());
+        Thread.sleep(10 * 1000);
+        System.out.println("Sending KILL - START");
+        jobHandle.kill();
+        System.out.println("Sending KILL - END");
+        Thread.sleep(240 * 1000);
 
         System.out.println("Done");
-        jobHandle.close();
     }
 }

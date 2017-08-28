@@ -80,9 +80,9 @@ public class JobHandleToMasterProtocol<O> {
         }
     }
 
-    public void kill() {
+    public void kill(String jobID) {
         try {
-            clientLink.write(new KillMessage());
+            clientLink.write(new KillMessage(jobID));
         } catch (IOException e) {
             throw new MasterUnreachableException(e);
         }

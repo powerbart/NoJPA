@@ -117,7 +117,7 @@ public class JobHandle<O> {
      */
     public void kill() {
         if (closed) throw new JobHandleClosedException();
-        jm.kill();
+        jm.kill(jobID);
         close();
     }
 
