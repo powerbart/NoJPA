@@ -1,33 +1,55 @@
 package dk.lessismore.nojpa.masterworker.client;
 
 import dk.lessismore.nojpa.masterworker.JobStatus;
-import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteResultMessage;
 import dk.lessismore.nojpa.masterworker.executor.SumExecutor;
-
+import dk.lessismore.nojpa.masterworker.executor.ToUpperExecutor;
+import dk.lessismore.nojpa.masterworker.master.MasterServer;
+import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteResultMessage;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Test client that runs a cpu consuming job and print status, progress and
- * the result to stdout.
+ * Created by seb on 30/08/2017.
  */
-public class SumClient {
+public class ToUpperCaseClient {
+
+
+    private static final Logger log = LoggerFactory.getLogger(ToUpperCaseClient.class);
+
+
+    @Test
+    public void funny(){
+        log.debug("debugg");
+        log.warn("warnnn");
+        log.error("errr");
+
+    }
+
+
 
     public static void main(String[] args) throws Exception {
 
+        log.debug("debugg");
+        log.warn("warnnn");
+        log.error("errr");
+
+
         JobListener<String> jobListener = new JobListener<String>() {
             public void onStatus(JobStatus status) {
-                System.out.println("onStatus: "+status);
+                System.out.println("onStatus2: "+status);
             }
 
             public void onProgress(double progress) {
-                System.out.println("onProgress: "+progress);
+                System.out.println("onProgress2: "+progress);
             }
 
             public void onResult(String result) {
-                System.out.println("onResult: "+result);
+                System.out.println("onResult2: "+result);
             }
 
             public void onRunMethodRemoteResult(RunMethodRemoteResultMessage runMethodRemoteResultMessage) {
-                //To change body of implemented methods use File | Settings | File Templates.
+
             }
 
             public void onException(RuntimeException e) {
@@ -35,7 +57,14 @@ public class SumClient {
             }
         };
 
-        JobHandle<String> jobHandle = MasterService.runJob(SumExecutor.class, 7L);
+        StringBuilder b = new StringBuilder();
+        for(int i = 0; i < 1000; i++){
+            b.append("0123456789a"+ i + "::");
+        }
+
+
+
+        JobHandle<String> jobHandle = MasterService.runJob(ToUpperExecutor.class, b.toString());
         jobHandle.addJobListener(jobListener);
         System.out.println("jobHandle.getProgress() = " + jobHandle.getProgress());
         System.out.println("jobHandle.getStatus() = " + jobHandle.getStatus());
@@ -46,7 +75,8 @@ public class SumClient {
 //        Thread.sleep(240 * 1000);
 
         System.out.println(" ----- GET RESULT ----- ");
-        System.out.println(jobHandle.getResult());
+        System.out.println("jobHandle.getResult()="+ jobHandle.getResult());
         System.out.println("------ DONE ------");
     }
+
 }

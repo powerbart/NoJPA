@@ -22,16 +22,16 @@ public class WorkerPool {
     private static final Logger log = LoggerFactory.getLogger(WorkerPool.class);
     Map<ServerLink, WorkerEntry> pool = new HashMap<ServerLink, WorkerEntry>();
 
-    public void addWorker(RegistrationMessage registrationMessage, ServerLink serverLink) {
+    public synchronized void addWorker(RegistrationMessage registrationMessage, ServerLink serverLink) {
         WorkerEntry workerEntry = new WorkerEntry(registrationMessage.getHostname()+ ":" + registrationMessage.getFolder(), registrationMessage.getKnownClasses(), serverLink);
         pool.put(workerEntry.serverLink, workerEntry);
     }
 
-    public void removeWorker(WorkerEntry workerEntry) {
-        pool.remove(workerEntry.serverLink);
-    }
+//    public synchronized void removeWorker(WorkerEntry workerEntry) {
+//        pool.remove(workerEntry.serverLink);
+//    }
 
-    public void removeWorker(ServerLink serverLink) {
+    public synchronized void removeWorker(ServerLink serverLink) {
         WorkerEntry entry = pool.get(serverLink); 
         if (entry != null) {
             pool.remove(serverLink);

@@ -84,18 +84,14 @@ public class MasterServer {
 
     void stopListen(ServerLink client) {
         log.debug("stopListen: " + client);
-        synchronized (jobPool){
-            jobPool.removeListener(client);
-        }
+        jobPool.removeListener(client);
         notifyObservers();
     }
 
     public void queueJob(JobMessage jobMessage) {
         SuperIO.writeTextToFile("/tmp/masterworker_queue_size", "" + (jobPool.getQueueSize()));
         log.debug("queueJob("+ jobPool.getQueueSize() +"): " + jobMessage);
-        synchronized (jobPool){
-            jobPool.addJob(jobMessage);
-        }
+        jobPool.addJob(jobMessage);
         runJobIfNecessaryAndPossible();
         notifyObservers();
     }
@@ -105,9 +101,7 @@ public class MasterServer {
     public void registerWorker(RegistrationMessage registrationMessage , ServerLink serverLink) {
         SuperIO.writeTextToFile("/tmp/masterworker_worker_count", "" + (workerPool.getSize()));
         log.debug("registerWorker: " + serverLink);
-        synchronized (workerPool){
-            workerPool.addWorker(registrationMessage, serverLink);
-        }
+        workerPool.addWorker(registrationMessage, serverLink);
         runJobIfNecessaryAndPossible();
         notifyObservers();
     }
@@ -115,34 +109,26 @@ public class MasterServer {
     public void unregisterWorker(ServerLink serverLink) {
         SuperIO.writeTextToFile("/tmp/masterworker_worker_count", "" + (workerPool.getSize()));
         log.debug("unregisterWorker: " + serverLink);
-        synchronized (jobPool){
-            jobPool.requeueJobIfRunning(serverLink);
-        }
-        synchronized (workerPool){
-            workerPool.removeWorker(serverLink);
-        }
+        jobPool.requeueJobIfRunning(serverLink);
+        workerPool.removeWorker(serverLink);
         notifyObservers();
     }
 
     public void updateWorkerHealth(HealthMessage healthMessage, ServerLink serverLink) {
         //log.debug("updateWorkerHealth: " + serverLink);
-        boolean applicableAfter = false;
-        synchronized (workerPool) {
-            boolean applicableBefore = workerPool.applicable(serverLink);
-            workerPool.updateWorkerHealth(healthMessage.getSystemLoad(), healthMessage.getVmMemoryUsage(), healthMessage.getDiskUsages(), serverLink);
-            if (!applicableBefore) {
-                applicableAfter = workerPool.applicable(serverLink);
-            }
+        boolean ableToWorkAfter = false;
+        boolean ableToWorkBefore = workerPool.applicable(serverLink);
+        workerPool.updateWorkerHealth(healthMessage.getSystemLoad(), healthMessage.getVmMemoryUsage(), healthMessage.getDiskUsages(), serverLink);
+        if (!ableToWorkBefore) {
+            ableToWorkAfter = workerPool.applicable(serverLink);
         }
-        if (applicableAfter) runJobIfNecessaryAndPossible();
+        if (ableToWorkAfter) runJobIfNecessaryAndPossible();
         //notifyObservers();
     }
 
     public void updateJobProgress(JobProgressMessage jobProgressMessage) {
         log.debug("updateJobProgress: " + jobProgressMessage);
-        synchronized (jobPool){
-            jobPool.updateJobProgress(jobProgressMessage.getJobID(), jobProgressMessage.getProgress());
-        }
+        jobPool.updateJobProgress(jobProgressMessage.getJobID(), jobProgressMessage.getProgress());
         notifyObservers();
     }
 
@@ -151,9 +137,7 @@ public class MasterServer {
     public void setRunMethodRemoteResultMessage(RunMethodRemoteResultMessage runMethodRemoteResultMessage) {
         //storeResult(result); TODO
         log.debug("setRunMethodRemoteResultMessage: " + runMethodRemoteResultMessage.getMethodID());
-        synchronized (jobPool){
-            jobPool.setRunMethodRemoteResultMessage(runMethodRemoteResultMessage);
-        }
+        jobPool.setRunMethodRemoteResultMessage(runMethodRemoteResultMessage);
         notifyObservers();
     }
 
@@ -164,14 +148,10 @@ public class MasterServer {
 
         log.debug("setResult["+ (result != null ? result.getJobID() : "NULL") +"]: " + serverLink);
         storeResult(result);
-        synchronized (jobPool){
-            jobPool.setResult(result);
-        }
-        synchronized (workerPool){
-            workerPool.setIdle(true, serverLink);
-            WorkerPool.WorkerEntry workerEntry = workerPool.getWorkerEntry(serverLink);
-            workerEntry.jobReturnedStats();
-        }
+        jobPool.setResult(result);
+        workerPool.setIdle(true, serverLink);
+        WorkerPool.WorkerEntry workerEntry = workerPool.getWorkerEntry(serverLink);
+        workerEntry.jobReturnedStats();
         runJobIfNecessaryAndPossible();
     }
 
@@ -329,34 +309,30 @@ public class MasterServer {
             builder.append("---------------------------------- Master Status ---------------------------------- ENDS");
             SuperIO.writeTextToFile("/tmp/master-status", builder.toString());
         }
-        synchronized (jobPool){
-            final JobPool.JobEntry jobEntry = jobPool.firstJob();
-            if (jobEntry == null) {
-                log.debug("No Job in queue to run");
+        final JobPool.JobEntry jobEntry = jobPool.firstJob();
+        if (jobEntry == null) {
+            log.debug("No Job in queue to run");
+            return;
+        }
+        SuperIO.writeTextToFile("/tmp/masterworker_input_jobs_count", "" + (masterworker_input_jobs_count++));
+        WorkerPool.WorkerEntry workerEntry = null;
+            workerEntry = workerPool.getBestApplicableWorker(jobEntry.jobMessage.getExecutorClassName());
+            if (workerEntry == null) {
+                log.debug("No available worker to run job");
                 return;
             }
-            SuperIO.writeTextToFile("/tmp/masterworker_input_jobs_count", "" + (masterworker_input_jobs_count++));
-            WorkerPool.WorkerEntry workerEntry = null;
-            synchronized (workerPool){
-                workerEntry = workerPool.getBestApplicableWorker(jobEntry.jobMessage.getExecutorClassName());
-                if (workerEntry == null) {
-                    log.debug("No available worker to run job");
-                    return;
-                }
+        log.debug("Found worker to run job: "+ workerEntry);
+        jobPool.jobTaken(jobEntry, workerEntry.serverLink);
+        workerEntry.jobTakenStats();
+
+
+        WorkerPool.WorkerEntry finalWorkerEntry = workerEntry;
+        MessageSender.send(jobEntry.jobMessage, workerEntry.serverLink, new MessageSender.FailureHandler() {
+            public void onFailure(ServerLink client) {
+                log.debug("IOException while sending job to worker - removing worker");
+                MasterServer.this.unregisterWorker(finalWorkerEntry.serverLink);
             }
-            log.debug("Found worker to run job: "+ workerEntry);
-            jobPool.jobTaken(jobEntry, workerEntry.serverLink);
-            workerEntry.jobTakenStats();
-
-
-            WorkerPool.WorkerEntry finalWorkerEntry = workerEntry;
-            MessageSender.send(jobEntry.jobMessage, workerEntry.serverLink, new MessageSender.FailureHandler() {
-                public void onFailure(ServerLink client) {
-                    log.debug("IOException while sending job to worker - removing worker");
-                    MasterServer.this.unregisterWorker(finalWorkerEntry.serverLink);
-                }
-            });
-        }
+        });
         notifyObservers();
     }
 
@@ -364,9 +340,7 @@ public class MasterServer {
 
     public void kill(String jobID) {
         JobPool.JobEntry jobEntry = null;
-        synchronized (jobPool){
-            jobEntry = jobPool.getJobEntry(jobID);
-        }
+        jobEntry = jobPool.getJobEntry(jobID);
         log.warn("kill job[" + jobID + "]: " + jobEntry);
         if (jobEntry != null) {
             if (jobEntry.worker != null && jobEntry.getStatus() == JobStatus.IN_PROGRESS) {
@@ -375,9 +349,7 @@ public class MasterServer {
                         log.debug("IOException while sending KillMessage to worker - removing worker");
                     }
                 });
-                synchronized (workerPool) {
-                    workerPool.removeWorker(jobEntry.worker);
-                }
+                workerPool.removeWorker(jobEntry.worker);
             }
             jobPool.kill(jobID);
         }

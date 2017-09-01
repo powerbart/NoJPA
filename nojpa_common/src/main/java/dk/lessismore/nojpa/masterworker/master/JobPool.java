@@ -53,7 +53,7 @@ public class JobPool {
 
 
 
-    public void addJob(JobMessage job) {
+    public synchronized void addJob(JobMessage job) {
         if(pool.get(job.getJobID()) == null) {
             log.debug("Job["+ job.getJobID() +"]: START - Added job: ");
             JobEntry jobEntry = new JobEntry(job);
@@ -77,7 +77,7 @@ public class JobPool {
      * @param client the link to the client
      * @return True if the listener could be added False otherwise.
      */
-    public boolean addListener(String jobID, ServerLink client) {
+    public synchronized boolean addListener(String jobID, ServerLink client) {
         clientMap.put(client, jobID);
         JobEntry jobEntry = pool.get(jobID);
         if (jobEntry != null) {
@@ -96,7 +96,7 @@ public class JobPool {
         }
     }
 
-    public void removeListener(ServerLink client) {
+    public synchronized void removeListener(ServerLink client) {
         String jobID = clientMap.get(client);
         if (jobID == null) {
             log.info("No jobID("+ jobID +") found for client - cant remove listener. clientMap.size("+ clientMap.size() +") pool.size("+ pool.size() +")");
@@ -173,7 +173,7 @@ public class JobPool {
         }
     }
 
-    public void jobTaken(JobEntry jobEntry, ServerLink worker) {
+    public synchronized void jobTaken(JobEntry jobEntry, ServerLink worker) {
         log.debug(" * JOB TAKEN: "+jobEntry);
         jobEntry.jobTakenDate = Calendar.getInstance();
         setWorker(jobEntry, worker);
@@ -181,7 +181,7 @@ public class JobPool {
         fireOnStatus(jobEntry);
     }
 
-    public void requeueJobIfRunning(ServerLink worker) {
+    public synchronized void requeueJobIfRunning(ServerLink worker) {
         log.debug("#################################################### requeueJobIfRunning !!!!");
         log.debug("#################################################### requeueJobIfRunning !!!!");
         log.debug("#################################################### requeueJobIfRunning !!!!");
@@ -276,7 +276,7 @@ public class JobPool {
         log.debug("fireOnResult["+ result.getJobID() +"]:ENDS");
     }
 
-    protected void removeJob(String jobID) {
+    protected synchronized void removeJob(String jobID) {
         JobEntry jobEntry = pool.get(jobID);
         log.debug("Removed job["+ jobID +"]: "+ jobEntry);
         if (jobEntry != null) {
@@ -300,7 +300,7 @@ public class JobPool {
         jobEntry.worker = worker;
     }
 
-    private void removeWorker(JobEntry jobEntry) {
+    private synchronized void removeWorker(JobEntry jobEntry) {
         workerMap.remove(jobEntry.worker);
         jobEntry.worker = null;
     }
@@ -435,50 +435,56 @@ public class JobPool {
 
     @Override
     public String toString() {
-        Calendar oneHour = Calendar.getInstance();
-        oneHour.add(Calendar.MINUTE, -10);
+        try {
+            Calendar oneHour = Calendar.getInstance();
+            oneHour.add(Calendar.MINUTE, -10);
 
-        StringBuilder builder = new StringBuilder();
-        builder.append("---------------------------------- JobPool ----------------------------------\n");
-        builder.append("IN QUEUE:\n");
-        for (JobEntry jobEntry: queue) {
-            builder.append("  ");
-            builder.append(jobEntry.toString());
-            builder.append("\n");
-        }
-        builder.append("OTHERS:\n");
-        List<String> jobsToRemove = new ArrayList<String>();
-        for (JobEntry jobEntry: pool.values()) {
-            if (queue.contains(jobEntry)) continue;
-            builder.append("  ");
-            builder.append(jobEntry.toString());
-            builder.append("\n");
-            if(jobEntry.getStatus() == JobStatus.DONE && jobEntry.jobDoneDate != null && jobEntry.jobDoneDate.before(oneHour)){
-                jobsToRemove.add(jobEntry.getJobID());
+            StringBuilder builder = new StringBuilder();
+            builder.append("---------------------------------- JobPool ----------------------------------\n");
+            builder.append("IN QUEUE:\n");
+            for (JobEntry jobEntry : queue) {
+                builder.append("  ");
+                builder.append(jobEntry.toString());
+                builder.append("\n");
             }
-        }
-        for(String sid : jobsToRemove){
-            try {
-                removeJob(sid);
-            } catch (Exception e){
-                log.error("Some error: "+ e, e);
+            builder.append("OTHERS:\n");
+            List<String> jobsToRemove = new ArrayList<String>();
+            for (JobEntry jobEntry : pool.values()) {
+                if (queue.contains(jobEntry)) continue;
+                builder.append("  ");
+                builder.append(jobEntry.toString());
+                builder.append("\n");
+                if (jobEntry.getStatus() == JobStatus.DONE && jobEntry.jobDoneDate != null && jobEntry.jobDoneDate.before(oneHour)) {
+                    jobsToRemove.add(jobEntry.getJobID());
+                }
             }
-        }
+            for (String sid : jobsToRemove) {
+                try {
+                    removeJob(sid);
+                } catch (Exception e) {
+                    log.error("Some error: " + e, e);
+                }
+            }
 
 
-        builder.append("LAST-5-RESULTS:\n");
-        for (Iterator<JobEntry> iterator = last5SuccesJobs.iterator(); iterator.hasNext(); ) {
-            JobEntry jobEntry = iterator.next();
-            builder.append("  ");
-            builder.append(jobEntry.toString());
-            builder.append("\n");
+            builder.append("LAST-5-RESULTS:\n");
+            for (Iterator<JobEntry> iterator = last5SuccesJobs.iterator(); iterator.hasNext(); ) {
+                JobEntry jobEntry = iterator.next();
+                builder.append("  ");
+                builder.append(jobEntry.toString());
+                builder.append("\n");
+            }
+            builder.append("STATS: ");
+            builder.append("Last-success(" + (lastResult != null ? "" + lastResult.getTime() : " -NO RESULTS.... yet...! ") + ") ");
+            builder.append("queue.size(" + queue.size() + ") ");
+            builder.append("TOTAL(" + resultTotalCounter + ") ");
+            builder.append("LAST-" + (resultTotalCounter % 100) + "-AVG(" + ((System.currentTimeMillis() - resultLast100Time) / (1 + (resultTotalCounter % 100))) + ") ");
+            builder.append('\n');
+            return builder.toString();
+        } catch (Exception e){
+            e.printStackTrace();
+            log.warn("Error with toString: " + e, e);
+            return null;
         }
-        builder.append("STATS: ");
-        builder.append("Last-success(" +  (lastResult != null ? "" + lastResult.getTime() : " -NO RESULTS.... yet...! ") +") ");
-        builder.append("queue.size("+ queue.size() +") ");
-        builder.append("TOTAL("+ resultTotalCounter +") ");
-        builder.append("LAST-"+ (resultTotalCounter % 100) +"-AVG("+ ((System.currentTimeMillis() - resultLast100Time)/(1+(resultTotalCounter % 100))) +") ");
-        builder.append('\n');
-        return builder.toString();
     }
 }
