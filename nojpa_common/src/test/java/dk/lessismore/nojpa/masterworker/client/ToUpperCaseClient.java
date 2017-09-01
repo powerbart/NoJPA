@@ -18,15 +18,6 @@ public class ToUpperCaseClient {
     private static final Logger log = LoggerFactory.getLogger(ToUpperCaseClient.class);
 
 
-    @Test
-    public void funny(){
-        log.debug("debugg");
-        log.warn("warnnn");
-        log.error("errr");
-
-    }
-
-
 
     public static void main(String[] args) throws Exception {
 
