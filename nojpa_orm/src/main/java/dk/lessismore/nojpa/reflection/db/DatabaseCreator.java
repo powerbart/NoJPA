@@ -7,6 +7,7 @@ import dk.lessismore.nojpa.db.statements.CreateSQLStatement;
 import dk.lessismore.nojpa.db.statements.DropSQLStatement;
 import dk.lessismore.nojpa.db.statements.SQLStatement;
 import dk.lessismore.nojpa.db.statements.SQLStatementFactory;
+import dk.lessismore.nojpa.reflection.db.annotations.Compressed;
 import dk.lessismore.nojpa.reflection.db.annotations.IgnoreFromTableCreation;
 import dk.lessismore.nojpa.reflection.db.annotations.IndexClass;
 import dk.lessismore.nojpa.reflection.db.annotations.IndexField;
@@ -119,6 +120,14 @@ public class DatabaseCreator {
         tables.add(dropTable);
         //log.debug("makeTableFromClass : 4");
         CreateSQLStatement statement = SQLStatementFactory.getCreateSQLStatement();
+
+        for (Annotation classAnno : targetClass.getAnnotations()) {
+            if (classAnno instanceof Compressed) {
+                statement.addCompressed(((Compressed) classAnno).key_block_size());
+            }
+        }
+
+
         tables.add(statement);
         //log.debug("makeTableFromClass : 5");
         statement.addTableName(attributeContainer.getTableName());

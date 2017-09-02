@@ -29,6 +29,7 @@ public class MySqlCreateStatement extends MySqlStatement implements CreateSQLSta
     private List<String> attributes = null;
     private List<String> primaryKeys = null;
     private Map<String, String> namesToIndex = Collections.emptyMap();
+    private int key_block_size = -1;
 
     public List<String> getAttributes() {
         if (attributes == null) {
@@ -39,6 +40,11 @@ public class MySqlCreateStatement extends MySqlStatement implements CreateSQLSta
 
     public void setNamesToIndex(Map<String, String> namesToIndex) {
         this.namesToIndex = namesToIndex;
+    }
+
+    @Override
+    public void addCompressed(int key_block_size) {
+        this.key_block_size = key_block_size;
     }
 
     public List<String> getPrimaryKeys() {
@@ -101,7 +107,12 @@ public class MySqlCreateStatement extends MySqlStatement implements CreateSQLSta
 
         // TODO set charset and collation as parameter
         // TODO http://stackoverflow.com/questions/2876789/case-insensitive-for-sql-like-wildcard-statement
-        statement.append("\n) ENGINE=MyISAM");// CHARACTER SET utf8 COLLATE utf8_bin");
+        statement.append("\n) ");
+
+        if(key_block_size > -1) {
+            statement.append(" ROW_FORMAT=COMPRESSED KEY_BLOCK_SIZE=" + key_block_size + " ");// CHARACTER SET utf8 COLLATE utf8_bin");
+        }
+        statement.append("ENGINE=MyISAM");// CHARACTER SET utf8 COLLATE utf8_bin");
         return statement.toString();
     }
 

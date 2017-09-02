@@ -6,13 +6,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Created by seb on 07/07/2017.
+ * Created by seb on 02/09/2017.
  */
-@Target(ElementType.METHOD)
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface LongTextClob {
+public @interface Compressed {
+
+    int key_block_size() default 8;
 
 }
-
-
-

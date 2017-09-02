@@ -30,4 +30,6 @@ public interface CreateSQLStatement extends SQLStatement {
     public void addPrimaryKey(String attributeName);
 
     public void setNamesToIndex(Map<String, String> namesToIndex);
+
+    void addCompressed(int key_block_size);
 }
