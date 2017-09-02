@@ -174,7 +174,7 @@ public class JobPool {
     }
 
     public synchronized void jobTaken(JobEntry jobEntry, ServerLink worker) {
-        log.debug(" * JOB TAKEN: "+jobEntry);
+        log.debug(" *** JOB TAKEN: "+jobEntry);
         jobEntry.jobTakenDate = Calendar.getInstance();
         setWorker(jobEntry, worker);
         queue.remove(jobEntry);
