@@ -149,7 +149,7 @@ public class WorkerPool {
             StringBuilder b = new StringBuilder();
             for(int i = 0; i < knownClasses.length; i++){
                 if(i > 0) b.append(", ");
-                b.append(knownClasses[i].indexOf(".") != -1 ? knownClasses[i].substring(knownClasses[i].indexOf(".") + 1) : knownClasses[i]);
+                b.append(knownClasses[i].indexOf(".") != -1 ? knownClasses[i].substring(knownClasses[i].lastIndexOf(".") + 1) : knownClasses[i]);
             }
             this.debugNameOfWorkerClasses = b.toString();
         }
