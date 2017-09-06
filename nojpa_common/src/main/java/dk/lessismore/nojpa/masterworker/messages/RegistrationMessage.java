@@ -10,7 +10,6 @@ import java.util.List;
 
 public class RegistrationMessage {
 
-    private final Logger log = LoggerFactory.getLogger(RegistrationMessage.class);
 
     private String[] knownClasses;
     private String hostname = "Unknown";
@@ -22,7 +21,7 @@ public class RegistrationMessage {
         knownClasses = new String[classes.size()];
         for (int i = 0; i < classes.size(); i++) {
             knownClasses[i] = classes.get(i).getName();
-            log.debug("Will registrate classes["+ i +"]: " + classes.get(i).getName());
+            System.out.println("Will registrate classes["+ i +"]: " + classes.get(i).getName());
         }
     }
 
