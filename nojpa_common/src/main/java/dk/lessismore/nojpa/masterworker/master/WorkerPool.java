@@ -138,8 +138,6 @@ public class WorkerPool {
 
     class WorkerEntry  {
 
-
-
         private final String debugNameOfWorker;
 
         private WorkerEntry(String debugNameOfWorker, String[] knownClasses, ServerLink serverLink) {
@@ -148,6 +146,12 @@ public class WorkerPool {
             this.serverLink = serverLink;
             this.idle = true;
             this.myID = TOTAL_COUNT_OF_INSTANCE++;
+            StringBuilder b = new StringBuilder();
+            for(int i = 0; i < knownClasses.length; i++){
+                if(i > 0) b.append(", ");
+                b.append(knownClasses[i].indexOf(".") != -1 ? knownClasses[i].substring(knownClasses[i].indexOf(".") + 1) : knownClasses[i]);
+            }
+            this.debugNameOfWorkerClasses = b.toString();
         }
 
         public Set<String> knownClasses;
@@ -156,6 +160,7 @@ public class WorkerPool {
         public double vmMemoryUsage = 0;
         public Map<String, Double> diskUsages = new HashMap<String, Double>();
         public boolean idle;
+        public String debugNameOfWorkerClasses;
         private final int myID;
 
         public long rebootTime = System.currentTimeMillis();
@@ -185,6 +190,10 @@ public class WorkerPool {
 
         public String getJobTime(){
             return timeToString(idle ? totalJobTime : (totalJobTime + (System.currentTimeMillis() - lastJobStart)));
+        }
+
+        public float getWorkLoad(){
+            return (((float)totalJobTime) / ((float)(System.currentTimeMillis() - rebootTime)));
         }
 
         public String getTimeSinceLastJob(){
@@ -228,7 +237,7 @@ public class WorkerPool {
                             (debugNameOfWorker != null && debugNameOfWorker.length() > 7 ? debugNameOfWorker : serverLink.getOtherHost())
                             +" JobTime:"+ getJobTime() +" IdleTime:"+ getIdleTime() +" jobs("+ totalCountOfSuccesJobs
                             +") succes("+ printNice("" + (((double) totalCountOfSuccesJobs)/ ((double) totalCountOfJobs)))
-                            +") job/sec("+ printNice("" + (((double)(System.currentTimeMillis() - rebootTime))/ ((double) totalCountOfJobs))) +") lastIdleStart("+ lastIdleStart +") LastJob("+  getTimeSinceLastJob() +")}"
+                            +") job/sec("+ printNice("" + (((double)(System.currentTimeMillis() - rebootTime))/ ((double) totalCountOfJobs))) +") lastIdleStart("+ (System.currentTimeMillis() - lastIdleStart) +") LastJob("+  getTimeSinceLastJob() +")}"
 
             ;
         }
@@ -240,14 +249,16 @@ public class WorkerPool {
                             + rightAlign(""+ idle, 8)
                             + rightAlign(""+ printNice(systemLoad), 8)
                             + rightAlign(""+ ("" + (debugNameOfWorker != null && debugNameOfWorker.length() > 7 ? debugNameOfWorker : serverLink.getOtherHost())), 42)
+                            + rightAlign(""+ printNice(getWorkLoad()), 8)
                             + rightAlign(""+ (getJobTime()), 8)
                             + rightAlign(""+ (getIdleTime()), 8)
-                            + rightAlign(""+ timeToString(lastIdleStart), 13)
                             + rightAlign(""+ timeToString(System.currentTimeMillis() - rebootTime), 8)
-                            + rightAlign(""+ timeToString(System.currentTimeMillis() - lastJobStart), 8)
+                            + rightAlign(""+ timeToString(System.currentTimeMillis() - lastIdleStart), 13)
+                            + rightAlign(""+ (idle ? "0" : timeToString(System.currentTimeMillis() - lastJobStart)), 8)
                             + rightAlign(""+ printNice((((double) totalCountOfSuccesJobs)/ ((double) totalCountOfJobs))), 8)
                             + rightAlign(""+ printNice(totalCountOfSuccesJobs), 13)
                             + rightAlign(""+ printNice((((double)(System.currentTimeMillis() - rebootTime))/ (((double) totalCountOfJobs) * 1000))), 17)
+                            + ":::" + debugNameOfWorkerClasses
                             + "}"
                     ;
         }
@@ -258,14 +269,16 @@ public class WorkerPool {
                             + rightAlign("idle", 8)
                             + rightAlign("Load", 8)
                             + rightAlign("Name", 42)
+                            + rightAlign("Load%", 8)
                             + rightAlign("JobT", 8)
                             + rightAlign("IdleT", 8)
+                            + rightAlign("Reboot", 8)
                             + rightAlign("LIdle", 13)
-                            + rightAlign("TotalT", 8)
                             + rightAlign("LastJ", 8)
                             + rightAlign("Succes", 8)
                             + rightAlign("Count", 13)
                             + rightAlign("J/sec", 17)
+                            + ":::" + "Classes:"
                             + "}"
                     ;
         }
@@ -281,6 +294,10 @@ public class WorkerPool {
                 }
                 return s;
             }
+        }
+
+        private String printNice(long s){
+            return String.format("%,d", s);
         }
 
         private String printNice(Number s){

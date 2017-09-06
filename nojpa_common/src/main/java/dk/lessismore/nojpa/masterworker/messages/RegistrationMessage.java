@@ -1,12 +1,16 @@
 package dk.lessismore.nojpa.masterworker.messages;
 
 import dk.lessismore.nojpa.masterworker.executor.Executor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 
 public class RegistrationMessage {
+
+    private final Logger log = LoggerFactory.getLogger(RegistrationMessage.class);
 
     private String[] knownClasses;
     private String hostname = "Unknown";
@@ -18,6 +22,7 @@ public class RegistrationMessage {
         knownClasses = new String[classes.size()];
         for (int i = 0; i < classes.size(); i++) {
             knownClasses[i] = classes.get(i).getName();
+            log.debug("Will registrate classes["+ i +"]: " + classes.get(i).getName());
         }
     }
 
