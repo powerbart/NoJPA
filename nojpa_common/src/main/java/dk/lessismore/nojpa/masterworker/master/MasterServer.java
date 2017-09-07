@@ -325,9 +325,6 @@ public class MasterServer {
                     workerEntry = workerPool.getBestApplicableWorker(diffJobs.get(i).jobMessage.getExecutorClassName());
                 }
                 if(workerEntry == null){
-                    log.error("=================================================================");
-                    log.error("We don't have any able workers to run any of the jobs...!!!!!!!!!");
-                    log.error("=================================================================");
                     return;
                 }
             }
