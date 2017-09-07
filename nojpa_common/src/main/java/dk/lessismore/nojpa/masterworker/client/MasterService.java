@@ -33,7 +33,9 @@ public class MasterService {
                         log.debug(" Got-InterruptedException for ("+ jobHandle.getJobID() +"):" +e);
                     }
                     if(jobHandle.getStatus() != JobStatus.DONE){
-                        log.debug(" Waiting["+ i +"/"+ maxSecondsBeforeFailure +"] for JobHandle("+ jobHandle.getJobID() +") status(" + jobHandle.getStatus() +") progress(" + jobHandle.getProgress() +")");
+                        if(i > (maxSecondsBeforeFailure / 2)) {
+                            log.debug(" Waiting[" + i + "/" + maxSecondsBeforeFailure + "] for JobHandle(" + jobHandle.getJobID() + ") status(" + jobHandle.getStatus() + ") progress(" + jobHandle.getProgress() + ") TYPE[" + implementationClass.getSimpleName() + "]");
+                        }
                     }
                 }
                 if(jobHandle.getStatus() != JobStatus.DONE){
