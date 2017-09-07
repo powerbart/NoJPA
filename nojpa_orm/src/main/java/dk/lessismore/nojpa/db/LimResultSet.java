@@ -70,7 +70,7 @@ public class LimResultSet {
             synchronized (listOfUnclosedSets) {
                 if (numberOfSetUnclosed > 10) {
                     Calendar min2 = Calendar.getInstance();
-                    min2.add(Calendar.MINUTE, -1);
+                    min2.add(Calendar.MINUTE, -2);
                     for (int j = listOfUnclosedSets.size() - 1; j >= 0; j--) {
                         LimResultSet limResultSet = listOfUnclosedSets.get(j);
                         if(limResultSet.creationDate.before(min2)){
