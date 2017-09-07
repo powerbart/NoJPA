@@ -65,7 +65,7 @@ public class LimResultSet {
                     listOfUnclosedSets.remove(this);
                 }
             }
-
+            //UNCLOSEDSETS(59)[Thu Sep 07 13:17:19 CEST 2017] : select 1+1;
 
             synchronized (listOfUnclosedSets) {
                 if (numberOfSetUnclosed > 10) {
@@ -74,9 +74,9 @@ public class LimResultSet {
                     for (int j = listOfUnclosedSets.size() - 1; j >= 0; j--) {
                         LimResultSet limResultSet = listOfUnclosedSets.get(j);
                         if(limResultSet.creationDate.before(min2)){
-                            log.error("UNCLOSEDSETS(" + Thread.currentThread().getId() +")["+ (limResultSet.creationDate.getTime()) +"] : " + (limResultSet.rawSqlStatement.replaceAll("\n", "")));
+                            log.error("UNCLOSEDSETS(" + listOfUnclosedSets.size() +")["+ (limResultSet.creationDate.getTime()) +"] : " + (limResultSet.rawSqlStatement.replaceAll("\n", "")));
                             for(int i = 0; stackTraceElements != null && i < stackTraceElements.length; i++){
-                                log.error("UNCLOSEDSETS("+ Thread.currentThread().getId() +") : " + stackTraceElements[i].getClassName() + "." + stackTraceElements[i].getMethodName() + ":" + stackTraceElements[i].getLineNumber());
+                                log.error("UNCLOSEDSETS("+ listOfUnclosedSets.size() +") : " + stackTraceElements[i].getClassName() + "." + stackTraceElements[i].getMethodName() + ":" + stackTraceElements[i].getLineNumber());
 
                             }
 //                            Calendar min10 = Calendar.getInstance();
