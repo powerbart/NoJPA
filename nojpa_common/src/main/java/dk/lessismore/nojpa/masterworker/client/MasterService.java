@@ -26,7 +26,7 @@ public class MasterService {
                     try {
                         synchronized (blocker) {
                             if(jobHandle.getStatus() != JobStatus.DONE){
-                                blocker.wait(1 * 1000);
+                                blocker.wait(1000);
                             }
                         }
                     } catch (InterruptedException e) {
