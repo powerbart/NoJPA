@@ -314,6 +314,20 @@ public class JobPool {
         return jobEntry;
     }
 
+    public synchronized List<JobEntry> getDiffJobs(String executorClassName) {
+        List<JobEntry> toReturn = new ArrayList<>();
+        HashSet<String> haveAlready = new HashSet<>();
+        for(Iterator<JobEntry> iterator = queue.iterator(); iterator.hasNext(); ){
+            JobEntry next = iterator.next();
+            String newExe = next.jobMessage.getExecutorClassName();
+            if(!newExe.equals(executorClassName) && !haveAlready.contains(newExe)){
+                haveAlready.add(newExe);
+                toReturn.add(next);
+            }
+        }
+        return toReturn;
+    }
+
 
     class JobEntry {
 
