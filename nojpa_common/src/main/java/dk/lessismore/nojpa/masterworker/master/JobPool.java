@@ -151,17 +151,22 @@ public class JobPool {
         }
         lastResult = Calendar.getInstance();
         String jobID = result.getJobID();
-        JobEntry jobEntry = pool.get(jobID);
-        if (jobEntry != null) {
-            jobEntry.result = result;
-            last5SuccesJobs.add(jobEntry);
-            if(resultTotalCounter++ % 100 == 0){
-                resultLast100Time = System.currentTimeMillis();
+
+        try {
+            JobEntry jobEntry = pool.get(jobID);
+            log.debug("setResult["+ jobID +"]->jobEntry("+ jobEntry +")");
+            if (jobEntry != null) {
+                jobEntry.result = result;
+                last5SuccesJobs.add(jobEntry);
+                if(resultTotalCounter++ % 100 == 0){
+                    resultLast100Time = System.currentTimeMillis();
+                }
+                fireOnResult(jobEntry, result);
+            } else {
+                log.error("["+ jobID +"]: Trying to set result for job not in pool");
             }
-//            removeWorker(jobEntry);
-            fireOnResult(jobEntry, result);
-        } else {
-            log.error("["+ jobID +"]: Trying to set result for job not in pool");
+        } catch (Exception e){
+            log.error("ERROR when setting result["+ jobID +"]:"+ e, e);
         }
     }
 
