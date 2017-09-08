@@ -130,13 +130,13 @@ public abstract class AbstractLink {
             timeoutThread.join();
             writeThread.join();
         } catch (InterruptedException e) {
-            log.error("Failed to join threads", e);
+            log.error(getLinkID()+":Failed to join threads", e);
         }
 
         if (writeException[0] != null) {
             throw writeException[0];
         } else if ( ! writeCompleted[0]) {
-            throw new WriteTimeoutException("Time on "+timeout+"ms exceeded while writing on link");
+            throw new WriteTimeoutException(getLinkID() + ":Time on "+timeout+"ms exceeded while writing on link");
         }
     }
 
@@ -221,6 +221,7 @@ public abstract class AbstractLink {
     }
 
     public void close() {
+        log.debug("Closing for link("+ getLinkID() +")");
         try {
             stopPinger();
             if (in != null){
@@ -271,7 +272,7 @@ public abstract class AbstractLink {
         }
 
         public void run(){
-            log.debug("Pinger is now running");
+            log.debug(getLinkID() + ":Pinger is now running");
             while(run){
                 try{
 //                    log.debug("Sending ping");
@@ -283,11 +284,11 @@ public abstract class AbstractLink {
                         stopPinger();
                     }
                 } catch(IOException e) {
-                    log.debug("IOException while sending PING: "+e.getMessage() + " - closing down pinger.");
+                    log.debug(getLinkID() + ":IOException while sending PING: "+e.getMessage() + " - closing down pinger.");
                     stopPinger();
                 }
             }
-            log.debug("Pinger is shutting down");
+            log.debug(getLinkID() + ":Pinger is shutting down");
         }
     }
 

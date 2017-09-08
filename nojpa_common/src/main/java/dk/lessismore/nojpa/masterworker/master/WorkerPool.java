@@ -32,6 +32,7 @@ public class WorkerPool {
 //    }
 
     public synchronized void removeWorker(ServerLink serverLink) {
+        log.debug("removeWorker:" + serverLink);
         WorkerEntry entry = pool.get(serverLink); 
         if (entry != null) {
             pool.remove(serverLink);
@@ -87,13 +88,14 @@ public class WorkerPool {
     public void setIdle(boolean idle, ServerLink worker) {
         WorkerEntry entry = pool.get(worker);
         if (entry == null) {
-            log.error("Worker does not exists - setIdle");
+            log.error("Worker does not exists - setIdle worker("+ worker +")");
             return;
         }
         entry.idle = idle;
     }
 
     public void updateWorkerHealth(double systemLoad, double vmMemoryUsage, Map<String, Double> diskUsages, ServerLink serverLink) {
+        log.debug("updateWorkerHealth:systemLoad("+ systemLoad +") for " + serverLink);
         WorkerEntry workerEntry = pool.get(serverLink);
         workerEntry.systemLoad = systemLoad;
         workerEntry.vmMemoryUsage = vmMemoryUsage;
@@ -103,7 +105,7 @@ public class WorkerPool {
     public boolean applicable(ServerLink worker) {
         WorkerEntry entry = pool.get(worker);
         if (entry == null) {
-            log.error("Worker does not exists");
+            log.error("Worker does not exists: " + worker);
             return false;
         }
         return entry.applicable();
