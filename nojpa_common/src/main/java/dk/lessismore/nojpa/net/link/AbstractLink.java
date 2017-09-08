@@ -2,6 +2,7 @@ package dk.lessismore.nojpa.net.link;
 
 
 import dk.lessismore.nojpa.guid.GuidFactory;
+import dk.lessismore.nojpa.masterworker.executor.Executor;
 import dk.lessismore.nojpa.serialization.Serializer;
 import dk.lessismore.nojpa.serialization.XmlSerializer;
 import org.slf4j.Logger;
@@ -225,14 +226,20 @@ public abstract class AbstractLink {
         try {
             stopPinger();
             if (in != null){
-                in.close();
+                try {
+                    in.close();
+                } catch (Exception e){}
             }
             if (out != null){
-                out.close();
+                try {
+                    out.close();
+                } catch (Exception e){}
             }
             if (socket != null){
                 try {
                     socket.shutdownInput();
+                } catch (Exception ee){}
+                try {
                     socket.shutdownOutput();
                 } catch (Exception ee){}
                 socket.close();

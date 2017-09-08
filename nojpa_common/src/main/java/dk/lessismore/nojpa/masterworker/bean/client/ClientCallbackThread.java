@@ -65,6 +65,13 @@ public class ClientCallbackThread<O> extends Thread {
             log.info("Connection closed - stopping listening for callbacks from master");
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            try {
+                cp.close();
+            } catch (Exception e){}
+            try {
+                jm.close();
+            } catch (Exception e){}
         }
     }
 }

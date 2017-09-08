@@ -40,6 +40,10 @@ public class ObserverCallbackThread extends Thread {
         } catch (IOException e) {
             log.info("IOException - stopping listening for callbacks from master");
             observer.setConnectionError(e);
+        } finally {
+            try{
+                master.close();
+            } catch (Exception e){}
         }
     }
 

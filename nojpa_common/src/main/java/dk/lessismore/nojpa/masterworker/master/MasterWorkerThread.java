@@ -60,6 +60,9 @@ public class MasterWorkerThread extends Thread {
         } catch (IOException e) {
             log.error("IOException - stopping listening to worker", e);
         } finally {
+            try{
+                serverLink.close();
+            } catch (Exception e){}
             masterServer.unregisterWorker(serverLink);
         }
     }
