@@ -50,7 +50,6 @@ public class ModelObjectSearchService {
 
     public static void addSolrServer(Class className, SolrService solrServer){
         log.info("Adding solrServer("+ solrServer +") for class("+ className.getSimpleName() +")");
-        servers.put(className.getSimpleName(), solrServer.getServer());
         serverServices.put(className.getSimpleName(), solrServer);
     }
 

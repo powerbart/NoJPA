@@ -54,6 +54,8 @@ public class CloudSolrServiceImpl extends SolrServiceImpl {
         // ignore
     }
 
+
+
     @Override
     public String getName() {
         return String.format("%s|%s", zkHost, collectionName);
