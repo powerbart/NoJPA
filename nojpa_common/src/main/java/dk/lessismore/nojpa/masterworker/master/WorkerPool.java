@@ -36,6 +36,9 @@ public class WorkerPool {
         WorkerEntry entry = pool.get(serverLink); 
         if (entry != null) {
             pool.remove(serverLink);
+            try {
+                serverLink.close();
+            } catch (Exception e){}
         }
     }
 
