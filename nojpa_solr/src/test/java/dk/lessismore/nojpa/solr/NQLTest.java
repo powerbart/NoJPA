@@ -249,7 +249,13 @@ public class NQLTest {
       //_Address_a__ID_Phone_funnyD__DOUBLE
 
 
-
+//
+//    @Test
+//    public void testCloudSolr() throws Exception {
+//        SolrService solrService = new CloudSolrServiceImpl("86.58.206.113:2181", "product");
+//        solrService.getServer();
+//        solrService.getByID("aaaa", Address.class);
+//    }
 
 
     @Test

@@ -30,7 +30,7 @@ public class SolrServiceImpl implements SolrService {
     private static Locale[] locales = null;
 
 
-    private SolrClient server;
+    protected SolrClient server;
     private String coreName = "";
     private boolean cleanOnStartup;
 
@@ -76,7 +76,7 @@ public class SolrServiceImpl implements SolrService {
 //                coreContainer.load(f.getParentFile().getAbsolutePath(), f);
             }
             if (server == null) {
-                log.debug("[ : cores]:getting " + coreName + " core: " + coreContainer.getCoreNames());
+                log.debug("[ : cores]:getting " + coreName + " core: " + coreContainer.getAllCoreNames());
                 server = new EmbeddedSolrServer(coreContainer, coreName);
             }
 
@@ -190,7 +190,7 @@ public class SolrServiceImpl implements SolrService {
     }
 
     @Override
-    public void destroy() {
+    public void destroy() throws IOException {
         coreContainer.shutdown();
     }
 

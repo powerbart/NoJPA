@@ -1,6 +1,5 @@
 package dk.lessismore.nojpa.reflection.db.model;
 
-import dk.lessismore.nojpa.reflection.db.model.SolrEmbeddedServiceImpl;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +25,7 @@ public class SolrRemoteServiceImpl extends SolrEmbeddedServiceImpl {
     public void startup() {
         log.debug("[void : (" + url + ")startup]:HIT: " + this);
         try {
-            client = new HttpSolrClient(url);
+            server = new HttpSolrClient.Builder(url).build();
         } catch (Exception e) {
             log.error("[ void: (" + url + ")startup ]: exception constructing embedded server: " + e.getMessage(), e);
         }
@@ -35,7 +34,7 @@ public class SolrRemoteServiceImpl extends SolrEmbeddedServiceImpl {
     @PreDestroy
     public void destroy() throws IOException {
         log.debug("closing down solr [{}]", getName());
-        client.close();
+        server.close();
     }
 
 }
