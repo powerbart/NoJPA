@@ -1,6 +1,7 @@
 package dk.lessismore.nojpa.net.link;
 
 
+import dk.lessismore.nojpa.guid.GuidFactory;
 import dk.lessismore.nojpa.serialization.Serializer;
 import dk.lessismore.nojpa.serialization.XmlSerializer;
 import org.slf4j.Logger;
@@ -29,6 +30,8 @@ public abstract class AbstractLink {
     private static final String SEPARATOR = "<~>";
     private Pinger pinger;
 
+    private final String linkID = GuidFactory.getInstance().makeGuid().substring(20);
+
     private long totalReadBytes = 0;
     private long totalWriteBytes = 0;
 
@@ -51,6 +54,11 @@ public abstract class AbstractLink {
 
     protected AbstractLink() {
         this(null);
+    }
+
+
+    public String getLinkID() {
+        return linkID;
     }
 
     /**
@@ -286,6 +294,6 @@ public abstract class AbstractLink {
 
     @Override
     public String toString() {
-        return this.getClass().getSimpleName()+" "+socket.toString();
+        return this.getClass().getSimpleName()+" ID("+ getLinkID() +"):"+socket.toString();
     }
 }

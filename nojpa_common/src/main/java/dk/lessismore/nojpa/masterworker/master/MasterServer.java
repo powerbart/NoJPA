@@ -109,7 +109,12 @@ public class MasterServer {
     public void unregisterWorker(ServerLink serverLink) {
         SuperIO.writeTextToFile("/tmp/masterworker_worker_count", "" + (workerPool.getSize()));
         log.debug("unregisterWorker: " + serverLink);
-        jobPool.requeueJobIfRunning(serverLink);
+//        jobPool.requeueJobIfRunning(serverLink);
+        MessageSender.send(new KillMessage(), serverLink, new MessageSender.FailureHandler() {
+            public void onFailure(ServerLink client) {
+                log.debug("unregisterWorker: IOException while sending KillMessage to worker - removing worker");
+            }
+        });
         workerPool.removeWorker(serverLink);
         notifyObservers();
     }
@@ -323,6 +328,7 @@ public class MasterServer {
                 List<JobPool.JobEntry> diffJobs = jobPool.getDiffJobs(jobEntry.jobMessage.getExecutorClassName());
                 for(int i = 0; workerEntry == null && i < diffJobs.size(); i++){
                     workerEntry = workerPool.getBestApplicableWorker(diffJobs.get(i).jobMessage.getExecutorClassName());
+                    jobEntry = diffJobs.get(i);
                 }
                 if(workerEntry == null){
                     return;
