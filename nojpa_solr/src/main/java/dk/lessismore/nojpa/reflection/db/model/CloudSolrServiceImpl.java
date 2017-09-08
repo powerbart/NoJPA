@@ -5,6 +5,7 @@ import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.util.NamedList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,9 @@ import java.io.IOException;
  * Created on 9/8/17.
  */
 public class CloudSolrServiceImpl extends SolrServiceImpl {
+
+    public static int AUTO_COMMIT_MS = 300;
+
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
@@ -58,7 +62,7 @@ public class CloudSolrServiceImpl extends SolrServiceImpl {
     @Override
     public QueryResponse query(SolrQuery query) {
         try {
-            if(server != null){
+            if (server != null) {
                 return server.query(collectionName, query);
             } else {
                 log.error("query() ... server is null ... This is okay doing startup ...");
@@ -81,5 +85,64 @@ public class CloudSolrServiceImpl extends SolrServiceImpl {
             log.error("[ void: (" + collectionName + ")request ]: IOException request: " + e.getMessage(), e);
         }
         return null;
+    }
+
+    public void index(SolrInputDocument solrInputDocument) {
+        if (solrInputDocument == null) {
+            log.error("index()::solrInputDocument is null");
+            return;
+        }
+        try {
+            server.add(collectionName, solrInputDocument, AUTO_COMMIT_MS);
+        } catch (SolrServerException e) {
+            log.error("[void : (" + collectionName + ")index]: SolrServerException: " + e.getMessage(), e);
+        } catch (IOException e) {
+            log.error("[void : (" + collectionName + ")index]: IOException: " + e.getMessage(), e);
+        }
+    }
+
+
+    @Override
+    public void delete(String id) {
+        try {
+            server.deleteById(collectionName, id, AUTO_COMMIT_MS);
+        } catch (SolrServerException e) {
+            log.error("[ void: (" + collectionName + ")deleteByID(" + id + ") ]: SolrServerException deleteByID index: " + e.getMessage(), e);
+        } catch (IOException e) {
+            log.error("[ void: (" + collectionName + ")deleteByID(" + id + ") ]: IOException deleteByID index: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void deleteAll() {
+        try {
+            server.deleteByQuery(collectionName, "*:*");
+        } catch (SolrServerException e) {
+            log.error("[ void: (" + collectionName + ")deleteAll index: " + e.getMessage(), e);
+        } catch (IOException e) {
+            log.error("[ void: (" + collectionName + ")deleteAll index: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void empty() {
+        try {
+            server.deleteByQuery(collectionName, "*:*", AUTO_COMMIT_MS);
+        } catch (SolrServerException e) {
+            log.error("[ void: (" + collectionName + ")deleteAll index: " + e.getMessage(), e);
+        } catch (IOException e) {
+            log.error("[ void: (" + collectionName + ")deleteAll index: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void optimize() {
+        try {
+            server.optimize(collectionName, false, false, 4);
+        } catch (SolrServerException e) {
+            log.error("[void : (" + collectionName + ")optimize]: SolrServerException: " + e.getMessage(), e);
+        } catch (IOException e) {
+            log.error("[void : (" + collectionName + ")optimize]: IOException: " + e.getMessage(), e);
+        }
     }
 }
