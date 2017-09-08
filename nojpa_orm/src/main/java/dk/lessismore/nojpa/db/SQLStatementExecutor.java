@@ -52,7 +52,8 @@ public class SQLStatementExecutor {
             debugMode = false;
         }
         try{
-            SQLStatementExecutor.doQuery("select 1+1;");
+            LimResultSet limResultSet = SQLStatementExecutor.doQuery("select 1+1;");
+            limResultSet.close();
         } catch (Exception e){
             System.out.println("Some ERROR when warming up.... " + e);
             e.printStackTrace();

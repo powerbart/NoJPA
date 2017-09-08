@@ -151,17 +151,22 @@ public class JobPool {
         }
         lastResult = Calendar.getInstance();
         String jobID = result.getJobID();
-        JobEntry jobEntry = pool.get(jobID);
-        if (jobEntry != null) {
-            jobEntry.result = result;
-            last5SuccesJobs.add(jobEntry);
-            if(resultTotalCounter++ % 100 == 0){
-                resultLast100Time = System.currentTimeMillis();
+
+        try {
+            JobEntry jobEntry = pool.get(jobID);
+            log.debug("setResult["+ jobID +"]->jobEntry("+ jobEntry +")");
+            if (jobEntry != null) {
+                jobEntry.result = result;
+                last5SuccesJobs.add(jobEntry);
+                if(resultTotalCounter++ % 100 == 0){
+                    resultLast100Time = System.currentTimeMillis();
+                }
+                fireOnResult(jobEntry, result);
+            } else {
+                log.error("["+ jobID +"]: Trying to set result for job not in pool");
             }
-//            removeWorker(jobEntry);
-            fireOnResult(jobEntry, result);
-        } else {
-            log.error("["+ jobID +"]: Trying to set result for job not in pool");
+        } catch (Exception e){
+            log.error("ERROR when setting result["+ jobID +"]:"+ e, e);
         }
     }
 
@@ -312,6 +317,20 @@ public class JobPool {
     public JobEntry getJobEntry(String jobID) {
         JobEntry jobEntry = pool.get(jobID);
         return jobEntry;
+    }
+
+    public synchronized List<JobEntry> getDiffJobs(String executorClassName) {
+        List<JobEntry> toReturn = new ArrayList<>();
+        HashSet<String> haveAlready = new HashSet<>();
+        for(Iterator<JobEntry> iterator = queue.iterator(); iterator.hasNext(); ){
+            JobEntry next = iterator.next();
+            String newExe = next.jobMessage.getExecutorClassName();
+            if(!newExe.equals(executorClassName) && !haveAlready.contains(newExe)){
+                haveAlready.add(newExe);
+                toReturn.add(next);
+            }
+        }
+        return toReturn;
     }
 
 

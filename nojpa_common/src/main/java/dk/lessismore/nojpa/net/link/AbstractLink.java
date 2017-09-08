@@ -1,6 +1,7 @@
 package dk.lessismore.nojpa.net.link;
 
 
+import dk.lessismore.nojpa.guid.GuidFactory;
 import dk.lessismore.nojpa.serialization.Serializer;
 import dk.lessismore.nojpa.serialization.XmlSerializer;
 import org.slf4j.Logger;
@@ -29,6 +30,8 @@ public abstract class AbstractLink {
     private static final String SEPARATOR = "<~>";
     private Pinger pinger;
 
+    private final String linkID = GuidFactory.getInstance().makeGuid().substring(20);
+
     private long totalReadBytes = 0;
     private long totalWriteBytes = 0;
 
@@ -51,6 +54,11 @@ public abstract class AbstractLink {
 
     protected AbstractLink() {
         this(null);
+    }
+
+
+    public String getLinkID() {
+        return linkID;
     }
 
     /**
@@ -122,13 +130,13 @@ public abstract class AbstractLink {
             timeoutThread.join();
             writeThread.join();
         } catch (InterruptedException e) {
-            log.error("Failed to join threads", e);
+            log.error(getLinkID()+":Failed to join threads", e);
         }
 
         if (writeException[0] != null) {
             throw writeException[0];
         } else if ( ! writeCompleted[0]) {
-            throw new WriteTimeoutException("Time on "+timeout+"ms exceeded while writing on link");
+            throw new WriteTimeoutException(getLinkID() + ":Time on "+timeout+"ms exceeded while writing on link");
         }
     }
 
@@ -213,6 +221,7 @@ public abstract class AbstractLink {
     }
 
     public void close() {
+        log.debug("Closing for link("+ getLinkID() +")");
         try {
             stopPinger();
             if (in != null){
@@ -263,7 +272,7 @@ public abstract class AbstractLink {
         }
 
         public void run(){
-            log.debug("Pinger is now running");
+            log.debug(getLinkID() + ":Pinger is now running");
             while(run){
                 try{
 //                    log.debug("Sending ping");
@@ -275,17 +284,17 @@ public abstract class AbstractLink {
                         stopPinger();
                     }
                 } catch(IOException e) {
-                    log.debug("IOException while sending PING: "+e.getMessage() + " - closing down pinger.");
+                    log.debug(getLinkID() + ":IOException while sending PING: "+e.getMessage() + " - closing down pinger.");
                     stopPinger();
                 }
             }
-            log.debug("Pinger is shutting down");
+            log.debug(getLinkID() + ":Pinger is shutting down");
         }
     }
 
 
     @Override
     public String toString() {
-        return this.getClass().getSimpleName()+" "+socket.toString();
+        return this.getClass().getSimpleName()+" ID("+ getLinkID() +"):"+socket.toString();
     }
 }

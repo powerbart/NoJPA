@@ -4,6 +4,7 @@ import dk.lessismore.nojpa.concurrency.WaitForValue;
 import dk.lessismore.nojpa.guid.GuidFactory;
 import dk.lessismore.nojpa.masterworker.JobStatus;
 import dk.lessismore.nojpa.masterworker.exceptions.JobHandleClosedException;
+import dk.lessismore.nojpa.masterworker.exceptions.TimeoutException;
 import dk.lessismore.nojpa.masterworker.executor.Executor;
 import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteBeanMessage;
 import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteResultMessage;
@@ -215,6 +216,14 @@ public class JobHandle<O> {
         if(!result.hasValue()){
             log.error("SETTING RESULT TO NULL.....!!!!");
             result.setValue(new Pair<O, RuntimeException>(null, new JobHandleClosedException()));
+        }
+    }
+
+    public void timeout() {
+        kill();
+        if(!result.hasValue()){
+            log.error("SETTING RESULT TO NULL -TIMEOUT.....!!!!");
+            result.setValue(new Pair<O, RuntimeException>(null, new TimeoutException()));
         }
     }
 

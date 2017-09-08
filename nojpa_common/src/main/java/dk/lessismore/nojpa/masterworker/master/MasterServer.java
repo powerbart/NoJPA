@@ -109,7 +109,12 @@ public class MasterServer {
     public void unregisterWorker(ServerLink serverLink) {
         SuperIO.writeTextToFile("/tmp/masterworker_worker_count", "" + (workerPool.getSize()));
         log.debug("unregisterWorker: " + serverLink);
-        jobPool.requeueJobIfRunning(serverLink);
+//        jobPool.requeueJobIfRunning(serverLink);
+        MessageSender.send(new KillMessage(), serverLink, new MessageSender.FailureHandler() {
+            public void onFailure(ServerLink client) {
+                log.debug("unregisterWorker: IOException while sending KillMessage to worker - removing worker");
+            }
+        });
         workerPool.removeWorker(serverLink);
         notifyObservers();
     }
@@ -309,22 +314,33 @@ public class MasterServer {
             builder.append("---------------------------------- Master Status ---------------------------------- ENDS");
             SuperIO.writeTextToFile("/tmp/master-status", builder.toString());
         }
-        final JobPool.JobEntry jobEntry = jobPool.firstJob();
-        if (jobEntry == null) {
-            log.debug("No Job in queue to run");
-            return;
-        }
-        SuperIO.writeTextToFile("/tmp/masterworker_input_jobs_count", "" + (masterworker_input_jobs_count++));
+        JobPool.JobEntry jobEntry = null;
         WorkerPool.WorkerEntry workerEntry = null;
-            workerEntry = workerPool.getBestApplicableWorker(jobEntry.jobMessage.getExecutorClassName());
-            if (workerEntry == null) {
-                log.debug("No available worker to run job");
+        synchronized(this) { //We don't want to start up the first job, many times ;-)
+            jobEntry = jobPool.firstJob();
+            if (jobEntry == null) {
+                log.debug("No Job in queue to run :-D ");
                 return;
             }
-        log.debug("Found worker to run job: "+ workerEntry);
-        jobPool.jobTaken(jobEntry, workerEntry.serverLink);
-        workerEntry.jobTakenStats();
+            workerEntry = workerPool.getBestApplicableWorker(jobEntry.jobMessage.getExecutorClassName());
+            if (workerEntry == null) {
+                log.debug("No available worker to run job - to run the first job... We will look in the queue for other jobs");
+                List<JobPool.JobEntry> diffJobs = jobPool.getDiffJobs(jobEntry.jobMessage.getExecutorClassName());
+                for(int i = 0; workerEntry == null && i < diffJobs.size(); i++){
+                    workerEntry = workerPool.getBestApplicableWorker(diffJobs.get(i).jobMessage.getExecutorClassName());
+                    jobEntry = diffJobs.get(i);
+                }
+                if(workerEntry == null){
+                    return;
+                }
+            }
 
+
+            SuperIO.writeTextToFile("/tmp/masterworker_input_jobs_count", "" + (masterworker_input_jobs_count++));
+            log.debug("Found worker to run job: " + workerEntry);
+            jobPool.jobTaken(jobEntry, workerEntry.serverLink);
+            workerEntry.jobTakenStats();
+        }
 
         WorkerPool.WorkerEntry finalWorkerEntry = workerEntry;
         MessageSender.send(jobEntry.jobMessage, workerEntry.serverLink, new MessageSender.FailureHandler() {
