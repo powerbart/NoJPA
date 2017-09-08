@@ -305,14 +305,18 @@ public class MasterServer {
     private long lastPrint = 0;
     private void runJobIfNecessaryAndPossible() {
         log.debug("runJobIfNecessaryAndPossible jobPool("+ jobPool.getQueueSize() +")");
-        if(System.currentTimeMillis() - lastPrint > 30_000){
+        if(System.currentTimeMillis() - lastPrint > 10_000){
             lastPrint = System.currentTimeMillis();
             StringBuilder builder = new StringBuilder();
             builder.append("---------------------------------- Master Status ---------------------------------- START\n");
-            builder.append(jobPool.toString() + workerPool.toString());
+            String jobPoolStr = jobPool.toString();
+            String workPoolStr = workerPool.toString();
+            builder.append(jobPoolStr + workPoolStr);
             builder.append("\n");
             builder.append("---------------------------------- Master Status ---------------------------------- ENDS");
             SuperIO.writeTextToFile("/tmp/master-status", builder.toString());
+            SuperIO.writeTextToFile("/tmp/master-status-workpool", workPoolStr);
+            SuperIO.writeTextToFile("/tmp/master-status-jobpool", jobPoolStr);
         }
         JobPool.JobEntry jobEntry = null;
         WorkerPool.WorkerEntry workerEntry = null;

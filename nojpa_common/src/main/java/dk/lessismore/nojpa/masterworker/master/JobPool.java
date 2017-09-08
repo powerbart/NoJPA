@@ -461,7 +461,9 @@ public class JobPool {
             StringBuilder builder = new StringBuilder();
             builder.append("---------------------------------- JobPool ----------------------------------\n");
             builder.append("IN QUEUE:\n");
-            for (JobEntry jobEntry : queue) {
+            JobEntry[] jobEntries = queue.toArray(new JobEntry[queue.size()]);
+            for (int i = 0; i < jobEntries.length; i++) {
+                JobEntry jobEntry = jobEntries[i];
                 builder.append("  ");
                 builder.append(jobEntry.toString());
                 builder.append("\n");
