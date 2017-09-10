@@ -41,6 +41,9 @@ public class MasterObserverThread extends Thread {
         } catch (IOException e) {
             log.error("IOException - stopping listening to observer", e);
         } finally {
+            try{
+                serverLink.close();
+            } catch (Exception e){}
             masterServer.unregisterWorker(serverLink);
         }
     }

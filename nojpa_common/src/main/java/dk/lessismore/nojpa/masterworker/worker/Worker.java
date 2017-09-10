@@ -316,9 +316,13 @@ public class Worker {
                         }
                     } catch(ClosedChannelException e) {
                         log.debug("Connection closed - Stopping stopperThread");
-                        System.exit(0);
                     } catch(IOException e) {
                         log.warn("Some error in stopper jobThread: ", e);
+                    } finally {
+                        try{
+                            linkAndThreads.clientLink.close();
+                        } catch (Exception e){}
+                        System.exit(0);
                     }
                 }
             });

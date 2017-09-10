@@ -53,6 +53,9 @@ public class MasterClientThread extends Thread {
         } catch (Exception e) {
             log.error("IOException - stopping listening to client", e);
         } finally {
+            try{
+                serverLink.close();
+            } catch (Exception e){}
             masterServer.stopListen(serverLink);
         }
     }
