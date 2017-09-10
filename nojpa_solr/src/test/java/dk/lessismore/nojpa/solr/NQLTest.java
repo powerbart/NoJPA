@@ -8,9 +8,11 @@ import dk.lessismore.nojpa.db.methodquery.NStats;
 import dk.lessismore.nojpa.db.testmodel.*;
 import dk.lessismore.nojpa.reflection.db.DatabaseCreator;
 import dk.lessismore.nojpa.reflection.db.DbObjectVisitor;
+import dk.lessismore.nojpa.reflection.db.model.CloudSolrServiceImpl;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectSearchService;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
+import dk.lessismore.nojpa.reflection.db.model.SolrService;
 import dk.lessismore.nojpa.reflection.db.model.SolrServiceImpl;
 import dk.lessismore.nojpa.reflection.translate.LessismoreTranslateServiceImpl;
 import dk.lessismore.nojpa.utils.Pair;
@@ -250,12 +252,13 @@ public class NQLTest {
 
 
 //
-//    @Test
-//    public void testCloudSolr() throws Exception {
-//        SolrService solrService = new CloudSolrServiceImpl("86.58.206.113:2181", "product");
-//        solrService.getServer();
-//        solrService.getByID("aaaa", Address.class);
-//    }
+    @Test
+    public void testCloudSolr() throws Exception {
+        SolrService solrService = new CloudSolrServiceImpl("86.58.206.113:2181", "product");
+        solrService.getServer();
+        QueryResponse response = solrService.query(new SolrQuery("*:*"));
+        System.out.println("response = " + response);
+    }
 
 
     @Test

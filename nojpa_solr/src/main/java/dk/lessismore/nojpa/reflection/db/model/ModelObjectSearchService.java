@@ -114,6 +114,9 @@ public class ModelObjectSearchService {
         return solrServer;
     }
 
+    public static <T extends ModelObjectInterface> SolrService solrService(Class<T> aClass) {
+        return serverServices.get(aClass.getSimpleName());
+    }
 
     public static <T extends ModelObjectInterface> void put(T object) {
         try{

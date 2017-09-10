@@ -8,11 +8,10 @@ import dk.lessismore.nojpa.reflection.db.attributes.DbAttribute;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttributeContainer;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectSearchService;
+import dk.lessismore.nojpa.reflection.db.model.SolrService;
 import dk.lessismore.nojpa.utils.Pair;
 import org.apache.commons.lang.StringUtils;
-import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.FieldStatsInfo;
 import org.apache.solr.client.solrj.response.QueryResponse;
@@ -330,7 +329,7 @@ public class NQL {
 
 
                 buildQuery();
-                SolrClient solrServer = ModelObjectSearchService.solrServer(selectClass);
+                SolrService solrServer = ModelObjectSearchService.solrService(selectClass);
 
                 solrQuery.setFacet(true);
                 solrQuery.setFacetLimit(limit);
@@ -339,7 +338,7 @@ public class NQL {
                 QueryResponse response = solrServer.query(solrQuery);
                 List<FacetField.Count> facets = response.getFacetFields().get(0).getValues();
                 for (FacetField.Count facet : facets) {
-                    toReturn.add(new Pair<String, Long>(facet.getName(), facet.getCount()));
+                    toReturn.add(new Pair<>(facet.getName(), facet.getCount()));
                 }
 
             } catch (Exception e){
@@ -364,7 +363,7 @@ public class NQL {
 
 
                 buildQuery();
-                SolrClient solrServer = ModelObjectSearchService.solrServer(selectClass);
+                SolrService solrServer = ModelObjectSearchService.solrService(selectClass);
 
                 solrQuery.setGetFieldStatistics(true);
                 solrQuery.setParam("stats.field", attributeIdentifier);
@@ -482,7 +481,7 @@ public class NQL {
                 SolrQuery query = new SolrQuery();
                 query.setRequestHandler("/suggest");
                 query.setQuery(ClientUtils.escapeQueryChars(userInput));
-                SolrClient solrServer = ModelObjectSearchService.solrServer(selectClass);
+                SolrService solrServer = ModelObjectSearchService.solrService(selectClass);
                 QueryResponse response = solrServer.query(query);
 
 //                NamedList<Object> namedList = response.getResponse();
@@ -562,7 +561,7 @@ public class NQL {
                 buildQuery();
 
 //                timer.markLap("1");
-                SolrClient solrServer = ModelObjectSearchService.solrServer(selectClass);
+                SolrService solrServer = ModelObjectSearchService.solrService(selectClass);
 //                timer.markLap("2");
                 solrQuery.setFields("objectID");
 //                solrQuery.setFields("*, score, _explain_");
@@ -608,9 +607,7 @@ public class NQL {
                         new Class[]{NList.class},
                         new NListImpl(queryResponse, toReturn));
 
-            } catch (SolrServerException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
             return null;
