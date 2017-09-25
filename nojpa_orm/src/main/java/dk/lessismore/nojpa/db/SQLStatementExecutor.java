@@ -101,7 +101,12 @@ public class SQLStatementExecutor {
                     } else if(next.getValue().getSecond().equals(Boolean.class)){
                         statement.setBoolean(i, (Boolean) next.getValue().getFirst());
                     } else if(next.getValue().getSecond().equals(Calendar.class)){
-                        statement.setTimestamp(i, new java.sql.Timestamp(((Calendar) next.getValue().getFirst()).getTimeInMillis()), (Calendar) next.getValue().getFirst());
+                        Object first = next.getValue().getFirst();
+                        if(first != null){
+                            statement.setTimestamp(i, new java.sql.Timestamp(((Calendar) first).getTimeInMillis()), (Calendar) next.getValue().getFirst());
+                        } else {
+                            statement.setTimestamp(i, null);
+                        }
                     } else if(next.getValue().getSecond().equals(String.class)){
                         statement.setString(i, (String) next.getValue().getFirst());
                     } else {
