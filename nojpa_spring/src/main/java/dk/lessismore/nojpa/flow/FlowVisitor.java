@@ -50,7 +50,7 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
                 if(startFromBeginning()){
                     query.limit(getSplitLimitSize());
                 } else {
-                    query.limit(currentCount, getSplitLimitSize());
+                    query.limit(currentCount, currentCount + getSplitLimitSize());
                 }
                 query.visit(new AbstractCountingVisitor<T>() {
                             @Override
