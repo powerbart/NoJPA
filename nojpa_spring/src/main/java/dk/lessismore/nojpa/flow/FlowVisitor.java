@@ -8,18 +8,20 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 public abstract class FlowVisitor<T extends ModelObjectInterface> {
 
-    private final Logger log = LoggerFactory.getLogger(getClass());
+    protected final Logger log = LoggerFactory.getLogger(getClass());
 
 
     private final ThreadPoolTaskExecutor executor;
     int currentCount = 0;
 
     public FlowVisitor() {
+        log.debug("FlowVisitor:constructor:START");
         executor = new ThreadPoolTaskExecutor();
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setThreadNamePrefix(getThreadNamePrefix());
         executor.setCorePoolSize(getNumberOfThreads());
         executor.setMaxPoolSize(getNumberOfThreads());
+        log.debug("FlowVisitor:constructor:START");
     }
 
     protected abstract int getNumberOfThreads();
