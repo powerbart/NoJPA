@@ -55,6 +55,9 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
                 query.visit(new AbstractCountingVisitor<T>() {
                             @Override
                             public void process(T t) {
+                                if(currentCount % getSplitLimitSize() == 0){
+                                    log.debug("WorkQueue-PROCESS: currentCount("+ currentCount +")");
+                                }
                                 currentCount++;
                                 executor.execute(() -> doWork(t));
                             }
