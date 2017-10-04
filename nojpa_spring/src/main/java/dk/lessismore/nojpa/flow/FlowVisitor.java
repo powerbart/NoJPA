@@ -22,6 +22,7 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
         executor.setCorePoolSize(getNumberOfThreads());
         executor.setMaxPoolSize(getNumberOfThreads());
         executor.setQueueCapacity(Integer.MAX_VALUE);
+        executor.initialize();
         log.debug("FlowVisitor:constructor:END");
     }
 
