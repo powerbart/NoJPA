@@ -12,23 +12,20 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
 
-    protected ThreadPoolTaskExecutor executor;
+    protected final ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
     int currentCount = 0;
 
-    public FlowVisitor() {
-        init();
-    }
-
-    protected void init(){
-        log.debug("FlowVisitor:constructor:START");
-        executor = new ThreadPoolTaskExecutor();
-        executor.setWaitForTasksToCompleteOnShutdown(true);
-        executor.setThreadNamePrefix(getThreadNamePrefix());
-        executor.setCorePoolSize(getNumberOfThreads());
-        executor.setMaxPoolSize(getNumberOfThreads());
-        executor.setQueueCapacity(Integer.MAX_VALUE);
-        executor.initialize();
-        log.debug("FlowVisitor:constructor:END");
+    @Bean
+    public ThreadPoolTaskExecutor getExecutor() {
+        if(executor.getThreadPoolExecutor() == null){
+            executor.setWaitForTasksToCompleteOnShutdown(true);
+            executor.setThreadNamePrefix(getThreadNamePrefix());
+            executor.setCorePoolSize(getNumberOfThreads());
+            executor.setMaxPoolSize(getNumberOfThreads());
+            executor.setQueueCapacity(Integer.MAX_VALUE);
+            executor.initialize();
+        }
+        return executor;
     }
 
     protected abstract int getNumberOfThreads();
@@ -37,15 +34,11 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
 
     protected abstract int getSplitLimitSize();
 
-    @Bean
-    public ThreadPoolTaskExecutor getExecutor() {
-        return executor;
-    }
 
     protected abstract String getThreadNamePrefix();
 
     public int getCurrentQueueSize(){
-        return executor.getThreadPoolExecutor().getQueue().size();
+        return getExecutor().getThreadPoolExecutor().getQueue().size();
     }
 
     public void runFlow() {
@@ -68,7 +61,7 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
                                     log.debug("WorkQueue-PROCESS: currentCount("+ currentCount +")");
                                 }
                                 currentCount++;
-                                executor.execute(() -> doWork(t));
+                                getExecutor().execute(() -> doWork(t));
                             }
                         });
             }
