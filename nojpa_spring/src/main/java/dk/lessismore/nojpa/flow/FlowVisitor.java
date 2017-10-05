@@ -99,6 +99,9 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
 
 
         }
+        close();
+        System.exit(-1);
+
 
 
     }
