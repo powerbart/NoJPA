@@ -161,27 +161,31 @@ public class JobHandle<O> {
      * Checked Exception (Errors) thrown from the executed job are wrapped in a WrappedErrorException.
      */
     public O getResult() {
-        if(jobStatus == JobStatus.DONE){
-            Pair<O, RuntimeException> pair = result.getValue();
-            O value = pair.getFirst();
-            RuntimeException exception = pair.getSecond();
-            if (exception != null) {
-                throw exception;
+        try {
+            if (jobStatus == JobStatus.DONE) {
+                Pair<O, RuntimeException> pair = result.getValue();
+                O value = pair.getFirst();
+                RuntimeException exception = pair.getSecond();
+                if (exception != null) {
+                    throw exception;
+                } else {
+                    jobProgress = 1;
+                    return value;
+                }
             } else {
-                jobProgress = 1;
-                return value;
+                if (closed) throw new JobHandleClosedException();
+                Pair<O, RuntimeException> pair = result.getValue();
+                O value = pair.getFirst();
+                RuntimeException exception = pair.getSecond();
+                if (exception != null) {
+                    throw exception;
+                } else {
+                    jobProgress = 1;
+                    return value;
+                }
             }
-        } else {
-            if (closed) throw new JobHandleClosedException();
-            Pair<O, RuntimeException> pair = result.getValue();
-            O value = pair.getFirst();
-            RuntimeException exception = pair.getSecond();
-            if (exception != null) {
-                throw exception;
-            } else {
-                jobProgress = 1;
-                return value;
-            }
+        } finally {
+            close();
         }
     }
 
