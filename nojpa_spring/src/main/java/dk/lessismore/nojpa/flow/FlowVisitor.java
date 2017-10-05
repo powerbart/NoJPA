@@ -12,7 +12,7 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
 
-    protected final ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+    private ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
     int currentCount = 0;
 
     @Bean
