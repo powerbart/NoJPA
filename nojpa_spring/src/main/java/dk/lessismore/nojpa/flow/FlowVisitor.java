@@ -12,12 +12,13 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
 
-    private ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+    private ThreadPoolTaskExecutor executor = null;
     int currentCount = 0;
 
     @Bean
     public ThreadPoolTaskExecutor getExecutor() {
-        if(executor.getThreadPoolExecutor() == null){
+        if(executor == null){
+            executor = new ThreadPoolTaskExecutor();
             executor.setWaitForTasksToCompleteOnShutdown(true);
             executor.setThreadNamePrefix(getThreadNamePrefix());
             executor.setCorePoolSize(getNumberOfThreads());
