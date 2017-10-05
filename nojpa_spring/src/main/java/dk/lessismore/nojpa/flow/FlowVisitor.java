@@ -12,10 +12,14 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
 
-    protected final ThreadPoolTaskExecutor executor;
+    protected ThreadPoolTaskExecutor executor;
     int currentCount = 0;
 
     public FlowVisitor() {
+        init();
+    }
+
+    protected void init(){
         log.debug("FlowVisitor:constructor:START");
         executor = new ThreadPoolTaskExecutor();
         executor.setWaitForTasksToCompleteOnShutdown(true);
