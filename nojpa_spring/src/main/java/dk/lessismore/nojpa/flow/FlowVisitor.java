@@ -4,6 +4,7 @@ import dk.lessismore.nojpa.db.methodquery.MQL;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 public abstract class FlowVisitor<T extends ModelObjectInterface> {
@@ -11,7 +12,7 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
     protected final Logger log = LoggerFactory.getLogger(getClass());
 
 
-    private final ThreadPoolTaskExecutor executor;
+    protected final ThreadPoolTaskExecutor executor;
     int currentCount = 0;
 
     public FlowVisitor() {
@@ -32,6 +33,10 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
 
     protected abstract int getSplitLimitSize();
 
+    @Bean
+    public ThreadPoolTaskExecutor getExecutor() {
+        return executor;
+    }
 
     protected abstract String getThreadNamePrefix();
 
