@@ -48,13 +48,14 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
 
         while (getSplitLimitSize() + currentCount < totalCount) {
             while (getCurrentQueueSize() < getMinimumQueueSize()) {
-                log.debug("WorkQueue-fill-up: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +")");
+                log.debug("WorkQueue-fill-up-start: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +")");
                 MQL.SelectQuery<T> query = query();
                 if(startFromBeginning()){
                     query.limit(getSplitLimitSize());
                 } else {
                     query.limit(currentCount, currentCount + getSplitLimitSize());
                 }
+                log.debug("WorkQueue-fill-up-end: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +")");
                 query.visit(new AbstractCountingVisitor<T>() {
                             @Override
                             public void process(T t) {
