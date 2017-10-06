@@ -54,7 +54,7 @@ public class DbClassReflector {
      * container is not allready present; the method will try to attemp to create the container.
      * If its not possible; null will be returned.
      */
-    public static DbAttributeContainer getDbAttributeContainer(Class myClass) {
+    public static synchronized DbAttributeContainer getDbAttributeContainer(Class myClass) {
 //        synchronized(log){
             DbAttributeContainer container = (DbAttributeContainer)getReflectedClasses().get(myClass.getName());
             //log.debug("DbAttributeContainer:: getDbAttributeContainer:0");
