@@ -37,6 +37,7 @@ public class JobHandleToMasterProtocol<O> {
     }
 
     private void initConnection() {
+        long start = System.currentTimeMillis();
         String host = properties.getHost();
         int port = properties.getClientPort();
         log.debug("Trying to establish connection to Master on "+host+":"+port);
@@ -47,7 +48,7 @@ public class JobHandleToMasterProtocol<O> {
         } catch (IOException e) {
             throw new MasterUnreachableException(e);
         }
-        log.debug("Connection established");
+        log.debug("Connection established.... Time("+ (System.currentTimeMillis() - start) +")");
 
         Thread callbackThread = new ClientCallbackThread<O>(this, clientLink, serializer);
         callbackThread.setDaemon(true);
