@@ -228,6 +228,10 @@ public class MasterServer {
         if (serverLink != null) {
             log.debug("acceptClientConnection[1.1]: clientExecutor.getActiveCount(" + clientExecutor.getActiveCount() + "), clientExecutor.getPoolSize(" + clientExecutor.getPoolSize() + "), clientExecutor.getQueue().size(" + clientExecutor.getQueue().size() + ")");
             clientExecutor.submit(new MasterClientThread(this, serverLink));
+            if(clientExecutor.getActiveCount() == clientExecutor.getPoolSize()){
+                clientExecutor.setCorePoolSize(clientExecutor.getCorePoolSize() + 1);
+            }
+
         }
         log.debug("acceptClientConnection[2]: " + serverSocket);
         notifyObservers();
