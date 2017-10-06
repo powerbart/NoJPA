@@ -635,7 +635,11 @@ public class DbObjectWriter {
                 DbAttributeContainer associationContainer = DbClassReflector.getDbAttributeContainer(association);
                 if (associationContainer != null) {
                     String targetId = associationContainer.getPrimaryKeyValue((ModelObject) association);
-                    insertSQLStatement.addAttributeValue(/*AssociationTable.TARGET*/associationContainer.getPrimaryKeyAttribute().getAttributeName(), targetId);
+                    String attributeName = associationContainer.getPrimaryKeyAttribute().getAttributeName();
+                    if(attributeName == null || !attributeName.equals("objectID")){
+                        log.warn("Wrong in associationContainer: " + associationContainer);
+                    }
+                    insertSQLStatement.addAttributeValue(/*AssociationTable.TARGET*/attributeName, targetId);
                 }
             } else {
                 addAttributeValueToStatement(dbAttribute, insertSQLStatement, association);
