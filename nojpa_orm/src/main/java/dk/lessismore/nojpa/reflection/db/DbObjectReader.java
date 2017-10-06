@@ -414,7 +414,7 @@ public class DbObjectReader {
                     } catch (Exception e) {
                         if((e.toString().indexOf("0000-00-00") == -1)){
                         log.error("resultSet.getString(attribute = " + dbAttribute.getAttributeName() + ")");
-                        log.error("some error ", e);
+                        log.error("some error with name("+ name +") in " + dbAttribute.getTableName() + "", e);
                         }
                     }
 
