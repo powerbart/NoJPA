@@ -346,18 +346,22 @@ public class WorkerPool {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("---------------------------------- WorkerPool ----------------------------------\n");
-        boolean first = true;
-        for (WorkerEntry workerEntry: pool.values()) {
-            if(first){
-                first = false;
-                builder.append(workerEntry.listTitle());
+        try {
+            StringBuilder builder = new StringBuilder();
+            builder.append("---------------------------------- WorkerPool ----------------------------------\n");
+            boolean first = true;
+            for (WorkerEntry workerEntry : pool.values()) {
+                if (first) {
+                    first = false;
+                    builder.append(workerEntry.listTitle());
+                    builder.append("\n");
+                }
+                builder.append(workerEntry.listRow());
                 builder.append("\n");
             }
-            builder.append(workerEntry.listRow());
-            builder.append("\n");
+            return builder.toString();
+        } catch (Exception e){
+            return "";
         }
-        return builder.toString();
     }
 }

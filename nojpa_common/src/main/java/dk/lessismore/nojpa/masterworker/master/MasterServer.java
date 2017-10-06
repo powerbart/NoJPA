@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.*;
 
 
 public class MasterServer {
@@ -214,12 +215,19 @@ public class MasterServer {
 
     static long masterworker_client_connection_count = new File("/tmp/masterworker_client_connection_count").exists() ? new Long(SuperIO.readTextFromFile("/tmp/masterworker_client_connection_count")) : 0;
 
+    ArrayList<MasterClientThread> clientThreads = new ArrayList<>();
+    ThreadPoolExecutor clientExecutor = new ThreadPoolExecutor(20, 5000, 5, TimeUnit.MINUTES, new LinkedBlockingQueue<>());
+
+
+
+
     public void acceptClientConnection(ServerSocket serverSocket) {
         SuperIO.writeTextToFile("/tmp/masterworker_client_connection_count", "" + (masterworker_client_connection_count++));
         log.debug("acceptClientConnection[1]: " + serverSocket);
         ServerLink serverLink = acceptConnection(serverSocket);
         if (serverLink != null) {
-            new MasterClientThread(this, serverLink).start();
+            log.debug("acceptClientConnection[1.1]: clientExecutor.getActiveCount(" + clientExecutor.getActiveCount() + "), clientExecutor.getPoolSize(" + clientExecutor.getPoolSize() + "), clientExecutor.getQueue().size(" + clientExecutor.getQueue().size() + ")");
+            clientExecutor.submit(new MasterClientThread(this, serverLink));
         }
         log.debug("acceptClientConnection[2]: " + serverSocket);
         notifyObservers();

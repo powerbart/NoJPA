@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
 
 
-public class MasterClientThread extends Thread {
+public class MasterClientThread implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(MasterClientThread.class);
     private final ServerLink serverLink;
