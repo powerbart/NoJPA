@@ -36,4 +36,9 @@ public class WaitForValue<V> {
             lock.unlock();
         }
     }
+
+    public void resignal(){
+        condition.signalAll();
+    }
+
 }

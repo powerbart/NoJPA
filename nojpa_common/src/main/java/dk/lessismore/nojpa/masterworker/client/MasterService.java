@@ -51,7 +51,7 @@ public class MasterService {
         };
 
 
-        blockerThread.setName(blockerThread.getName() + "-" + DEBUG_ID);
+        blockerThread.setName(Thread.currentThread().getName() + "-" + blockerThread.getName() + "-" + DEBUG_ID);
         blockerThread.start();
         return jobHandle;
     }

@@ -179,7 +179,7 @@ public class JobPool {
     }
 
     public synchronized void jobTaken(JobEntry jobEntry, ServerLink worker) {
-        log.debug(" *** JOB TAKEN: "+jobEntry);
+        log.debug(" *** JOB TAKEN: "+jobEntry + " by worker/ServerLink("+ worker +")");
         jobEntry.jobTakenDate = Calendar.getInstance();
         setWorker(jobEntry, worker);
         queue.remove(jobEntry);
@@ -301,8 +301,14 @@ public class JobPool {
     }
 
     private void setWorker(JobEntry jobEntry, ServerLink worker) {
-        workerMap.put(worker, jobEntry.jobMessage.getJobID());
-        jobEntry.worker = worker;
+        try {
+            log.debug("setWorker job["+ jobEntry.getJobID() +"]: START ");
+            workerMap.put(worker, jobEntry.jobMessage.getJobID());
+            jobEntry.worker = worker;
+            log.debug("setWorker job["+ jobEntry.getJobID() +"]: DONE ");
+        } catch (Exception e){
+            log.error("setWorker job["+ jobEntry.getJobID() +"]: FAILED:  " + e, e);
+        }
     }
 
     private synchronized void removeWorker(JobEntry jobEntry) {
