@@ -94,6 +94,7 @@ public class Worker {
 
             log.debug("Waiting for job");
             final JobMessage jobMessage = linkAndThreads.waitForValue.getValue();
+            log.debug("Got a job...!");
             if(jobMessage == null){
                 String message = "Exception .. jobMessage == null";
                 log.error(message, new Exception(message));
@@ -179,11 +180,12 @@ public class Worker {
 //            break;
 
         } // end loop
+        log.debug("Exiting!-1");
         try{
             linkAndThreads.clientLink.close();
             linkAndThreads.stopThreads();
         } catch (Exception e){}
-        log.debug("Exiting!");
+        log.debug("Exiting!-2");
     }
 
     private Executor<Object, Object> loadExecutor(JobMessage jobMessage) {
@@ -268,6 +270,7 @@ public class Worker {
                         while(!stop && linkAndThreads.clientLink.isWorking()) { //TODO loop unnecassary
                             Object o = linkAndThreads.clientLink.read();
                             if(o instanceof JobMessage) {
+                                log.debug("Read: JobMessage");
                                 maybeJob = (JobMessage) o;
                                 waitForValue.setValue(maybeJob);
                             } else if(o instanceof KillMessage) {
