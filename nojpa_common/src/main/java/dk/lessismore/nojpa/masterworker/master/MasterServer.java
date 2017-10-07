@@ -117,6 +117,7 @@ public class MasterServer {
             }
         });
         workerPool.removeWorker(serverLink);
+        runJobIfNecessaryAndPossible();
         notifyObservers();
     }
 
@@ -128,7 +129,7 @@ public class MasterServer {
         if (!ableToWorkBefore) {
             ableToWorkAfter = workerPool.applicable(serverLink);
         }
-        if (ableToWorkAfter) runJobIfNecessaryAndPossible();
+        runJobIfNecessaryAndPossible();
         //notifyObservers();
     }
 
@@ -333,39 +334,36 @@ public class MasterServer {
         JobPool.JobEntry jobEntry = null;
         WorkerPool.WorkerEntry workerEntry = null;
         synchronized(this) { //We don't want to start up the first job, many times ;-)
-            jobEntry = jobPool.firstJob();
-            if (jobEntry == null) {
-                log.debug("No Job in queue to run :-D ");
-                return;
-            }
-            workerEntry = workerPool.getBestApplicableWorker(jobEntry.jobMessage.getExecutorClassName());
-            if (workerEntry == null) {
-                log.debug("No available worker to run job - to run the first job... We will look in the queue for other jobs");
-                List<JobPool.JobEntry> diffJobs = jobPool.getDiffJobs(jobEntry.jobMessage.getExecutorClassName());
-                for(int i = 0; workerEntry == null && i < diffJobs.size(); i++){
-                    workerEntry = workerPool.getBestApplicableWorker(diffJobs.get(i).jobMessage.getExecutorClassName());
-                    jobEntry = diffJobs.get(i);
+            while((jobEntry = jobPool.firstJob()) != null){
+                workerEntry = workerPool.getBestApplicableWorker(jobEntry.jobMessage.getExecutorClassName());
+                if (workerEntry == null) {
+                    log.debug("No available worker to run job - to run the first job... We will look in the queue for other jobs");
+                    List<JobPool.JobEntry> diffJobs = jobPool.getDiffJobs(jobEntry.jobMessage.getExecutorClassName());
+                    for(int i = 0; workerEntry == null && i < diffJobs.size(); i++){
+                        workerEntry = workerPool.getBestApplicableWorker(diffJobs.get(i).jobMessage.getExecutorClassName());
+                        jobEntry = diffJobs.get(i);
+                    }
+                    if(workerEntry == null){
+                        return;
+                    }
                 }
-                if(workerEntry == null){
-                    return;
-                }
+                SuperIO.writeTextToFile("/tmp/masterworker_input_jobs_count", "" + (masterworker_input_jobs_count++));
+                log.debug("Found worker to run job: " + workerEntry);
+                jobPool.jobTaken(jobEntry, workerEntry.serverLink);
+                workerEntry.jobTakenStats();
+
+                WorkerPool.WorkerEntry finalWorkerEntry = workerEntry;
+                MessageSender.send(jobEntry.jobMessage, workerEntry.serverLink, new MessageSender.FailureHandler() {
+                    public void onFailure(ServerLink client) {
+                        log.debug("IOException while sending job to worker - removing worker");
+                        MasterServer.this.unregisterWorker(finalWorkerEntry.serverLink);
+                    }
+                });
             }
-
-
-            SuperIO.writeTextToFile("/tmp/masterworker_input_jobs_count", "" + (masterworker_input_jobs_count++));
-            log.debug("Found worker to run job: " + workerEntry);
-            jobPool.jobTaken(jobEntry, workerEntry.serverLink);
-            workerEntry.jobTakenStats();
         }
-
-        WorkerPool.WorkerEntry finalWorkerEntry = workerEntry;
-        MessageSender.send(jobEntry.jobMessage, workerEntry.serverLink, new MessageSender.FailureHandler() {
-            public void onFailure(ServerLink client) {
-                log.debug("IOException while sending job to worker - removing worker");
-                MasterServer.this.unregisterWorker(finalWorkerEntry.serverLink);
-            }
-        });
-        notifyObservers();
+        if(workerEntry != null) {
+            notifyObservers();
+        }
     }
 
 
