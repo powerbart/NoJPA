@@ -42,9 +42,9 @@ public class MasterService {
                     log.warn(" MW-NO-RESULT Waiting: We didn't get any result from JobHandle("+ jobHandle.getJobID() +") status(" + jobHandle.getStatus() +") progress(" + jobHandle.getProgress() +")");
                 }
                 if(jobHandle.getStatus() != JobStatus.DONE) {
-                    log.warn("timeout-TIMEOUT for job("+ jobHandle.getJobID()  +")...!!!!!!!! =!=!=!=!=!=!=!=!=!");
-                    log.warn("timeout-TIMEOUT for job("+ jobHandle.getJobID()  +")...!!!!!!!! =!=!=!=!=!=!=!=!=!");
-                    log.warn("timeout-TIMEOUT for job("+ jobHandle.getJobID()  +")...!!!!!!!! =!=!=!=!=!=!=!=!=!");
+                    log.warn("timeout-TIMEOUT for job("+ jobHandle.getJobID()  +")...!!!!!!!! =!=!=!=!=!=!=!=!=! " + jobHandle.getImplementationClass().getSimpleName());
+                    log.warn("timeout-TIMEOUT for job("+ jobHandle.getJobID()  +")...!!!!!!!! =!=!=!=!=!=!=!=!=! " + jobHandle.getImplementationClass().getSimpleName());
+                    log.warn("timeout-TIMEOUT for job("+ jobHandle.getJobID()  +")...!!!!!!!! =!=!=!=!=!=!=!=!=! " + jobHandle.getImplementationClass().getSimpleName());
                     jobHandle.timeout();
                 }
             }

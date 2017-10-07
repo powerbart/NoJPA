@@ -271,14 +271,12 @@ public class Worker {
                                 maybeJob = (JobMessage) o;
                                 waitForValue.setValue(maybeJob);
                             } else if(o instanceof KillMessage) {
+                                log.info("Kill message recieved from master - shutting down.");
                                 stop = true;
                                 System.exit(0);
                             } else if(o instanceof StopMessage) {
                                 log.info("Stop message recieved from master - signal executer to stop nicely.");
                                 executor.stopNicely();
-                            } else if(o instanceof KillMessage) {
-                                log.info("Kill message recieved from master - shutting down.");
-                                System.exit(0);
                             } else if(o instanceof RunMethodRemoteBeanMessage) {
                                 RunMethodRemoteBeanMessage runMethodRemoteBeanMessage = (RunMethodRemoteBeanMessage) o;
                                 BeanExecutor b = (BeanExecutor) executor;

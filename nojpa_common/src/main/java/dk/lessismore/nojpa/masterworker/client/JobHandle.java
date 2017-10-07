@@ -225,14 +225,13 @@ public class JobHandle<O> {
 
     public void timeout() {
         jobStatus = JobStatus.DONE;
-        kill();
         if(!result.hasValue()){
             log.error("SETTING RESULT TO NULL -TIMEOUT.....!!!!");
             result.setValue(new Pair<O, RuntimeException>(null, new TimeoutException()));
         } else {
             result.resignal();
         }
-
+        kill();
     }
 
 
