@@ -320,6 +320,7 @@ public class Worker {
                         try{
                             linkAndThreads.clientLink.close();
                         } catch (Exception e){}
+                        log.info("We are done.....");
                         System.exit(0);
                     }
                 }
