@@ -42,7 +42,7 @@ public class WorkerPool {
         }
     }
 
-    public WorkerEntry getBestApplicableWorker(String executorClass) {
+    public synchronized WorkerEntry getBestApplicableWorker(String executorClass) {
         if (pool.isEmpty()) {
             log.info("No workers in pool");
             return null;
