@@ -317,52 +317,59 @@ public class MasterServer {
 
     private long lastPrint = 0;
     private void runJobIfNecessaryAndPossible() {
-        log.debug("runJobIfNecessaryAndPossible jobPool("+ jobPool.getQueueSize() +")");
-        if(System.currentTimeMillis() - lastPrint > 10_000){
-            lastPrint = System.currentTimeMillis();
-            StringBuilder builder = new StringBuilder();
-            builder.append("---------------------------------- Master Status ---------------------------------- START\n");
-            String jobPoolStr = jobPool.toString();
-            String workPoolStr = workerPool.toString();
-            builder.append(jobPoolStr + workPoolStr);
-            builder.append("\n");
-            builder.append("---------------------------------- Master Status ---------------------------------- ENDS");
-            SuperIO.writeTextToFile("/tmp/master-status", builder.toString());
-            SuperIO.writeTextToFile("/tmp/master-status-workpool", workPoolStr);
-            SuperIO.writeTextToFile("/tmp/master-status-jobpool", jobPoolStr);
-        }
-        JobPool.JobEntry jobEntry = null;
-        WorkerPool.WorkerEntry workerEntry = null;
-        synchronized(this) { //We don't want to start up the first job, many times ;-)
-            while((jobEntry = jobPool.firstJob()) != null){
+        try {
+            log.debug("runJobIfNecessaryAndPossible jobPool(" + jobPool.getQueueSize() + ")");
+            if (System.currentTimeMillis() - lastPrint > 10_000) {
+                lastPrint = System.currentTimeMillis();
+                StringBuilder builder = new StringBuilder();
+                builder.append("---------------------------------- Master Status ---------------------------------- START\n");
+                String jobPoolStr = jobPool.toString();
+                String workPoolStr = workerPool.toString();
+                builder.append(jobPoolStr + workPoolStr);
+                builder.append("\n");
+                builder.append("---------------------------------- Master Status ---------------------------------- ENDS");
+                SuperIO.writeTextToFile("/tmp/master-status", builder.toString());
+                SuperIO.writeTextToFile("/tmp/master-status-workpool", workPoolStr);
+                SuperIO.writeTextToFile("/tmp/master-status-jobpool", jobPoolStr);
+            }
+            JobPool.JobEntry jobEntry = null;
+            WorkerPool.WorkerEntry workerEntry = null;
+            synchronized (this) { //We don't want to start up the first job, many times ;-)
+                jobEntry = jobPool.firstJob();
+                if (jobEntry == null) {
+                    log.debug("No Job in queue to run :-D ");
+                    return;
+                }
                 workerEntry = workerPool.getBestApplicableWorker(jobEntry.jobMessage.getExecutorClassName());
                 if (workerEntry == null) {
                     log.debug("No available worker to run job - to run the first job... We will look in the queue for other jobs");
                     List<JobPool.JobEntry> diffJobs = jobPool.getDiffJobs(jobEntry.jobMessage.getExecutorClassName());
-                    for(int i = 0; workerEntry == null && i < diffJobs.size(); i++){
+                    for (int i = 0; workerEntry == null && i < diffJobs.size(); i++) {
                         workerEntry = workerPool.getBestApplicableWorker(diffJobs.get(i).jobMessage.getExecutorClassName());
                         jobEntry = diffJobs.get(i);
                     }
-                    if(workerEntry == null){
+                    if (workerEntry == null) {
                         return;
                     }
                 }
+
+
                 SuperIO.writeTextToFile("/tmp/masterworker_input_jobs_count", "" + (masterworker_input_jobs_count++));
                 log.debug("Found worker to run job: " + workerEntry);
                 jobPool.jobTaken(jobEntry, workerEntry.serverLink);
                 workerEntry.jobTakenStats();
-
-                WorkerPool.WorkerEntry finalWorkerEntry = workerEntry;
-                MessageSender.send(jobEntry.jobMessage, workerEntry.serverLink, new MessageSender.FailureHandler() {
-                    public void onFailure(ServerLink client) {
-                        log.debug("IOException while sending job to worker - removing worker");
-                        MasterServer.this.unregisterWorker(finalWorkerEntry.serverLink);
-                    }
-                });
             }
-        }
-        if(workerEntry != null) {
+
+            WorkerPool.WorkerEntry finalWorkerEntry = workerEntry;
+            MessageSender.send(jobEntry.jobMessage, workerEntry.serverLink, new MessageSender.FailureHandler() {
+                public void onFailure(ServerLink client) {
+                    log.debug("IOException while sending job to worker - removing worker");
+                    MasterServer.this.unregisterWorker(finalWorkerEntry.serverLink);
+                }
+            });
             notifyObservers();
+        } catch (Exception e){
+            log.error("Some error when running runJobIfNecessaryAndPossible:" + e, e);
         }
     }
 
