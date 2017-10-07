@@ -37,7 +37,7 @@ public class Worker {
     private static final MasterProperties properties = PropertiesProxy.getInstance(MasterProperties.class);
     private static final Logger log = LoggerFactory.getLogger(Worker.class);
     private static final long SEND_PROGRESS_INTERVAL = 10 * 1000;
-    private static final long SEND_HEALTH_INTERVAL = 10 * 60 * 1000;
+    private static final long SEND_HEALTH_INTERVAL = 20 * 1000;
     private static final int  MAX_SAME_PROGRESS = 3;
     private final List<? extends Class<? extends Executor>> supportedExecutors;
     private static final double CRITICAL_VM_MEMORY_USAGE = 0.95;
