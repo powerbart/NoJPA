@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.net.ConnectException;
 import java.nio.channels.ClosedChannelException;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 
 
@@ -267,6 +268,7 @@ public class Worker {
             stopperThread = new Thread(new Runnable() {
                 public void run() {
                     try {
+                        Calendar lastMsg = Calendar.getInstance();
                         while(!stop && linkAndThreads.clientLink.isWorking()) { //TODO loop unnecassary
                             Object o = linkAndThreads.clientLink.read();
                             if(o instanceof JobMessage) {
@@ -274,9 +276,15 @@ public class Worker {
                                 maybeJob = (JobMessage) o;
                                 waitForValue.setValue(maybeJob);
                             } else if(o instanceof KillMessage) {
-                                log.info("Kill message recieved from master - shutting down.");
-                                stop = true;
-                                System.exit(0);
+                                Calendar oneMin = Calendar.getInstance();
+                                oneMin.add(Calendar.MINUTE, -1);
+                                if(lastMsg.before(oneMin)) {
+                                    log.info("Kill message recieved from master - shutting down.");
+                                    stop = true;
+                                    System.exit(0);
+                                } else {
+                                    log.info("We will ignore Kill message, since last msg was ("+ lastMsg.getTime() +") < 1 min ago");
+                                }
                             } else if(o instanceof StopMessage) {
                                 log.info("Stop message recieved from master - signal executer to stop nicely.");
                                 executor.stopNicely();
@@ -313,7 +321,7 @@ public class Worker {
                             } else {
                                 log.error("Did not understand message from master (stop or kill message expected): " + o);
                             }
-
+                            lastMsg = Calendar.getInstance();
                         }
                     } catch(ClosedChannelException e) {
                         log.debug("Connection closed - Stopping stopperThread");
