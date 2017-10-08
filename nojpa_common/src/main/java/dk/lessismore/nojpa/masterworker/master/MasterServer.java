@@ -118,7 +118,7 @@ public class MasterServer {
             public void onFailure(ServerLink client) {
                 log.debug("unregisterWorker: IOException while sending KillMessage to worker - removing worker");
             }
-        });
+        }, "unregisterWorker client("+ serverLink.getLinkID() +")");
         workerPool.removeWorker(serverLink);
         runJobIfNecessaryAndPossible();
         notifyObservers();
@@ -402,7 +402,7 @@ public class MasterServer {
                     log.debug("IOException while sending job to worker - removing worker");
                     MasterServer.this.unregisterWorker(finalWorkerEntry.serverLink);
                 }
-            });
+            }, "sendWork("+ jobEntry.getJobID() +") to WorkerLink("+ workerEntry.serverLink.getLinkID() +")");
             long e = System.currentTimeMillis();
             log.debug("runJobs: TimeStats("+ (e-a) +") 1("+ (b-a) +") 2("+ (c-b) +") 3("+ (d-c) +") 4("+ (e-d)+")");
         } catch (Exception e){
@@ -413,16 +413,15 @@ public class MasterServer {
 
 
     public void kill(String jobID) {
-        JobPool.JobEntry jobEntry = null;
-        jobEntry = jobPool.getJobEntry(jobID);
+        final JobPool.JobEntry jobEntry = jobPool.getJobEntry(jobID);
         log.warn("kill job[" + jobID + "]: " + jobEntry);
         if (jobEntry != null) {
             if (jobEntry.worker != null && jobEntry.getStatus() == JobStatus.IN_PROGRESS) {
                 MessageSender.send(new KillMessage(), jobEntry.worker, new MessageSender.FailureHandler() {
                     public void onFailure(ServerLink client) {
-                        log.debug("IOException while sending KillMessage to worker - removing worker");
+                        log.debug("IOException while sending KillMessage to worker - removing worker("+ jobEntry.worker.getLinkID() +")");
                     }
-                });
+                }, "Sending KILL to jobEntry.worker("+ jobEntry.worker.getLinkID() +")");
                 workerPool.removeWorker(jobEntry.worker);
             }
             jobPool.kill(jobID);
