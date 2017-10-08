@@ -265,7 +265,7 @@ public class JobPool {
             jobEntry.jobDoneDate = Calendar.getInstance();
             if (jobEntry.clients == null || jobEntry.clients.isEmpty()) return;
             for (ServerLink client : getListeningClientsCloned(jobEntry)) {
-                log.debug("fireOnResult[" + result.getJobID() + "]:sendResultToClient(" + client.getOtherHost() + ")-START");
+                log.debug("fireOnResult[" + result.getJobID() + "]:sendResultToClient(" + client + ")-START");
                 MessageSender.sendResultToClient(result, client, new MessageSender.FailureHandler() {
                     public void onFailure(ServerLink client) {
                         log.error("fireOnResult[" + result.getJobID() + "]:sendResultToClient(" + client.getOtherHost() + ")-ERROR");
