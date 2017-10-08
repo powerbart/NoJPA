@@ -278,7 +278,7 @@ public class JobPool {
                 client.close();
             }
         } catch (Exception e){
-            log.error("Some error:" + e, e);
+            log.error("Some error with Job("+ result.getJobID() +"):" + e, e);
         }
         log.debug("fireOnResult["+ result.getJobID() +"]:BEFORE-REMOVE");
         removeJob(result.getJobID());
