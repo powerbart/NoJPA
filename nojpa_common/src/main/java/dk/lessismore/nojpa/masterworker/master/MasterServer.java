@@ -429,19 +429,22 @@ public class MasterServer {
     }
 
     public void restartAllWorkers() {
-        log.debug("restartAllWorkers");
-        Map.Entry<ServerLink, WorkerPool.WorkerEntry>[] entries = workerPool.pool.entrySet().toArray(new Map.Entry[workerPool.pool.size()]);
-        for(int i = 0; i < entries.length; i++){
-            log.debug("restartAllWorkers("+ i +"/"+ entries.length +")");
-            Map.Entry<ServerLink, WorkerPool.WorkerEntry> entry = entries[i];
-            try {
-                entry.getKey().stopPinger();
-                entry.getKey().write(new KillMessage());
-            } catch (IOException e) {
-                log.warn("When restartAllWorkers we got from worker("+ entry.getValue().toString() +")  : "+ e, e);
+        try {
+            log.debug("restartAllWorkers");
+            Map.Entry<ServerLink, WorkerPool.WorkerEntry>[] entries = workerPool.pool.entrySet().toArray(new Map.Entry[workerPool.pool.size()]);
+            for (int i = 0; i < entries.length; i++) {
+                log.debug("restartAllWorkers(" + i + "/" + entries.length + ")");
+                Map.Entry<ServerLink, WorkerPool.WorkerEntry> entry = entries[i];
+                try {
+                    entry.getKey().stopPinger();
+                    entry.getKey().write(new KillMessage());
+                } catch (IOException e) {
+                    log.warn("When restartAllWorkers we got from worker(" + entry.getValue().toString() + ")  : " + e, e);
+                }
             }
+        } catch (Exception e){
+            System.exit(-1); //TODO: Remove this in the future, when it is running stable
         }
-        System.exit(-1); //TODO: Remove this in the future, when it is running stable
 
     }
 }
