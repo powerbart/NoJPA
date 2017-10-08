@@ -36,6 +36,11 @@ public class MessageSender {
         send(result, client, failureHandler, "sendResultToClient("+ result.getJobID() +") client.getLinkID("+ client.getLinkID() +")");
     }
 
+    public static void sendResultToClientAndClose(JobResultMessage result, ServerLink client, FailureHandler failureHandler) {
+        log.debug("sendResultToClient("+ result.getJobID() +") with ServerLink("+ client.getLinkID() +")");
+        sendAndClose(result, client, failureHandler, "sendResultToClient("+ result.getJobID() +") client.getLinkID("+ client.getLinkID() +")");
+    }
+
     public static void sendRunMethodRemoteResultOfToClient(RunMethodRemoteResultMessage runMethodRemoteResultMessage, ServerLink client, FailureHandler failureHandler) {
         log.debug("sendRunMethodRemoteResultOfToClient: sending " + runMethodRemoteResultMessage);
         send(runMethodRemoteResultMessage, client, failureHandler, "RunMethodRemoteResultOfToClient");
@@ -55,6 +60,27 @@ public class MessageSender {
                     log.debug("Writing ("+ debugLog+") - START");
                     client.write(message);
                     log.debug("Writing ("+ debugLog+") - END");
+                } catch (IOException e) {
+                    log.error("Writing ("+ debugLog+") - ERROR: " + e, e);
+                    if (failureHandler != null) failureHandler.onFailure(client);
+                }
+            }});
+        synchronized (sendExecutor) {
+            if (sendExecutor.getActiveCount() == sendExecutor.getPoolSize()) {
+                log.debug("sendExecutor[1.1]: sendExecutor.getActiveCount(" + sendExecutor.getActiveCount() + "), sendExecutor.getPoolSize(" + sendExecutor.getPoolSize() + "), sendExecutor.getQueue().size(" + sendExecutor.getQueue().size() + ")");
+                sendExecutor.setCorePoolSize(sendExecutor.getCorePoolSize() + 1);
+            }
+        }
+    }
+
+    public static void sendAndClose(final Object message, final ServerLink client, final FailureHandler failureHandler, String debugLog) {
+        sendExecutor.submit(new Runnable() {
+            public void run() {
+                try {
+                    log.debug("Writing ("+ debugLog+") - START");
+                    client.write(message);
+                    log.debug("Writing ("+ debugLog+") - END");
+                    client.close();
                 } catch (IOException e) {
                     log.error("Writing ("+ debugLog+") - ERROR: " + e, e);
                     if (failureHandler != null) failureHandler.onFailure(client);

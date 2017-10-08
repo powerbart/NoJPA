@@ -266,7 +266,7 @@ public class JobPool {
             if (jobEntry.clients == null || jobEntry.clients.isEmpty()) return;
             for (ServerLink client : getListeningClientsCloned(jobEntry)) {
                 log.debug("fireOnResult[" + result.getJobID() + "]:sendResultToClient(" + client + ")-START");
-                MessageSender.sendResultToClient(result, client, new MessageSender.FailureHandler() {
+                MessageSender.sendResultToClientAndClose(result, client, new MessageSender.FailureHandler() {
                     public void onFailure(ServerLink client) {
                         log.error("fireOnResult[" + result.getJobID() + "]:sendResultToClient(" + client.getOtherHost() + ")-ERROR");
                         removeListener(client);
@@ -275,7 +275,6 @@ public class JobPool {
                     SuperIO.writeTextToFile("/tmp/masterworker_output_error_jobs_count", "" + (masterworker_output_error_jobs_count++));
                 }
                 log.debug("fireOnResult[" + result.getJobID() + "]:sendResultToClient(" + client.getOtherHost() + ")-DONE");
-                client.close();
             }
         } catch (Exception e){
             log.error("Some error with Job("+ result.getJobID() +"):" + e, e);
