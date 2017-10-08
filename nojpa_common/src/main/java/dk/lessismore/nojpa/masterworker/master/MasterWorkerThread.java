@@ -30,7 +30,7 @@ public class MasterWorkerThread implements Runnable{
         try{
             while(true) {
                 Object clientRequest = serverLink.read();
-                log.debug("Got clientRequest " + clientRequest.getClass().getSimpleName());
+                log.debug(serverLink.getLinkID() + " Got clientRequest " + clientRequest.getClass().getSimpleName());
                 if (! (clientRequest instanceof HealthMessage) &&
                     ! (clientRequest instanceof JobProgressMessage))
                     log.debug("Message recieved from worker '" + clientRequest.getClass().getSimpleName() + "'");
@@ -56,9 +56,9 @@ public class MasterWorkerThread implements Runnable{
                 }
             }
         } catch (ClosedChannelException e) {
-            log.info("Connection closed - stopping listening to worker");
+            log.info("Connection closed - stopping listening to worker("+ serverLink.getLinkID() +")");
         } catch (IOException e) {
-            log.error("IOException - stopping listening to worker", e);
+            log.error("IOException - stopping listening to worker("+ serverLink.getLinkID() +"):", e);
         } finally {
             try{
                 serverLink.close();

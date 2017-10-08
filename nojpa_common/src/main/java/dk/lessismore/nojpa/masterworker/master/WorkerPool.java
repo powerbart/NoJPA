@@ -237,7 +237,7 @@ public class WorkerPool {
         public String toString() {
             return
                     "{" + rightAlign("Worker["+ myID +"]:", 12) + rightAlign(" idle="+ idle, 11) + rightAlign("load="+ printNice("" + systemLoad), 10) +" "+
-                            (debugNameOfWorker != null && debugNameOfWorker.length() > 7 ? debugNameOfWorker : serverLink.getOtherHost())
+                            (serverLink.getLinkID()) + " "+ (debugNameOfWorker != null && debugNameOfWorker.length() > 7 ? debugNameOfWorker : serverLink.getOtherHost())
                             +" JobTime:"+ getJobTime() +" IdleTime:"+ getIdleTime() +" jobs("+ totalCountOfSuccesJobs
                             +") succes("+ printNice("" + (((double) totalCountOfSuccesJobs)/ ((double) totalCountOfJobs)))
                             +") job/sec("+ printNice("" + (((double)(System.currentTimeMillis() - rebootTime))/ ((double) totalCountOfJobs))) +") lastIdleStart("+ (System.currentTimeMillis() - lastIdleStart) +") LastJob("+  getTimeSinceLastJob() +")}"
@@ -251,7 +251,7 @@ public class WorkerPool {
                     "{" + rightAlign(""+ myID +"", 10)
                             + rightAlign(""+ idle, 8)
                             + rightAlign(""+ printNice(systemLoad), 8)
-                            + rightAlign(""+ ("" + (debugNameOfWorker != null && debugNameOfWorker.length() > 7 ? debugNameOfWorker : serverLink.getOtherHost())), 42)
+                            + rightAlign(""+ (serverLink.getLinkID()) + " "+ ("" + (debugNameOfWorker != null && debugNameOfWorker.length() > 7 ? debugNameOfWorker : serverLink.getOtherHost())), 42)
                             + rightAlign(""+ printNice(getWorkLoad()), 8)
                             + rightAlign(""+ (getJobTime()), 8)
                             + rightAlign(""+ (getIdleTime()), 8)

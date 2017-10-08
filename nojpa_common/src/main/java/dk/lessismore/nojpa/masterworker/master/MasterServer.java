@@ -399,7 +399,7 @@ public class MasterServer {
             WorkerPool.WorkerEntry finalWorkerEntry = workerEntry;
             MessageSender.send(jobEntry.jobMessage, workerEntry.serverLink, new MessageSender.FailureHandler() {
                 public void onFailure(ServerLink client) {
-                    log.debug("IOException while sending job to worker - removing worker");
+                    log.debug("IOException while sending job to worker - removing worker - will run unregisterWorker("+ client.getLinkID() +")");
                     MasterServer.this.unregisterWorker(finalWorkerEntry.serverLink);
                 }
             }, "sendWork("+ jobEntry.getJobID() +") to WorkerLink("+ workerEntry.serverLink.getLinkID() +")");
@@ -441,6 +441,7 @@ public class MasterServer {
                 log.warn("When restartAllWorkers we got from worker("+ entry.getValue().toString() +")  : "+ e, e);
             }
         }
+        System.exit(-1); //TODO: Remove this in the future, when it is running stable
 
     }
 }
