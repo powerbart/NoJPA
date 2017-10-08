@@ -353,6 +353,7 @@ public class MasterServer {
 
     protected void runJobs() {
         try {
+            long a = System.currentTimeMillis();
             JobPool.JobEntry jobEntry = null;
             WorkerPool.WorkerEntry workerEntry = null;
 
@@ -368,6 +369,7 @@ public class MasterServer {
                 return;
             }
             workerEntry = workerPool.getBestApplicableWorker(jobEntry.jobMessage.getExecutorClassName());
+            long b = System.currentTimeMillis();
             if (workerEntry == null) {
                 log.debug("No available worker to run job - to run the first job... We will look in the queue for other jobs");
                 List<JobPool.JobEntry> diffJobs = jobPool.getDiffJobs(jobEntry.jobMessage.getExecutorClassName());
@@ -385,7 +387,7 @@ public class MasterServer {
                     return;
                 }
             }
-
+            long c = System.currentTimeMillis();
 
             if(masterworker_input_jobs_count % 50 == 0) {
                 SuperIO.writeTextToFile("/tmp/masterworker_input_jobs_count", "" + (masterworker_input_jobs_count++));
@@ -393,7 +395,7 @@ public class MasterServer {
             log.debug("Found worker to run job: " + workerEntry);
             jobPool.jobTaken(jobEntry, workerEntry.serverLink);
             workerEntry.jobTakenStats();
-
+            long d = System.currentTimeMillis();
             WorkerPool.WorkerEntry finalWorkerEntry = workerEntry;
             MessageSender.send(jobEntry.jobMessage, workerEntry.serverLink, new MessageSender.FailureHandler() {
                 public void onFailure(ServerLink client) {
@@ -401,6 +403,8 @@ public class MasterServer {
                     MasterServer.this.unregisterWorker(finalWorkerEntry.serverLink);
                 }
             });
+            long e = System.currentTimeMillis();
+            log.debug("runJobs: TimeStats("+ (e-a) +") 1("+ (b-a) +") 2("+ (c-b) +") 3("+ (d-c) +") 4("+ (e-d)+")");
         } catch (Exception e){
             log.error("Some error when running runJobIfNecessaryAndPossible:" + e, e);
         }
