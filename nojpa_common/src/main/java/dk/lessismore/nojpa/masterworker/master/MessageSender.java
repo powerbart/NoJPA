@@ -56,6 +56,7 @@ public class MessageSender {
                     client.write(message);
                     log.debug("Writing ("+ debugLog+") - END");
                 } catch (IOException e) {
+                    log.error("Writing ("+ debugLog+") - ERROR: " + e, e);
                     if (failureHandler != null) failureHandler.onFailure(client);
                 }
             }});
