@@ -67,7 +67,36 @@ public class Master {
             }
         });
 
+        Thread queueToWorkerThread = new Thread(new Runnable() {
+            public void run() {
+                while (true)
+                    try {
+                        server.runJobs();
+                    } catch (Exception e) {
+                        log.error("error in queueToWorkerThread: {}", e.getMessage(), e);
+                    }
+            }
+        });
+
+        Thread printStatusThread = new Thread(new Runnable() {
+            public void run() {
+                while (true)
+                    try {
+                        server.printStatus();
+                        Thread.sleep(10 * 1000);
+                    } catch (Exception e) {
+                        log.error("error in queueToWorkerThread: {}", e.getMessage(), e);
+                    }
+            }
+        });
+
         ObserverNotifierThread observerNotifierThread = new ObserverNotifierThread(server);
+
+        printStatusThread.setName("printStatusThread");
+        printStatusThread.start();
+
+        queueToWorkerThread.setName("queueToWorkerThread");
+        queueToWorkerThread.start();
 
         clientAcceptThread.setName("clientAcceptThread");
         clientAcceptThread.start();
