@@ -57,7 +57,7 @@ public class MessageSender {
         sendExecutor.submit(new Runnable() {
             public void run() {
                 try {
-                    log.debug("Writing ("+ debugLog+") - START");
+//                    log.debug("Writing ("+ debugLog+") - START");
                     client.write(message);
                     log.debug("Writing ("+ debugLog+") - END");
                 } catch (IOException e) {
@@ -77,7 +77,7 @@ public class MessageSender {
         sendExecutor.submit(new Runnable() {
             public void run() {
                 try {
-                    log.debug("Writing ("+ debugLog+") - START");
+//                    log.debug("Writing ("+ debugLog+") - START");
                     client.write(message);
                     log.debug("Writing ("+ debugLog+") - END");
                     client.close();
