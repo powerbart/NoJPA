@@ -51,9 +51,7 @@ public class WorkerPool {
         for (WorkerEntry entry: pool.values()) {
             String inapplicableReason = entry.notApplicableReason();
             if (inapplicableReason != null) {
-//                if(!inapplicableReason.equals("Worker is busy")){
 //                    log.debug("Worker("+ entry +") not applicable: " + inapplicableReason);
-//                }
                 continue;
             }
             if (entry.knownClasses.contains(executorClass)) {

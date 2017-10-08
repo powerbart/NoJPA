@@ -216,11 +216,7 @@ public class MasterServer {
 
     static long masterworker_client_connection_count = new File("/tmp/masterworker_client_connection_count").exists() ? new Long(SuperIO.readTextFromFile("/tmp/masterworker_client_connection_count")) : 0;
 
-    ArrayList<MasterClientThread> clientThreads = new ArrayList<>();
     ThreadPoolExecutor clientExecutor = new ThreadPoolExecutor(20, 5000, 5, TimeUnit.MINUTES, new LinkedBlockingQueue<>());
-
-
-
 
     public void acceptClientConnection(ServerSocket serverSocket) {
         SuperIO.writeTextToFile("/tmp/masterworker_client_connection_count", "" + (masterworker_client_connection_count++));
@@ -239,11 +235,17 @@ public class MasterServer {
         log.debug("acceptClientConnection[3]: " + serverSocket);
     }
 
+    ThreadPoolExecutor workerExecutor = new ThreadPoolExecutor(20, 5000, 5, TimeUnit.MINUTES, new LinkedBlockingQueue<>());
+
     public void acceptWorkerConnection(ServerSocket serverSocket) {
         log.debug("acceptWorkerConnection: " + serverSocket);
         ServerLink serverLink = acceptConnection(serverSocket);
         if (serverLink != null) {
-            new MasterWorkerThread(this, serverLink).start();
+            log.debug("acceptWorkerConnection[1.1]: workerExecutor.getActiveCount(" + clientExecutor.getActiveCount() + "), workerExecutor.getPoolSize(" + clientExecutor.getPoolSize() + "), workerExecutor.getQueue().size(" + clientExecutor.getQueue().size() + ")");
+            workerExecutor.submit(new MasterWorkerThread(this, serverLink));
+            if(workerExecutor.getActiveCount() == workerExecutor.getPoolSize()){
+                workerExecutor.setCorePoolSize(workerExecutor.getCorePoolSize() + 1);
+            }
         }
         notifyObservers();
     }

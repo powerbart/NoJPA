@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
 
 
-public class MasterWorkerThread extends Thread {
+public class MasterWorkerThread implements Runnable{
 
     private static final Logger log = LoggerFactory.getLogger(MasterWorkerThread.class);
     private final ServerLink serverLink;
