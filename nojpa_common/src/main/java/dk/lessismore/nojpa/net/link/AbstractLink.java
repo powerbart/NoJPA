@@ -215,7 +215,7 @@ public abstract class AbstractLink {
     }
 
     public String getOtherHost() {
-        return socket.getInetAddress().getHostName();
+        return (socket != null && socket.getInetAddress() != null ?  socket.getInetAddress().getHostName() : "DEAD-LINK");
     }
 
     public int getOtherPort() {
