@@ -359,7 +359,7 @@ public class MasterServer {
 
             jobEntry = jobPool.firstJob();
             if (jobEntry == null) {
-                log.debug("No Job in queue to run :-D ");
+                log.debug("runJobs: No Job in queue to run :-D ");
                 try {
                     lock.lock();
                     condition.await(10, TimeUnit.SECONDS);
@@ -371,7 +371,7 @@ public class MasterServer {
             workerEntry = workerPool.getBestApplicableWorker(jobEntry.jobMessage.getExecutorClassName());
             long b = System.currentTimeMillis();
             if (workerEntry == null) {
-                log.debug("No available worker to run job - to run the first job... We will look in the queue for other jobs");
+                log.debug("runJobs: No available worker to run job - to run the first job... We will look in the queue for other jobs");
                 List<JobPool.JobEntry> diffJobs = jobPool.getDiffJobs(jobEntry.jobMessage.getExecutorClassName());
                 for (int i = 0; workerEntry == null && i < diffJobs.size(); i++) {
                     workerEntry = workerPool.getBestApplicableWorker(diffJobs.get(i).jobMessage.getExecutorClassName());
@@ -392,7 +392,7 @@ public class MasterServer {
             if(masterworker_input_jobs_count % 50 == 0) {
                 SuperIO.writeTextToFile("/tmp/masterworker_input_jobs_count", "" + (masterworker_input_jobs_count++));
             }
-            log.debug("Found worker to run job: " + workerEntry);
+            log.debug("runJobs: Found worker to run job: " + workerEntry);
             jobPool.jobTaken(jobEntry, workerEntry.serverLink);
             workerEntry.jobTakenStats();
             long d = System.currentTimeMillis();

@@ -68,13 +68,18 @@ public abstract class AbstractLink {
      * @throws IOException Connection error.
      */
     public synchronized void write(Object o) throws IOException {
-        String serializedObject = serializer.serialize(o);
-        totalWriteBytes += serializedObject.length();
+        try {
+            String serializedObject = serializer.serialize(o);
+            totalWriteBytes += serializedObject.length();
 //        if(!o.getClass().equals(Ping.class)){
 //            log.debug("Writing: " + o + " totalReadBytes("+ totalReadBytes +") totalWriteBytes("+ totalWriteBytes +")");
 //        }
-        out.write((serializedObject + SEPARATOR).getBytes());
-        out.flush();
+            out.write((serializedObject + SEPARATOR).getBytes());
+            out.flush();
+        } catch (IOException e){
+            log.error("ERROR when writing to ServerLink("+ getLinkID() +") " + e);
+            throw e;
+        }
     }
 
     /**
@@ -229,11 +234,13 @@ public abstract class AbstractLink {
                 try {
                     in.close();
                 } catch (Exception e){}
+                in = null;
             }
             if (out != null){
                 try {
                     out.close();
                 } catch (Exception e){}
+                out = null;
             }
             if (socket != null){
                 try {
@@ -243,6 +250,7 @@ public abstract class AbstractLink {
                     socket.shutdownOutput();
                 } catch (Exception ee){}
                 socket.close();
+                socket = null;
             }
         } catch (IOException e) {
             e.printStackTrace();

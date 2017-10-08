@@ -32,7 +32,7 @@ public class MessageSender {
     }
 
     public static void sendResultToClient(JobResultMessage result, ServerLink client, FailureHandler failureHandler) {
-        log.debug("sendResultToClient("+ result.getJobID() +")");
+        log.debug("sendResultToClient("+ result.getJobID() +") with ServerLink("+ client.getLinkID() +")");
         send(result, client, failureHandler);
     }
 
@@ -46,7 +46,7 @@ public class MessageSender {
      * @param client serverLink to recipient
      * @param failureHandler failure callback or null.
      */
-    static ThreadPoolExecutor sendExecutor = new ThreadPoolExecutor(20, 5000, 5, TimeUnit.MINUTES, new LinkedBlockingQueue<>());
+    static ThreadPoolExecutor sendExecutor = new ThreadPoolExecutor(40, 5000, 5, TimeUnit.MINUTES, new LinkedBlockingQueue<>());
 
     public static void send(final Object message, final ServerLink client, final FailureHandler failureHandler) {
         sendExecutor.submit(new Runnable() {
@@ -57,8 +57,11 @@ public class MessageSender {
                     if (failureHandler != null) failureHandler.onFailure(client);
                 }
             }});
-        if(sendExecutor.getActiveCount() == sendExecutor.getPoolSize()){
-            sendExecutor.setCorePoolSize(sendExecutor.getCorePoolSize() + 1);
+        synchronized (sendExecutor) {
+            if (sendExecutor.getActiveCount() == sendExecutor.getPoolSize()) {
+                log.debug("sendExecutor[1.1]: sendExecutor.getActiveCount(" + sendExecutor.getActiveCount() + "), sendExecutor.getPoolSize(" + sendExecutor.getPoolSize() + "), sendExecutor.getQueue().size(" + sendExecutor.getQueue().size() + ")");
+                sendExecutor.setCorePoolSize(sendExecutor.getCorePoolSize() + 1);
+            }
         }
     }
 
@@ -73,8 +76,11 @@ public class MessageSender {
                 }
             }
         });
-        if(sendExecutor.getActiveCount() == sendExecutor.getPoolSize()){
-            sendExecutor.setCorePoolSize(sendExecutor.getCorePoolSize() + 1);
+        synchronized (sendExecutor) {
+            if (sendExecutor.getActiveCount() == sendExecutor.getPoolSize()) {
+                log.debug("sendExecutor[1.1]: sendExecutor.getActiveCount(" + sendExecutor.getActiveCount() + "), sendExecutor.getPoolSize(" + sendExecutor.getPoolSize() + "), sendExecutor.getQueue().size(" + sendExecutor.getQueue().size() + ")");
+                sendExecutor.setCorePoolSize(sendExecutor.getCorePoolSize() + 1);
+            }
         }
     }
 
