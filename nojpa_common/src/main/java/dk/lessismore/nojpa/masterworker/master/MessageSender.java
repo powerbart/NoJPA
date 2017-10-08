@@ -10,6 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 
 public class MessageSender {
@@ -43,22 +46,24 @@ public class MessageSender {
      * @param client serverLink to recipient
      * @param failureHandler failure callback or null.
      */
+    static ThreadPoolExecutor sendExecutor = new ThreadPoolExecutor(20, 5000, 5, TimeUnit.MINUTES, new LinkedBlockingQueue<>());
+
     public static void send(final Object message, final ServerLink client, final FailureHandler failureHandler) {
-        Thread thread = new Thread(new Runnable() {
+        sendExecutor.submit(new Runnable() {
             public void run() {
                 try {
                     client.write(message);
                 } catch (IOException e) {
                     if (failureHandler != null) failureHandler.onFailure(client);
                 }
-            }
-        });
-        thread.setDaemon(true);
-        thread.run();
+            }});
+        if(sendExecutor.getActiveCount() == sendExecutor.getPoolSize()){
+            sendExecutor.setCorePoolSize(sendExecutor.getCorePoolSize() + 1);
+        }
     }
 
     public static void sendOrTimeout(final Object message, final ServerLink client, final FailureHandler failureHandler) {
-        Thread thread = new Thread(new Runnable() {
+        sendExecutor.submit(new Runnable() {
             public void run() {
                 try {
                     client.writeWithTimeout(message, 1000);
@@ -68,8 +73,9 @@ public class MessageSender {
                 }
             }
         });
-        thread.setDaemon(true);
-        thread.run();
+        if(sendExecutor.getActiveCount() == sendExecutor.getPoolSize()){
+            sendExecutor.setCorePoolSize(sendExecutor.getCorePoolSize() + 1);
+        }
     }
 
     public interface FailureHandler {
