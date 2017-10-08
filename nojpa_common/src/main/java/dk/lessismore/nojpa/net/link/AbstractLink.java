@@ -310,6 +310,6 @@ public abstract class AbstractLink {
 
     @Override
     public String toString() {
-        return this.getClass().getSimpleName()+" ID("+ getLinkID() +"):"+socket.toString();
+        return this.getClass().getSimpleName()+" ID("+ getLinkID() +"):";
     }
 }
