@@ -56,6 +56,7 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
                     query.limit(currentCount, currentCount + getSplitLimitSize());
                 }
                 log.debug("WorkQueue-fill-up-end: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +")");
+                int oldCount = currentCount;
                 query.visit(new AbstractCountingVisitor<T>() {
                             @Override
                             public void process(T t) {
@@ -66,11 +67,19 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
                                 getExecutor().execute(() -> doWork(t));
                             }
                         });
+                if (oldCount == currentCount) {
+                    // didn't visit any
+                    break;
+                }
             }
             log.debug("WorkQueue-is-full: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +")");
             int beforeQSize = getCurrentQueueSize();
             int sameCount = 0;
             for (int i = 0; i < 180; i++) {
+                if (getCurrentQueueSize() == 0 && totalCount == currentCount) {
+                    // we're DONE!
+                    break;
+                }
                 try {
                     Thread.sleep(1_000);
                 } catch (InterruptedException e) {
@@ -87,20 +96,22 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
             }
             if(sameCount == 180){
                 log.debug("WorkQueue-has-not-changed-for-long-time: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +")");
-                try{
-                    log.error("Will now try to force a shutdown... ");
-                    close();
-                } catch (Exception e){
-
-                } finally {
-                    System.exit(-1);
-                }
+                log.error("Will now try to force a shutdown... ");
+                break;
             }
 
 
         }
-        close();
-        System.exit(-1);
+
+        // closing things
+        try{
+            log.error("Will close... ");
+            close();
+        } catch (Exception e){
+
+        } finally {
+            System.exit(-1);
+        }
 
 
 
