@@ -48,25 +48,20 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
 
         while (getSplitLimitSize() + currentCount < totalCount) {
             while (getCurrentQueueSize() < getMinimumQueueSize()) {
-                log.debug("WorkQueue-fill-up-start: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +")");
-                MQL.SelectQuery<T> query = query();
-                if(startFromBeginning()){
-                    query.limit(getSplitLimitSize());
-                } else {
-                    query.limit(currentCount, currentCount + getSplitLimitSize());
-                }
+                log.debug("WorkQueue-fill-up: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +")");
+                int start = startFromBeginning() ? 0 : currentCount;
                 log.debug("WorkQueue-fill-up-end: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +")");
                 int oldCount = currentCount;
-                query.visit(new AbstractCountingVisitor<T>() {
-                            @Override
-                            public void process(T t) {
-                                if(currentCount % (getSplitLimitSize() / 10) == 0){
-                                    log.debug("WorkQueue-PROCESS: currentCount("+ currentCount +")");
-                                }
-                                currentCount++;
-                                getExecutor().execute(() -> doWork(t));
-                            }
-                        });
+                query().limit(start, start + getSplitLimitSize()).visit(new AbstractCountingVisitor<T>() {
+                    @Override
+                    public void process(T t) {
+                        if (currentCount % (getSplitLimitSize() / 10) == 0) {
+                            log.debug("WorkQueue-PROCESS: currentCount(" + currentCount + ")");
+                        }
+                        currentCount++;
+                        getExecutor().execute(() -> doWork(t));
+                    }
+                });
                 if (oldCount == currentCount) {
                     // didn't visit any
                     break;
@@ -94,6 +89,7 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
                 log.debug("WorkQueue-has-not-changed-for-long-time: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +")");
                 log.error("Will now try to force a shutdown... ");
                 break;
+
             }
 
 
@@ -109,12 +105,9 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
             System.exit(-1);
         }
 
-
-
     }
 
     public abstract MQL.SelectQuery<T> query();
-
 
     public abstract boolean startFromBeginning();
     public abstract void doWork(T t);
