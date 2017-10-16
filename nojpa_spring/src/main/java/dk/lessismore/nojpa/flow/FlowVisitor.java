@@ -76,10 +76,6 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
             int beforeQSize = getCurrentQueueSize();
             int sameCount = 0;
             for (int i = 0; i < 180; i++) {
-                if (getCurrentQueueSize() == 0 && totalCount == currentCount) {
-                    // we're DONE!
-                    break;
-                }
                 try {
                     Thread.sleep(1_000);
                 } catch (InterruptedException e) {
