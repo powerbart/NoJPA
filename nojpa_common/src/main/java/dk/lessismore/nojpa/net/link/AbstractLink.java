@@ -226,7 +226,7 @@ public abstract class AbstractLink {
         return "" + getOtherHost() + ":" + getOtherPort();
     }
 
-    public void close() {
+    public synchronized void close() {
         log.debug("Closing for link("+ getLinkID() +")");
         try {
             stopPinger();
