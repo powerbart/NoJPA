@@ -1,27 +1,20 @@
 package dk.lessismore.nojpa.masterworker.worker;
 
-import dk.lessismore.nojpa.concurrency.WaitForValue;
 import dk.lessismore.nojpa.concurrency.WaitForValueRepeat;
 import dk.lessismore.nojpa.masterworker.SystemHealth;
+import dk.lessismore.nojpa.masterworker.bean.RemoteBeanInterface;
 import dk.lessismore.nojpa.masterworker.bean.worker.BeanExecutor;
 import dk.lessismore.nojpa.masterworker.exceptions.JobDoesNotExistException;
 import dk.lessismore.nojpa.masterworker.exceptions.MasterUnreachableException;
 import dk.lessismore.nojpa.masterworker.exceptions.WorkerExecutionException;
 import dk.lessismore.nojpa.masterworker.executor.Executor;
 import dk.lessismore.nojpa.masterworker.master.MasterProperties;
-import dk.lessismore.nojpa.masterworker.messages.HealthMessage;
-import dk.lessismore.nojpa.masterworker.messages.JobMessage;
-import dk.lessismore.nojpa.masterworker.messages.JobProgressMessage;
-import dk.lessismore.nojpa.masterworker.messages.JobResultMessage;
-import dk.lessismore.nojpa.masterworker.messages.KillMessage;
-import dk.lessismore.nojpa.masterworker.messages.RegistrationMessage;
-import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteBeanMessage;
-import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteResultMessage;
-import dk.lessismore.nojpa.masterworker.messages.StopMessage;
+import dk.lessismore.nojpa.masterworker.messages.*;
 import dk.lessismore.nojpa.net.link.ClientLink;
 import dk.lessismore.nojpa.properties.PropertiesProxy;
 import dk.lessismore.nojpa.serialization.Serializer;
 import dk.lessismore.nojpa.serialization.XmlSerializer;
+import dk.lessismore.nojpa.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,30 +33,39 @@ public class Worker {
     private static final long SEND_PROGRESS_INTERVAL = 10 * 1000;
     private static final long SEND_HEALTH_INTERVAL = 20 * 1000;
     private static final int  MAX_SAME_PROGRESS = 3;
-    private final List<? extends Class<? extends Executor>> supportedExecutors;
+    private final List<Class<? extends Executor>> supportedExecutors;
     private static final double CRITICAL_VM_MEMORY_USAGE = 0.95;
     private final Serializer serializer;
+    private RemoteBeanInterface remoteBean = null;
+    private Class<? extends RemoteBeanInterface> remoteBeanClass = null;
+    private BeanExecutor beanExecutor = null;
 
     private final LinkAndThreads linkAndThreads = new LinkAndThreads();
 
     private boolean stop = false;
 
-    public Worker(Serializer serializer, List<? extends Class<? extends Executor>> supportedExecutors) {
+    public Worker(Serializer serializer, List<Class<? extends Executor>> supportedExecutors) {
         this.serializer = serializer;
         this.supportedExecutors = supportedExecutors;
-        run();
     }
 
     public Worker(Serializer serializer, Class<? extends Executor> ... supportedExecutors) {
         this(serializer, Arrays.asList(supportedExecutors));
     }
 
-    public Worker(List<? extends Class<? extends Executor>> supportedExecutors) {
+    public Worker(List<Class<? extends Executor>> supportedExecutors) {
         this (new XmlSerializer(), supportedExecutors);
     }
 
     public Worker(Class<? extends Executor> ... supportedExecutors) {
         this (new XmlSerializer(), supportedExecutors);
+    }
+
+    public Worker(Class<? extends RemoteBeanInterface> remoteBeanClass, RemoteBeanInterface remoteBean, Class<? extends Executor> ... supportedExecutors) {
+        this (new XmlSerializer(), supportedExecutors);
+        this.remoteBeanClass = remoteBeanClass;
+        this.remoteBean = remoteBean;
+        beanExecutor = new BeanExecutor(remoteBeanClass, remoteBean);
     }
 
 
@@ -83,7 +85,7 @@ public class Worker {
             if(linkAndThreads.clientLink == null) {
                 try {
                     linkAndThreads.clientLink = new ClientLink(host, port);
-                    linkAndThreads.clientLink.write(new RegistrationMessage(getSupportedExecutors()));
+                    linkAndThreads.clientLink.write(new RegistrationMessage(remoteBeanClass, getSupportedExecutors()));
                     linkAndThreads.startThreads();
                 } catch (ConnectException e) {
                     throw new MasterUnreachableException("Failed to connect to Master on " + host + ":" + port, e);
@@ -189,11 +191,15 @@ public class Worker {
         log.debug("Exiting!-2");
     }
 
-    private Executor<Object, Object> loadExecutor(JobMessage jobMessage) {
+    private Executor<?, ?> loadExecutor(JobMessage jobMessage) {
         try {
             final String className = jobMessage.getExecutorClassName();
-            final Class executorClass = Class.forName(className);
-            return (Executor) executorClass.newInstance();
+            if(remoteBeanClass != null && remoteBeanClass.getName().equals(className)){
+                return beanExecutor;
+            } else {
+                final Class executorClass = Class.forName(className);
+                return (Executor) executorClass.newInstance();
+            }
         } catch (Exception e) {
             log.error("Error extracting executer from job message. ", e);
             throw new RuntimeException(e);
@@ -202,16 +208,22 @@ public class Worker {
 
     private void runJob(Executor<Object, Object> executor, Object input, JobResultMessage<Object> resultMessage) {
         try {
-            log.debug("Will run job: " + input);
+            log.debug("runJob:Will run job: " + input);
             Object result = executor.run(input);
-            if(executor.isStoppedNicely()) resultMessage.setException(new JobDoesNotExistException(), serializer);
-            else resultMessage.setResult(result, serializer);
+            log.debug("runJob:result("+ result +")");
+            if(executor.isStoppedNicely()){
+                log.debug("runJob:executor.isStoppedNicely("+ executor.isStoppedNicely() +") - will return exception");
+                resultMessage.setException(new JobDoesNotExistException(), serializer);
+            } else {
+                log.debug("runJob:setResult...");
+                resultMessage.setResult(result, serializer);
+            }
         } catch (Exception e) {
             resultMessage.setException(e, serializer);
         }
     }
 
-    private List<? extends Class<? extends Executor>> getSupportedExecutors() {
+    private List<Class<? extends Executor>> getSupportedExecutors() {
         return supportedExecutors;
     }
 

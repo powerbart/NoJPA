@@ -11,7 +11,7 @@ import java.util.*;
 public class StartManyWorkers {
 
     private static int workerAmount = 10;
-    List<? extends Class<? extends Executor>> executorClasses = Arrays.asList(SumExecutor.class, ToUpperExecutor.class, ToLowerExecutor.class);
+    List<Class<? extends Executor>> executorClasses = Arrays.asList(SumExecutor.class, ToUpperExecutor.class, ToLowerExecutor.class);
 
     public static void main(String[] args) {
         new StartManyWorkers();
@@ -35,7 +35,7 @@ public class StartManyWorkers {
         new TestWorker().run();
     }
 
-    synchronized private List<? extends Class<? extends Executor>> getSomeExecutorClasses() {
+    synchronized private List<Class<? extends Executor>> getSomeExecutorClasses() {
 //        try {
 //            Thread.sleep(100);
 //        } catch (InterruptedException e) {

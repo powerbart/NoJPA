@@ -27,21 +27,21 @@ public class RemoteBeanService implements InvocationHandler {
     private static final Logger log = LoggerFactory.getLogger(RemoteBeanService.class);
 
 
-    public static <I extends RemoteBeanInterface, E extends BeanExecutor> I newRemoteBean(Class<I> beanInterface, Class<E> beanExecutor) {
+    public static <I extends RemoteBeanInterface> I newRemoteBean(Class<I> beanInterface) {
         return (I) Proxy.newProxyInstance(
                 beanInterface.getClassLoader(),
                 new Class[] {beanInterface},
-                new RemoteBeanService(beanInterface, beanExecutor));
+                new RemoteBeanService(beanInterface));
     }
 
     
 
 
-    private final Class<? extends ModelObjectInterface> sourceClass;
+    private final Class<? extends RemoteBeanInterface> sourceClass;
     private JobListener<Object> jobListener = null;
     JobHandle<Object> jobHandle = null;
 
-    public RemoteBeanService(Class sourceClass, Class executorClass) {
+    public RemoteBeanService(Class<? extends RemoteBeanInterface> sourceClass) {
         this.sourceClass = sourceClass;
 
         jobListener = new JobListener<Object>() {
@@ -69,7 +69,7 @@ public class RemoteBeanService implements InvocationHandler {
          };
 
          //JobHandle<String> jobHandle = MasterService.runJob(ToUpperExecutor.class, "WeAreNowUsingTheHandler");
-         jobHandle = MasterService.runJob(executorClass, new NewRemoteBeanMessage(sourceClass));
+         jobHandle = MasterService.runRemoteBean(sourceClass);
          jobHandle.addJobListener(jobListener);
 //        jobHandle.getResult();
     }

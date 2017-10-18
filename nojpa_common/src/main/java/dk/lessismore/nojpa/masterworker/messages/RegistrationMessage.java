@@ -1,5 +1,6 @@
 package dk.lessismore.nojpa.masterworker.messages;
 
+import dk.lessismore.nojpa.masterworker.bean.RemoteBeanInterface;
 import dk.lessismore.nojpa.masterworker.executor.Executor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,12 +17,18 @@ public class RegistrationMessage {
     private String folder = "UnknownF";
 
 
-    public RegistrationMessage(List<? extends Class<? extends Executor>> classes) {
+    public RegistrationMessage(Class<? extends RemoteBeanInterface> remoteBeanClass, List<Class<? extends Executor>> supportedExecutors) {
         this();
-        knownClasses = new String[classes.size()];
-        for (int i = 0; i < classes.size(); i++) {
-            knownClasses[i] = classes.get(i).getName();
-            System.out.println("Will registrate classes["+ i +"]: " + classes.get(i).getName());
+        knownClasses = new String[supportedExecutors.size() + (remoteBeanClass != null ? 1 :0)];
+        for (int i = 0; i < supportedExecutors.size(); i++) {
+            knownClasses[i] = supportedExecutors.get(i).getName();
+        }
+        if(remoteBeanClass != null){
+            knownClasses[knownClasses.length - 1] = remoteBeanClass.getName();
+        }
+        for (int i = 0; i < knownClasses.length; i++) {
+            System.out.println("Will registrate classes["+ i +"]: " + knownClasses[i]);
+
         }
     }
 
@@ -66,12 +73,6 @@ public class RegistrationMessage {
     public void setKnownClasses(String[] knownClasses) {
         this.knownClasses = knownClasses;
     }
-
-
-    public static void main(String[] args) throws UnknownHostException {
-        System.out.println(System.getenv("PWD"));
-    }
-
 
 
 }

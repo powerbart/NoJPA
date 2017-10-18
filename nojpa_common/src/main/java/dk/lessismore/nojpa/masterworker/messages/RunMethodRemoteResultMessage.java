@@ -86,13 +86,6 @@ public class RunMethodRemoteResultMessage<O> extends JobRelatedMessage {
 
     @Override
     public String toString() {
-        try {
-            if(result != null && result.length() > 0){
-                SuperIO.writeTextToFile("/infopaq/nfs/xml_debug/" + (new Date()).toString().replaceAll(" ", "-") + "-" + (super.toString().replaceAll("@", "-")) + ".xml", result);
-            }
-        } catch(Exception e){
-            e.printStackTrace();
-        }
         return super.toString() + " result("+ (result != null && result.length() > 300 ? result.substring(0, 300) + " ...zipped..." : result) +") + exception("+ exception +")";
     }
 }

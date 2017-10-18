@@ -1,5 +1,6 @@
 package dk.lessismore.nojpa.masterworker.bean.client;
 
+import dk.lessismore.nojpa.masterworker.bean.RemoteBeanInterface;
 import dk.lessismore.nojpa.masterworker.executor.Executor;
 import dk.lessismore.nojpa.serialization.Serializer;
 import dk.lessismore.nojpa.serialization.XmlSerializer;
@@ -23,13 +24,13 @@ public class MasterService {
         JobHandleToMasterProtocol<O> jm = new JobHandleToMasterProtocol<O>(serializer);
         return new JobHandle<O>(jm, jobID);
     }
-    
-    public static  <I,O> BatchJobHandle<O> runBatchJob(
-            Class<? extends Executor<I,O>> implementationClass, I[] jobDatas, boolean stopOnFirstError) {
-        return new BatchJobHandle<O>();
-    }
 
     private static Serializer defaultSerializer() {
         return new XmlSerializer();
+    }
+
+    public static <I, O> JobHandle<O> runRemoteBean(Class<? extends RemoteBeanInterface> sourceClass) {
+        JobHandleToMasterProtocol<O> jm = new JobHandleToMasterProtocol<O>(defaultSerializer());
+        return new JobHandle<O>(jm, sourceClass);
     }
 }

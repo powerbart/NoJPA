@@ -83,7 +83,7 @@ public class Master {
                 while (true)
                     try {
                         server.printStatus();
-                        Thread.sleep(10 * 1000);
+                        Thread.sleep(5 * 1000);
                     } catch (Exception e) {
                         log.error("error in queueToWorkerThread: {}", e.getMessage(), e);
                     }

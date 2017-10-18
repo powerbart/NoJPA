@@ -219,7 +219,7 @@ public abstract class AbstractLink {
     }
 
     public int getOtherPort() {
-        return socket.getPort();
+        return (socket != null ? socket.getPort() : -1);
     }
 
     public String getOtherHostPort() {

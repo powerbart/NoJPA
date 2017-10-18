@@ -3,8 +3,10 @@ package dk.lessismore.nojpa.masterworker.bean.client;
 import dk.lessismore.nojpa.concurrency.WaitForValue;
 import dk.lessismore.nojpa.guid.GuidFactory;
 import dk.lessismore.nojpa.masterworker.JobStatus;
+import dk.lessismore.nojpa.masterworker.bean.RemoteBeanInterface;
 import dk.lessismore.nojpa.masterworker.exceptions.JobHandleClosedException;
 import dk.lessismore.nojpa.masterworker.executor.Executor;
+import dk.lessismore.nojpa.masterworker.messages.NewRemoteBeanMessage;
 import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteBeanMessage;
 import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteResultMessage;
 import dk.lessismore.nojpa.reflection.db.DbObjectSelector;
@@ -19,7 +21,7 @@ public class JobHandle<O> {
     private static final Logger log = LoggerFactory.getLogger(DbObjectSelector.class);
 
     private final JobHandleToMasterProtocol<O> jm;
-    private final Class<? extends Executor> implementationClass;
+    private final Class implementationClass;
     private final Object jobData;
     private final String jobID = GuidFactory.getInstance().makeGuid();
     private boolean closed = false;
@@ -42,6 +44,14 @@ public class JobHandle<O> {
         this.jm = jm;
         this.implementationClass = executorClass;
         this.jobData = jobData;
+        jm.sendRunJobRequest(jobID, executorClass, jobData);
+        jm.addJobListener(new Listener(), jobID);
+    }
+
+    public JobHandle(JobHandleToMasterProtocol<O> jm, Class<? extends RemoteBeanInterface> executorClass) {
+        this.jm = jm;
+        this.implementationClass = executorClass;
+        this.jobData = new NewRemoteBeanMessage();
         jm.sendRunJobRequest(jobID, executorClass, jobData);
         jm.addJobListener(new Listener(), jobID);
     }

@@ -24,13 +24,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -47,6 +43,9 @@ public class MasterServer {
             }
         });
     }
+
+    private static boolean DEBUG = true;
+
     private final JobPool jobPool = new JobPool();
     private final WorkerPool workerPool = new WorkerPool();
     private final HashSet<ServerLink> observers = new HashSet<ServerLink>();
@@ -93,7 +92,7 @@ public class MasterServer {
     }
 
     public void queueJob(JobMessage jobMessage) {
-        SuperIO.writeTextToFile("/tmp/masterworker_queue_size", "" + (jobPool.getQueueSize()));
+        MasterServer.increaseCounterStatus("/tmp/masterworker_queue_size");
         log.debug("queueJob("+ jobPool.getQueueSize() +"): " + jobMessage);
         jobPool.addJob(jobMessage);
         runJobIfNecessaryAndPossible();
@@ -151,10 +150,27 @@ public class MasterServer {
         notifyObservers();
     }
 
-    static long masterworker_result_jobs_count = new File("/tmp/masterworker_result_jobs_count").exists() ? new Long(SuperIO.readTextFromFile("/tmp/masterworker_result_jobs_count")) : 0;
+    private static HashMap<String, AtomicLong> counterStatusMap = new HashMap<>();
+    public static void increaseCounterStatus(String filename){
+        AtomicLong counter = counterStatusMap.get(filename);
+        if(counter == null && new File(filename).exists()){
+            try{
+                counter = new AtomicLong(new Long(SuperIO.readTextFromFile(filename)));
+            } catch (Exception e){
+                counter = new AtomicLong(0L);
+            }
+            counterStatusMap.put(filename, counter);
+        }
+        final long increment = counter.getAndIncrement();
+        if(increment % 50 == 0){
+            SuperIO.writeTextToFile(filename, ""+ increment);
+        }
+
+    }
+
 
     public void setResult(JobResultMessage result, ServerLink serverLink) {
-        SuperIO.writeTextToFile("/tmp/masterworker_result_jobs_count", "" + (masterworker_result_jobs_count++));
+        increaseCounterStatus("/tmp/masterworker_result_jobs_count");
 
         log.debug("setResult["+ (result != null ? result.getJobID() : "NULL") +"]: " + serverLink);
         storeResult(result);
@@ -217,13 +233,12 @@ public class MasterServer {
         }
     }
 
-    static long masterworker_client_connection_count = new File("/tmp/masterworker_client_connection_count").exists() ? new Long(SuperIO.readTextFromFile("/tmp/masterworker_client_connection_count")) : 0;
 
     ThreadPoolExecutor clientExecutor = new ThreadPoolExecutor(20, 5000, 5, TimeUnit.MINUTES, new LinkedBlockingQueue<>());
 
     public void acceptClientConnection(ServerSocket serverSocket) {
-        SuperIO.writeTextToFile("/tmp/masterworker_client_connection_count", "" + (masterworker_client_connection_count++));
         log.debug("acceptClientConnection[1]: " + serverSocket);
+        MasterServer.increaseCounterStatus("/tmp/masterworker_client_connection_count");
         ServerLink serverLink = acceptConnection(serverSocket);
         if (serverLink != null) {
             log.debug("acceptClientConnection[1.1]: clientExecutor.getActiveCount(" + clientExecutor.getActiveCount() + "), clientExecutor.getPoolSize(" + clientExecutor.getPoolSize() + "), clientExecutor.getQueue().size(" + clientExecutor.getQueue().size() + ")");
@@ -318,7 +333,7 @@ public class MasterServer {
         }
     }
 
-    static long masterworker_input_jobs_count = new File("/tmp/masterworker_input_jobs_count").exists() ? new Long(SuperIO.readTextFromFile("/tmp/masterworker_input_jobs_count")) : 0;
+//    static long masterworker_input_jobs_count = new File("/tmp/masterworker_input_jobs_count").exists() ? new Long(SuperIO.readTextFromFile("/tmp/masterworker_input_jobs_count")) : 0;
 
     private long lastPrint = 0;
     protected void printStatus() {
@@ -331,7 +346,13 @@ public class MasterServer {
             builder.append(jobPoolStr + workPoolStr);
             builder.append("\n");
             builder.append("---------------------------------- Master Status ---------------------------------- ENDS");
-            SuperIO.writeTextToFile("/tmp/master-status", builder.toString());
+            final String content = builder.toString();
+            if(DEBUG){
+                log.debug(jobPoolStr);
+                log.debug(workPoolStr);
+                log.debug(content);
+            }
+            SuperIO.writeTextToFile("/tmp/master-status", content);
             SuperIO.writeTextToFile("/tmp/master-status-workpool", workPoolStr);
             SuperIO.writeTextToFile("/tmp/master-status-jobpool", jobPoolStr);
         } catch (Exception e){
@@ -389,9 +410,7 @@ public class MasterServer {
             }
             long c = System.currentTimeMillis();
 
-            if(masterworker_input_jobs_count % 50 == 0) {
-                SuperIO.writeTextToFile("/tmp/masterworker_input_jobs_count", "" + (masterworker_input_jobs_count++));
-            }
+             MasterServer.increaseCounterStatus("/tmp/masterworker_input_jobs_count");
             log.debug("runJobs: Found worker to run job: " + workerEntry);
             jobPool.jobTaken(jobEntry, workerEntry.serverLink);
             workerEntry.jobTakenStats();

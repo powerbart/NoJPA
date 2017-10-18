@@ -254,11 +254,9 @@ public class JobPool {
         }
     }
 
-    static long masterworker_output_jobs_count = new File("/tmp/masterworker_output_jobs_count").exists() ? new Long(SuperIO.readTextFromFile("/tmp/masterworker_output_jobs_count")) : 0;
-    static long masterworker_output_error_jobs_count = new File("/tmp/masterworker_output_error_jobs_count").exists() ? new Long(SuperIO.readTextFromFile("/tmp/masterworker_output_error_jobs_count")) : 0;
 
     private void fireOnResult(JobEntry jobEntry, JobResultMessage result) {
-        SuperIO.writeTextToFile("/tmp/masterworker_output_jobs_count", "" + (masterworker_output_jobs_count++));
+        MasterServer.increaseCounterStatus("/tmp/masterworker_output_jobs_count");
 
         log.debug("fireOnResult["+ result.getJobID() +"]:START");
         try {
@@ -272,7 +270,7 @@ public class JobPool {
                         removeListener(client);
                     }});
                 if (result.hasException()) {
-                    SuperIO.writeTextToFile("/tmp/masterworker_output_error_jobs_count", "" + (masterworker_output_error_jobs_count++));
+                    MasterServer.increaseCounterStatus("/tmp/masterworker_output_error_jobs_count");
                 }
                 log.debug("fireOnResult[" + result.getJobID() + "]:sendResultToClient(" + client.getOtherHost() + ")-DONE");
             }

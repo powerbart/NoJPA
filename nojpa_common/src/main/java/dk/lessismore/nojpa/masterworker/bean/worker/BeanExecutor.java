@@ -21,28 +21,29 @@ public class BeanExecutor extends Executor<NewRemoteBeanMessage, Object> {
 
     private boolean done = false;
     private RemoteBeanInterface objectToRunOn = null;
-    protected String implClassName = "net.infopaq.masterworker.bean.worker.RandomPrinterBeanImpl";
+    private Class<? extends RemoteBeanInterface> remoteBeanClass;
 
-    public BeanExecutor() {}
-
-    public BeanExecutor(String implClassName) {
-        this.implClassName = implClassName;
+    public BeanExecutor(Class<? extends RemoteBeanInterface> remoteBeanClass, RemoteBeanInterface objectToRunOn) {
+        this.objectToRunOn = objectToRunOn;
+        this.remoteBeanClass = remoteBeanClass;
     }
+
 
     public Object run(NewRemoteBeanMessage n) {
 
-        try {
-            // TODO if implClassName is set, use that class
-            objectToRunOn = (RemoteBeanInterface) Class.forName(implClassName).newInstance();
-        } catch (InstantiationException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
+//        try {
+//            // TODO if implClassName is set, use that class
+////            objectToRunOn = (RemoteBeanInterface) Class.forName(implClassName).newInstance();
+//        } catch (InstantiationException e) {
+//            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+//        } catch (IllegalAccessException e) {
+//            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+//        } catch (ClassNotFoundException e) {
+//            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+//        }
 
 
+        //TODO: Do we need this....?
         while(!done) {
             log.debug("Waiting for RemoteMethod: " + n + " " + super.toString());
             try {
@@ -61,6 +62,9 @@ public class BeanExecutor extends Executor<NewRemoteBeanMessage, Object> {
         try {
             if(n.getMethodName().equals("closeDownRemoteBean")){
                 done = true;
+                log.info("We will close down....");
+                Thread.sleep(2000);
+                System.exit(0);
             } else {
                 Method method = null;
 
@@ -83,13 +87,13 @@ public class BeanExecutor extends Executor<NewRemoteBeanMessage, Object> {
         return null;
     }
 
-    private static Class[] findArgsClasses(Object[] objects){
-        if(objects == null || objects.length == 0) return null;
-        Class[] classes = new Class[objects.length];
-        for(int i = 0; i < objects.length; i++){
-            classes[i] = objects[i].getClass();
-        }
-        return classes;
-    }
-
+//    private static Class[] findArgsClasses(Object[] objects){
+//        if(objects == null || objects.length == 0) return null;
+//        Class[] classes = new Class[objects.length];
+//        for(int i = 0; i < objects.length; i++){
+//            classes[i] = objects[i].getClass();
+//        }
+//        return classes;
+//    }
+//
 }
