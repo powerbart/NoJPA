@@ -299,7 +299,10 @@ public class Worker {
                                 Calendar oneMin = Calendar.getInstance();
                                 oneMin.add(Calendar.MINUTE, -1);
                                 if(lastMsg.before(oneMin)) {
-                                    log.info("Kill message recieved from master - shutting down.");
+                                    log.error("Kill message recieved from master - shutting down.");
+                                    log.error("Kill message recieved from master - shutting down.");
+                                    log.error("Kill message recieved from master - shutting down.");
+                                    log.error("Kill message recieved from master - shutting down.");
                                     stop = true;
                                     System.exit(0);
                                 } else {
@@ -360,6 +363,11 @@ public class Worker {
                             linkAndThreads.clientLink = null;
                         }
                         if(countOfFails % 10 == 0){
+                            log.error("WE WILL CLOSE DOWN AND EXIT-3 .... System.exit");
+                            log.error("WE WILL CLOSE DOWN AND EXIT-3 .... System.exit");
+                            log.error("WE WILL CLOSE DOWN AND EXIT-3 .... System.exit");
+                            log.error("WE WILL CLOSE DOWN AND EXIT-3 .... System.exit");
+                            log.error("WE WILL CLOSE DOWN AND EXIT-3 .... System.exit");
                             System.exit(-1);
                         }
                     }

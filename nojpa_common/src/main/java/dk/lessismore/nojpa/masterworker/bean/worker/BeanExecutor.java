@@ -62,8 +62,12 @@ public class BeanExecutor extends Executor<NewRemoteBeanMessage, Object> {
         try {
             if(n.getMethodName().equals("closeDownRemoteBean")){
                 done = true;
-                log.info("We will close down....");
+                log.error("We will close down.... - we got a closeDownRemoteBean-request");
                 Thread.sleep(2000);
+                log.error("We will close down.... - we got a closeDownRemoteBean-request");
+                log.error("We will close down.... - we got a closeDownRemoteBean-request");
+                log.error("We will close down.... - we got a closeDownRemoteBean-request");
+                log.error("We will close down.... - we got a closeDownRemoteBean-request");
                 System.exit(0);
             } else {
                 Method method = null;

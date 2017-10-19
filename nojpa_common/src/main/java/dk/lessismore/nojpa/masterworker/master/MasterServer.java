@@ -462,6 +462,10 @@ public class MasterServer {
                 }
             }
         } catch (Exception e){
+            log.error("We got a restartAllWorkers");
+            log.error("We got a restartAllWorkers");
+            log.error("We got a restartAllWorkers");
+            log.error("We got a restartAllWorkers");
             System.exit(-1); //TODO: Remove this in the future, when it is running stable
         }
 
