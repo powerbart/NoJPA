@@ -74,8 +74,12 @@ public abstract class AbstractLink {
 //        if(!o.getClass().equals(Ping.class)){
 //            log.debug("Writing: " + o + " totalReadBytes("+ totalReadBytes +") totalWriteBytes("+ totalWriteBytes +")");
 //        }
-            out.write((serializedObject + SEPARATOR).getBytes());
-            out.flush();
+            if(out == null){
+                throw new RuntimeException("Writing on a closed connection... ");
+            } else {
+                out.write((serializedObject + SEPARATOR).getBytes());
+                out.flush();
+            }
         } catch (IOException e){
             log.error("ERROR when writing to ServerLink("+ getLinkID() +") " + e);
             throw e;
