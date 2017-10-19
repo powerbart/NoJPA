@@ -83,7 +83,8 @@ public class Worker {
         int port = properties.getWorkerPort();
 
         while(true && !stop) {
-            log.debug("Trying to establish connection to Master on "+host+":"+port);
+            log.debug("1/2:Worker trying to establish connection to Master on "+host+":"+port);
+            long start = System.currentTimeMillis();
             //final ClientLink clientLink;
 
             if(linkAndThreads.clientLink == null) {
@@ -97,6 +98,7 @@ public class Worker {
                     throw new MasterUnreachableException("Failed to connect to Master on " + host + ":" + port, e);
                 }
             }
+            log.debug("2/2:Worker trying to establish connection to Master on "+host+":"+port + " TIME("+ (System.currentTimeMillis() - start) +")");
 
 
             log.debug("Waiting for job");
