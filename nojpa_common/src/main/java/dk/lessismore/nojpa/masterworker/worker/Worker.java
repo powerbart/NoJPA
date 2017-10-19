@@ -349,6 +349,7 @@ public class Worker {
                         log.error("Some error in stopper jobThread: ", e);
                     } finally {
                         try{
+                            countOfFails++;
                             log.error("WE WILL CLOSE DOWN AND EXIT-1");
                             linkAndThreads.clientLink.close();
                         } catch (Exception e){}
@@ -357,6 +358,9 @@ public class Worker {
                         if(linkAndThreads.clientLink != null){
                             linkAndThreads.clientLink.close();
                             linkAndThreads.clientLink = null;
+                        }
+                        if(countOfFails % 10 == 0){
+                            System.exit(-1);
                         }
                     }
                 }
@@ -370,5 +374,6 @@ public class Worker {
 
     }
 
+    private static int countOfFails = 0;
 
 }
