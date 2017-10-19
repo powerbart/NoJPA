@@ -179,6 +179,11 @@ public class ConnectionFactory implements ResourceFactory {
         return "DB-Connection";
     }
 
+    @Override
+    public int maxWaitSecBeforeCreatingNewResource() {
+        return 60 * 2;
+    }
+
     public Object makeResource() {
         String conStr = null;
         try {

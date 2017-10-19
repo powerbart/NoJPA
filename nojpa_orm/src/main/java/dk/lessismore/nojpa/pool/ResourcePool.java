@@ -171,7 +171,7 @@ public class ResourcePool {
 
 
                         //log.error("getFromPool:2.1 - wait - ends");
-                        if (countOfWait++ > 5 * 60 * 5) { //Waiting to 5 mins ...
+                        if (countOfWait++ > 5 * _resourceFactory.maxWaitSecBeforeCreatingNewResource()) { //Waiting to 5 mins ...
                             //log.error("getFromPool:2.1 - addNew - starts");
                             addNew();
                             countOfWait = 0;

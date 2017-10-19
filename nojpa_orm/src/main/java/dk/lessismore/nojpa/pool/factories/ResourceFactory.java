@@ -28,4 +28,5 @@ public interface ResourceFactory {
 
     public String debugName();
 
+    int maxWaitSecBeforeCreatingNewResource();
 }
