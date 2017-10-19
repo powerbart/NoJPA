@@ -227,6 +227,7 @@ public abstract class AbstractLink {
     }
 
     public synchronized void close() {
+//        log.debug("Closing for link("+ getLinkID() +")", new RuntimeException("DEBUG-STACK-TRACE"));
         log.debug("Closing for link("+ getLinkID() +")");
         try {
             stopPinger();
@@ -272,6 +273,16 @@ public abstract class AbstractLink {
             pinger = null;
         }
 
+    }
+
+    public boolean ping(){
+        try {
+            write(new Ping());
+            return true;
+        } catch (IOException e) {
+            log.debug("Will not throw this error...:"+ e, e);
+        }
+        return false;
     }
 
     private class Pinger extends Thread {

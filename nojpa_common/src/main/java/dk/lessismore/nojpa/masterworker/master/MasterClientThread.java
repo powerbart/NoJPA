@@ -23,6 +23,7 @@ public class MasterClientThread implements Runnable {
     public void run() {
         try{
             while(true) {
+                log.debug("Will wait for client request...");
                 Object clientRequest = serverLink.read();
                 log.debug("Message recieved from client '" + clientRequest.getClass().getSimpleName() + "'");
 
@@ -54,6 +55,7 @@ public class MasterClientThread implements Runnable {
             log.error("IOException - stopping listening to client", e);
         } finally {
             try{
+                log.debug("Saying goodbye to client....");
                 serverLink.close();
             } catch (Exception e){}
             masterServer.stopListen(serverLink);

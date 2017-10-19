@@ -46,7 +46,9 @@ public class JobPool {
 
 
     public void runMethodRemote(RunMethodRemoteBeanMessage runMethodRemoteBeanMessage, ServerLink serverLink) throws IOException {
+        log.debug("runMethodRemote:1:runMethodRemoteBeanMessage("+ runMethodRemoteBeanMessage.getJobID() +")/("+ runMethodRemoteBeanMessage.getMethodName() +")");
         JobPool.JobEntry jobEntry = pool.get(runMethodRemoteBeanMessage.getJobID());
+        log.debug("runMethodRemote:2:jobEntry("+ jobEntry +")");
         jobEntry.runMethodRemote(runMethodRemoteBeanMessage, serverLink);
     }
 
@@ -373,15 +375,29 @@ public class JobPool {
         }
 
         public void runMethodRemote(RunMethodRemoteBeanMessage runMethodRemoteBeanMessage, ServerLink serverLink) throws IOException {
-            while (getStatus().equals(JobStatus.QUEUED)) {
+            int counter = 0;
+            while (getStatus().equals(JobStatus.QUEUED) && serverLink.isWorking()) {
                 try {
-                    log.error("JobEntry thread has no assigned worker. The thread with sleep for 150ms and recheck");
+                    if(counter++ % 20 == 0){
+                        log.error("JobEntry thread has no assigned worker. The thread with sleep for 150ms and recheck");
+                        if(!serverLink.ping()){
+                            serverLink.close();
+                            break;
+                        }
+                    }
                     Thread.sleep(150);
                 } catch (InterruptedException e) {
                     log.error("JobEntry thread was interrupted " + e.getMessage());
                 }
             }
-            worker.write(runMethodRemoteBeanMessage);
+            if(serverLink.isWorking()){
+                log.debug("Client said goodbye.... ");
+            }
+            if(worker == null){
+                removeJob(getJobID());
+            } else {
+                worker.write(runMethodRemoteBeanMessage);
+            }
         }
 
 
