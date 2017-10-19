@@ -263,11 +263,11 @@ public class Worker {
         public void startThreads(){
             healthReporterThread = new Thread(new Runnable() {
                 public void run() {
-                    while(!stop) {
+                    while(!stop && linkAndThreads.clientLink != null) {
                         try {
                             HealthMessage healthMessage = new HealthMessage(SystemHealth.getSystemLoadAverage(),
                                     SystemHealth.getVmMemoryUsage(), SystemHealth.getDiskUsages());
-                            if(linkAndThreads.clientLink.isWorking()) {
+                            if(linkAndThreads.clientLink != null && linkAndThreads.clientLink.isWorking()) {
                                 linkAndThreads.clientLink.write(healthMessage);
                             }
                             Thread.sleep(SEND_HEALTH_INTERVAL);
@@ -359,8 +359,12 @@ public class Worker {
                         log.info("We are done.....");
                         log.error("WE WILL CLOSE DOWN AND EXIT-2");
                         if(linkAndThreads.clientLink != null){
-                            linkAndThreads.clientLink.close();
-                            linkAndThreads.clientLink = null;
+                            try {
+                                linkAndThreads.clientLink.close();
+                                linkAndThreads.clientLink = null;
+                            } catch (Exception e){
+
+                            }
                         }
                         if(countOfFails % 10 == 0){
                             log.error("WE WILL CLOSE DOWN AND EXIT-3 .... System.exit");
