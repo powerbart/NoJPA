@@ -77,7 +77,8 @@ public class BeanExecutor extends Executor<NewRemoteBeanMessage, Object> {
                 }
 //                objectToRunOn.getClass().getMethod(n.getMethodName(), findArgsClasses(n.getArgs()));
                 Object returnValue = method.invoke(objectToRunOn, n.getArgs());
-                log.debug(n.getMethodName() + " returns ( " + returnValue + ")");
+                final String s = String.valueOf(returnValue);
+                log.debug(n.getMethodName() + " returns ( " + (returnValue == null ? null : (s.length() > 20 ? s.substring(0, 20) + "..." : s)) + ")");
 
                 //will update progress from 0.00 to 0.99
                 if(objectToRunOn.getProgress() < 0.1){

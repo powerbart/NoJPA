@@ -344,15 +344,20 @@ public class Worker {
                             lastMsg = Calendar.getInstance();
                         }
                     } catch(ClosedChannelException e) {
-                        log.debug("Connection closed - Stopping stopperThread");
+                        log.error("Connection closed - Stopping stopperThread");
                     } catch(IOException e) {
-                        log.warn("Some error in stopper jobThread: ", e);
+                        log.error("Some error in stopper jobThread: ", e);
                     } finally {
                         try{
+                            log.error("WE WILL CLOSE DOWN AND EXIT-1");
                             linkAndThreads.clientLink.close();
                         } catch (Exception e){}
                         log.info("We are done.....");
-                        System.exit(0);
+                        log.error("WE WILL CLOSE DOWN AND EXIT-2");
+                        if(linkAndThreads.clientLink != null){
+                            linkAndThreads.clientLink.close();
+                            linkAndThreads.clientLink = null;
+                        }
                     }
                 }
             });
