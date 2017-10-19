@@ -47,7 +47,7 @@ public class BeanExecutor extends Executor<NewRemoteBeanMessage, Object> {
         while(!done) {
             log.debug("Waiting for RemoteMethod: " + n + " " + super.toString());
             try {
-                Thread.sleep(500);
+                Thread.sleep(5_000);
                 this.setProgress( objectToRunOn.getProgress() );
             } catch (InterruptedException e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.

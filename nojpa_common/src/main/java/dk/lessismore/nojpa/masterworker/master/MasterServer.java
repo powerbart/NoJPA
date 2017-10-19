@@ -153,7 +153,7 @@ public class MasterServer {
     private static HashMap<String, AtomicLong> counterStatusMap = new HashMap<>();
     public static void increaseCounterStatus(String filename){
         AtomicLong counter = counterStatusMap.get(filename);
-        if(counter == null && new File(filename).exists()){
+        if(counter == null){
             try{
                 counter = new AtomicLong(new Long(SuperIO.readTextFromFile(filename)));
             } catch (Exception e){
