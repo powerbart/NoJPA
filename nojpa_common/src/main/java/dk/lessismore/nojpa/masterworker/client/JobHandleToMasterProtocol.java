@@ -55,7 +55,7 @@ public class JobHandleToMasterProtocol<O> {
         callbackThread.start();
     }
 
-    public void sendRunJobRequest(String objectID, Class<? extends Executor> executorClass, Object jobData) {
+    public void sendRunJobRequest(String objectID, Class executorClass, Object jobData) {
         String serializedJobDate = serializer.serialize(jobData);
         JobMessage jobMessage = new JobMessage(objectID, executorClass, serializedJobDate);
         try {

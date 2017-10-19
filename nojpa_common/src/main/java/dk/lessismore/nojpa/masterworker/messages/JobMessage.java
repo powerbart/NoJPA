@@ -11,7 +11,7 @@ public class JobMessage extends JobRelatedMessage {
     public JobMessage() {
     }
 
-    public JobMessage(String jobID, Class<? extends Executor> executorClass, String serializedJobData){
+    public JobMessage(String jobID, Class executorClass, String serializedJobData){
         super(jobID);
         this.executorClassName = executorClass.getName();
         this.serializedJobData = serializedJobData;

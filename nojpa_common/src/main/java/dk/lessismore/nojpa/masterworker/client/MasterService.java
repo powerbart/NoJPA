@@ -1,6 +1,7 @@
 package dk.lessismore.nojpa.masterworker.client;
 
 import dk.lessismore.nojpa.masterworker.JobStatus;
+import dk.lessismore.nojpa.masterworker.bean.RemoteBeanInterface;
 import dk.lessismore.nojpa.masterworker.executor.Executor;
 import dk.lessismore.nojpa.masterworker.messages.observer.UpdateMessage;
 import dk.lessismore.nojpa.masterworker.observer.AbstractObserver;
@@ -122,4 +123,12 @@ public class MasterService {
     private static Serializer defaultSerializer() {
         return new XmlSerializer();
     }
+
+
+    public static <I, O> JobHandle<O> runRemoteBean(Class<? extends RemoteBeanInterface> sourceClass) {
+        JobHandleToMasterProtocol<O> jm = new JobHandleToMasterProtocol<O>(defaultSerializer());
+        return new JobHandle<O>(jm, sourceClass);
+    }
+
+
 }

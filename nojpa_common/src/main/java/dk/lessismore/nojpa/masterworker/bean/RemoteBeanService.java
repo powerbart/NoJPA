@@ -1,14 +1,11 @@
 package dk.lessismore.nojpa.masterworker.bean;
 
 import dk.lessismore.nojpa.masterworker.JobStatus;
-import dk.lessismore.nojpa.masterworker.bean.client.JobHandle;
-import dk.lessismore.nojpa.masterworker.bean.client.JobListener;
-import dk.lessismore.nojpa.masterworker.bean.client.MasterService;
-import dk.lessismore.nojpa.masterworker.bean.worker.BeanExecutor;
-import dk.lessismore.nojpa.masterworker.messages.NewRemoteBeanMessage;
+import dk.lessismore.nojpa.masterworker.client.JobHandle;
+import dk.lessismore.nojpa.masterworker.client.JobListener;
+import dk.lessismore.nojpa.masterworker.client.MasterService;
 import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteBeanMessage;
 import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteResultMessage;
-import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
