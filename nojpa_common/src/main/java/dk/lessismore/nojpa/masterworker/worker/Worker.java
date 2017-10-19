@@ -317,7 +317,7 @@ public class Worker {
                                 resultMessageOfMethod.setMethodName( runMethodRemoteBeanMessage.getMethodName() );
                                 try{
                                     resultOfMethod = b.runMethod(runMethodRemoteBeanMessage);
-                                    log.debug("Will set the of " + runMethodRemoteBeanMessage.getMethodName() + " -> result("+ resultOfMethod +") ");
+                                    log.debug("Will set the of " + runMethodRemoteBeanMessage.getMethodName() + " -> result("+ (resultOfMethod == null ? "NULL" : "HAS-RESULT") +") ");
 //                                    if(resultOfMethod != null){ // TODO ??? - should we return the null?
 
                                     resultMessageOfMethod.setResult(resultOfMethod, serializer);
