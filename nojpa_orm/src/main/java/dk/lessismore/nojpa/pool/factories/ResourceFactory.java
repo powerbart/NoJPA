@@ -25,4 +25,7 @@ public interface ResourceFactory {
      * database connection or termination of a thread.
      */
     public void closeResource(Object resource);
+
+    public String debugName();
+
 }

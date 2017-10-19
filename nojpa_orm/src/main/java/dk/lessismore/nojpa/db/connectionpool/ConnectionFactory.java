@@ -174,6 +174,11 @@ public class ConnectionFactory implements ResourceFactory {
         }
     }
 
+    @Override
+    public String debugName() {
+        return "DB-Connection";
+    }
+
     public Object makeResource() {
         String conStr = null;
         try {
