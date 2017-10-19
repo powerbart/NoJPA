@@ -30,7 +30,9 @@ public class MasterWorkerThread implements Runnable{
         try{
             while(true) {
                 Object clientRequest = serverLink.read();
-                log.debug(serverLink.getLinkID() + " Got clientRequest " + clientRequest.getClass().getSimpleName());
+                if(!clientRequest.getClass().getSimpleName().equals("HealthMessage") && !clientRequest.getClass().getSimpleName().equals("PingMessage")){
+                    log.debug(serverLink.getLinkID() + " Got clientRequest " + clientRequest.getClass().getSimpleName());
+                }
                 if (! (clientRequest instanceof HealthMessage) &&
                     ! (clientRequest instanceof JobProgressMessage))
                     log.debug("Message recieved from worker '" + clientRequest.getClass().getSimpleName() + "'");

@@ -43,11 +43,16 @@ public class ClientOfRandomPrinterBean {
 //        System.out.println("======= 100 calls in TIME("+ (end100 - start100) +")");
 
         System.out.println("x1 = " + randomPrinterBean.getMyInt());
-        Thread.sleep(1000 * 120);
+        Thread.sleep(1000 * 10);
         System.out.println("x2 = " + randomPrinterBean.getMyInt());
         System.out.println("x3 = " + randomPrinterBean.getMyInt());
-        System.out.println("x4 = " + randomPrinterBean.getMyInt());
-
+        Thread.sleep(1000 * 10);
+        System.out.println("x4.1 = " + randomPrinterBean.getMyInt());
+        System.out.println("x4.2 = " + randomPrinterBean.getMyInt());
+        System.out.println("x4.3 = " + randomPrinterBean.getMyInt());
+        System.out.println("x4.4 = " + randomPrinterBean.getMyInt());
+        System.out.println("x4.5 = " + randomPrinterBean.getMyInt());
+        Thread.sleep(1000 * 60);
         randomPrinterBean.closeDownRemoteBean();
         
         Thread.sleep(5000);

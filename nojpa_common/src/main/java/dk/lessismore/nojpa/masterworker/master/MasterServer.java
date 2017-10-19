@@ -205,13 +205,13 @@ public class MasterServer {
 
     long lastUpdate = System.currentTimeMillis();
     void notifyObservers() {
-        log.debug("notifyObservers.size("+ observers.size() +"): ");
+//        log.debug("notifyObservers.size("+ observers.size() +"): ");
+        if (observers == null || observers.isEmpty()) return;
         long now = System.currentTimeMillis();
         if(now - lastUpdate < 1000 * 1){
             return;
         }
         lastUpdate = now;
-        if (observers == null || observers.isEmpty()) return;
         UpdateMessage updateMessage = new UpdateMessage();
         updateMessage.setObserverJobMessages(jobPool.getObserverJobMessageList());
         updateMessage.setObserverWorkerMessages(workerPool.getObserverWorkerMessageList());

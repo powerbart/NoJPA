@@ -96,7 +96,7 @@ public class WorkerPool {
     }
 
     public void updateWorkerHealth(double systemLoad, double vmMemoryUsage, Map<String, Double> diskUsages, ServerLink serverLink) {
-        log.debug("updateWorkerHealth:systemLoad("+ systemLoad +") for " + serverLink);
+//        log.debug("updateWorkerHealth:systemLoad("+ systemLoad +") for " + serverLink);
         WorkerEntry workerEntry = pool.get(serverLink);
         workerEntry.systemLoad = systemLoad;
         workerEntry.vmMemoryUsage = vmMemoryUsage;
