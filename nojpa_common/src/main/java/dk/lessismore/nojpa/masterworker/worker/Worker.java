@@ -83,11 +83,11 @@ public class Worker {
         int port = properties.getWorkerPort();
 
         while(true && !stop) {
-            log.debug("1/2:Worker trying to establish connection to Master on "+host+":"+port);
-            long start = System.currentTimeMillis();
             //final ClientLink clientLink;
 
             if(linkAndThreads.clientLink == null) {
+                log.debug("1/2:Worker trying to establish connection to Master on "+host+":"+port);
+                long start = System.currentTimeMillis();
                 try {
                     linkAndThreads.clientLink = new ClientLink(host, port);
                     linkAndThreads.clientLink.write(new RegistrationMessage(remoteBeanClass, getSupportedExecutors()));
@@ -97,8 +97,8 @@ public class Worker {
                 } catch (IOException e) {
                     throw new MasterUnreachableException("Failed to connect to Master on " + host + ":" + port, e);
                 }
+                log.debug("2/2:Worker trying to establish connection to Master on "+host+":"+port + " TIME("+ (System.currentTimeMillis() - start) +")");
             }
-            log.debug("2/2:Worker trying to establish connection to Master on "+host+":"+port + " TIME("+ (System.currentTimeMillis() - start) +")");
 
 
             log.debug("Waiting for job");
@@ -134,23 +134,25 @@ public class Worker {
             double progress = -1.0;
             int sameProgress = 0;
             while(linkAndThreads.jobThread.isAlive() && linkAndThreads.clientLink.isWorking()) {
-                if(linkAndThreads.executor.getProgress() != progress) {
-                    sameProgress = 0;
-                    progress = linkAndThreads.executor.getProgress();
-                    log.debug("Working: "+(progress*100) + "%");
-                    try {
-                        linkAndThreads.clientLink.write(new JobProgressMessage(jobMessage.getJobID(), progress));
-                    } catch (IOException e) {
-                        log.error("IOException while writing back progress. Closing link",e);
-                        linkAndThreads.clientLink.close();
-                        break;
-                    }
-                } else {
-                    sameProgress++;
-                    if(sameProgress > MAX_SAME_PROGRESS){
-                        log.debug("This is a job that haven't had any progress the last "+ (sameProgress * 10) +"sec - we will kill it...");
-                        resultMessage.setException(new WorkerExecutionException("Too long time with no progress"), serializer);
-                        break;
+                if(remoteBean == null) {
+                    if (linkAndThreads.executor.getProgress() != progress) {
+                        sameProgress = 0;
+                        progress = linkAndThreads.executor.getProgress();
+                        log.debug("Working: " + (progress * 100) + "%");
+                        try {
+                            linkAndThreads.clientLink.write(new JobProgressMessage(jobMessage.getJobID(), progress));
+                        } catch (IOException e) {
+                            log.error("IOException while writing back progress. Closing link", e);
+                            linkAndThreads.clientLink.close();
+                            break;
+                        }
+                    } else {
+                        sameProgress++;
+                        if (sameProgress > MAX_SAME_PROGRESS) {
+                            log.debug("This is a job that haven't had any progress the last " + (sameProgress * 10) + "sec - we will kill it...");
+                            resultMessage.setException(new WorkerExecutionException("Too long time with no progress"), serializer);
+                            break;
+                        }
                     }
                 }
                 try {
@@ -163,7 +165,7 @@ public class Worker {
                 }
             }
 
-            log.debug("Writeting back result...");
+            log.debug("Writing back result...");
             try {
                 linkAndThreads.clientLink.write(resultMessage);
             } catch(IOException e) {
