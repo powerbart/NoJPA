@@ -68,6 +68,10 @@ public class Worker {
         beanExecutor = new BeanExecutor(remoteBeanClass, remoteBean);
     }
 
+    public Worker(Class<? extends RemoteBeanInterface> remoteBeanClass, Class<? extends Executor>[] supportedExecutors, RemoteBeanInterface remoteBean) {
+        this(remoteBeanClass, remoteBean, supportedExecutors);
+    }
+
 
     /**
      * Runs one job and then exits if memory usage is critical high.
