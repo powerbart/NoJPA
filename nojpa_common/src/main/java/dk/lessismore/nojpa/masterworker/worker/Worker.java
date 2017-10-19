@@ -366,7 +366,7 @@ public class Worker {
 
                             }
                         }
-                        if(countOfFails % 10 == 0){
+                        if(countOfFails > 3){
                             log.error("WE WILL CLOSE DOWN AND EXIT-3 .... System.exit");
                             log.error("WE WILL CLOSE DOWN AND EXIT-3 .... System.exit");
                             log.error("WE WILL CLOSE DOWN AND EXIT-3 .... System.exit");
