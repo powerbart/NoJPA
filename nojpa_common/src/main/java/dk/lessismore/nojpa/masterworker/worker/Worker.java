@@ -149,7 +149,7 @@ public class Worker {
                     sameProgress++;
                     if(sameProgress > MAX_SAME_PROGRESS){
                         log.debug("This is a job that haven't had any progress the last "+ (sameProgress * 10) +"sec - we will kill it...");
-                        resultMessage.setException(new WorkerExecutionException("Too long time"), serializer);
+                        resultMessage.setException(new WorkerExecutionException("Too long time with no progress"), serializer);
                         break;
                     }
                 }

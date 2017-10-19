@@ -78,6 +78,12 @@ public class BeanExecutor extends Executor<NewRemoteBeanMessage, Object> {
 //                objectToRunOn.getClass().getMethod(n.getMethodName(), findArgsClasses(n.getArgs()));
                 Object returnValue = method.invoke(objectToRunOn, n.getArgs());
                 log.debug(n.getMethodName() + " returns ( " + returnValue + ")");
+
+                //will update progress from 0.00 to 0.99
+                if(objectToRunOn.getProgress() < 0.1){
+                    this.setProgress(((this.getProgress() * 100 + 1) % 100) / 100);
+                }
+
                 return returnValue;
             }
         } catch (Exception e) {

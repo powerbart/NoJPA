@@ -44,7 +44,7 @@ public class MasterServer {
         });
     }
 
-    private static boolean DEBUG = true;
+    private static boolean DEBUG = false;
 
     private final JobPool jobPool = new JobPool();
     private final WorkerPool workerPool = new WorkerPool();
@@ -237,7 +237,7 @@ public class MasterServer {
     ThreadPoolExecutor clientExecutor = new ThreadPoolExecutor(20, 5000, 5, TimeUnit.MINUTES, new LinkedBlockingQueue<>());
 
     public void acceptClientConnection(ServerSocket serverSocket) {
-        log.debug("acceptClientConnection[1]: " + serverSocket);
+//        log.debug("acceptClientConnection[1]: " + serverSocket);
         MasterServer.increaseCounterStatus("/tmp/masterworker_client_connection_count");
         ServerLink serverLink = acceptConnection(serverSocket);
         if (serverLink != null) {
@@ -248,15 +248,15 @@ public class MasterServer {
             }
 
         }
-        log.debug("acceptClientConnection[2]: " + serverSocket);
+//        log.debug("acceptClientConnection[2]: " + serverSocket);
         notifyObservers();
-        log.debug("acceptClientConnection[3]: " + serverSocket);
+//        log.debug("acceptClientConnection[3]: " + serverSocket);
     }
 
     ThreadPoolExecutor workerExecutor = new ThreadPoolExecutor(20, 5000, 5, TimeUnit.MINUTES, new LinkedBlockingQueue<>());
 
     public void acceptWorkerConnection(ServerSocket serverSocket) {
-        log.debug("acceptWorkerConnection: " + serverSocket);
+//        log.debug("acceptWorkerConnection: " + serverSocket);
         ServerLink serverLink = acceptConnection(serverSocket);
         if (serverLink != null) {
             log.debug("acceptWorkerConnection[1.1]: workerExecutor.getActiveCount(" + clientExecutor.getActiveCount() + "), workerExecutor.getPoolSize(" + clientExecutor.getPoolSize() + "), workerExecutor.getQueue().size(" + clientExecutor.getQueue().size() + ")");
@@ -269,7 +269,7 @@ public class MasterServer {
     }
 
     public void acceptObserverConnection(ServerSocket serverSocket) {
-        log.debug("acceptObserverConnection: " + serverSocket);
+//        log.debug("acceptObserverConnection: " + serverSocket);
         ServerLink serverLink = acceptConnection(serverSocket);
         if (serverLink != null) {
             new MasterObserverThread(this, serverLink).start();
@@ -277,7 +277,7 @@ public class MasterServer {
     }
 
     private ServerLink acceptConnection(ServerSocket serverSocket) {
-        log.debug("acceptConnection: " + serverSocket);
+//        log.debug("acceptConnection: " + serverSocket);
         try {
             Socket socket;
             socket = serverSocket.accept();
