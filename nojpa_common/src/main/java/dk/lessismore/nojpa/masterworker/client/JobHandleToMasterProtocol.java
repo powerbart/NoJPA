@@ -1,5 +1,6 @@
 package dk.lessismore.nojpa.masterworker.client;
 
+import dk.lessismore.nojpa.concurrency.WaitForValue;
 import dk.lessismore.nojpa.masterworker.JobStatus;
 import dk.lessismore.nojpa.masterworker.exceptions.MasterUnreachableException;
 import dk.lessismore.nojpa.masterworker.executor.Executor;
@@ -14,11 +15,13 @@ import dk.lessismore.nojpa.masterworker.messages.StopMessage;
 import dk.lessismore.nojpa.net.link.ClientLink;
 import dk.lessismore.nojpa.properties.PropertiesProxy;
 import dk.lessismore.nojpa.serialization.Serializer;
+import dk.lessismore.nojpa.utils.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.ConnectException;
+import java.nio.channels.ClosedChannelException;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -30,6 +33,7 @@ public class JobHandleToMasterProtocol<O> {
     private ClientLink clientLink = null;
     private Set<JobListener<O>> listeners = new CopyOnWriteArraySet<JobListener<O>>();
     public final Serializer serializer;
+    WaitForValue<Pair<Object, RuntimeException>> waitForValueOrNull = null;
 
     public JobHandleToMasterProtocol(Serializer serializer) {
         this.serializer = serializer;
@@ -89,8 +93,9 @@ public class JobHandleToMasterProtocol<O> {
         }
     }
 
-    public void runMethodRemote(RunMethodRemoteBeanMessage runMethodRemoteBeanMessage) {
+    public void runMethodRemote(RunMethodRemoteBeanMessage runMethodRemoteBeanMessage, WaitForValue<Pair<Object, RuntimeException>> waitForValue) {
         try {
+            waitForValueOrNull = waitForValue;
             clientLink.write(runMethodRemoteBeanMessage);
         } catch (IOException e) {
             throw new MasterUnreachableException(e);
@@ -120,7 +125,14 @@ public class JobHandleToMasterProtocol<O> {
         listeners.clear();
     }
 
+    public void setWaitForValueToNull() {
+        this.waitForValueOrNull = null;
+    }
+
     public void close() {
+        if(waitForValueOrNull != null){
+            waitForValueOrNull.setValue(new Pair<Object, RuntimeException>(null, new RuntimeException("ServerLink closed by Master/Worker")));
+        }
         removeAllJobListeners();
         clientLink.close();
     }

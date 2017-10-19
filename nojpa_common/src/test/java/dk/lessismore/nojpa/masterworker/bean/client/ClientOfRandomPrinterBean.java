@@ -24,6 +24,18 @@ public class ClientOfRandomPrinterBean {
 //        Thread.sleep(2500);
 //
 //
+
+        for(int i = 0; i < 100_000; i++){
+            System.out.println("Calling - START");
+            System.out.println("x1 = " + randomPrinterBean.getMyInt());
+            System.out.println("Calling - END");
+            System.out.println("Will sleep - START");
+            Thread.sleep(1000 * 10);
+            System.out.println("Will sleep - END");
+
+        }
+
+
         System.out.println(" ---------- NOW CALLING RETURNS ---------------- 1");
 //        System.out.println("randomPrinterBean.getMyName() = " + randomPrinterBean.getMyName());
 //        System.out.println(" ---------- NOW CALLING RETURNS ---------------- 2");

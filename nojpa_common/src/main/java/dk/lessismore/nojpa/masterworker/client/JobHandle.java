@@ -138,8 +138,9 @@ public class JobHandle<O> {
             runMethodRemoteBeanMessage.setJobID( jobID );
             WaitForValue<Pair<Object, RuntimeException>> waitForValue = new WaitForValue<Pair<Object, RuntimeException>>();
             runMethodRemoteResultMap.put(runMethodRemoteBeanMessage.getMethodID(), waitForValue);
-            jm.runMethodRemote(runMethodRemoteBeanMessage);
+            jm.runMethodRemote(runMethodRemoteBeanMessage, waitForValue);
             Pair<Object, RuntimeException> pair = waitForValue.getValue();
+            jm.setWaitForValueToNull();
             Object value = pair.getFirst();
             RuntimeException exception = pair.getSecond();
             if (exception != null) {
