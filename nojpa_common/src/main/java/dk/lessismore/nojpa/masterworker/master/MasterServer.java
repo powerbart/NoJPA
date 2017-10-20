@@ -92,7 +92,7 @@ public class MasterServer {
     }
 
     public void queueJob(JobMessage jobMessage) {
-        MasterServer.increaseCounterStatus("/tmp/masterworker_queue_size");
+        SuperIO.writeTextToFile("/tmp/masterworker_queue_size", "" + (jobPool.getQueueSize()));
         log.debug("queueJob("+ jobPool.getQueueSize() +"): " + jobMessage);
         jobPool.addJob(jobMessage);
         runJobIfNecessaryAndPossible();
