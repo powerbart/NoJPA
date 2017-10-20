@@ -95,9 +95,10 @@ public class ResourcePool {
     }
     */
     public void addNew(){
-	Object resource = _resourceFactory.makeResource();
-	_pool.push(resource);
-	log.debug(" ------x addNew()");
+        log.info("START: addNew() ----- of " + _resourceFactory.debugName());
+        Object resource = _resourceFactory.makeResource();
+        _pool.push(resource);
+        log.info("END: addNew() ----- of " + _resourceFactory.debugName());
     }
 
     /**
