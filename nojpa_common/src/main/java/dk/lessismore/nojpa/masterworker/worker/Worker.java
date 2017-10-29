@@ -92,10 +92,17 @@ public class Worker {
                     linkAndThreads.clientLink = new ClientLink(host, port);
                     linkAndThreads.clientLink.write(new RegistrationMessage(remoteBeanClass, getSupportedExecutors()));
                     linkAndThreads.startThreads();
-                } catch (ConnectException e) {
-                    throw new MasterUnreachableException("Failed to connect to Master on " + host + ":" + port, e);
-                } catch (IOException e) {
-                    throw new MasterUnreachableException("Failed to connect to Master on " + host + ":" + port, e);
+                } catch (Exception e) {
+                    log.error("Failed to connect to Master on " + host + ":" + port, e);
+                    try {
+                        log.error("Will now sleep for 10 secs");
+                        Thread.sleep(10_000);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                    log.error("Will now call System.exit - since we can't connect to Master .... ");
+                    System.exit(-1);
+
                 }
                 log.debug("2/2:Worker trying to establish connection to Master on "+host+":"+port + " TIME("+ (System.currentTimeMillis() - start) +")");
             }
@@ -276,6 +283,10 @@ public class Worker {
                             break;
                         } catch (InterruptedException e) {
 //                            log.debug("Health report thread interrupted");
+                        } catch (Exception e) {
+                            log.error("Exception in healthReporterThread: " + e, e);
+                            log.error("Will now call System.exit");
+                            System.exit(-1);
                         }
                     }
                 }

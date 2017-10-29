@@ -392,7 +392,7 @@ public class MasterServer {
             workerEntry = workerPool.getBestApplicableWorker(jobEntry.jobMessage.getExecutorClassName());
             long b = System.currentTimeMillis();
             if (workerEntry == null) {
-                log.debug("runJobs: No available worker to run job - to run the first job... We will look in the queue for other jobs");
+                log.debug("runJobs: No available worker to run job - to run the first job... We will look in the queue for other jobs("+ jobPool.getQueueSize() +")");
                 List<JobPool.JobEntry> diffJobs = jobPool.getDiffJobs(jobEntry.jobMessage.getExecutorClassName());
                 for (int i = 0; workerEntry == null && i < diffJobs.size(); i++) {
                     workerEntry = workerPool.getBestApplicableWorker(diffJobs.get(i).jobMessage.getExecutorClassName());
