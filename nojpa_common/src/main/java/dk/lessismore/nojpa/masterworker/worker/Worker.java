@@ -65,7 +65,6 @@ public class Worker {
         this (new XmlSerializer(), supportedExecutors);
         this.remoteBeanClass = remoteBeanClass;
         this.remoteBean = remoteBean;
-        beanExecutor = new BeanExecutor(remoteBeanClass, remoteBean);
     }
 
     public Worker(Class<? extends RemoteBeanInterface> remoteBeanClass, Class<? extends Executor>[] supportedExecutors, RemoteBeanInterface remoteBean) {
@@ -92,6 +91,9 @@ public class Worker {
                     linkAndThreads.clientLink = new ClientLink(host, port);
                     linkAndThreads.clientLink.write(new RegistrationMessage(remoteBeanClass, getSupportedExecutors()));
                     linkAndThreads.startThreads();
+                    if(remoteBean != null){
+                        beanExecutor = new BeanExecutor(remoteBeanClass, remoteBean);
+                    }
                 } catch (Exception e) {
                     log.error("Failed to connect to Master on " + host + ":" + port, e);
                     try {
@@ -140,7 +142,7 @@ public class Worker {
 
             double progress = -1.0;
             int sameProgress = 0;
-            while(linkAndThreads.jobThread.isAlive() && linkAndThreads.clientLink.isWorking()) {
+            while(linkAndThreads.jobThread != null && linkAndThreads.clientLink != null && linkAndThreads.jobThread.isAlive() && linkAndThreads.clientLink.isWorking()) {
                 if(remoteBean == null) {
                     if (linkAndThreads.executor.getProgress() != progress) {
                         sameProgress = 0;
@@ -172,27 +174,29 @@ public class Worker {
                 }
             }
 
-            log.debug("Writing back result...");
-            try {
-                linkAndThreads.clientLink.write(resultMessage);
-            } catch(IOException e) {
-                log.error("Error when writing job result to master: ", e);
-                linkAndThreads.clientLink.close();
-                linkAndThreads.stopThreads();
-                break;
-            }
+            if(linkAndThreads.clientLink != null) {
+                log.debug("Writing back result...");
+                try {
+                    linkAndThreads.clientLink.write(resultMessage);
+                } catch (IOException e) {
+                    log.error("Error when writing job result to master: ", e);
+                    linkAndThreads.clientLink.close();
+                    linkAndThreads.stopThreads();
+                    break;
+                }
 
-            if (SystemHealth.getVmMemoryUsage() > CRITICAL_VM_MEMORY_USAGE) {
-                log.warn("Worker has a critical high VM memory usage.");
-                stop = true;
-                linkAndThreads.clientLink.close();
-                linkAndThreads.stopThreads();
-                break; //exit
-            }
+                if (SystemHealth.getVmMemoryUsage() > CRITICAL_VM_MEMORY_USAGE) {
+                    log.warn("Worker has a critical high VM memory usage.");
+                    stop = true;
+                    linkAndThreads.clientLink.close();
+                    linkAndThreads.stopThreads();
+                    break; //exit
+                }
 
-            if(sameProgress > MAX_SAME_PROGRESS){
-                stop = true;
-                break;
+                if (sameProgress > MAX_SAME_PROGRESS) {
+                    stop = true;
+                    break;
+                }
             }
 //            stop = true;
 //            break;
@@ -318,6 +322,7 @@ public class Worker {
                                     System.exit(0);
                                 } else {
                                     log.info("We will ignore Kill message, since last msg was ("+ lastMsg.getTime() +") < 1 min ago");
+                                    executor.stopNicely();
                                 }
                             } else if(o instanceof StopMessage) {
                                 log.info("Stop message recieved from master - signal executer to stop nicely.");

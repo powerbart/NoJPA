@@ -87,6 +87,15 @@ public class MasterServer {
 
     void stopListen(ServerLink client) {
         log.debug("stopListen: " + client);
+
+        String jobID = jobPool.getJobID(client);
+        log.debug("stopListen - jobID: " + jobID);
+        if(jobID != null){
+            log.debug("stopListen - sending KILL: " + jobID);
+            kill(jobID);
+        } else {
+            log.warn("We don't have a jobID for serverLink("+ client +")");
+        }
         jobPool.removeListener(client);
         notifyObservers();
     }
@@ -443,8 +452,8 @@ public class MasterServer {
                 }, "Sending KILL to jobEntry.worker("+ jobEntry.worker.getLinkID() +")");
                 workerPool.removeWorker(jobEntry.worker);
             }
-            jobPool.kill(jobID);
         }
+        jobPool.kill(jobID);
     }
 
     public void restartAllWorkers() {

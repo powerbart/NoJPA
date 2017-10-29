@@ -104,7 +104,7 @@ public class JobPool {
             log.info("No jobID("+ jobID +") found for client - cant remove listener. clientMap.size("+ clientMap.size() +") pool.size("+ pool.size() +")");
             return;
         }
-        clientMap.remove(client);
+
         JobEntry jobEntry = pool.get(jobID);
         if (jobEntry == null) {
             log.debug("No jobEntry exist - cant remove listener for jobID("+ jobID +"). clientMap.size("+ clientMap.size() +") pool.size("+ pool.size() +")");
@@ -115,6 +115,7 @@ public class JobPool {
             return;
         }
         jobEntry.clients.remove(client);
+        clientMap.remove(client);
     }
 
     public void updateJobProgress(String jobID, double progress) {
@@ -326,6 +327,21 @@ public class JobPool {
     public JobEntry getJobEntry(String jobID) {
         JobEntry jobEntry = pool.get(jobID);
         return jobEntry;
+    }
+
+    public JobEntry getJobEntry(ServerLink client) {
+        String jobID = clientMap.get(client);
+        if(jobID != null){
+            JobEntry jobEntry = pool.get(jobID);
+            return jobEntry;
+        } else {
+            return null;
+        }
+    }
+
+    public String getJobID(ServerLink client) {
+        String jobID = clientMap.get(client);
+        return jobID;
     }
 
     public synchronized List<JobEntry> getDiffJobs(String executorClassName) {

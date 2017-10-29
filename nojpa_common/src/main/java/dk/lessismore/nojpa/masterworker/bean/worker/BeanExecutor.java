@@ -44,7 +44,7 @@ public class BeanExecutor extends Executor<NewRemoteBeanMessage, Object> {
 
 
         //TODO: Do we need this....?
-        while(!done) {
+        while(!done && !isStoppedNicely()) {
             log.debug("Waiting for RemoteMethod: " + n + " " + super.toString());
             try {
                 Thread.sleep(5_000);
