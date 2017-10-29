@@ -231,8 +231,8 @@ public abstract class AbstractLink {
     }
 
     public synchronized void close() {
-        log.debug("Closing for link("+ getLinkID() +")", new RuntimeException("DEBUG-STACK-TRACE"));
-//        log.debug("Closing for link("+ getLinkID() +")");
+//        log.debug("Closing for link("+ getLinkID() +")", new RuntimeException("DEBUG-STACK-TRACE"));
+        log.debug("Closing for link("+ getLinkID() +")");
         try {
             stopPinger();
             if (in != null){

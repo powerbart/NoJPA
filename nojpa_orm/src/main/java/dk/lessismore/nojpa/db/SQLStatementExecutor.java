@@ -66,7 +66,13 @@ public class SQLStatementExecutor {
 
     private static void close(AutoCloseable... autoCloseables) throws Exception {
         for(AutoCloseable a : autoCloseables){
-            if(a != null){ a.close(); }
+            if(a != null){
+                try {
+                    a.close();
+                } catch (Exception e){
+
+                }
+            }
         }
     }
 
@@ -132,8 +138,8 @@ public class SQLStatementExecutor {
             } catch (Exception e) {
                 log.error("Update/Insert sql execution failed 2nd try (GIVING UP) \nstmt=" + insertSQLStatement, e);
                 try {
-                    close(statement, connection);
                     ConnectionPoolFactory.getPool().addNew();
+                    close(statement, connection);
                 } catch (Exception exp) {
                     log.warn("Trying to close connection because of error ..." + exp.toString());
                 }
@@ -172,8 +178,8 @@ public class SQLStatementExecutor {
         } catch (Exception e) {
             log.warn("Update/Insert sql execution failed (will try to recover) \nstmt=" + sqlStatement, e);
             try {
-                close(statement, connection);
                 ConnectionPoolFactory.getPool().addNew();
+                close(statement, connection);
             } catch (Exception ex) {
                 log.warn("Trying to close connection because of error ..." + ex.toString());
             }
@@ -186,8 +192,8 @@ public class SQLStatementExecutor {
             } catch (Exception ex) {
                 log.error("Update/Insert sql execution failed 2nd try (GIVING UP) \nstmt=" + sqlStatement, e);
                 try {
-                    close(statement, connection);
                     ConnectionPoolFactory.getPool().addNew();
+                    close(statement, connection);
                 } catch (Exception exp) {
                     log.warn("Trying to close connection because of error ..." + exp.toString());
                 }
@@ -229,8 +235,8 @@ public class SQLStatementExecutor {
         } catch (Exception e) {
             log.error("query sql execution failed \nstmt=" + sqlStatement, e);
             try {
-                close(resultSet, statement, connection);
                 ConnectionPoolFactory.getPool().addNew();
+                close(resultSet, statement, connection);
             } catch (Exception ex) {
                 log.error("2:Trying to close connection because of error ..." + ex.toString());
             }
@@ -244,8 +250,8 @@ public class SQLStatementExecutor {
             } catch (Exception ex) {
                 log.error("Some error in doQuery " + e.toString());
                 try {
-                    close(resultSet, statement, connection);
                     ConnectionPoolFactory.getPool().addNew();
+                    close(resultSet, statement, connection);
                 } catch (Exception exp) {
                     log.warn("2:Trying to close connection because of error ..." + exp.toString());
                 }
@@ -288,8 +294,8 @@ public class SQLStatementExecutor {
             } catch (Exception e) {
                 log.warn("doQuery: query sql execution failed. We will try again: " + e, e);
                 try {
-                    close(statement, connection);
                     ConnectionPoolFactory.getPool().addNew();
+                    close(statement, connection);
                 } catch (Exception ex) {
                     log.warn("2:Trying to close connection because of error ..." + ex.toString());
                 }
@@ -308,8 +314,8 @@ public class SQLStatementExecutor {
                     log.error("doQuery: query sql execution failed (GIVING-UP-1):" + e, e);
                     log.error("doQuery: query sql execution failed (GIVING-UP-2):" + exp, exp);
                     try {
-                        close(statement, connection);
                         ConnectionPoolFactory.getPool().addNew();
+                        close(statement, connection);
                     } catch (Exception ex) {
                         log.warn("2:Trying to close connection because of error ..." + ex.toString());
                     }

@@ -69,17 +69,17 @@ public class ResourcePool {
     }
 
     public void createPool(int poolSize) {
-        log.debug("Creating pool x-start");
+        log.debug("Creating pool x-start : " + _resourceFactory.debugName());
         _poolSize = poolSize;
 
 
         //Fill the pool!
         for(int i = 0; i < _poolSize; i++) {
-            log.debug("createPool() making("+ i +" out of "+ poolSize +")");
+            log.debug("createPool() making("+ i +" out of "+ poolSize +") ["+  _resourceFactory.debugName() +"]");
             Object resource = _resourceFactory.makeResource();
             _pool.push(resource);
         }
-	log.debug("Creating pool -done");
+	log.debug("Creating pool -done : " + _resourceFactory.debugName());
     }
     /*
     public void recreatePool() {
@@ -156,7 +156,7 @@ public class ResourcePool {
      */
     public Object getFromPool() {
         synchronized (log) {
-            //log.debug("getFromPool:1");
+            log.debug("getFromPool " + _resourceFactory.debugName());
             try {
                 //log.debug("getFromPool:2");
                 int countOfWait = 0;
@@ -198,7 +198,7 @@ public class ResourcePool {
      */
     public void putBackInPool(Object poolObj) {
 	//notifyAll();
-	//log.debug("putBackInPool:: -start ");
+	log.debug("putBackInPool " + _resourceFactory.debugName());
         _pool.push(poolObj);
         try{
             synchronized (log) {
