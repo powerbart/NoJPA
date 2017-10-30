@@ -70,7 +70,7 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
             log.debug("WorkQueue-is-full: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +")");
             int beforeQSize = getCurrentQueueSize();
             int sameCount = 0;
-            for (int i = 0; i < 60; i++) {
+            for (int i = 0; i < 120; i++) {
                 try {
                     Thread.sleep(1_000);
                 } catch (InterruptedException e) {
@@ -85,7 +85,7 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
                 }
                 log.debug("WorkQueue-is-full: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +")");
             }
-            if(sameCount == 60){
+            if(sameCount > 110){
                 log.debug("WorkQueue-has-not-changed-for-long-time: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +")");
                 log.error("Will now try to force a shutdown... ");
                 break;
