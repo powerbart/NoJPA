@@ -117,6 +117,7 @@ public class JobHandle<O> {
     public void stopNicely() {
         if (closed) throw new JobHandleClosedException();
         jm.stopNicely();
+        jm.close();
         close();
     }
 
@@ -197,7 +198,7 @@ public class JobHandle<O> {
                 }
             }
         } finally {
-            close();
+            MasterService.getJobHandleToMasterProtocolPool(null).putBackInPool(jm);
         }
     }
 

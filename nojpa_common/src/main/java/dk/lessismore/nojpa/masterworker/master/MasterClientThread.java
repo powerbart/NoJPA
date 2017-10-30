@@ -33,6 +33,7 @@ public class MasterClientThread implements Runnable {
                 if(clientRequest instanceof JobMessage) {
                     JobMessage jobMessage = (JobMessage) clientRequest;
                     masterServer.queueJob(jobMessage);
+                    masterServer.startListen(jobMessage.getJobID(), serverLink);
                 } else if(clientRequest instanceof JobListenMessage) {
                     JobListenMessage jobListenMessage = (JobListenMessage) clientRequest;
                     masterServer.startListen(jobListenMessage.getJobID(), serverLink);
@@ -55,7 +56,7 @@ public class MasterClientThread implements Runnable {
             log.error("IOException - stopping listening to client", e);
         } finally {
             try{
-                log.debug("Saying goodbye to client....");
+                log.debug("Saying goodbye to client.... " + serverLink.getLinkID());
                 serverLink.close();
             } catch (Exception e){}
             masterServer.stopListen(serverLink);

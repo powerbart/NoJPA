@@ -62,6 +62,7 @@ public class MasterServer {
 
     // Client services
     void startListen(String jobID, ServerLink client) {
+        log.debug("startListen("+ jobID +"->"+ client +")");
         if (jobID == null) log.error("Can't listen to null job");
         else {
             boolean listenerAdded = jobPool.addListener(jobID, client);
@@ -87,7 +88,6 @@ public class MasterServer {
 
     void stopListen(ServerLink client) {
         log.debug("stopListen: " + client);
-
         String jobID = jobPool.getJobID(client);
         log.debug("stopListen - jobID: " + jobID);
         if(jobID != null){
@@ -96,8 +96,8 @@ public class MasterServer {
         } else {
             log.warn("We don't have a jobID for serverLink("+ client +")");
         }
-        jobPool.removeListener(client);
-        notifyObservers();
+//        jobPool.removeListener(client);
+//        notifyObservers();
     }
 
     public void queueJob(JobMessage jobMessage) {

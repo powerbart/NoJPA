@@ -5,6 +5,8 @@ import dk.lessismore.nojpa.masterworker.bean.RemoteBeanInterface;
 import dk.lessismore.nojpa.masterworker.executor.Executor;
 import dk.lessismore.nojpa.masterworker.messages.observer.UpdateMessage;
 import dk.lessismore.nojpa.masterworker.observer.AbstractObserver;
+import dk.lessismore.nojpa.pool.ResourcePool;
+import dk.lessismore.nojpa.pool.factories.ResourceFactory;
 import dk.lessismore.nojpa.serialization.Serializer;
 import dk.lessismore.nojpa.serialization.XmlSerializer;
 import org.slf4j.Logger;
@@ -61,8 +63,47 @@ public class MasterService {
         return runJob(implementationClass,  jobData, defaultSerializer());
     }
 
+
+    private static ResourcePool pool = null;
+    public synchronized static <O> ResourcePool getJobHandleToMasterProtocolPool(Serializer serializer){
+        if(pool == null){
+            pool = new ResourcePool(new ResourceFactory() {
+                @Override
+                public Object makeResource() {
+                    return new JobHandleToMasterProtocol<O>(serializer);
+                }
+
+                @Override
+                public void closeResource(Object resource) {
+                    ((JobHandleToMasterProtocol) resource).close();
+                }
+
+                @Override
+                public String debugName() {
+                    return "JobHandleToMasterProtocol";
+                }
+
+                @Override
+                public int maxWaitSecBeforeCreatingNewResource() {
+                    return 0;
+                }
+            }, 1);
+        }
+        return pool;
+    }
+
+    public static JobHandleToMasterProtocol getNewJobHandleToMasterProtocol(Serializer serializer){
+        ResourcePool p = getJobHandleToMasterProtocolPool(serializer);
+        if(p.getNrOfResources() < 1){
+            p.addNew();
+        }
+        return (JobHandleToMasterProtocol) p.getFromPool();
+    }
+
+
     public static <I,O> JobHandle<O> runJob(Class<? extends Executor<I,O>> implementationClass, I jobData, Serializer serializer) {
-        JobHandleToMasterProtocol<O> jm = new JobHandleToMasterProtocol<O>(serializer);
+//        JobHandleToMasterProtocol<O> jm = new JobHandleToMasterProtocol<O>(serializer);
+        JobHandleToMasterProtocol<O> jm = getNewJobHandleToMasterProtocol(serializer);
         return new JobHandle<O>(jm, implementationClass, jobData);
     }
 

@@ -66,15 +66,16 @@ public class ClientCallbackThread<O> extends Thread {
             }
         } catch (ClosedChannelException e) {
             log.info("Connection closed - stopping listening for callbacks from master: " + e);
-            try {
-                jm.close();
-                cp.close();
-            } catch (Exception ex){
-                ex.printStackTrace();
-            }
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } finally {
+            try {
+                jm.close();
+            } catch (Exception e){
+
+            }
+            log.debug("Ending runner");
         }
-        log.debug("Ending runner");
+
     }
 }

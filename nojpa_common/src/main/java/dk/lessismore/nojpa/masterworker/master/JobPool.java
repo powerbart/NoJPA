@@ -1,5 +1,6 @@
 package dk.lessismore.nojpa.masterworker.master;
 
+import dk.lessismore.nojpa.guid.GuidFactory;
 import dk.lessismore.nojpa.masterworker.JobStatus;
 import dk.lessismore.nojpa.masterworker.exceptions.WorkerExecutionException;
 import dk.lessismore.nojpa.masterworker.messages.*;
@@ -261,7 +262,7 @@ public class JobPool {
     private void fireOnResult(JobEntry jobEntry, JobResultMessage result) {
         MasterServer.increaseCounterStatus("/tmp/masterworker_output_jobs_count");
 
-        log.debug("fireOnResult["+ result.getJobID() +"]:START");
+        log.debug("fireOnResult["+ result.getJobID() +"]:START ... jobEntry.clients("+ (jobEntry.clients == null ? -1 : jobEntry.clients.size()) +")");
         try {
             jobEntry.jobDoneDate = Calendar.getInstance();
             if (jobEntry.clients == null || jobEntry.clients.isEmpty()) return;
@@ -270,7 +271,9 @@ public class JobPool {
                 MessageSender.sendResultToClientAndClose(result, client, new MessageSender.FailureHandler() {
                     public void onFailure(ServerLink client) {
                         log.error("fireOnResult[" + result.getJobID() + "]:sendResultToClient(" + client.getOtherHost() + ")-ERROR");
-                        removeListener(client);
+                        try {
+                            client.close();
+                        } catch (Exception e){}
                     }});
                 if (result.hasException()) {
                     MasterServer.increaseCounterStatus("/tmp/masterworker_output_error_jobs_count");
@@ -361,6 +364,7 @@ public class JobPool {
 
     class JobEntry {
 
+        public String jobEntryID = GuidFactory.getInstance().makeGuid();
         public final int sequenceNumber;
         public JobMessage jobMessage;
         public HashSet<ServerLink> clients;
@@ -419,18 +423,20 @@ public class JobPool {
 
         @Override
         public String toString() {
-            return String.format("{Job-%s:%s status=%s, result=%s progress=%s, priority=%s, rerun=%s,  w=%s, created=%s, taken=%s, result=%s}",
+            return String.format("{Job-%s:%s status=%s, result=%s progress=%s, priority=%s, clients=%s, rerun=%s,  w=%s, created=%s, taken=%s, result=%s, ID=%s}",
                     getSimpleName(jobMessage.getExecutorClassName()),
                     jobMessage.getJobID(),
                     getStatus(),
                     getResultType(result),
                     progress,
                     priority,
+                    (clients == null ? -1 : clients.size()),
                     workerFailureCount,
                     (worker != null ? "" + worker.getOtherHost() +":"+ worker.getOtherPort() : "null"),
                     (new SimpleDateFormat("yyyyMMMdd HH:mm:ss")).format(date.getTime()),
                     (jobTakenDate != null ? (new SimpleDateFormat("MMMdd HH:mm:ss")).format(jobTakenDate.getTime()) : "-"),
-                    (jobDoneDate != null ? (new SimpleDateFormat("MMMdd HH:mm:ss")).format(jobDoneDate.getTime()) : "-")
+                    (jobDoneDate != null ? (new SimpleDateFormat("MMMdd HH:mm:ss")).format(jobDoneDate.getTime()) : "-"),
+                    jobEntryID
                     );
         }
 

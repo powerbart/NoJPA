@@ -22,7 +22,7 @@ public abstract class AbstractLink {
 
     public static boolean RUN_PINGER;
 
-
+    private static final boolean DEBUG_STACK_TRACE = false;
     protected Socket socket = null;
     protected OutputStream out = null;
     protected InputStream in = null;
@@ -51,6 +51,12 @@ public abstract class AbstractLink {
         } else {
             this.serializer = serializer;
         }
+        if(DEBUG_STACK_TRACE) {
+            log.debug("Starting for link(" + getLinkID() + ")", new RuntimeException("DEBUG-STACK-TRACE"));
+        } else {
+            log.debug("Starting for link("+ getLinkID() +")");
+        }
+
     }
 
     protected AbstractLink() {
@@ -231,8 +237,11 @@ public abstract class AbstractLink {
     }
 
     public synchronized void close() {
-//        log.debug("Closing for link("+ getLinkID() +")", new RuntimeException("DEBUG-STACK-TRACE"));
-        log.debug("Closing for link("+ getLinkID() +")");
+        if(DEBUG_STACK_TRACE) {
+            log.debug("Closing for link(" + getLinkID() + ")", new RuntimeException("DEBUG-STACK-TRACE"));
+        } else {
+            log.debug("Closing for link("+ getLinkID() +")");
+        }
         try {
             stopPinger();
             if (in != null){

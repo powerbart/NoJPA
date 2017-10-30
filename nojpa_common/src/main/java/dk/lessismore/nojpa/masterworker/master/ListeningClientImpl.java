@@ -48,7 +48,6 @@ public class ListeningClientImpl implements ListeningClient {
                 } catch (IOException e) {
                     log.debug("IOException while sending "+message.getClass().getSimpleName()+
                             " to client - removing client");
-                    jobPool.removeListener(client);
                 }
             }
         });

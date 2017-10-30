@@ -80,7 +80,7 @@ public class MessageSender {
 //                    log.debug("Writing ("+ debugLog+") - START");
                     client.write(message);
                     log.debug("Writing ("+ debugLog+") - END");
-                    client.close();
+//                    client.close();
                 } catch (IOException e) {
                     log.error("Writing ("+ debugLog+") - ERROR: " + e, e);
                     if (failureHandler != null) failureHandler.onFailure(client);
