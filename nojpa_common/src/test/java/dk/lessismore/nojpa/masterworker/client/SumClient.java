@@ -35,18 +35,36 @@ public class SumClient {
             }
         };
 
-        JobHandle<String> jobHandle = MasterService.runJob(SumExecutor.class, 7L);
-        jobHandle.addJobListener(jobListener);
-        System.out.println("jobHandle.getProgress() = " + jobHandle.getProgress());
-        System.out.println("jobHandle.getStatus() = " + jobHandle.getStatus());
-        //Thread.sleep(10 * 1000);
-        System.out.println("Sending KILL - START");
+        {
+            JobHandle<String> jobHandle = MasterService.runJob(SumExecutor.class, 7L);
+            jobHandle.addJobListener(jobListener);
+            System.out.println("jobHandle.getProgress() = " + jobHandle.getProgress());
+            System.out.println("jobHandle.getStatus() = " + jobHandle.getStatus());
+            //Thread.sleep(10 * 1000);
+//            System.out.println("Sending KILL - START");
 //        jobHandle.kill();
 //        System.out.println("Sending KILL - END");
 //        Thread.sleep(240 * 1000);
 
-        System.out.println(" ----- GET RESULT ----- ");
-        System.out.println(jobHandle.getResult());
-        System.out.println("------ DONE ------");
+            System.out.println(" ----- GET RESULT ----- ");
+            System.out.println(jobHandle.getResult());
+            System.out.println("------ DONE ------");
+        }
+        System.out.println("***************************************************");
+        {
+            JobHandle<String> jobHandle = MasterService.runJob(SumExecutor.class, 9L);
+            jobHandle.addJobListener(jobListener);
+            System.out.println("jobHandle.getProgress() = " + jobHandle.getProgress());
+            System.out.println("jobHandle.getStatus() = " + jobHandle.getStatus());
+            //Thread.sleep(10 * 1000);
+//            System.out.println("Sending KILL - START");
+//        jobHandle.kill();
+//        System.out.println("Sending KILL - END");
+//        Thread.sleep(240 * 1000);
+
+            System.out.println(" ----- GET RESULT ----- ");
+            System.out.println(jobHandle.getResult());
+            System.out.println("------ DONE ------");
+        }
     }
 }

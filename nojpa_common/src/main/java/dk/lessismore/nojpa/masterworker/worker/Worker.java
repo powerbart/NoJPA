@@ -40,6 +40,9 @@ public class Worker {
     private Class<? extends RemoteBeanInterface> remoteBeanClass = null;
     private BeanExecutor beanExecutor = null;
 
+    private static int NUMBER_OF_WORKERS_IN_JVM = 0;
+    private static int NUMBER_OF_DEAD_WORKERS_IN_JVM = 0;
+
     private final LinkAndThreads linkAndThreads = new LinkAndThreads();
 
     private boolean stop = false;
@@ -274,12 +277,17 @@ public class Worker {
         public void startThreads(){
             healthReporterThread = new Thread(new Runnable() {
                 public void run() {
+                    int countOfFails = 0;
                     while(!stop && linkAndThreads.clientLink != null) {
                         try {
                             HealthMessage healthMessage = new HealthMessage(SystemHealth.getSystemLoadAverage(),
                                     SystemHealth.getVmMemoryUsage(), SystemHealth.getDiskUsages());
                             if(linkAndThreads.clientLink != null && linkAndThreads.clientLink.isWorking()) {
                                 linkAndThreads.clientLink.write(healthMessage);
+                            }
+                            if(countOfFails > 3){
+                                log.error("WE WILL CLOSE DOWN IN HEALT.. BECAUSE OF ERRORS .... System.exit");
+                                System.exit(-1);
                             }
                             Thread.sleep(SEND_HEALTH_INTERVAL);
                         } catch (IOException e) {
@@ -311,13 +319,15 @@ public class Worker {
                                 maybeJob = (JobMessage) o;
                                 waitForValue.setValue(maybeJob);
                             } else if(o instanceof KillMessage) {
+                                KillMessage msg = (KillMessage) o;
                                 Calendar oneMin = Calendar.getInstance();
                                 oneMin.add(Calendar.MINUTE, -1);
                                 if(lastMsg.before(oneMin)) {
-                                    log.error("Kill message recieved from master - shutting down.");
-                                    log.error("Kill message recieved from master - shutting down.");
-                                    log.error("Kill message recieved from master - shutting down.");
-                                    log.error("Kill message recieved from master - shutting down.");
+                                    log.error("Kill message recieved from master - shutting down. " + msg.getJobID());
+                                    log.error("Kill message recieved from master - shutting down. " + msg.getJobID());
+                                    log.error("Kill message recieved from master - shutting down. " + msg.getJobID());
+                                    log.error("Kill message recieved from master - shutting down. " + msg.getJobID());
+                                    log.error("Kill message recieved from master - shutting down. " + msg.getJobID());
                                     stop = true;
                                     System.exit(0);
                                 } else {
@@ -352,6 +362,7 @@ public class Worker {
                                     resultMessageOfMethod.setException( t , serializer);
                                     try{
                                         linkAndThreads.clientLink.write(resultMessageOfMethod);
+
                                     } catch (Exception e){
                                         log.error("Some error when writing back result ... Have been executed .. " + e, e);
                                     }
@@ -367,22 +378,23 @@ public class Worker {
                     } catch(IOException e) {
                         log.error("Some error in stopper jobThread: ", e);
                     } finally {
+                        NUMBER_OF_DEAD_WORKERS_IN_JVM++;
                         try{
-                            countOfFails++;
                             log.error("WE WILL CLOSE DOWN AND EXIT-1");
                             linkAndThreads.clientLink.close();
-                        } catch (Exception e){}
-                        log.info("We are done.....");
+                        } catch (Exception e){
+                        }
+                        log.info("We are done..... ");
                         log.error("WE WILL CLOSE DOWN AND EXIT-2");
                         if(linkAndThreads.clientLink != null){
                             try {
                                 linkAndThreads.clientLink.close();
                                 linkAndThreads.clientLink = null;
                             } catch (Exception e){
-
                             }
+                        } else {
                         }
-                        if(countOfFails > 3){
+                        if(NUMBER_OF_DEAD_WORKERS_IN_JVM >= (NUMBER_OF_WORKERS_IN_JVM / 2)){
                             log.error("WE WILL CLOSE DOWN AND EXIT-3 .... System.exit");
                             log.error("WE WILL CLOSE DOWN AND EXIT-3 .... System.exit");
                             log.error("WE WILL CLOSE DOWN AND EXIT-3 .... System.exit");
@@ -402,6 +414,5 @@ public class Worker {
 
     }
 
-    private static int countOfFails = 0;
 
 }
