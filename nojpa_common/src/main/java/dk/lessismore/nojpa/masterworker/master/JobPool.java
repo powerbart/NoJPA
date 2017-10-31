@@ -548,8 +548,7 @@ public class JobPool {
             builder.append('\n');
             return builder.toString();
         } catch (Exception e){
-            e.printStackTrace();
-            log.warn("Error with toString: " + e, e);
+            log.warn("Error with toString: " + e); //we will get a lot of java.util.ConcurrentModificationException here... That we will skip ;-)
             return null;
         }
     }
