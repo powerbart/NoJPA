@@ -154,6 +154,7 @@ public class ResourcePool {
      * @exception RuntimeException If the pool has been closed or if the thread has been
      * interrupted.
      */
+    static long countOfWait = 0;
     public Object getFromPool() {
         synchronized (log) {
             log.debug("getFromPool " + _resourceFactory.debugName());
@@ -161,7 +162,7 @@ public class ResourcePool {
                 //log.debug("getFromPool:2");
                 int countOfWait = 0;
                 while (_pool.isEmpty()) {
-                    log.error("waiting for "+ _resourceFactory.debugName() +"..... " + _pool.size());
+                    log.error("Waiting for "+ _resourceFactory.debugName() +"..... size(" + _pool.size() + ") #"+ (countOfWait++));
                     try {
                         //log.error("getFromPool:2.1 - wait - start");
                         try {
@@ -184,6 +185,7 @@ public class ResourcePool {
                     }
                 }
                 //log.debug("getFromPool:3");
+                countOfWait = 0;
                 return _pool.pop();
             } catch (Exception e) {
                 log.error("Some error in getFromPool(): " + e.toString());

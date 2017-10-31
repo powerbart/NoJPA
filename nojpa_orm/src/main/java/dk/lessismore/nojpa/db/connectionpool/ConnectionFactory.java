@@ -181,7 +181,7 @@ public class ConnectionFactory implements ResourceFactory {
 
     @Override
     public int maxWaitSecBeforeCreatingNewResource() {
-        return 90;
+        return 120;
     }
 
     public Object makeResource() {
