@@ -46,9 +46,6 @@ public class Worker {
     private Class<? extends RemoteBeanInterface> remoteBeanClass = null;
     private BeanExecutor beanExecutor = null;
 
-    private static int NUMBER_OF_WORKERS_IN_JVM = 0;
-    private static int NUMBER_OF_DEAD_WORKERS_IN_JVM = 0;
-
     private boolean disableMemoryMonitoring = BooleanUtils.toBoolean(System.getenv("DISABLE_MEMORY_MONITORING"));
     private final LinkAndThreads linkAndThreads = new LinkAndThreads();
 
@@ -385,7 +382,6 @@ public class Worker {
                     } catch(IOException e) {
                         log.error("Some error in stopper jobThread: ", e);
                     } finally {
-                        NUMBER_OF_DEAD_WORKERS_IN_JVM++;
                         try{
                             log.error("WE WILL CLOSE DOWN AND EXIT-1");
                             linkAndThreads.clientLink.close();
@@ -401,14 +397,10 @@ public class Worker {
                             }
                         } else {
                         }
-                        if(NUMBER_OF_DEAD_WORKERS_IN_JVM >= (NUMBER_OF_WORKERS_IN_JVM / 2)){
-                            log.error("WE WILL CLOSE DOWN AND EXIT-3 .... System.exit");
-                            log.error("WE WILL CLOSE DOWN AND EXIT-3 .... System.exit");
-                            log.error("WE WILL CLOSE DOWN AND EXIT-3 .... System.exit");
-                            log.error("WE WILL CLOSE DOWN AND EXIT-3 .... System.exit");
-                            log.error("WE WILL CLOSE DOWN AND EXIT-3 .... System.exit");
-                            System.exit(-1);
-                        }
+                        log.error("WE WILL CLOSE DOWN AND EXIT-3 .... System.exit");
+                        log.error("WE WILL CLOSE DOWN AND EXIT-3 .... System.exit");
+                        log.error("WE WILL CLOSE DOWN AND EXIT-3 .... System.exit");
+                        System.exit(-1);
                     }
                 }
             });
