@@ -21,7 +21,6 @@ import org.apache.solr.common.util.SimpleOrderedMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -566,7 +565,9 @@ public class NQL {
                 solrQuery.setFields("objectID");
 //                solrQuery.setFields("*, score, _explain_");
 //                solrQuery.setParam("bf", "sum(_Post_pageViewCounter__ID_Counter_count__LONG,8)");
+                long start = System.currentTimeMillis();
                 QueryResponse queryResponse = solrServer.query(solrQuery);
+                log.info("[{}ms size: {}] Will solr query: {}", System.currentTimeMillis() - start, queryResponse.getResults().getNumFound(), solrQuery.toString().replace('+', ' '));
 
 //                timer.markLap("3");
 //                log.debug("queryResponse = " + queryResponse.getResults().size());
