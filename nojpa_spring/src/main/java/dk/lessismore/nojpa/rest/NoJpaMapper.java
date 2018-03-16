@@ -12,6 +12,7 @@ import org.springframework.hateoas.hal.Jackson2HalModule;
  */
 public class NoJpaMapper extends ObjectMapper {
     public NoJpaMapper() {
+
         this.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
         this.registerModule(new NoJpaModule());
 //        this.registerModule(new Jackson2HalModule());
