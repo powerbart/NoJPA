@@ -5,21 +5,27 @@ import dk.lessismore.nojpa.masterworker.SystemHealth;
 import dk.lessismore.nojpa.masterworker.bean.RemoteBeanInterface;
 import dk.lessismore.nojpa.masterworker.bean.worker.BeanExecutor;
 import dk.lessismore.nojpa.masterworker.exceptions.JobDoesNotExistException;
-import dk.lessismore.nojpa.masterworker.exceptions.MasterUnreachableException;
 import dk.lessismore.nojpa.masterworker.exceptions.WorkerExecutionException;
 import dk.lessismore.nojpa.masterworker.executor.Executor;
 import dk.lessismore.nojpa.masterworker.master.MasterProperties;
-import dk.lessismore.nojpa.masterworker.messages.*;
+import dk.lessismore.nojpa.masterworker.messages.HealthMessage;
+import dk.lessismore.nojpa.masterworker.messages.JobMessage;
+import dk.lessismore.nojpa.masterworker.messages.JobProgressMessage;
+import dk.lessismore.nojpa.masterworker.messages.JobResultMessage;
+import dk.lessismore.nojpa.masterworker.messages.KillMessage;
+import dk.lessismore.nojpa.masterworker.messages.RegistrationMessage;
+import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteBeanMessage;
+import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteResultMessage;
+import dk.lessismore.nojpa.masterworker.messages.StopMessage;
 import dk.lessismore.nojpa.net.link.ClientLink;
 import dk.lessismore.nojpa.properties.PropertiesProxy;
 import dk.lessismore.nojpa.serialization.Serializer;
 import dk.lessismore.nojpa.serialization.XmlSerializer;
-import dk.lessismore.nojpa.utils.Pair;
+import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.ConnectException;
 import java.nio.channels.ClosedChannelException;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -40,9 +46,7 @@ public class Worker {
     private Class<? extends RemoteBeanInterface> remoteBeanClass = null;
     private BeanExecutor beanExecutor = null;
 
-    private static int NUMBER_OF_WORKERS_IN_JVM = 0;
-    private static int NUMBER_OF_DEAD_WORKERS_IN_JVM = 0;
-
+    private boolean disableMemoryMonitoring = BooleanUtils.toBoolean(System.getenv("DISABLE_MEMORY_MONITORING"));
     private final LinkAndThreads linkAndThreads = new LinkAndThreads();
 
     private boolean stop = false;
@@ -188,7 +192,7 @@ public class Worker {
                     break;
                 }
 
-                if (SystemHealth.getVmMemoryUsage() > CRITICAL_VM_MEMORY_USAGE) {
+                if (!disableMemoryMonitoring && SystemHealth.getVmMemoryUsage() > CRITICAL_VM_MEMORY_USAGE) {
                     log.warn("Worker has a critical high VM memory usage.");
                     stop = true;
                     linkAndThreads.clientLink.close();
@@ -378,7 +382,6 @@ public class Worker {
                     } catch(IOException e) {
                         log.error("Some error in stopper jobThread: ", e);
                     } finally {
-                        NUMBER_OF_DEAD_WORKERS_IN_JVM++;
                         try{
                             log.error("WE WILL CLOSE DOWN AND EXIT-1");
                             linkAndThreads.clientLink.close();
@@ -394,14 +397,10 @@ public class Worker {
                             }
                         } else {
                         }
-                        if(NUMBER_OF_DEAD_WORKERS_IN_JVM >= (NUMBER_OF_WORKERS_IN_JVM / 2)){
-                            log.error("WE WILL CLOSE DOWN AND EXIT-3 .... System.exit");
-                            log.error("WE WILL CLOSE DOWN AND EXIT-3 .... System.exit");
-                            log.error("WE WILL CLOSE DOWN AND EXIT-3 .... System.exit");
-                            log.error("WE WILL CLOSE DOWN AND EXIT-3 .... System.exit");
-                            log.error("WE WILL CLOSE DOWN AND EXIT-3 .... System.exit");
-                            System.exit(-1);
-                        }
+                        log.error("WE WILL CLOSE DOWN AND EXIT-3 .... System.exit");
+                        log.error("WE WILL CLOSE DOWN AND EXIT-3 .... System.exit");
+                        log.error("WE WILL CLOSE DOWN AND EXIT-3 .... System.exit");
+                        System.exit(-1);
                     }
                 }
             });
