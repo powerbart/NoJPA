@@ -614,6 +614,10 @@ public class NQL {
             return null;
         }
 
+        public SearchQuery<T> search(String query) {
+            rootConstraints.add(has(query));
+            return this;
+        }
 
 //        private int selectCountFromDb() {
 //            statement.addExpression(getExpressionAddJoins());
@@ -889,6 +893,12 @@ public class NQL {
             expression = newLeafExpression().addConstrain(makeAttributeIdentifier(pair), comp, model.getObjectID());
         }
         return new SolrConstraint(expression, joints);
+    }
+
+    public static Constraint has(String query) {
+        SolrExpression expression = new SolrExpression();
+        expression.addConstrain(query);
+        return new SolrConstraint(expression, new ArrayList<>());
     }
 
     public static <M extends ModelObjectInterface> Constraint hasNull(M mockValue) {
@@ -1289,6 +1299,11 @@ public class NQL {
             this.attr = attributeName;
             this.value = "" + value;
             this.comparator = comparator;
+            return this;
+        }
+        public SolrExpression addConstrain(String query) {
+            log.trace("addConstrain:("+ query+")");
+            this.statement = query;
             return this;
         }
 
