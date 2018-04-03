@@ -92,12 +92,16 @@ public class MasterService {
         return pool;
     }
 
-    public static JobHandleToMasterProtocol getNewJobHandleToMasterProtocol(Serializer serializer){
+    public static JobHandleToMasterProtocol getNewJobHandleToMasterProtocol(Serializer serializer) {
         ResourcePool p = getJobHandleToMasterProtocolPool(serializer);
-        if(p.getNrOfResources() < 1){
+        if (p.getNrOfResources() < 1) {
             p.addNew();
         }
-        return (JobHandleToMasterProtocol) p.getFromPool();
+        JobHandleToMasterProtocol protocol = (JobHandleToMasterProtocol) p.getFromPool();
+        if (!protocol.getClientLink().isWorking()) {
+            return (JobHandleToMasterProtocol) p.addNew();
+        }
+        return protocol;
     }
 
 
@@ -115,7 +119,7 @@ public class MasterService {
         JobHandleToMasterProtocol<O> jm = new JobHandleToMasterProtocol<O>(serializer);
         return new JobHandle<O>(jm, jobID);
     }
-    
+
     public static  <I,O> BatchJobHandle<O> runBatchJob(
             Class<? extends Executor<I,O>> implementationClass, I[] jobDatas, boolean stopOnFirstError) {
         return new BatchJobHandle<O>();

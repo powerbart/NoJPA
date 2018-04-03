@@ -94,11 +94,12 @@ public class ResourcePool {
 	log.debug("recreatePool:: done");
     }
     */
-    public void addNew(){
+    public Object addNew(){
         log.info("START: addNew() ----- of " + _resourceFactory.debugName());
         Object resource = _resourceFactory.makeResource();
         _pool.push(resource);
         log.info("END: addNew() ----- of " + _resourceFactory.debugName());
+        return resource;
     }
 
     /**
