@@ -81,7 +81,7 @@ public abstract class AbstractLink {
 //            log.debug("Writing: " + o + " totalReadBytes("+ totalReadBytes +") totalWriteBytes("+ totalWriteBytes +")");
 //        }
             if(out == null){
-                throw new RuntimeException("Writing on a closed connection... ");
+                throw new RuntimeException("Writing on a closed connection... " + getLinkID());
             } else {
                 out.write((serializedObject + SEPARATOR).getBytes());
                 out.flush();

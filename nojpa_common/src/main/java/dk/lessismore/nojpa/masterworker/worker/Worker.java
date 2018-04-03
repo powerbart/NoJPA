@@ -38,7 +38,7 @@ public class Worker {
     private static final Logger log = LoggerFactory.getLogger(Worker.class);
     private static final long SEND_PROGRESS_INTERVAL = 10 * 1000;
     private static final long SEND_HEALTH_INTERVAL = 20 * 1000;
-    private static final int  MAX_SAME_PROGRESS = 3;
+    private static final int DEFAULT_MAX_SAME_PROGRESS = 3;
     private final List<Class<? extends Executor>> supportedExecutors;
     private static final double CRITICAL_VM_MEMORY_USAGE = 0.95;
     private final Serializer serializer;
@@ -164,7 +164,7 @@ public class Worker {
                         }
                     } else {
                         sameProgress++;
-                        if (sameProgress > MAX_SAME_PROGRESS) {
+                        if (sameProgress > getMaxSameProgress()) {
                             log.debug("This is a job that haven't had any progress the last " + (sameProgress * 10) + "sec - we will kill it...");
                             resultMessage.setException(new WorkerExecutionException("Too long time with no progress"), serializer);
                             break;
@@ -200,7 +200,7 @@ public class Worker {
                     break; //exit
                 }
 
-                if (sameProgress > MAX_SAME_PROGRESS) {
+                if (sameProgress > getMaxSameProgress()) {
                     stop = true;
                     break;
                 }
@@ -413,5 +413,8 @@ public class Worker {
 
     }
 
+    public int getMaxSameProgress() {
+        return DEFAULT_MAX_SAME_PROGRESS;
+    }
 
 }

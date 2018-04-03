@@ -40,6 +40,10 @@ public class JobHandleToMasterProtocol<O> {
         initConnection();
     }
 
+    public ClientLink getClientLink() {
+        return clientLink;
+    }
+
     private void initConnection() {
         long start = System.currentTimeMillis();
         String host = properties.getHost();
