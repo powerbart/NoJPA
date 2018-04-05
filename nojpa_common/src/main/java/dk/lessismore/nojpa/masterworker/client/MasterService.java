@@ -12,15 +12,33 @@ import dk.lessismore.nojpa.serialization.XmlSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
+
+//This class has the purpose the be the "interface" against the client
+
 public class MasterService {
 
     private final static Logger log = LoggerFactory.getLogger(MasterService.class);
 
-    public static <I,O> JobHandle<O> runJob(Class<? extends Executor<I,O>> implementationClass, I jobData, int maxSecondsBeforeFailure) {
-        JobHandle<O> jobHandle = runJob(implementationClass, jobData, defaultSerializer());
-        final Object blocker = new Object();
-        final Object resultBocker = new Object();
+    private static ResourcePool pool = null;
 
+    public static <I, O> JobHandle<O> runRemoteBean(Class<? extends RemoteBeanInterface> sourceClass) {
+        JobHandleToMasterProtocol<O> jm = new JobHandleToMasterProtocol<O>(defaultSerializer());
+        return new JobHandle<O>(jm, sourceClass);
+    }
+
+
+    public static <I,O> JobHandle<O> runJob(Class<? extends Executor<I,O>> implementationClass, I jobData, int maxSecondsBeforeFailure) {
+        return runJob(implementationClass, jobData, defaultSerializer(), maxSecondsBeforeFailure);
+    }
+
+    public static <I,O> JobHandle<O> runJob(Class<? extends Executor<I,O>> implementationClass, I jobData, Serializer serializer, int maxSecondsBeforeFailure) {
+        JobHandleToMasterProtocol<O> jm = getNewJobHandleToMasterProtocol(serializer);
+        JobHandle<O> jobHandle = new JobHandle<O>(jm, implementationClass, jobData, System.currentTimeMillis() + maxSecondsBeforeFailure * 1000);
+        final Object blocker = new Object();
+
+        //TODO: In this case, we have one thread living as long as the request is active + 1 second.
+        //TODO: We should make one shared thread that is checking all jobHandles and timing it out, when needed.
         final String DEBUG_ID = jobHandle.getJobID().substring(jobHandle.getJobID().length() - 6);
         Thread blockerThread = new Thread() {
             @Override
@@ -53,18 +71,21 @@ public class MasterService {
             }
         };
 
-
-        blockerThread.setName(Thread.currentThread().getName() + "-" + blockerThread.getName() + "-" + DEBUG_ID);
-        blockerThread.start();
+        if(maxSecondsBeforeFailure > 0) {
+            blockerThread.setName(Thread.currentThread().getName() + "-" + blockerThread.getName() + "-" + DEBUG_ID);
+            blockerThread.start();
+        }
         return jobHandle;
     }
 
-    public static <I,O> JobHandle<O> runJob(Class<? extends Executor<I,O>> implementationClass, I jobData) {
-        return runJob(implementationClass,  jobData, defaultSerializer());
+
+    public static void closeAllConnections(){
+        //TODO: Should call close on all JobHandleToMasterProtocol objects, and the MasterService should be uncallable after.
     }
 
 
-    private static ResourcePool pool = null;
+
+    //TODO: Serializer should not be a parameter, we will always use the XmlSerializer....!
     public synchronized static <O> ResourcePool getJobHandleToMasterProtocolPool(Serializer serializer){
         if(pool == null){
             pool = new ResourcePool(new ResourceFactory() {
@@ -105,30 +126,7 @@ public class MasterService {
     }
 
 
-    public static <I,O> JobHandle<O> runJob(Class<? extends Executor<I,O>> implementationClass, I jobData, Serializer serializer) {
-//        JobHandleToMasterProtocol<O> jm = new JobHandleToMasterProtocol<O>(serializer);
-        JobHandleToMasterProtocol<O> jm = getNewJobHandleToMasterProtocol(serializer);
-        return new JobHandle<O>(jm, implementationClass, jobData);
-    }
 
-    public static <I, O> JobHandle<O> restoreJobHandle(Class<? extends Executor<I,O>>implementationClass, String jobID) {
-        return restoreJobHandle(implementationClass, jobID, defaultSerializer());
-    }
-
-    public static <I, O> JobHandle<O> restoreJobHandle(Class<? extends Executor<I,O>>implementationClass, String jobID, Serializer serializer) {
-        JobHandleToMasterProtocol<O> jm = new JobHandleToMasterProtocol<O>(serializer);
-        return new JobHandle<O>(jm, jobID);
-    }
-
-    public static  <I,O> BatchJobHandle<O> runBatchJob(
-            Class<? extends Executor<I,O>> implementationClass, I[] jobDatas, boolean stopOnFirstError) {
-        return new BatchJobHandle<O>();
-    }
-
-    public static void restartAllWorkers() {
-        JobHandleToMasterProtocol jm = new JobHandleToMasterProtocol(defaultSerializer());
-        jm.restartAllWorkers();
-    }
 
 
     public static UpdateMessage getStatus(){
@@ -169,11 +167,6 @@ public class MasterService {
         return new XmlSerializer();
     }
 
-
-    public static <I, O> JobHandle<O> runRemoteBean(Class<? extends RemoteBeanInterface> sourceClass) {
-        JobHandleToMasterProtocol<O> jm = new JobHandleToMasterProtocol<O>(defaultSerializer());
-        return new JobHandle<O>(jm, sourceClass);
-    }
 
 
 }

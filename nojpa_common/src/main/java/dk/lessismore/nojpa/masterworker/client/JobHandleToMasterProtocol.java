@@ -3,15 +3,12 @@ package dk.lessismore.nojpa.masterworker.client;
 import dk.lessismore.nojpa.concurrency.WaitForValue;
 import dk.lessismore.nojpa.masterworker.JobStatus;
 import dk.lessismore.nojpa.masterworker.exceptions.MasterUnreachableException;
-import dk.lessismore.nojpa.masterworker.executor.Executor;
 import dk.lessismore.nojpa.masterworker.master.MasterProperties;
-import dk.lessismore.nojpa.masterworker.messages.JobListenMessage;
 import dk.lessismore.nojpa.masterworker.messages.JobMessage;
 import dk.lessismore.nojpa.masterworker.messages.KillMessage;
-import dk.lessismore.nojpa.masterworker.messages.RestartAllWorkersMessage;
 import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteBeanMessage;
 import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteResultMessage;
-import dk.lessismore.nojpa.masterworker.messages.StopMessage;
+import dk.lessismore.nojpa.masterworker.messages.CancelJobMessage;
 import dk.lessismore.nojpa.net.link.ClientLink;
 import dk.lessismore.nojpa.properties.PropertiesProxy;
 import dk.lessismore.nojpa.serialization.Serializer;
@@ -21,7 +18,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.ConnectException;
-import java.nio.channels.ClosedChannelException;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -33,7 +29,7 @@ public class JobHandleToMasterProtocol<O> {
     private ClientLink clientLink = null;
     private Set<JobListener<O>> listeners = new CopyOnWriteArraySet<JobListener<O>>();
     public final Serializer serializer;
-    WaitForValue<Pair<Object, RuntimeException>> waitForValueOrNull = null;
+    private WaitForValue<Pair<Object, RuntimeException>> waitForValueOrNull = null;
 
     public JobHandleToMasterProtocol(Serializer serializer) {
         this.serializer = serializer;
@@ -63,19 +59,13 @@ public class JobHandleToMasterProtocol<O> {
         callbackThread.start();
     }
 
-    public void sendRunJobRequest(String objectID, Class executorClass, Object jobData) {
+    public void sendRunJobRequest(String jobID, Class executorClass, Object jobData, JobListener<O> listener, long deadline) {
+        removeAllJobListeners();
         String serializedJobDate = serializer.serialize(jobData);
-        JobMessage jobMessage = new JobMessage(objectID, executorClass, serializedJobDate);
+        JobMessage jobMessage = new JobMessage(jobID, executorClass, serializedJobDate, deadline);
         try {
             clientLink.write(jobMessage);
-        } catch (IOException e) {
-            throw new MasterUnreachableException(e);
-        }
-    }
-
-    public void restartAllWorkers() {
-        try {
-            clientLink.write(new RestartAllWorkersMessage());
+            addJobListener(listener);
         } catch (IOException e) {
             throw new MasterUnreachableException(e);
         }
@@ -83,7 +73,7 @@ public class JobHandleToMasterProtocol<O> {
 
     public void stopNicely() {
         try {
-            clientLink.write(new StopMessage());
+            clientLink.write(new CancelJobMessage());
         } catch (IOException e) {
             throw new MasterUnreachableException(e);
         }
@@ -92,6 +82,7 @@ public class JobHandleToMasterProtocol<O> {
     public void kill(String jobID) {
         try {
             clientLink.write(new KillMessage(jobID));
+            close();
         } catch (IOException e) {
             throw new MasterUnreachableException(e);
         }
@@ -107,19 +98,10 @@ public class JobHandleToMasterProtocol<O> {
     }
 
 
-
-    public void addJobListener(JobListener<O> listener, String jobID) {
-        if (listeners.isEmpty()) registerForCallbacks(jobID);
+    public void addJobListener(JobListener<O> listener) {
         listeners.add(listener);
     }
 
-    private void registerForCallbacks(String jobID) {
-        try {
-            clientLink.write(new JobListenMessage(jobID));
-        } catch (IOException e) {
-            throw new MasterUnreachableException(e);
-        }
-    }
 
     public void removeJobListener(JobListener<O> listener) {
         listeners.remove(listener);

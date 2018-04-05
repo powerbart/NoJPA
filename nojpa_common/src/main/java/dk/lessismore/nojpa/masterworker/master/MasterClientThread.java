@@ -5,7 +5,6 @@ import dk.lessismore.nojpa.net.link.ServerLink;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
 
 
@@ -32,13 +31,7 @@ public class MasterClientThread implements Runnable {
 //                    masterServer.newRemoteBean(newRemoteBeanMessage);
                 if(clientRequest instanceof JobMessage) {
                     JobMessage jobMessage = (JobMessage) clientRequest;
-                    masterServer.queueJob(jobMessage);
-                    masterServer.startListen(jobMessage.getJobID(), serverLink);
-                } else if(clientRequest instanceof JobListenMessage) {
-                    JobListenMessage jobListenMessage = (JobListenMessage) clientRequest;
-                    masterServer.startListen(jobListenMessage.getJobID(), serverLink);
-                } else if(clientRequest instanceof RestartAllWorkersMessage) {
-                    masterServer.restartAllWorkers();
+                    masterServer.queueJob(jobMessage, serverLink);
                 } else if(clientRequest instanceof RunMethodRemoteBeanMessage) {
                     RunMethodRemoteBeanMessage runMethodRemoteBeanMessage = (RunMethodRemoteBeanMessage) clientRequest;
                     masterServer.runMethodRemote(runMethodRemoteBeanMessage, serverLink);
@@ -59,7 +52,7 @@ public class MasterClientThread implements Runnable {
                 log.debug("Saying goodbye to client.... " + serverLink.getLinkID());
                 serverLink.close();
             } catch (Exception e){}
-            masterServer.stopListen(serverLink);
+            masterServer.clientClosedCancelRunningJobs(serverLink);
         }
     }
 }

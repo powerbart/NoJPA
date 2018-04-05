@@ -7,14 +7,16 @@ public class JobMessage extends JobRelatedMessage {
 
     private String executorClassName;
     private String serializedJobData;
+    private long dealline;
 
     public JobMessage() {
     }
 
-    public JobMessage(String jobID, Class executorClass, String serializedJobData){
+    public JobMessage(String jobID, Class executorClass, String serializedJobData, long dealline){
         super(jobID);
         this.executorClassName = executorClass.getName();
         this.serializedJobData = serializedJobData;
+        this.dealline = dealline;
     }
 
 
@@ -32,5 +34,9 @@ public class JobMessage extends JobRelatedMessage {
 
     public void setSerializedJobData(String serializedJobData) {
         this.serializedJobData = serializedJobData;
+    }
+
+    public long getDealline() {
+        return dealline;
     }
 }

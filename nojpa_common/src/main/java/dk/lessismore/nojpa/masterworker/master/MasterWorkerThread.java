@@ -30,11 +30,12 @@ public class MasterWorkerThread implements Runnable{
         try{
             while(true) {
                 Object clientRequest = serverLink.read();
-                if(!clientRequest.getClass().getSimpleName().equals("HealthMessage") && !clientRequest.getClass().getSimpleName().equals("PingMessage")){
+                if(!clientRequest.getClass().getSimpleName().equals("HealthMessage") && !clientRequest.getClass().getSimpleName().equals("PingMessage") && !clientRequest.getClass().getSimpleName().equals("PongMessage")){
                     log.debug(serverLink.getLinkID() + " Got clientRequest " + clientRequest.getClass().getSimpleName());
                 }
                 if (! (clientRequest instanceof HealthMessage) &&
-                    ! (clientRequest instanceof JobProgressMessage))
+                    ! (clientRequest instanceof JobProgressMessage) &&
+                    ! (clientRequest instanceof PongMessage))
                     log.debug("Message recieved from worker '" + clientRequest.getClass().getSimpleName() + "'");
                 if(clientRequest instanceof PingMessage) {
                     serverLink.write(new PongMessage());
@@ -47,6 +48,7 @@ public class MasterWorkerThread implements Runnable{
                 } else if(clientRequest instanceof JobProgressMessage) {
                     JobProgressMessage jobProgressMessage = (JobProgressMessage) clientRequest;
                     masterServer.updateJobProgress(jobProgressMessage);
+                } else if(clientRequest instanceof PongMessage) {
                 } else if(clientRequest instanceof RunMethodRemoteResultMessage) {
                     RunMethodRemoteResultMessage runMethodRemoteResultMessage = (RunMethodRemoteResultMessage) clientRequest;
                     masterServer.setRunMethodRemoteResultMessage(runMethodRemoteResultMessage);

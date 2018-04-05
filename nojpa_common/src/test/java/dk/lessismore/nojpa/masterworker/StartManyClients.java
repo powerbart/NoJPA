@@ -10,7 +10,7 @@ import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteResultMessage;
 
 public class StartManyClients {
 
-    private static int clientAmount = 50;
+    private static int clientAmount = 100;
 
 //    public static void main(String[] args) throws Exception {
 //        final StartManyClients startManyClients = new StartManyClients();
@@ -53,7 +53,7 @@ public class StartManyClients {
         String name = Thread.currentThread().getName();
         try {
             System.out.println(name +":1");
-            JobHandle<String> jobHandle = MasterService.runJob(SumExecutor.class, 100l);
+            JobHandle<String> jobHandle = MasterService.runJob(SumExecutor.class, 100l, 15);
             System.out.println(name +":2");
 //        jobHandle.addJobListener(new VerboseListener(n));
             System.out.format("%d: RESULT: %s\n", n, jobHandle.getResult());
@@ -69,14 +69,14 @@ public class StartManyClients {
     }
 
     private void startToUpperClient(int n) {
-        JobHandle<String> jobHandle = MasterService.runJob(ToUpperExecutor.class, "LilLe PeTer");
+        JobHandle<String> jobHandle = MasterService.runJob(ToUpperExecutor.class, "LilLe PeTer", 60);
         jobHandle.addJobListener(new VerboseListener(n));
         System.out.format("%d: RESULT: %s\n", n, jobHandle.getResult());
         jobHandle.close();
     }
 
     private void startToLowerClient(int n) {
-        JobHandle<String> jobHandle = MasterService.runJob(ToLowerExecutor.class, "StoRe Claus");
+        JobHandle<String> jobHandle = MasterService.runJob(ToLowerExecutor.class, "StoRe Claus", 60);
         jobHandle.addJobListener(new VerboseListener(n));
         System.out.format("%d: RESULT: %s\n", n, jobHandle.getResult());
         jobHandle.close();

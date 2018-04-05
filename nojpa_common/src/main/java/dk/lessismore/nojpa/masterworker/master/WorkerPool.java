@@ -2,6 +2,7 @@ package dk.lessismore.nojpa.masterworker.master;
 
 import dk.lessismore.nojpa.masterworker.messages.RegistrationMessage;
 import dk.lessismore.nojpa.masterworker.messages.observer.ObserverWorkerMessage;
+import dk.lessismore.nojpa.net.Server;
 import dk.lessismore.nojpa.net.link.ServerLink;
 import dk.lessismore.nojpa.properties.PropertiesProxy;
 import org.slf4j.Logger;
@@ -42,16 +43,15 @@ public class WorkerPool {
         }
     }
 
-    public synchronized WorkerEntry getBestApplicableWorker(String executorClass) {
+    public synchronized WorkerEntry getBestWorker(String executorClass) {
         if (pool.isEmpty()) {
             log.info("No workers in pool");
             return null;
         }
         WorkerEntry stepEntry = null;
         for (WorkerEntry entry: pool.values()) {
-            String inapplicableReason = entry.notApplicableReason();
-            if (inapplicableReason != null) {
-//                    log.debug("Worker("+ entry +") not applicable: " + inapplicableReason);
+            if (!entry.available()) {
+//                    log.debug("Worker("+ entry +") not available: " + inapplicableReason);
                 continue;
             }
             if (entry.knownClasses.contains(executorClass)) {
@@ -66,9 +66,7 @@ public class WorkerPool {
         }
 
         if (stepEntry == null) {
-            log.warn("No applicable or compatible worker in pool(size:"+ pool.size() +") for executor: "+executorClass);
-        } else {
-            stepEntry.idle = false;
+            log.warn("No available or compatible worker in pool(size:"+ pool.size() +") for executor: "+executorClass);
         }
         return stepEntry;
     }
@@ -95,6 +93,10 @@ public class WorkerPool {
         entry.idle = idle;
     }
 
+    public void setIdle(boolean idle, WorkerEntry entry) {
+        entry.idle = idle;
+    }
+
     public void updateWorkerHealth(double systemLoad, double vmMemoryUsage, Map<String, Double> diskUsages, ServerLink serverLink) {
 //        log.debug("updateWorkerHealth:systemLoad("+ systemLoad +") for " + serverLink);
         WorkerEntry workerEntry = pool.get(serverLink);
@@ -103,14 +105,6 @@ public class WorkerPool {
         workerEntry.diskUsages = diskUsages;
     }
 
-    public boolean applicable(ServerLink worker) {
-        WorkerEntry entry = pool.get(worker);
-        if (entry == null) {
-            log.error("Worker does not exists: " + worker);
-            return false;
-        }
-        return entry.applicable();
-    }
 
     public List<ObserverWorkerMessage> getObserverWorkerMessageList() {
         ArrayList<ObserverWorkerMessage> list = new ArrayList<ObserverWorkerMessage>();
@@ -128,7 +122,7 @@ public class WorkerPool {
         worker.setKnownClasses(workerEntry.knownClasses);
         worker.setSystemLoad(workerEntry.systemLoad);
         worker.setVmMemoryUsage(workerEntry.vmMemoryUsage);
-        worker.setProblem(workerEntry.notApplicableReason());
+        worker.setProblem(workerEntry.notAvailableReason());
         return worker;
     }
 
@@ -137,6 +131,12 @@ public class WorkerPool {
 
     public int getSize() {
         return pool.size();
+    }
+
+    public synchronized ArrayList<ServerLink> getAllServerLinksFromWorkers() {
+        ArrayList<ServerLink> workerServerLinks = new ArrayList<>();
+        workerServerLinks.addAll(pool.keySet());
+        return workerServerLinks;
     }
 
     class WorkerEntry  {
@@ -312,18 +312,15 @@ public class WorkerPool {
         }
 
 
-        public boolean healthierThan(WorkerEntry entry) {
-            return this.health() > entry.health();
-        }
 
-        public boolean applicable() {
-            return notApplicableReason() == null;
+        public boolean available() {
+            return notAvailableReason() == null;
         }
 
         /**
-         * @return null if worker is healthy enough to be usable (applicable) or a String stating the problem.
+         * @return null if worker is healthy enough to be usable (available) or a String stating the problem.
          */
-        public String notApplicableReason() {
+        public String notAvailableReason() {
             if (! idle) {
                 return "Worker is busy";
             }
@@ -336,7 +333,7 @@ public class WorkerPool {
 //                    return "v2: Disk usage on disk mounted on : "+ mountPoint + " is to high: " + usage;
 //                }
 //            }
-            return null; // worker is applicable
+            return null; // worker is available
         }
 
     }

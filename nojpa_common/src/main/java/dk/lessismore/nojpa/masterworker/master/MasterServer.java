@@ -1,18 +1,9 @@
 package dk.lessismore.nojpa.masterworker.master;
 
 import dk.lessismore.nojpa.masterworker.JobStatus;
-import dk.lessismore.nojpa.masterworker.exceptions.JobDoesNotExistException;
-import dk.lessismore.nojpa.masterworker.messages.HealthMessage;
-import dk.lessismore.nojpa.masterworker.messages.JobMessage;
-import dk.lessismore.nojpa.masterworker.messages.JobProgressMessage;
-import dk.lessismore.nojpa.masterworker.messages.JobResultMessage;
-import dk.lessismore.nojpa.masterworker.messages.KillMessage;
-import dk.lessismore.nojpa.masterworker.messages.RegistrationMessage;
-import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteBeanMessage;
-import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteResultMessage;
+import dk.lessismore.nojpa.masterworker.messages.*;
 import dk.lessismore.nojpa.masterworker.messages.observer.UpdateMessage;
 import dk.lessismore.nojpa.net.link.ServerLink;
-import dk.lessismore.nojpa.properties.PropertiesListener;
 import dk.lessismore.nojpa.properties.PropertiesProxy;
 import dk.lessismore.nojpa.serialization.Serializer;
 import dk.lessismore.nojpa.serialization.XmlSerializer;
@@ -36,20 +27,13 @@ public class MasterServer {
 
     private static final Logger log = LoggerFactory.getLogger(MasterServer.class);
     private static final MasterProperties properties = PropertiesProxy.getInstance(MasterProperties.class);
-    static {
-        properties.addListener(new PropertiesListener() {
-            public void onChanged() {
-                log.info("Master.properties changed");
-            }
-        });
-    }
 
     private static boolean DEBUG = false;
 
     private final JobPool jobPool = new JobPool();
     private final WorkerPool workerPool = new WorkerPool();
     private final HashSet<ServerLink> observers = new HashSet<ServerLink>();
-    private final Serializer storeSerializer = new XmlSerializer();
+    private final Serializer storeSerializer = new XmlSerializer(); //TODO: We should just always use this serializer and stop having as argument...
     private final Calendar started = Calendar.getInstance();
 
 
@@ -60,39 +44,14 @@ public class MasterServer {
 
 
 
-    // Client services
-    void startListen(String jobID, ServerLink client) {
-        log.debug("startListen("+ jobID +"->"+ client +")");
-        if (jobID == null) log.error("Can't listen to null job");
-        else {
-            boolean listenerAdded = jobPool.addListener(jobID, client);
-            // No job entry in pool, look for stored results.
-            if (! listenerAdded) {
-                log.debug("Trying to find stored job result. jobID("+ jobID +")");
-                JobResultMessage jobResultMessage = restoreResult(jobID);
-                if (jobResultMessage == null) {
-                    log.error("No stored result found, sending back exception for jobID("+ jobID +")");
-                    jobResultMessage = new JobResultMessage(jobID);
-                    jobResultMessage.setMasterException(new JobDoesNotExistException());
-                } else {
-                    MessageSender.sendResultToClient(jobResultMessage, client, new MessageSender.FailureHandler() {
-                        public void onFailure(ServerLink client) {
-                            log.warn("Failed to send restored result to client");
-                        }
-                    });
-                }
-            }
-        }
-        notifyObservers();
-    }
-
-    void stopListen(ServerLink client) {
-        log.debug("stopListen: " + client);
+    //stopListen
+    void clientClosedCancelRunningJobs(ServerLink client) {
+        log.debug("clientClosedCancelRunningJobs: " + client);
         String jobID = jobPool.getJobID(client);
-        log.debug("stopListen - jobID: " + jobID);
+        log.debug("clientClosedCancelRunningJobs - jobID: " + jobID);
         if(jobID != null){
-            log.debug("stopListen - sending KILL: " + jobID);
-            kill(jobID);
+            log.debug("clientClosedCancelRunningJobs - sending KILL: " + jobID);
+            cancelJob(jobID);
         } else {
             log.warn("We don't have a jobID for serverLink("+ client +")");
         }
@@ -100,10 +59,10 @@ public class MasterServer {
 //        notifyObservers();
     }
 
-    public void queueJob(JobMessage jobMessage) {
+    public void queueJob(JobMessage jobMessage, ServerLink client) {
         SuperIO.writeTextToFile("/tmp/masterworker_queue_size", "" + (jobPool.getQueueSize()));
         log.debug("queueJob("+ jobPool.getQueueSize() +"): " + jobMessage);
-        jobPool.addJob(jobMessage);
+        jobPool.addJob(jobMessage, client);
         runJobIfNecessaryAndPossible();
         notifyObservers();
     }
@@ -128,20 +87,14 @@ public class MasterServer {
             }
         }, "unregisterWorker client("+ serverLink.getLinkID() +")");
         workerPool.removeWorker(serverLink);
-        runJobIfNecessaryAndPossible();
         notifyObservers();
     }
 
     public void updateWorkerHealth(HealthMessage healthMessage, ServerLink serverLink) {
         //log.debug("updateWorkerHealth: " + serverLink);
-        boolean ableToWorkAfter = false;
-        boolean ableToWorkBefore = workerPool.applicable(serverLink);
         workerPool.updateWorkerHealth(healthMessage.getSystemLoad(), healthMessage.getVmMemoryUsage(), healthMessage.getDiskUsages(), serverLink);
-        if (!ableToWorkBefore) {
-            ableToWorkAfter = workerPool.applicable(serverLink);
-        }
         runJobIfNecessaryAndPossible();
-        //notifyObservers();
+        notifyObservers();
     }
 
     public void updateJobProgress(JobProgressMessage jobProgressMessage) {
@@ -153,18 +106,20 @@ public class MasterServer {
 
 
     public void setRunMethodRemoteResultMessage(RunMethodRemoteResultMessage runMethodRemoteResultMessage) {
-        //storeResult(result); TODO
         log.debug("setRunMethodRemoteResultMessage: " + runMethodRemoteResultMessage.getMethodID());
         jobPool.setRunMethodRemoteResultMessage(runMethodRemoteResultMessage);
         notifyObservers();
     }
 
+    //TODO: Move this to the SuperIO
     private static HashMap<String, AtomicLong> counterStatusMap = new HashMap<>();
     public static void increaseCounterStatus(String filename){
         AtomicLong counter = counterStatusMap.get(filename);
         if(counter == null){
             try{
-                counter = new AtomicLong(new Long(SuperIO.readTextFromFile(filename)));
+                if(new File(filename).exists()) {
+                    counter = new AtomicLong(new Long(SuperIO.readTextFromFile(filename)));
+                }
             } catch (Exception e){
                 counter = new AtomicLong(0L);
             }
@@ -180,9 +135,7 @@ public class MasterServer {
 
     public void setResult(JobResultMessage result, ServerLink serverLink) {
         increaseCounterStatus("/tmp/masterworker_result_jobs_count");
-
         log.debug("setResult["+ (result != null ? result.getJobID() : "NULL") +"]: " + serverLink);
-        storeResult(result);
         jobPool.setResult(result);
         workerPool.setIdle(true, serverLink);
         WorkerPool.WorkerEntry workerEntry = workerPool.getWorkerEntry(serverLink);
@@ -194,20 +147,14 @@ public class MasterServer {
     // Observer services
     public void registerObserver(ServerLink serverLink) {
         log.debug("registerObserver: " + serverLink);
-        addObserver(serverLink);
+        observers.add(serverLink);
         //notifyObservers();
     }
 
 
 
-    // Local stuff
-    private void addObserver(ServerLink serverLink) {
-        log.debug("addObserver: " + serverLink);
-        observers.add(serverLink);
-    }
-
-    private void removeObserver(ServerLink serverLink) {
-        log.debug("removeObserver: " + serverLink);
+    public void unregisterObserver(ServerLink serverLink) {
+        log.debug("unregisterObserver: " + serverLink);
         observers.remove(serverLink);
     }
 
@@ -217,7 +164,7 @@ public class MasterServer {
 //        log.debug("notifyObservers.size("+ observers.size() +"): ");
         if (observers == null || observers.isEmpty()) return;
         long now = System.currentTimeMillis();
-        if(now - lastUpdate < 1000 * 1){
+        if(now - lastUpdate < 1000 * 5){
             return;
         }
         lastUpdate = now;
@@ -225,20 +172,13 @@ public class MasterServer {
         updateMessage.setObserverJobMessages(jobPool.getObserverJobMessageList());
         updateMessage.setObserverWorkerMessages(workerPool.getObserverWorkerMessageList());
         updateMessage.setStarted(started);
-        final List<ServerLink> deadObservers = new ArrayList<ServerLink>();
         for (final ServerLink observer: (Set<ServerLink>) observers.clone()) {
             MessageSender.sendOrTimeout(updateMessage, observer, new MessageSender.FailureHandler() {
                 public void onFailure(ServerLink client) {
                     log.warn("Failed to send message to observer "+ observer.getOtherHostPort() + " - removing observer");
-                    deadObservers.add(observer);
+                    unregisterObserver(observer);
                 }
             });
-        }
-        if (!deadObservers.isEmpty()) {
-            for (ServerLink deadObserver: deadObservers) {
-                removeObserver(deadObserver);
-            }
-            deadObservers.clear();
         }
     }
 
@@ -250,6 +190,7 @@ public class MasterServer {
         MasterServer.increaseCounterStatus("/tmp/masterworker_client_connection_count");
         ServerLink serverLink = acceptConnection(serverSocket);
         if (serverLink != null) {
+            //TODO: Read 5 mins if the queue is working with this or not ...
             log.debug("acceptClientConnection[1.1]: clientExecutor.getActiveCount(" + clientExecutor.getActiveCount() + "), clientExecutor.getPoolSize(" + clientExecutor.getPoolSize() + "), clientExecutor.getQueue().size(" + clientExecutor.getQueue().size() + ")");
             clientExecutor.submit(new MasterClientThread(this, serverLink));
             if(clientExecutor.getActiveCount() == clientExecutor.getPoolSize()){
@@ -296,48 +237,6 @@ public class MasterServer {
             return new ServerLink(socket);
         } catch (Exception e) {
             log.warn("Socket could not be accepted", e);
-            return null;
-        }
-    }
-
-    protected static File getStoredResultFile(String jobID) {
-        log.debug("getStoredResultFile: " + jobID);
-        String resultDirName = properties.getStoreResultDir();
-        File resultDir = new File(resultDirName);
-        if (! resultDir.isDirectory()) {
-            boolean success = resultDir.mkdirs();
-            if (! success) {
-                log.error("Failed to create directory to store results at "+ resultDirName);
-                return null;
-            }
-        }
-        String resultFileName = jobID + ".xml";
-        return new File(resultDir, resultFileName);
-    }
-
-    private void storeResult(JobResultMessage result) {
-        log.debug("storeResult: " + result.getJobID());
-        File resultFile = getStoredResultFile(result.getJobID());
-        if(!resultFile.getParentFile().exists()){
-            resultFile.getParentFile().mkdirs();
-        }
-        if (resultFile == null) return;
-        try {
-            storeSerializer.store(result, resultFile);
-            log.debug("Result saved to file " + resultFile.getAbsolutePath());
-        } catch (IOException e) {
-            log.error("Failed save result to file " + resultFile.getAbsolutePath(), e);
-        }
-    }
-
-    private JobResultMessage restoreResult(String jobID) {
-        log.debug("restoreResult: " + jobID);
-        File resultFile = getStoredResultFile(jobID);
-        if (resultFile == null) return null;
-        try {
-            return (JobResultMessage) storeSerializer.restore(resultFile);
-        } catch (IOException e) {
-            log.error("Error while trying to load stored result");
             return null;
         }
     }
@@ -397,14 +296,35 @@ public class MasterServer {
                     lock.unlock();
                 }
                 return;
+            } else {
+                if(jobEntry.jobMessage.getDealline() > 0 && jobEntry.jobMessage.getDealline() < System.currentTimeMillis()){
+                    log.warn("Job was timeout before starting ... Will remove it from queue: " + jobEntry.jobMessage.getJobID());
+                    return;
+                }
             }
-            workerEntry = workerPool.getBestApplicableWorker(jobEntry.jobMessage.getExecutorClassName());
+            
+            //WORKER
+            //2: DownloadExecutor - Occupied
+            //3: NlpExecutor
+            //4: NlpExecutor
+            //5: NlpExecutor
+            //6: ToUpperCaseExecutor
+            
+            // JOB's
+            //1: DownloadJob
+            //200: DownloadJob
+            //203: NlpJob
+            //204: NlpJob
+            //205: NlpJob
+            //206: ToUpperCaseJob
+            
+            workerEntry = workerPool.getBestWorker(jobEntry.jobMessage.getExecutorClassName());
             long b = System.currentTimeMillis();
             if (workerEntry == null) {
                 log.debug("runJobs: No available worker to run job - to run the first job... We will look in the queue for other jobs("+ jobPool.getQueueSize() +")");
                 List<JobPool.JobEntry> diffJobs = jobPool.getDiffJobs(jobEntry.jobMessage.getExecutorClassName());
                 for (int i = 0; workerEntry == null && i < diffJobs.size(); i++) {
-                    workerEntry = workerPool.getBestApplicableWorker(diffJobs.get(i).jobMessage.getExecutorClassName());
+                    workerEntry = workerPool.getBestWorker(diffJobs.get(i).jobMessage.getExecutorClassName());
                     jobEntry = diffJobs.get(i);
                 }
                 if (workerEntry == null) {
@@ -423,11 +343,12 @@ public class MasterServer {
             log.debug("runJobs: Found worker to run job: " + workerEntry);
             jobPool.jobTaken(jobEntry, workerEntry.serverLink);
             workerEntry.jobTakenStats();
+            workerPool.setIdle(false, workerEntry);
             long d = System.currentTimeMillis();
             WorkerPool.WorkerEntry finalWorkerEntry = workerEntry;
             MessageSender.send(jobEntry.jobMessage, workerEntry.serverLink, new MessageSender.FailureHandler() {
                 public void onFailure(ServerLink client) {
-                    log.debug("IOException while sending job to worker - removing worker - will run unregisterWorker("+ client.getLinkID() +")");
+                    log.debug("IOException while sending job to worker - removing worker - will run unregisterWorker("+ client.getLinkID() +") ");
                     MasterServer.this.unregisterWorker(finalWorkerEntry.serverLink);
                 }
             }, "sendWork("+ jobEntry.getJobID() +") to WorkerLink("+ workerEntry.serverLink.getLinkID() +")");
@@ -442,12 +363,13 @@ public class MasterServer {
 
     public void kill(String jobID) {
         final JobPool.JobEntry jobEntry = jobPool.getJobEntry(jobID);
-        log.warn("kill job[" + jobID + "]: " + jobEntry);
         if (jobEntry != null) {
+            log.warn("kill job[" + jobID + "]: " + jobEntry);
             if (jobEntry.worker != null && jobEntry.getStatus() == JobStatus.IN_PROGRESS) {
                 MessageSender.send(new KillMessage(), jobEntry.worker, new MessageSender.FailureHandler() {
-                    public void onFailure(ServerLink client) {
-                        log.debug("IOException while sending KillMessage to worker - removing worker("+ jobEntry.worker.getLinkID() +")");
+                    public void onFailure(ServerLink worker) {
+                        log.debug("IOException while sending StopMessage to worker - removing worker("+ jobEntry.worker.getLinkID() +")");
+                        unregisterWorker(worker);
                     }
                 }, "Sending KILL to jobEntry.worker("+ jobEntry.worker.getLinkID() +")");
                 workerPool.removeWorker(jobEntry.worker);
@@ -456,27 +378,55 @@ public class MasterServer {
         jobPool.kill(jobID);
     }
 
-    public void restartAllWorkers() {
-        try {
-            log.debug("restartAllWorkers");
-            Map.Entry<ServerLink, WorkerPool.WorkerEntry>[] entries = workerPool.pool.entrySet().toArray(new Map.Entry[workerPool.pool.size()]);
-            for (int i = 0; i < entries.length; i++) {
-                log.debug("restartAllWorkers(" + i + "/" + entries.length + ")");
-                Map.Entry<ServerLink, WorkerPool.WorkerEntry> entry = entries[i];
-                try {
-                    entry.getKey().stopPinger();
-                    entry.getKey().write(new KillMessage());
-                } catch (IOException e) {
-                    log.warn("When restartAllWorkers we got from worker(" + entry.getValue().toString() + ")  : " + e, e);
-                }
+    public void cancelJob(String jobID) {
+        final JobPool.JobEntry jobEntry = jobPool.getJobEntry(jobID);
+        if (jobEntry != null) {
+            log.warn("kill job[" + jobID + "]: " + jobEntry);
+            if (jobEntry.worker != null && jobEntry.getStatus() == JobStatus.IN_PROGRESS) {
+                MessageSender.send(new CancelJobMessage(jobID), jobEntry.worker, new MessageSender.FailureHandler() {
+                    public void onFailure(ServerLink worker) {
+                        log.debug("IOException while sending StopMessage to worker - removing worker("+ jobEntry.worker.getLinkID() +")");
+                        unregisterWorker(worker);
+                    }
+                }, "Sending KILL to jobEntry.worker("+ jobEntry.worker.getLinkID() +")");
             }
-        } catch (Exception e){
-            log.error("We got a restartAllWorkers");
-            log.error("We got a restartAllWorkers");
-            log.error("We got a restartAllWorkers");
-            log.error("We got a restartAllWorkers");
-            System.exit(-1); //TODO: Remove this in the future, when it is running stable
         }
+        jobPool.kill(jobID);
+    }
 
+    public void pingAllWorkers() {
+        for(ServerLink worker : workerPool.getAllServerLinksFromWorkers()){
+            MessageSender.send(new PingMessage(), worker, new MessageSender.FailureHandler() {
+                public void onFailure(ServerLink worker) {
+                    log.debug("IOException while sending PingMessage to worker - removing worker("+ worker +")");
+                    unregisterWorker(worker);
+                }
+            }, "Sending Ping to jobEntry.worker("+ worker.getLinkID() +")");
+
+        }
+    }
+
+    public void sendAllHealthMessages() {
+        for(ServerLink worker : workerPool.getAllServerLinksFromWorkers()){
+            MessageSender.send(new HealthMessageRequest(), worker, new MessageSender.FailureHandler() {
+                public void onFailure(ServerLink worker) {
+                    log.debug("IOException while sending HealthMessageRequest to worker - removing worker("+ worker +")");
+                    unregisterWorker(worker);
+                }
+            }, "Sending HealthMessageRequest to jobEntry.worker("+ worker.getLinkID() +")");
+
+        }
+    }
+
+    public void pingAllClients() {
+        final Set<ServerLink> allClients = jobPool.getAllClients();
+        for(ServerLink client : allClients){
+            MessageSender.send(new PingMessage(), client, new MessageSender.FailureHandler() {
+                public void onFailure(ServerLink worker) {
+                    log.debug("IOException while sending PingMessage to client - removing client("+ worker +")");
+                }
+            }, "Sending Ping to jobEntry.client("+ client.getLinkID() +")");
+
+        }
     }
 }

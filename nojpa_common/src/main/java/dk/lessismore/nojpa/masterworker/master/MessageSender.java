@@ -1,10 +1,7 @@
 package dk.lessismore.nojpa.masterworker.master;
 
 import dk.lessismore.nojpa.masterworker.JobStatus;
-import dk.lessismore.nojpa.masterworker.messages.JobProgressMessage;
-import dk.lessismore.nojpa.masterworker.messages.JobResultMessage;
-import dk.lessismore.nojpa.masterworker.messages.JobStatusMessage;
-import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteResultMessage;
+import dk.lessismore.nojpa.masterworker.messages.*;
 import dk.lessismore.nojpa.net.link.ServerLink;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +56,9 @@ public class MessageSender {
                 try {
 //                    log.debug("Writing ("+ debugLog+") - START");
                     client.write(message);
-                    log.debug("Writing ("+ debugLog+") - END");
+                    if(!(message instanceof PingMessage)){
+                        log.debug("Writing ("+ debugLog+") - END");
+                    }
                 } catch (IOException e) {
                     log.error("Writing ("+ debugLog+") - ERROR: " + e, e);
                     if (failureHandler != null) failureHandler.onFailure(client);

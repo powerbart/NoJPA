@@ -20,8 +20,6 @@ public abstract class AbstractLink {
 
     private static final Logger log = LoggerFactory.getLogger(AbstractLink.class);
 
-    public static boolean RUN_PINGER;
-
     private static final boolean DEBUG_STACK_TRACE = false;
     protected Socket socket = null;
     protected OutputStream out = null;
@@ -29,9 +27,8 @@ public abstract class AbstractLink {
     private final LinkedList<Object> receivedObjects = new LinkedList<Object>();
     private final Serializer serializer;
     private static final String SEPARATOR = "<~>";
-    private Pinger pinger;
 
-    private final String linkID = GuidFactory.getInstance().makeGuid().substring(20);
+    private String linkID = GuidFactory.getInstance().makeGuid();
 
     private long totalReadBytes = 0;
     private long totalWriteBytes = 0;
@@ -66,6 +63,10 @@ public abstract class AbstractLink {
 
     public String getLinkID() {
         return linkID;
+    }
+
+    public void setLinkID(String jobIDOrLinkID) {
+        linkID = jobIDOrLinkID;
     }
 
     /**
@@ -199,9 +200,7 @@ public abstract class AbstractLink {
                     if (endIndex != -1) {
                         String objectStr = s.substring(startIndex, endIndex);
                         Object o = serializer.unserialize(objectStr);
-                        if (! (o instanceof Ping)) {
-                            receivedObjects.addLast(o);
-                        }
+                        receivedObjects.addLast(o);
                         startIndex = endIndex + SEPARATOR.length();
                     } else {
                         startIndex = endIndex;
@@ -243,7 +242,6 @@ public abstract class AbstractLink {
             log.debug("Closing for link("+ getLinkID() +")");
         }
         try {
-            stopPinger();
             if (in != null){
                 try {
                     in.close();
@@ -267,67 +265,7 @@ public abstract class AbstractLink {
                 socket = null;
             }
         } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    public void startPinger() {
-        if (pinger == null && RUN_PINGER) {
-            pinger = new Pinger();
-            pinger.start();
-        }
-    }
-
-    public void stopPinger() {
-        if (pinger != null) {
-            pinger.stopPinger();
-            pinger.interrupt();
-            pinger = null;
-        }
-
-    }
-
-    public boolean ping(){
-        try {
-            write(new Ping());
-            return true;
-        } catch (IOException e) {
-            log.debug("Will not throw this error...:"+ e, e);
-        }
-        return false;
-    }
-
-    private class Pinger extends Thread {
-        private boolean run = true;
-
-        public Pinger(){
-            this.setPriority(Thread.MIN_PRIORITY);
-            this.setDaemon(true);
-        }
-
-        public void stopPinger() {
-            run = false;
-        }
-
-        public void run(){
-            log.debug(getLinkID() + ":Pinger is now running");
-            while(run){
-                try{
-//                    log.debug("Sending ping");
-                    write(new Ping());
-                    try{
-                        Thread.sleep(30 * 1000);
-                    } catch(InterruptedException e) {
-                        log.debug("Sleep interupted - exiting pinger");
-                        stopPinger();
-                    }
-                } catch(IOException e) {
-                    log.debug(getLinkID() + ":IOException while sending PING: "+e.getMessage() + " - closing down pinger.");
-                    stopPinger();
-                }
-            }
-            log.debug(getLinkID() + ":Pinger is shutting down");
+            log.error("We got a IOException when closing down the connection: "+ e, e);
         }
     }
 

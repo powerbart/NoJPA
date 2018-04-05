@@ -30,20 +30,6 @@ public class BeanExecutor extends Executor<NewRemoteBeanMessage, Object> {
 
 
     public Object run(NewRemoteBeanMessage n) {
-
-//        try {
-//            // TODO if implClassName is set, use that class
-////            objectToRunOn = (RemoteBeanInterface) Class.forName(implClassName).newInstance();
-//        } catch (InstantiationException e) {
-//            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-//        } catch (IllegalAccessException e) {
-//            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-//        } catch (ClassNotFoundException e) {
-//            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-//        }
-
-
-        //TODO: Do we need this....?
         while(!done && !isStoppedNicely()) {
             log.debug("Waiting for RemoteMethod: " + n + " " + super.toString());
             try {
@@ -63,12 +49,7 @@ public class BeanExecutor extends Executor<NewRemoteBeanMessage, Object> {
             if(n.getMethodName().equals("closeDownRemoteBean")){
                 done = true;
                 log.error("We will close down.... - we got a closeDownRemoteBean-request");
-                Thread.sleep(2000);
                 log.error("We will close down.... - we got a closeDownRemoteBean-request");
-                log.error("We will close down.... - we got a closeDownRemoteBean-request");
-                log.error("We will close down.... - we got a closeDownRemoteBean-request");
-                log.error("We will close down.... - we got a closeDownRemoteBean-request");
-                System.exit(0);
             } else {
                 Method method = null;
 
@@ -79,7 +60,6 @@ public class BeanExecutor extends Executor<NewRemoteBeanMessage, Object> {
                         break;
                     }
                 }
-//                objectToRunOn.getClass().getMethod(n.getMethodName(), findArgsClasses(n.getArgs()));
                 Object returnValue = method.invoke(objectToRunOn, n.getArgs());
                 final String s = String.valueOf(returnValue);
                 log.debug(n.getMethodName() + " returns ( " + (returnValue == null ? null : (s.length() > 20 ? s.substring(0, 20) + "..." : s)) + ")");
@@ -97,14 +77,4 @@ public class BeanExecutor extends Executor<NewRemoteBeanMessage, Object> {
         }
         return null;
     }
-
-//    private static Class[] findArgsClasses(Object[] objects){
-//        if(objects == null || objects.length == 0) return null;
-//        Class[] classes = new Class[objects.length];
-//        for(int i = 0; i < objects.length; i++){
-//            classes[i] = objects[i].getClass();
-//        }
-//        return classes;
-//    }
-//
 }

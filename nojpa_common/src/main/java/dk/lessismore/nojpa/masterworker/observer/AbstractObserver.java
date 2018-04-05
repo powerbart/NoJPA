@@ -20,7 +20,7 @@ public abstract class AbstractObserver {
     private final int port;
     private IOException connectionError;
     private Calendar connectionErrorTime;
-    protected ClientLink clientLink; // TODO move back inside
+    protected ClientLink clientLink;
 
     protected AbstractObserver() {
         host = properties.getHost();

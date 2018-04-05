@@ -1,6 +1,5 @@
 package dk.lessismore.nojpa.masterworker;
 
-import dk.lessismore.nojpa.masterworker.executor.SumExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,24 +19,6 @@ public class SystemHealth {
     private static OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.getOperatingSystemMXBean();
     private static MemoryMXBean heapBean = ManagementFactory.getMemoryMXBean();
 
-    public static void main(String[] args) throws IOException {
-
-        SumExecutor executor = new SumExecutor();
-        executor.run(10000000l);
-        
-        // CPU
-        System.out.println("getSystemLoadAverage() = " + getSystemLoadAverage());
-
-        // MEM
-        System.out.println("getVmMemoryUsage() = " + getVmMemoryUsage());
-
-        // DISK
-        Map<String, Double> usageMap = getDiskUsages();
-        for (String mountPoint: usageMap.keySet()) {
-            double usage = usageMap.get(mountPoint);
-            System.out.println("Mount point: " + mountPoint + " "+usage);
-        }
-    }
 
     /**
      * @return the system load average; or a negative value if not available.

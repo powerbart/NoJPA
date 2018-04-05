@@ -27,7 +27,6 @@ public class Master {
         System.out.println("resources = " + resources.getString("clientPort"));
 
         final MasterServer server = new MasterServer();
-        // TODO move sockets inside the link api
         final ServerSocket clientSocket = new ServerSocket(properties.getClientPort());
         final ServerSocket workerSocket = new ServerSocket(properties.getWorkerPort());
         final ServerSocket observerSocket = new ServerSocket(properties.getObserverPort());
@@ -90,7 +89,38 @@ public class Master {
             }
         });
 
+        Thread pingerThread = new Thread(new Runnable() {
+            public void run() {
+                try {
+                    Thread.sleep(20 * 1000);
+                } catch (InterruptedException e) {
+
+                }
+                while (true)
+                    try {
+                        for(int i = 0; i < 12; i++){ //5 * 12 = 1 min
+                            Thread.sleep(5 * 1000);
+                            try{
+                                server.pingAllWorkers();
+                                server.pingAllClients();
+                            } catch (Exception e){
+                                log.debug("Some error: " + e, e);
+                            }
+                        }
+                        server.sendAllHealthMessages();
+                    } catch (Exception e) {
+                        log.error("error in queueToWorkerThread: {}", e.getMessage(), e);
+                    }
+            }
+        });
+
+        //TODO: The master should start pingers + HealthMessage - no other should start pingers
+
+
         ObserverNotifierThread observerNotifierThread = new ObserverNotifierThread(server);
+
+        pingerThread.setName("pingerThread");
+        pingerThread.start();
 
         printStatusThread.setName("printStatusThread");
         printStatusThread.start();

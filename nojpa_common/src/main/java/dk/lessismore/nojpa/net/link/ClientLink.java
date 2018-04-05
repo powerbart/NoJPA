@@ -18,7 +18,6 @@ public class ClientLink extends AbstractLink {
         socket.setSoTimeout(0); // This implies that a read call will block forever.
         in = socket.getInputStream();
         out = socket.getOutputStream();
-        startPinger();
     }
 
 }

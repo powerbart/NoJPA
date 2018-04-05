@@ -36,7 +36,7 @@ public class SumClient {
         };
 
         {
-            JobHandle<String> jobHandle = MasterService.runJob(SumExecutor.class, 7L);
+            JobHandle<String> jobHandle = MasterService.runJob(SumExecutor.class, 7L, 60);
             jobHandle.addJobListener(jobListener);
             System.out.println("jobHandle.getProgress() = " + jobHandle.getProgress());
             System.out.println("jobHandle.getStatus() = " + jobHandle.getStatus());
@@ -52,7 +52,7 @@ public class SumClient {
         }
         System.out.println("***************************************************");
         {
-            JobHandle<String> jobHandle = MasterService.runJob(SumExecutor.class, 9L);
+            JobHandle<String> jobHandle = MasterService.runJob(SumExecutor.class, 9L, 60);
             jobHandle.addJobListener(jobListener);
             System.out.println("jobHandle.getProgress() = " + jobHandle.getProgress());
             System.out.println("jobHandle.getStatus() = " + jobHandle.getStatus());

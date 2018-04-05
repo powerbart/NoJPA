@@ -44,7 +44,7 @@ public class MasterObserverThread extends Thread {
             try{
                 serverLink.close();
             } catch (Exception e){}
-            masterServer.unregisterWorker(serverLink);
+            masterServer.unregisterObserver(serverLink);
         }
     }
 

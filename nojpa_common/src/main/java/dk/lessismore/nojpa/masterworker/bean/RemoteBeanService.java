@@ -82,6 +82,9 @@ public class RemoteBeanService implements InvocationHandler {
             }
             log.debug("Now calling " + methodName);
             Object toReturn = jobHandle.runMethodRemote(new RunMethodRemoteBeanMessage(methodName,  objects));
+            if(closeDownRemoteBean){
+                jobHandle.closeProtocol();
+            }
             return toReturn;
         } else {
             throw new Exception("Remote bean is already closed!!! So you cant call " + method.getName() + " after calling closeDownRemoteBean()");

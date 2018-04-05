@@ -55,7 +55,7 @@ public class ToUpperCaseClient {
 
 
 
-        JobHandle<String> jobHandle = MasterService.runJob(ToUpperExecutor.class, b.toString());
+        JobHandle<String> jobHandle = null; //TODO: MasterService.runJob(ToUpperExecutor.class, b.toString());
         jobHandle.addJobListener(jobListener);
         System.out.println("jobHandle.getProgress() = " + jobHandle.getProgress());
         System.out.println("jobHandle.getStatus() = " + jobHandle.getStatus());

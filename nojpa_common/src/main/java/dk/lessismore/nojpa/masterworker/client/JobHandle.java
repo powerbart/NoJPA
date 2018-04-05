@@ -24,7 +24,7 @@ public class JobHandle<O> {
     private final JobHandleToMasterProtocol<O> jm;
     private final Class implementationClass;
     private final Object jobData;
-    private String jobID = GuidFactory.getInstance().makeGuid();
+    private final String jobID;
     private boolean closed = false;
 
     // Default job values
@@ -41,35 +41,29 @@ public class JobHandle<O> {
      * @param executorClass Class carrying the algorithem of the job.
      * @param jobData Input for the executor class's run method.
      */
-    public JobHandle(JobHandleToMasterProtocol<O> jm, Class<? extends Executor> executorClass, Object jobData) {
+    public JobHandle(JobHandleToMasterProtocol<O> jm, Class<? extends Executor> executorClass, Object jobData, long deadline) {
+        String tmpObjectID = GuidFactory.getInstance().makeGuid();
         try{
             Method getIDMethod = jobData.getClass().getMethod("getID");
             Object id =  getIDMethod.invoke(jobData, null);
             if(id != null && (("" + id).length() > 2)){
-                jobID = "" + id;
+                tmpObjectID = "" + id;
             }
         } catch (Exception e){}
+        this.jobID = tmpObjectID;
         this.jm = jm;
         this.implementationClass = executorClass;
         this.jobData = jobData;
-        jm.sendRunJobRequest(jobID, executorClass, jobData);
-        jm.addJobListener(new Listener(), jobID);
+        jm.sendRunJobRequest(jobID, executorClass, jobData, new Listener(), deadline);
     }
 
     public JobHandle(JobHandleToMasterProtocol<O> jm, Class<? extends RemoteBeanInterface> executorClass) {
+        this.jobID = GuidFactory.getInstance().makeGuid();
         this.jm = jm;
         this.implementationClass = executorClass;
         this.jobData = new NewRemoteBeanMessage();
         //String objectID, Class<? extends Executor> executorClass, Object jobData
-        jm.sendRunJobRequest(jobID, executorClass, jobData);
-        jm.addJobListener(new Listener(), jobID);
-    }
-
-    public JobHandle(JobHandleToMasterProtocol<O> jm, String jobID) {
-        this.jm = jm;
-        this.implementationClass = null;
-        this.jobData = null;
-        jm.addJobListener(new Listener(), jobID);
+        jm.sendRunJobRequest(jobID, executorClass, jobData, new Listener(), -1);
     }
 
 
@@ -134,6 +128,11 @@ public class JobHandle<O> {
         close();
     }
 
+    public void closeProtocol() {
+        jm.close();
+        close();
+    }
+
     public Object runMethodRemote(RunMethodRemoteBeanMessage runMethodRemoteBeanMessage)  throws Throwable {
         try{
             runMethodRemoteBeanMessage.setJobID( jobID );
@@ -175,27 +174,16 @@ public class JobHandle<O> {
      */
     public O getResult() {
         try {
-            if (jobStatus == JobStatus.DONE) {
-                Pair<O, RuntimeException> pair = result.getValue();
-                O value = pair.getFirst();
-                RuntimeException exception = pair.getSecond();
-                if (exception != null) {
-                    throw exception;
-                } else {
-                    jobProgress = 1;
-                    return value;
-                }
+            if (jobStatus != JobStatus.DONE && closed) {
+                throw new JobHandleClosedException();
+            }
+            Pair<O, RuntimeException> pair = result.getValue();
+            O value = pair.getFirst();
+            RuntimeException exception = pair.getSecond();
+            if (exception != null) {
+                throw exception;
             } else {
-                if (closed) throw new JobHandleClosedException();
-                Pair<O, RuntimeException> pair = result.getValue();
-                O value = pair.getFirst();
-                RuntimeException exception = pair.getSecond();
-                if (exception != null) {
-                    throw exception;
-                } else {
-                    jobProgress = 1;
-                    return value;
-                }
+                return value;
             }
         } finally {
             MasterService.getJobHandleToMasterProtocolPool(null).putBackInPool(jm);
@@ -208,7 +196,7 @@ public class JobHandle<O> {
      */
     public void addJobListener(JobListener<O> listener) {
         if (closed) throw new JobHandleClosedException();
-        jm.addJobListener(listener, jobID);
+        jm.addJobListener(listener);
     }
 
     /**
@@ -221,7 +209,6 @@ public class JobHandle<O> {
     }
 
     /**
-     * TODO is this smart ?
      * Unregister all listeners created with this handle and close connection to master.
      * Subsequent calls to getStatus(), getProgress(), stopNicely(), kill(),
      * close(), getResult() and addJobListener will raise JobHandleClosedException.
@@ -229,9 +216,10 @@ public class JobHandle<O> {
     public void close() {
 //        if (closed) throw new JobHandleClosedException();
         closed = true;
-        jm.close();
+        //We should NOT call close on the jm.... Since we are reusing the connection ...
+        //jm.close();
         if(!result.hasValue()){
-            log.error("SETTING RESULT TO NULL.....!!!!");
+            log.warn("SETTING RESULT TO NULL.....!!!!");
             result.setValue(new Pair<O, RuntimeException>(null, new JobHandleClosedException()));
         }
     }
@@ -239,12 +227,12 @@ public class JobHandle<O> {
     public void timeout() {
         jobStatus = JobStatus.DONE;
         if(!result.hasValue()){
-            log.error("SETTING RESULT TO NULL -TIMEOUT.....!!!!");
+            log.warn("SETTING RESULT TO NULL -TIMEOUT.....!!!!");
             result.setValue(new Pair<O, RuntimeException>(null, new TimeoutException()));
         } else {
             result.resignal();
         }
-        kill();
+        stopNicely();
     }
 
 
@@ -261,9 +249,10 @@ public class JobHandle<O> {
 
         public void onResult(O value) {
             log.debug("Setting result for jobID[" + jobID + "]");
-            result.setValue(new Pair<O, RuntimeException>(value, null));
             jobProgress = 1;
             jobStatus = JobStatus.DONE;
+            result.setValue(new Pair<O, RuntimeException>(value, null));
+
         }
 
         public void onRunMethodRemoteResult(RunMethodRemoteResultMessage runMethodRemoteResultMessage) {
@@ -279,9 +268,9 @@ public class JobHandle<O> {
 
         public void onException(RuntimeException e) {
             log.debug("Setting exception for jobID[" + jobID + "]");
-            result.setValue(new Pair<O, RuntimeException>(null, e));
             jobProgress = 1;
             jobStatus = JobStatus.DONE;
+            result.setValue(new Pair<O, RuntimeException>(null, e));
         }
     }
 
