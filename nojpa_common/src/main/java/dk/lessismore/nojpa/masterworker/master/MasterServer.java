@@ -51,7 +51,7 @@ public class MasterServer {
 
         log.debug("clientClosedCancelRunningJobs - jobID: " + jobID);
         if(jobID != null){
-            log.debug("clientClosedCancelRunningJobs - sending KILL: " + jobID);
+            log.debug("clientClosedCancelRunningJobs - sending cancelJob: " + jobID);
             cancelJob(jobID);
         } else {
             log.warn("We don't have a jobID for serverLink("+ client +")");
@@ -62,7 +62,7 @@ public class MasterServer {
 
     public void queueJob(JobMessage jobMessage, ServerLink client) {
         SuperIO.writeTextToFile("/tmp/masterworker_queue_size", "" + (jobPool.getQueueSize()));
-        log.debug("queueJob("+ jobPool.getQueueSize() +"): " + jobMessage);
+        log.debug("queueJob.. QueueSize("+ jobPool.getQueueSize() +"): " + jobMessage.getJobID());
         jobPool.addJob(jobMessage, client);
         runJobIfNecessaryAndPossible();
         notifyObservers();
@@ -137,6 +137,7 @@ public class MasterServer {
     public void setResult(JobResultMessage result, ServerLink serverLink) {
         increaseCounterStatus("/tmp/masterworker_result_jobs_count");
         log.debug("setResult["+ (result != null ? result.getJobID() : "NULL") +"]: " + serverLink);
+        result.setWorkerID("" + serverLink );
         jobPool.setResult(result);
         workerPool.setIdle(true, serverLink);
         WorkerPool.WorkerEntry workerEntry = workerPool.getWorkerEntry(serverLink);
@@ -341,7 +342,7 @@ public class MasterServer {
             long c = System.currentTimeMillis();
 
              MasterServer.increaseCounterStatus("/tmp/masterworker_input_jobs_count");
-            log.debug("runJobs: Found worker to run job: " + workerEntry);
+            log.debug("runJobs: Found worker to run job("+ jobEntry.jobMessage.getJobID() +"): " + workerEntry);
             jobPool.jobTaken(jobEntry, workerEntry.serverLink);
             workerEntry.jobTakenStats();
             workerPool.setIdle(false, workerEntry);
@@ -382,14 +383,14 @@ public class MasterServer {
     public void cancelJob(String jobID) {
         final JobPool.JobEntry jobEntry = jobPool.getJobEntry(jobID);
         if (jobEntry != null) {
-            log.warn("kill job[" + jobID + "]: " + jobEntry);
+            log.warn("cancelJob job[" + jobID + "]: " + jobEntry);
             if (jobEntry.worker != null && jobEntry.getStatus() == JobStatus.IN_PROGRESS) {
                 MessageSender.send(new CancelJobMessage(jobID), jobEntry.worker, new MessageSender.FailureHandler() {
                     public void onFailure(ServerLink worker) {
-                        log.debug("IOException while sending StopMessage to worker - removing worker("+ jobEntry.worker.getLinkID() +")");
+                        log.debug("IOException while sending CancelJobMessage for job("+ jobID +") to worker - removing worker("+ jobEntry.worker.getLinkID() +")");
                         unregisterWorker(worker);
                     }
-                }, "Sending KILL to jobEntry.worker("+ jobEntry.worker.getLinkID() +")");
+                }, "Sending cancelJob to jobEntry.worker("+ jobEntry.worker.getLinkID() +")");
             }
         }
         jobPool.kill(jobID);

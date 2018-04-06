@@ -38,10 +38,15 @@ public class MasterClientThread implements Runnable {
                     RunMethodRemoteBeanMessage runMethodRemoteBeanMessage = (RunMethodRemoteBeanMessage) clientRequest;
                     MDC.put("jobID", runMethodRemoteBeanMessage.getJobID());
                     masterServer.runMethodRemote(runMethodRemoteBeanMessage, serverLink);
+                } else if(clientRequest instanceof PongMessage) {
+                    //We got a pong ;-)
                 } else if(clientRequest instanceof KillMessage) {
                     KillMessage killMessage = (KillMessage) clientRequest;
                     MDC.put("jobID", killMessage.getJobID());
                     masterServer.kill(killMessage.getJobID());
+                } else if(clientRequest instanceof CancelJobMessage) {
+                    CancelJobMessage cancelJobMessage = (CancelJobMessage) clientRequest;
+                    masterServer.cancelJob(cancelJobMessage.getJobID());
                 } else {
                     MDC.remove("jobID");
                     System.out.println("Don't know .... clientRequest = " + clientRequest);

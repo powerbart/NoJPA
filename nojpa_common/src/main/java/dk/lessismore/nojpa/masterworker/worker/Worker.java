@@ -199,7 +199,7 @@ public class Worker {
             }
 
             if (linkAndThreads.clientLink != null) {
-                log.debug("Writing back result...");
+                log.debug("Writing back result... "+ jobMessage.getJobID());
                 try {
                     linkAndThreads.clientLink.write(resultMessage);
                 } catch (IOException e) {
