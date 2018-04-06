@@ -110,8 +110,7 @@ public class JobHandle<O> {
      */
     public void stopNicely() {
         if (closed) throw new JobHandleClosedException();
-        jm.stopNicely();
-        jm.close();
+        jm.stopNicely(jobID);
         close();
     }
 

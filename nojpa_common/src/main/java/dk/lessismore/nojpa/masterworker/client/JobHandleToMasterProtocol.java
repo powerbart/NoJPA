@@ -71,9 +71,9 @@ public class JobHandleToMasterProtocol<O> {
         }
     }
 
-    public void stopNicely() {
+    public void stopNicely(String jobID) {
         try {
-            clientLink.write(new CancelJobMessage());
+            clientLink.write(new CancelJobMessage(jobID));
         } catch (IOException e) {
             throw new MasterUnreachableException(e);
         }
