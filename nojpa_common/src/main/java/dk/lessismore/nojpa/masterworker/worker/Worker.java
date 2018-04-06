@@ -3,7 +3,6 @@ package dk.lessismore.nojpa.masterworker.worker;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import dk.lessismore.nojpa.concurrency.WaitForValueRepeat;
 import dk.lessismore.nojpa.masterworker.SystemHealth;
 import dk.lessismore.nojpa.masterworker.bean.RemoteBeanInterface;
@@ -11,7 +10,18 @@ import dk.lessismore.nojpa.masterworker.bean.worker.BeanExecutor;
 import dk.lessismore.nojpa.masterworker.exceptions.WorkerExecutionException;
 import dk.lessismore.nojpa.masterworker.executor.Executor;
 import dk.lessismore.nojpa.masterworker.master.MasterProperties;
-import dk.lessismore.nojpa.masterworker.messages.*;
+import dk.lessismore.nojpa.masterworker.messages.CancelJobMessage;
+import dk.lessismore.nojpa.masterworker.messages.HealthMessage;
+import dk.lessismore.nojpa.masterworker.messages.HealthMessageRequest;
+import dk.lessismore.nojpa.masterworker.messages.JobMessage;
+import dk.lessismore.nojpa.masterworker.messages.JobProgressMessage;
+import dk.lessismore.nojpa.masterworker.messages.JobResultMessage;
+import dk.lessismore.nojpa.masterworker.messages.KillMessage;
+import dk.lessismore.nojpa.masterworker.messages.PingMessage;
+import dk.lessismore.nojpa.masterworker.messages.PongMessage;
+import dk.lessismore.nojpa.masterworker.messages.RegistrationMessage;
+import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteBeanMessage;
+import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteResultMessage;
 import dk.lessismore.nojpa.net.link.ClientLink;
 import dk.lessismore.nojpa.properties.PropertiesProxy;
 import dk.lessismore.nojpa.serialization.Serializer;
@@ -23,11 +33,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
 
@@ -35,8 +42,6 @@ public class Worker {
 
     private static final MasterProperties properties = PropertiesProxy.getInstance(MasterProperties.class);
     private static final Logger log = LoggerFactory.getLogger(Worker.class);
-    private static final long SEND_PROGRESS_INTERVAL = 10 * 1000;
-    private static final int DEFAULT_MAX_SAME_PROGRESS = 3;
     private final List<Class<? extends Executor>> supportedExecutors;
     private static final double CRITICAL_VM_MEMORY_USAGE = 0.95;
     private final Serializer serializer;
@@ -58,20 +63,20 @@ public class Worker {
         this.supportedExecutors = supportedExecutors;
     }
 
-    public Worker(Serializer serializer, Class<? extends Executor> ... supportedExecutors) {
+    public Worker(Serializer serializer, Class<? extends Executor>... supportedExecutors) {
         this(serializer, Arrays.asList(supportedExecutors));
     }
 
     public Worker(List<Class<? extends Executor>> supportedExecutors) {
-        this (new XmlSerializer(), supportedExecutors);
+        this(new XmlSerializer(), supportedExecutors);
     }
 
-    public Worker(Class<? extends Executor> ... supportedExecutors) {
-        this (new XmlSerializer(), supportedExecutors);
+    public Worker(Class<? extends Executor>... supportedExecutors) {
+        this(new XmlSerializer(), supportedExecutors);
     }
 
-    public Worker(Class<? extends RemoteBeanInterface> remoteBeanClass, RemoteBeanInterface remoteBean, Class<? extends Executor> ... supportedExecutors) {
-        this (new XmlSerializer(), supportedExecutors);
+    public Worker(Class<? extends RemoteBeanInterface> remoteBeanClass, RemoteBeanInterface remoteBean, Class<? extends Executor>... supportedExecutors) {
+        this(new XmlSerializer(), supportedExecutors);
         this.remoteBeanClass = remoteBeanClass;
         this.remoteBean = remoteBean;
     }
@@ -90,17 +95,17 @@ public class Worker {
         String host = properties.getHost();
         int port = properties.getWorkerPort();
 
-        while(!stop) {
+        while (!stop) {
             //final ClientLink clientLink;
 
-            if(linkAndThreads.clientLink == null) {
-                log.debug("1/2:Worker trying to establish connection to Master on "+host+":"+port);
+            if (linkAndThreads.clientLink == null) {
+                log.debug("1/2:Worker trying to establish connection to Master on " + host + ":" + port);
                 long start = System.currentTimeMillis();
                 try {
                     linkAndThreads.clientLink = new ClientLink(host, port);
                     linkAndThreads.clientLink.write(new RegistrationMessage(remoteBeanClass, getSupportedExecutors()));
                     linkAndThreads.startThreads();
-                    if(remoteBean != null){
+                    if (remoteBean != null) {
                         beanExecutor = new BeanExecutor(remoteBeanClass, remoteBean);
                     }
                 } catch (Exception e) {
@@ -115,14 +120,14 @@ public class Worker {
                     log.warn("We are now restarting....");
                     System.exit(-1);
                 }
-                log.debug("2/2:Worker trying to establish connection to Master on "+host+":"+port + " TIME("+ (System.currentTimeMillis() - start) +")");
+                log.debug("2/2:Worker trying to establish connection to Master on " + host + ":" + port + " TIME(" + (System.currentTimeMillis() - start) + ")");
             }
 
 
             log.debug("Waiting for job");
             final JobMessage jobMessage = linkAndThreads.waitForValue.getValue();
             log.debug("Got a job...! ");
-            if(jobMessage == null){
+            if (jobMessage == null) {
                 String message = "Exception .. jobMessage == null ... ";
                 log.error(message, new Exception(message));
                 linkAndThreads.clientLink = null;
@@ -133,9 +138,7 @@ public class Worker {
 
             final JobResultMessage<Object> resultMessage = new JobResultMessage<Object>(jobMessage.getJobID());
 
-            log.debug("Job received... jobMessage.getJobID("+ jobMessage.getJobID() +")");
-
-
+            log.debug("Job received... jobMessage.getJobID(" + jobMessage.getJobID() + ")");
 
 
             final ListenableFuture<Object> submit = listeningExecutorService.submit(() ->
@@ -147,26 +150,24 @@ public class Worker {
                     }
             );
 
-            try{
+            try {
                 final long dealline = jobMessage.getDealline();
-                if(dealline > 0){
+                if (dealline > 0) {
                     log.debug("Waiting for calculation to end...");
-                    submit.get( dealline - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+                    submit.get(dealline - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
                 } else {
                     submit.get();
                 }
 
-            } catch (Exception e){
+            } catch (Exception e) {
                 submit.cancel(true);
-                log.error("We killed the Thread because we hitted the deadline "+ jobMessage.getJobID());
+                log.error("We killed the Thread because we hitted the deadline " + jobMessage.getJobID());
             }
 
 
-
-
             double progress = -1.0;
-            while(!submit.isCancelled() && !submit.isDone() && linkAndThreads.clientLink != null && linkAndThreads.clientLink.isWorking()) {
-                if(remoteBean == null) {
+            while (!submit.isCancelled() && !submit.isDone() && linkAndThreads.clientLink != null && linkAndThreads.clientLink.isWorking()) {
+                if (remoteBean == null) {
                     if (linkAndThreads.executor.getProgress() != progress) {
                         progress = linkAndThreads.executor.getProgress();
                         log.debug("Working: " + (progress * 100) + "%");
@@ -178,10 +179,11 @@ public class Worker {
                             break;
                         }
                     }
-                    if(linkAndThreads.maybeJob != null && linkAndThreads.maybeJob.getDealline() > 0 && linkAndThreads.maybeJob.getDealline() < System.currentTimeMillis()){
-                        try{
+                    if (linkAndThreads.maybeJob != null && linkAndThreads.maybeJob.getDealline() > 0 && linkAndThreads.maybeJob.getDealline() < System.currentTimeMillis()) {
+                        try {
                             linkAndThreads.executor.stopNicely();
-                        } catch (Exception e){}
+                        } catch (Exception e) {
+                        }
                         log.debug("The job has passed the deadline, so we are closing it...");
                         resultMessage.setException(new WorkerExecutionException("The job has passed the deadline"), serializer);
                         break;
@@ -194,7 +196,7 @@ public class Worker {
                 }
             }
 
-            if(linkAndThreads.clientLink != null) {
+            if (linkAndThreads.clientLink != null) {
                 log.debug("Writing back result...");
                 try {
                     linkAndThreads.clientLink.write(resultMessage);
@@ -213,10 +215,11 @@ public class Worker {
             }
         } // end loop
         log.debug("Exiting!-1");
-        try{
+        try {
             linkAndThreads.clientLink.close();
             linkAndThreads.stopThreads();
-        } catch (Exception e){}
+        } catch (Exception e) {
+        }
         log.debug("Exiting!-2");
         System.exit(-1);
     }
@@ -224,7 +227,7 @@ public class Worker {
     private Executor<?, ?> loadExecutor(JobMessage jobMessage) {
         try {
             final String className = jobMessage.getExecutorClassName();
-            if(remoteBeanClass != null && remoteBeanClass.getName().equals(className)){
+            if (remoteBeanClass != null && remoteBeanClass.getName().equals(className)) {
                 return beanExecutor;
             } else {
                 final Class executorClass = Class.forName(className);
@@ -239,9 +242,9 @@ public class Worker {
     //TODO: Put jobID in all log statements
     private void runJob(Executor<Object, Object> executor, Object input, JobResultMessage<Object> resultMessage) {
         try {
-            log.debug("runJob-START["+ resultMessage.getJobID() +"]:Will run job: " + input);
+            log.debug("runJob-START[" + resultMessage.getJobID() + "]:Will run job: " + input);
             Object result = executor.run(input);
-            log.debug("runJob-DONE["+ resultMessage.getJobID() +"]:Got result("+ result +")");
+            log.debug("runJob-DONE[" + resultMessage.getJobID() + "]:Got result(" + result + ")");
             resultMessage.setResult(result, serializer);
         } catch (Exception e) {
             resultMessage.setException(e, serializer);
@@ -256,18 +259,19 @@ public class Worker {
     protected class LinkAndThreads {
 
         protected ClientLink clientLink = null;
-//        protected Thread healthReporterThread = null;
+        //        protected Thread healthReporterThread = null;
         protected Thread stopperThread = null;
         protected WaitForValueRepeat<JobMessage> waitForValue = new WaitForValueRepeat<JobMessage>();
         protected Executor executor = null;
         protected JobMessage maybeJob = null;
 
 
-        public void stopThreads(){
-            if(stopperThread != null){
+        public void stopThreads() {
+            if (stopperThread != null) {
                 try {
                     stopperThread.interrupt();
-                } catch (Exception e){}
+                } catch (Exception e) {
+                }
             }
 //            if(healthReporterThread != null){
 //                try {
@@ -276,7 +280,7 @@ public class Worker {
 //            }
         }
 
-        public void startThreads(){
+        public void startThreads() {
 //            healthReporterThread = new Thread(new Runnable() {
 //                public void run() {
 //                    int countOfFails = 0;
@@ -310,93 +314,88 @@ public class Worker {
 //
 
 
-            stopperThread = new Thread(new Runnable() {
-                public void run() {
-                    try {
-                        Calendar startUpTime = Calendar.getInstance();
-                        while(!stop && linkAndThreads.clientLink.isWorking()) {
-                            Object o = linkAndThreads.clientLink.read();
-                            if(o instanceof JobMessage) {
-                                log.debug("Read: JobMessage");
-                                maybeJob = (JobMessage) o;
-                                waitForValue.setValue(maybeJob);
-                            } else if(o instanceof KillMessage) {
-                                KillMessage msg = (KillMessage) o;
-                                executor.stopNicely();
-                                linkAndThreads.clientLink.close();
-                                linkAndThreads.clientLink = null;
-                                linkAndThreads.stopThreads();
-                            } else if(o instanceof CancelJobMessage) {
-                                log.info("Stop message recieved from master");
-                                executor.stopNicely();
-                            } else if(o instanceof PingMessage) {
-                                linkAndThreads.clientLink.write(new PongMessage());
-                            } else if(o instanceof HealthMessageRequest) {
-                                log.info("HealthMessageRequest recieved from master ");
-                                HealthMessage healthMessage = new HealthMessage(SystemHealth.getSystemLoadAverage(),
-                                        SystemHealth.getVmMemoryUsage(), SystemHealth.getDiskUsages());
-                                if(linkAndThreads.clientLink != null && linkAndThreads.clientLink.isWorking()) {
-                                    linkAndThreads.clientLink.write(healthMessage);
-                                }
-                            } else if(o instanceof RunMethodRemoteBeanMessage) {
-                                RunMethodRemoteBeanMessage runMethodRemoteBeanMessage = (RunMethodRemoteBeanMessage) o;
-                                BeanExecutor b = (BeanExecutor) executor;
-                                Object resultOfMethod = null;
-                                RunMethodRemoteResultMessage resultMessageOfMethod = new RunMethodRemoteResultMessage(maybeJob.getJobID());
-                                resultMessageOfMethod.setMethodID( runMethodRemoteBeanMessage.getMethodID() );
-                                resultMessageOfMethod.setMethodName( runMethodRemoteBeanMessage.getMethodName() );
-                                try{
-                                    resultOfMethod = b.runMethod(runMethodRemoteBeanMessage);
-                                    log.debug("Will set the of " + runMethodRemoteBeanMessage.getMethodName() + " -> result("+ (resultOfMethod == null ? "NULL" : "HAS-RESULT") +") ");
-                                    resultMessageOfMethod.setResult(resultOfMethod, serializer);
-                                    try{
-//                                            log.debug("Writing the result : " + resultMessageOfMethod);
-                                        linkAndThreads.clientLink.write(resultMessageOfMethod);
-                                    } catch (Exception e){
-                                        log.error("Some error when writing back result ... Have been executed .. " + e, e);
-                                    }
-//                                    }
-                                } catch(Exception t){
-                                    log.error("Some error when calling remoteMethod: " + t, t);
-                                    resultMessageOfMethod.setException( t , serializer);
-                                    try{
-                                        linkAndThreads.clientLink.write(resultMessageOfMethod);
-
-                                    } catch (Exception e){
-                                        log.error("Some error when writing back result ... Have been executed .. " + e, e);
-                                    }
-                                }
-                                System.out.println("We will now run RemoteMethod on executor :" + executor);
-                            } else {
-                                log.error("Did not understand message from master (stop or kill message expected): " + o);
-                            }
-                            startUpTime = Calendar.getInstance();
-                        }
-                    } catch(ClosedChannelException e) {
-                        log.error("Connection closed - Stopping stopperThread");
-                    } catch(IOException e) {
-                        log.error("Some error in stopper jobThread: ", e);
-                    } finally {
-                        try{
-                            log.error("WE WILL CLOSE DOWN AND EXIT-1");
+            stopperThread = new Thread(() -> {
+                try {
+                    while (!stop && linkAndThreads.clientLink.isWorking()) {
+                        Object o = linkAndThreads.clientLink.read();
+                        if (o instanceof JobMessage) {
+                            log.debug("Read: JobMessage");
+                            maybeJob = (JobMessage) o;
+                            waitForValue.setValue(maybeJob);
+                        } else if (o instanceof KillMessage) {
+                            KillMessage msg = (KillMessage) o;
+                            executor.stopNicely();
                             linkAndThreads.clientLink.close();
-                        } catch (Exception e){
-                        }
-                        log.info("We are done..... ");
-                        log.error("WE WILL CLOSE DOWN AND EXIT-2");
-                        if(linkAndThreads.clientLink != null){
-                            try {
-                                linkAndThreads.clientLink.close();
-                                linkAndThreads.clientLink = null;
-                            } catch (Exception e){
+                            linkAndThreads.clientLink = null;
+                            linkAndThreads.stopThreads();
+                        } else if (o instanceof CancelJobMessage) {
+                            log.info("Stop message recieved from master");
+                            executor.stopNicely();
+                        } else if (o instanceof PingMessage) {
+                            linkAndThreads.clientLink.write(new PongMessage());
+                        } else if (o instanceof HealthMessageRequest) {
+                            log.info("HealthMessageRequest recieved from master ");
+                            HealthMessage healthMessage = new HealthMessage(SystemHealth.getSystemLoadAverage(),
+                                    SystemHealth.getVmMemoryUsage(), SystemHealth.getDiskUsages());
+                            if (linkAndThreads.clientLink != null && linkAndThreads.clientLink.isWorking()) {
+                                linkAndThreads.clientLink.write(healthMessage);
                             }
+                        } else if (o instanceof RunMethodRemoteBeanMessage) {
+                            RunMethodRemoteBeanMessage runMethodRemoteBeanMessage = (RunMethodRemoteBeanMessage) o;
+                            BeanExecutor b = (BeanExecutor) executor;
+                            Object resultOfMethod = null;
+                            RunMethodRemoteResultMessage resultMessageOfMethod = new RunMethodRemoteResultMessage(maybeJob.getJobID());
+                            resultMessageOfMethod.setMethodID(runMethodRemoteBeanMessage.getMethodID());
+                            resultMessageOfMethod.setMethodName(runMethodRemoteBeanMessage.getMethodName());
+                            try {
+                                resultOfMethod = b.runMethod(runMethodRemoteBeanMessage);
+                                log.debug("Will set the of " + runMethodRemoteBeanMessage.getMethodName() + " -> result(" + (resultOfMethod == null ? "NULL" : "HAS-RESULT") + ") ");
+                                resultMessageOfMethod.setResult(resultOfMethod, serializer);
+                                try {
+//                                            log.debug("Writing the result : " + resultMessageOfMethod);
+                                    linkAndThreads.clientLink.write(resultMessageOfMethod);
+                                } catch (Exception e) {
+                                    log.error("Some error when writing back result ... Have been executed .. " + e, e);
+                                }
+//                                    }
+                            } catch (Exception t) {
+                                log.error("Some error when calling remoteMethod: " + t, t);
+                                resultMessageOfMethod.setException(t, serializer);
+                                try {
+                                    linkAndThreads.clientLink.write(resultMessageOfMethod);
+
+                                } catch (Exception e) {
+                                    log.error("Some error when writing back result ... Have been executed .. " + e, e);
+                                }
+                            }
+                            System.out.println("We will now run RemoteMethod on executor :" + executor);
                         } else {
+                            log.error("Did not understand message from master (stop or kill message expected): " + o);
                         }
-                        log.error("WE WILL CLOSE DOWN AND EXIT-3 .... System.exit");
-                        log.error("WE WILL CLOSE DOWN AND EXIT-3 .... System.exit");
-                        log.error("WE WILL CLOSE DOWN AND EXIT-3 .... System.exit");
-                        System.exit(-1);
                     }
+                } catch (ClosedChannelException e) {
+                    log.error("Connection closed - Stopping stopperThread");
+                } catch (IOException e) {
+                    log.error("Some error in stopper jobThread: ", e);
+                } finally {
+                    try {
+                        log.error("WE WILL CLOSE DOWN AND EXIT-1");
+                        linkAndThreads.clientLink.close();
+                    } catch (Exception e) {
+                    }
+                    log.info("We are done..... ");
+                    log.error("WE WILL CLOSE DOWN AND EXIT-2");
+                    if (linkAndThreads.clientLink != null) {
+                        try {
+                            linkAndThreads.clientLink.close();
+                            linkAndThreads.clientLink = null;
+                        } catch (Exception e) {
+                        }
+                    }
+                    log.error("WE WILL CLOSE DOWN AND EXIT-3 .... System.exit");
+                    log.error("WE WILL CLOSE DOWN AND EXIT-3 .... System.exit");
+                    log.error("WE WILL CLOSE DOWN AND EXIT-3 .... System.exit");
+                    System.exit(-1);
                 }
             });
             stopperThread.setDaemon(true);
@@ -406,10 +405,6 @@ public class Worker {
         }
 
 
-    }
-
-    public int getMaxSameProgress() {
-        return DEFAULT_MAX_SAME_PROGRESS;
     }
 
 }
