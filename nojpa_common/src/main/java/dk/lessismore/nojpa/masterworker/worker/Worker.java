@@ -29,6 +29,7 @@ import dk.lessismore.nojpa.serialization.XmlSerializer;
 import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
@@ -104,6 +105,7 @@ public class Worker {
                 try {
                     linkAndThreads.clientLink = new ClientLink(host, port);
                     linkAndThreads.clientLink.write(new RegistrationMessage(remoteBeanClass, getSupportedExecutors()));
+                    MDC.put("workerID", linkAndThreads.clientLink.getLinkID());
                     linkAndThreads.startThreads();
                     if (remoteBean != null) {
                         beanExecutor = new BeanExecutor(remoteBeanClass, remoteBean);
@@ -241,6 +243,7 @@ public class Worker {
 
     //TODO: Put jobID in all log statements
     private void runJob(Executor<Object, Object> executor, Object input, JobResultMessage<Object> resultMessage) {
+        MDC.put("jobID", resultMessage.getJobID());
         try {
             log.debug("runJob-START[" + resultMessage.getJobID() + "]:Will run job: " + input);
             Object result = executor.run(input);

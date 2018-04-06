@@ -10,6 +10,7 @@ import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteResultMessage;
 import dk.lessismore.nojpa.net.link.ServerLink;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
@@ -27,6 +28,7 @@ public class MasterWorkerThread implements Runnable{
     }
 
     public void run() {
+        MDC.put("workerID", serverLink.getLinkID());
         try{
             while(true) {
                 Object clientRequest = serverLink.read();

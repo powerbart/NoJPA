@@ -11,7 +11,7 @@ import dk.lessismore.nojpa.serialization.Serializer;
 import dk.lessismore.nojpa.serialization.XmlSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.slf4j.MDC;
 
 
 //This class has the purpose the be the "interface" against the client
@@ -40,6 +40,9 @@ public class MasterService {
         //TODO: In this case, we have one thread living as long as the request is active + 1 second.
         //TODO: We should make one shared thread that is checking all jobHandles and timing it out, when needed.
         final String DEBUG_ID = jobHandle.getJobID().substring(jobHandle.getJobID().length() - 6);
+        MDC.put("jobID", jobHandle.getJobID());
+        MDC.put("workerID", jm.getClientLink().getLinkID());
+
         Thread blockerThread = new Thread() {
             @Override
             public void run() {

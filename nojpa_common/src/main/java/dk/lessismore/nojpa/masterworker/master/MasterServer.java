@@ -48,6 +48,7 @@ public class MasterServer {
     void clientClosedCancelRunningJobs(ServerLink client) {
         log.debug("clientClosedCancelRunningJobs: " + client);
         String jobID = jobPool.getJobID(client);
+
         log.debug("clientClosedCancelRunningJobs - jobID: " + jobID);
         if(jobID != null){
             log.debug("clientClosedCancelRunningJobs - sending KILL: " + jobID);

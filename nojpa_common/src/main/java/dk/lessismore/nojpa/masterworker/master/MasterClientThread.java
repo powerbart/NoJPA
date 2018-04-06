@@ -4,6 +4,7 @@ import dk.lessismore.nojpa.masterworker.messages.*;
 import dk.lessismore.nojpa.net.link.ServerLink;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.nio.channels.ClosedChannelException;
 
@@ -31,14 +32,18 @@ public class MasterClientThread implements Runnable {
 //                    masterServer.newRemoteBean(newRemoteBeanMessage);
                 if(clientRequest instanceof JobMessage) {
                     JobMessage jobMessage = (JobMessage) clientRequest;
+                    MDC.put("jobID", jobMessage.getJobID());
                     masterServer.queueJob(jobMessage, serverLink);
                 } else if(clientRequest instanceof RunMethodRemoteBeanMessage) {
                     RunMethodRemoteBeanMessage runMethodRemoteBeanMessage = (RunMethodRemoteBeanMessage) clientRequest;
+                    MDC.put("jobID", runMethodRemoteBeanMessage.getJobID());
                     masterServer.runMethodRemote(runMethodRemoteBeanMessage, serverLink);
                 } else if(clientRequest instanceof KillMessage) {
                     KillMessage killMessage = (KillMessage) clientRequest;
+                    MDC.put("jobID", killMessage.getJobID());
                     masterServer.kill(killMessage.getJobID());
                 } else {
+                    MDC.remove("jobID");
                     System.out.println("Don't know .... clientRequest = " + clientRequest);
                     log.warn("Don't know clientRequest = " + clientRequest);
                 }
