@@ -136,6 +136,7 @@ public class MasterServer {
     public void setResult(JobResultMessage result, ServerLink serverLink) {
         increaseCounterStatus("/tmp/masterworker_result_jobs_count");
         log.debug("setResult["+ (result != null ? result.getJobID() : "NULL") +"]: " + serverLink);
+        result.setWorkerID("" + serverLink );
         jobPool.setResult(result);
         workerPool.setIdle(true, serverLink);
         WorkerPool.WorkerEntry workerEntry = workerPool.getWorkerEntry(serverLink);

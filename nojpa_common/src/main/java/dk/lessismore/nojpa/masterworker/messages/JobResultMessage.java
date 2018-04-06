@@ -9,6 +9,8 @@ public class JobResultMessage<O> extends JobRelatedMessage {
     private String exception;
     private String result;
     private MasterWorkerException masterException;
+    private String workerID;
+
 
     public JobResultMessage() {
     }
@@ -59,7 +61,15 @@ public class JobResultMessage<O> extends JobRelatedMessage {
 
     public String toString(){
         int i = result == null ? -1 : result.length();
-        return super.toString() + " exception("+ exception +") result("+ (i > 100 ? result.substring(0, 100) : null) +")";
+        return super.toString() + " workerID("+ workerID +") exception("+ exception +") result("+ (i > 100 ? result.substring(0, 100) : null) +")";
+    }
+
+    public String getWorkerID() {
+        return workerID;
+    }
+
+    public void setWorkerID(String workerID) {
+        this.workerID = workerID;
     }
 
 

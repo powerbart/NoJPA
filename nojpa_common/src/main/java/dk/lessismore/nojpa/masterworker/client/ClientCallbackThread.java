@@ -43,7 +43,7 @@ public class ClientCallbackThread<O> extends Thread {
                     jm.notifyRunMethodRemoteResult( runMethodRemoteResultMessage );
                 } else if(message instanceof JobResultMessage) {
                     JobResultMessage<O> jobResultMessage = (JobResultMessage<O>) message;
-                    log.debug("Message is JobResultMessage ("+ jobResultMessage.getJobID() +")");
+                    log.debug("Message is JobResultMessage ("+ jobResultMessage.getJobID() +") with workerID("+ jobResultMessage.getWorkerID() +")");
                     jm.notifyStatus(JobStatus.DONE);
                     if (jobResultMessage.hasException()) {
                         jm.notifyException(jobResultMessage.getException(serializer));

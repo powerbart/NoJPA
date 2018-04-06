@@ -174,7 +174,7 @@ public class JobPool {
         log.debug("fireOnResult["+ result.getJobID() +"]:START ... jobEntry.client("+ jobEntry.client +")");
         try {
             jobEntry.jobDoneDate = Calendar.getInstance();
-            MessageSender.sendResultToClientAndClose(result, jobEntry.client, new MessageSender.FailureHandler() {
+            MessageSender.sendResultToClient(result, jobEntry.client, new MessageSender.FailureHandler() {
                 public void onFailure(ServerLink client) {
                     log.error("fireOnResult[" + result.getJobID() + "]:sendResultToClient(" + client.getOtherHost() + ")-ERROR");
                     try {
