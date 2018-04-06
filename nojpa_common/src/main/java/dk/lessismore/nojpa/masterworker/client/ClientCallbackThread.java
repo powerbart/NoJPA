@@ -54,7 +54,7 @@ public class ClientCallbackThread<O> extends Thread {
                     }
                 } else if(message instanceof JobStatusMessage) {
                     JobStatusMessage jobStatusMessage = (JobStatusMessage) message;
-                    log.debug("Message is JobStatusMessage ("+ jobStatusMessage.getJobID() +")");
+                    log.debug("Message is JobStatusMessage ("+ jobStatusMessage.getJobID() +") with workerID("+ ((JobStatusMessage) message).getWorkerID() +")");
                     jm.notifyStatus(jobStatusMessage.getStatus());
                 } else if(message instanceof JobProgressMessage) {
                     JobProgressMessage jobProgressMessage = (JobProgressMessage) message;

@@ -330,7 +330,6 @@ public class Worker {
                                 log.info("Stop message recieved from master");
                                 executor.stopNicely();
                             } else if(o instanceof PingMessage) {
-                                log.info("PingMessage message recieved from master");
                                 linkAndThreads.clientLink.write(new PongMessage());
                             } else if(o instanceof HealthMessageRequest) {
                                 log.info("HealthMessageRequest recieved from master ");

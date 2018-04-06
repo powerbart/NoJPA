@@ -16,9 +16,9 @@ public class MessageSender {
 
     private static final Logger log = LoggerFactory.getLogger(MessageSender.class);
 
-    public static void sendStatusToClient(String jobID, JobStatus jobStatus, ServerLink client, FailureHandler failureHandler) {
+    public static void sendStatusToClient(String jobID, JobStatus jobStatus, ServerLink client, String workerID, FailureHandler failureHandler) {
         log.debug("sendStatusToClient("+ jobID +")");
-        JobStatusMessage statusMessage = new JobStatusMessage(jobID, jobStatus);
+        JobStatusMessage statusMessage = new JobStatusMessage(jobID, jobStatus, workerID);
         send(statusMessage, client, failureHandler, "sendStatusToClient("+ jobID +") client.getLinkID("+ client.getLinkID() +")");
     }
 

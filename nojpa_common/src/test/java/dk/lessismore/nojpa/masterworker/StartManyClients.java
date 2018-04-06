@@ -10,7 +10,7 @@ import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteResultMessage;
 
 public class StartManyClients {
 
-    private static int clientAmount = 100;
+    private static int clientAmount = 1;
 
 //    public static void main(String[] args) throws Exception {
 //        final StartManyClients startManyClients = new StartManyClients();

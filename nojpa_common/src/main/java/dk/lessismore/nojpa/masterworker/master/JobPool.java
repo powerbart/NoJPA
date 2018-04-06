@@ -154,7 +154,7 @@ public class JobPool {
     private void fireOnStatus(JobEntry jobEntry) {
         String jobID = jobEntry.jobMessage.getJobID();
         JobStatus jobStatus = jobEntry.getStatus();
-        MessageSender.sendStatusToClient(jobID, jobStatus, jobEntry.client, failureHandler);
+        MessageSender.sendStatusToClient(jobID, jobStatus, jobEntry.client, ""+jobEntry.worker, failureHandler);
     }
 
     private void fireOnProgress(JobEntry jobEntry) {
