@@ -29,7 +29,7 @@ public class MessageSender {
     }
 
     public static void sendResultToClient(JobResultMessage result, ServerLink client, FailureHandler failureHandler) {
-        log.debug("sendResultToClient("+ result.getJobID() +") with ServerLink("+ client.getLinkID() +")");
+        log.debug("sendResultToClient("+ result.getJobID() +") with ServerLink("+ client.getLinkID() +") hasResultOrException("+ result.hasResultOrException() +")");
         send(result, client, failureHandler, "sendResultToClient("+ result.getJobID() +") client.getLinkID("+ client.getLinkID() +")");
     }
 
@@ -54,7 +54,9 @@ public class MessageSender {
         sendExecutor.submit(new Runnable() {
             public void run() {
                 try {
-//                    log.debug("Writing ("+ debugLog+") - START");
+                    if(!(message instanceof PingMessage)){
+                        log.debug("Writing ("+ debugLog+") - START");
+                    }
                     client.write(message);
                     if(!(message instanceof PingMessage)){
                         log.debug("Writing ("+ debugLog+") - END");

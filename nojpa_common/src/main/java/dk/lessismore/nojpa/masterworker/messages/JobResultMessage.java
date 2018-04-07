@@ -46,6 +46,10 @@ public class JobResultMessage<O> extends JobRelatedMessage {
         this.result = null;
     }
 
+
+    public boolean hasResultOrException() {
+        return result != null || exception != null;
+    }
     public boolean hasException() {
         return exception != null;
     }
