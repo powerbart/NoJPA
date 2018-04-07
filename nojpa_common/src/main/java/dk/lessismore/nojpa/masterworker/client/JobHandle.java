@@ -195,7 +195,7 @@ public class JobHandle<O> {
      */
     public void addJobListener(JobListener<O> listener) {
         if (closed) throw new JobHandleClosedException();
-        jm.addJobListener(listener);
+        jm.setJobListener(listener);
     }
 
     /**
@@ -210,7 +210,7 @@ public class JobHandle<O> {
     /**
      * Unregister all listeners created with this handle and close connection to master.
      * Subsequent calls to getStatus(), getProgress(), stopNicely(), kill(),
-     * close(), getResult() and addJobListener will raise JobHandleClosedException.
+     * close(), getResult() and setJobListener will raise JobHandleClosedException.
      */
     public void close() {
 //        if (closed) throw new JobHandleClosedException();
@@ -237,6 +237,11 @@ public class JobHandle<O> {
 
 
     private class Listener implements JobListener<O> {
+
+        @Override
+        public String toString() {
+            return "JobHandleListener.jobID("+ jobID +")";
+        }
 
         public void onStatus(JobStatus status) {
             jobStatus = status;

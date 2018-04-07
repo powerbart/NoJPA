@@ -18,8 +18,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.ConnectException;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 public class JobHandleToMasterProtocol<O> {
 
@@ -27,7 +25,7 @@ public class JobHandleToMasterProtocol<O> {
     private static final Logger log = LoggerFactory.getLogger(JobHandleToMasterProtocol.class);
 
     private ClientLink clientLink = null;
-    private Set<JobListener<O>> listeners = new CopyOnWriteArraySet<JobListener<O>>();
+    private JobListener<O> listener = null;
     public final Serializer serializer;
     private WaitForValue<Pair<Object, RuntimeException>> waitForValueOrNull = null;
 
@@ -65,7 +63,7 @@ public class JobHandleToMasterProtocol<O> {
         JobMessage jobMessage = new JobMessage(jobID, executorClass, serializedJobDate, deadline);
         try {
             clientLink.write(jobMessage);
-            addJobListener(listener);
+            setJobListener(listener);
         } catch (IOException e) {
             throw new MasterUnreachableException(e);
         }
@@ -98,17 +96,20 @@ public class JobHandleToMasterProtocol<O> {
     }
 
 
-    public void addJobListener(JobListener<O> listener) {
-        listeners.add(listener);
+    public void setJobListener(JobListener<O> listener) {
+        log.debug("setJobListener("+ listener +")");
+        this.listener = listener;
     }
 
 
     public void removeJobListener(JobListener<O> listener) {
-        listeners.remove(listener);
+        log.debug("removeJobListener("+ listener +")");
+        this.listener = null;
     }
 
     public void removeAllJobListeners() {
-        listeners.clear();
+        log.debug("removeAllJobListeners("+ listener +")");
+        this.listener = null;
     }
 
     public void setWaitForValueToNull() {
@@ -124,35 +125,48 @@ public class JobHandleToMasterProtocol<O> {
     }
 
     public void notifyException(RuntimeException exception)  {
-        for (JobListener<O> listener: listeners) {
+        log.debug("notifyException("+ listener +")");
+        if(listener != null){
             listener.onException(exception);
+        } else {
+            log.error("We don't have a listener");
         }
     }
 
     public void notifyResult(O result) {
-        log.debug("notifyResult for listeners.size("+ listeners.size() +")");
-        for (JobListener<O> listener: listeners) {
+        log.debug("notifyException("+ listener +")");
+        if(listener != null){
             listener.onResult(result);
+        } else {
+            log.error("We don't have a listener");
         }
     }
 
     public void notifyRunMethodRemoteResult(RunMethodRemoteResultMessage runMethodRemoteResultMessage) {
-        for (JobListener<O> listener: listeners) {
+        log.debug("notifyRunMethodRemoteResult("+ listener +")");
+        if(listener != null){
             listener.onRunMethodRemoteResult(runMethodRemoteResultMessage);
+        } else {
+            log.error("We don't have a listener");
         }
     }
 
     public void notifyStatus(JobStatus status) {
-        log.debug("notifyStatus for listeners.size("+ listeners.size() +")");
-        if (status.equals(JobStatus.DONE)) notifyProgress(1.0);
-        for (JobListener<O> listener: listeners) {
+        log.debug("notifyStatus("+ listener +")");
+        if(listener != null){
             listener.onStatus(status);
+        } else {
+            log.error("We don't have a listener");
         }
     }
 
+
     public void notifyProgress(double progress) {
-        for (JobListener<O> listener: listeners) {
+        log.debug("notifyProgress("+ listener +")");
+        if(listener != null){
             listener.onProgress(progress);
+        } else {
+            log.error("We don't have a listener");
         }
     }
 

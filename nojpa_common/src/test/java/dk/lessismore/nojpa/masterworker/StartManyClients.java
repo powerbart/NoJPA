@@ -55,7 +55,7 @@ public class StartManyClients {
             System.out.println(name +":1");
             JobHandle<String> jobHandle = MasterService.runJob(SumExecutor.class, 100l, 15);
             System.out.println(name +":2");
-//        jobHandle.addJobListener(new VerboseListener(n));
+//        jobHandle.setJobListener(new VerboseListener(n));
             System.out.format("%d: RESULT: %s\n", n, jobHandle.getResult());
             System.out.println(name +":3");
             System.out.println("Start closing " + n);
