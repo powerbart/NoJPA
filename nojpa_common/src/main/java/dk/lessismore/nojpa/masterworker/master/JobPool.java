@@ -146,7 +146,9 @@ public class JobPool {
         jobEntry.jobTakenDate = Calendar.getInstance();
         setWorker(jobEntry, worker);
         queue.remove(jobEntry);
-        fireOnStatus(jobEntry);
+        if(jobEntry.creation + 1000 > System.currentTimeMillis()){ //Job was taken fast, no need for sending status
+            fireOnStatus(jobEntry);
+        }
     }
 
 
@@ -257,6 +259,7 @@ public class JobPool {
         public JobResultMessage result;
         public double progress = 0;
         public double priority = 1;
+        public long creation = System.currentTimeMillis();
         public Calendar date = Calendar.getInstance();
         public Calendar jobTakenDate = null;
         public Calendar jobDoneDate = null;

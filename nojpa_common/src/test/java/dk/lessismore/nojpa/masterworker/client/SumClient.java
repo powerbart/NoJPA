@@ -13,31 +13,30 @@ public class SumClient {
 
     public static void main(String[] args) throws Exception {
 
-        JobListener<String> jobListener = new JobListener<String>() {
-            public void onStatus(JobStatus status) {
-                System.out.println("onStatus: "+status);
-            }
-
-            public void onProgress(double progress) {
-                System.out.println("onProgress: "+progress);
-            }
-
-            public void onResult(String result) {
-                System.out.println("onResult: "+result);
-            }
-
-            public void onRunMethodRemoteResult(RunMethodRemoteResultMessage runMethodRemoteResultMessage) {
-                //To change body of implemented methods use File | Settings | File Templates.
-            }
-
-            public void onException(RuntimeException e) {
-                System.out.println("onException: "+e.getMessage());
-            }
-        };
+//        JobListener<String> jobListener = new JobListener<String>() {
+//            public void onStatus(JobStatus status) {
+//                System.out.println("onStatus: "+status);
+//            }
+//
+//            public void onProgress(double progress) {
+//                System.out.println("onProgress: "+progress);
+//            }
+//
+//            public void onResult(String result) {
+//                System.out.println("onResult: "+result);
+//            }
+//
+//            public void onRunMethodRemoteResult(RunMethodRemoteResultMessage runMethodRemoteResultMessage) {
+//                //To change body of implemented methods use File | Settings | File Templates.
+//            }
+//
+//            public void onException(RuntimeException e) {
+//                System.out.println("onException: "+e.getMessage());
+//            }
+//        };
 
         {
             JobHandle<String> jobHandle = MasterService.runJob(SumExecutor.class, 7L, 60);
-            jobHandle.addJobListener(jobListener);
             System.out.println("jobHandle.getProgress() = " + jobHandle.getProgress());
             System.out.println("jobHandle.getStatus() = " + jobHandle.getStatus());
             //Thread.sleep(10 * 1000);
@@ -53,7 +52,7 @@ public class SumClient {
         System.out.println("***************************************************");
         {
             JobHandle<String> jobHandle = MasterService.runJob(SumExecutor.class, 9L, 60);
-            jobHandle.addJobListener(jobListener);
+//            jobHandle.addJobListener(jobListener);
             System.out.println("jobHandle.getProgress() = " + jobHandle.getProgress());
             System.out.println("jobHandle.getStatus() = " + jobHandle.getStatus());
             //Thread.sleep(10 * 1000);

@@ -5,6 +5,8 @@ import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteResultMessage;
 
 public interface JobListener<O> {
 
+    public String getJobID();
+
     public void onStatus(JobStatus status);
 
     public void onProgress(double progress);

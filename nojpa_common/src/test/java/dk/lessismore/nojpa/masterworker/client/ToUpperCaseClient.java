@@ -26,27 +26,28 @@ public class ToUpperCaseClient {
         log.error("errr");
 
 
-        JobListener<String> jobListener = new JobListener<String>() {
-            public void onStatus(JobStatus status) {
-                System.out.println("onStatus2: "+status);
-            }
-
-            public void onProgress(double progress) {
-                System.out.println("onProgress2: "+progress);
-            }
-
-            public void onResult(String result) {
-                System.out.println("onResult2: "+result);
-            }
-
-            public void onRunMethodRemoteResult(RunMethodRemoteResultMessage runMethodRemoteResultMessage) {
-
-            }
-
-            public void onException(RuntimeException e) {
-                System.out.println("onException: "+e.getMessage());
-            }
-        };
+        JobListener<String> jobListener = null;
+//        new JobListener<String>() {
+//            public void onStatus(JobStatus status) {
+//                System.out.println("onStatus2: "+status);
+//            }
+//
+//            public void onProgress(double progress) {
+//                System.out.println("onProgress2: "+progress);
+//            }
+//
+//            public void onResult(String result) {
+//                System.out.println("onResult2: "+result);
+//            }
+//
+//            public void onRunMethodRemoteResult(RunMethodRemoteResultMessage runMethodRemoteResultMessage) {
+//
+//            }
+//
+//            public void onException(RuntimeException e) {
+//                System.out.println("onException: "+e.getMessage());
+//            }
+//        };
 
         StringBuilder b = new StringBuilder();
         for(int i = 0; i < 1000; i++){

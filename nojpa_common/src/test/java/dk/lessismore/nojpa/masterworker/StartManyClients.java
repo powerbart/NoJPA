@@ -53,7 +53,7 @@ public class StartManyClients {
         String name = Thread.currentThread().getName();
         try {
             System.out.println(name +":1");
-            JobHandle<String> jobHandle = MasterService.runJob(SumExecutor.class, 100l, 15);
+            JobHandle<String> jobHandle = MasterService.runJob(SumExecutor.class, 1000l, 15);
             System.out.println(name +":2");
 //        jobHandle.setJobListener(new VerboseListener(n));
             System.out.format("%d: RESULT: %s\n", n, jobHandle.getResult());
@@ -70,47 +70,47 @@ public class StartManyClients {
 
     private void startToUpperClient(int n) {
         JobHandle<String> jobHandle = MasterService.runJob(ToUpperExecutor.class, "LilLe PeTer", 60);
-        jobHandle.addJobListener(new VerboseListener(n));
+//        jobHandle.addJobListener(new VerboseListener(n));
         System.out.format("%d: RESULT: %s\n", n, jobHandle.getResult());
         jobHandle.close();
     }
 
     private void startToLowerClient(int n) {
         JobHandle<String> jobHandle = MasterService.runJob(ToLowerExecutor.class, "StoRe Claus", 60);
-        jobHandle.addJobListener(new VerboseListener(n));
+//        jobHandle.addJobListener(new VerboseListener(n));
         System.out.format("%d: RESULT: %s\n", n, jobHandle.getResult());
         jobHandle.close();
     }
 
-    class VerboseListener implements JobListener<String> {
-
-        private final int number;
-
-        public VerboseListener(int number) {
-            this.number = number;
-        }
-
-        public void onStatus(JobStatus status) {
-            System.out.format("%d: onStatus: %s\n", number, status);
-        }
-
-        public void onProgress(double progress) {
-            System.out.format("%d: onProgress: %f\n", number, progress);
-        }
-
-        public void onResult(String result) {
-            System.out.format("%d: onResult: %s\n", number, result);
-        }
-
-        public void onRunMethodRemoteResult(RunMethodRemoteResultMessage runMethodRemoteResultMessage) {
-            //To change body of implemented methods use File | Settings | File Templates.
-        }
-
-        public void onException(RuntimeException e) {
-            System.out.format("%d: onException: %s\n", number, e.getMessage());
-        }
-
-
-    }
+//    class VerboseListener implements JobListener<String> {
+//
+//        private final int number;
+//
+//        public VerboseListener(int number) {
+//            this.number = number;
+//        }
+//
+//        public void onStatus(JobStatus status) {
+//            System.out.format("%d: onStatus: %s\n", number, status);
+//        }
+//
+//        public void onProgress(double progress) {
+//            System.out.format("%d: onProgress: %f\n", number, progress);
+//        }
+//
+//        public void onResult(String result) {
+//            System.out.format("%d: onResult: %s\n", number, result);
+//        }
+//
+//        public void onRunMethodRemoteResult(RunMethodRemoteResultMessage runMethodRemoteResultMessage) {
+//            //To change body of implemented methods use File | Settings | File Templates.
+//        }
+//
+//        public void onException(RuntimeException e) {
+//            System.out.format("%d: onException: %s\n", number, e.getMessage());
+//        }
+//
+//
+//    }
 
 }

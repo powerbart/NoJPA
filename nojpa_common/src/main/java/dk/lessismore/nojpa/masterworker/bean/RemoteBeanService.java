@@ -42,7 +42,14 @@ public class RemoteBeanService implements InvocationHandler {
         this.sourceClass = sourceClass;
 
         jobListener = new JobListener<Object>() {
-             public void onStatus(JobStatus status) {
+
+
+            @Override
+            public String getJobID() {
+                return jobHandle != null ? jobHandle.getJobID() : null;
+            }
+
+            public void onStatus(JobStatus status) {
                  System.out.println("RemoteBeanService.JobListener.onStatus: "+status);
              }
 

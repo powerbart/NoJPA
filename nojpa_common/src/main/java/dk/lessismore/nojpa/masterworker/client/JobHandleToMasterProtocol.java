@@ -62,8 +62,9 @@ public class JobHandleToMasterProtocol<O> {
         String serializedJobDate = serializer.serialize(jobData);
         JobMessage jobMessage = new JobMessage(jobID, executorClass, serializedJobDate, deadline);
         try {
-            clientLink.write(jobMessage);
             setJobListener(listener);
+            log.debug("sendRunJobRequest("+ jobID +")");
+            clientLink.write(jobMessage);
         } catch (IOException e) {
             throw new MasterUnreachableException(e);
         }
@@ -134,7 +135,7 @@ public class JobHandleToMasterProtocol<O> {
     }
 
     public void notifyResult(O result) {
-        log.debug("notifyException("+ listener +")");
+        log.debug("notifyResult("+ listener +")");
         if(listener != null){
             listener.onResult(result);
         } else {
@@ -170,4 +171,13 @@ public class JobHandleToMasterProtocol<O> {
         }
     }
 
+    public boolean matchJobID(String jobID) {
+        if(jobID == null){
+            log.error("1: NULL JobID .. matchJobID("+ listener +") ... arg.jobID("+jobID+")");
+        }
+        if(listener == null){
+            log.error("2: NULL JobID .. matchJobID("+ listener +") ... arg.jobID("+jobID+")");
+        }
+        return jobID.equals(listener.getJobID());
+    }
 }

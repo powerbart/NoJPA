@@ -44,18 +44,26 @@ public class ClientCallbackThread<O> extends Thread {
                 } else if(message instanceof JobResultMessage) {
                     JobResultMessage<O> jobResultMessage = (JobResultMessage<O>) message;
                     log.debug("Message is JobResultMessage ("+ jobResultMessage.getJobID() +") with workerID("+ jobResultMessage.getWorkerID() +")");
-                    jm.notifyStatus(JobStatus.DONE);
-                    if (jobResultMessage.hasException()) {
-                        jm.notifyException(jobResultMessage.getException(serializer));
-                    } else if (jobResultMessage.hasMasterException()) {
-                        jm.notifyException(jobResultMessage.getMasterException());
+                    if(jm.matchJobID(jobResultMessage.getJobID())){
+                        jm.notifyStatus(JobStatus.DONE);
+                        if (jobResultMessage.hasException()) {
+                            jm.notifyException(jobResultMessage.getException(serializer));
+                        } else if (jobResultMessage.hasMasterException()) {
+                            jm.notifyException(jobResultMessage.getMasterException());
+                        } else {
+                            jm.notifyResult(jobResultMessage.getResult(serializer));
+                        }
                     } else {
-                        jm.notifyResult(jobResultMessage.getResult(serializer));
+                        log.error("JobID dont matches JobResultMessage("+ jobResultMessage.getJobID() +") ");
                     }
                 } else if(message instanceof JobStatusMessage) {
                     JobStatusMessage jobStatusMessage = (JobStatusMessage) message;
                     log.debug("Message is JobStatusMessage ("+ jobStatusMessage.getJobID() +") with workerID("+ ((JobStatusMessage) message).getWorkerID() +")");
-                    jm.notifyStatus(jobStatusMessage.getStatus());
+                    if(jm.matchJobID(jobStatusMessage.getJobID())){
+                        jm.notifyStatus(jobStatusMessage.getStatus());
+                    } else {
+                        log.error("JobID dont matches JobStatusMessage("+ jobStatusMessage.getJobID() +") ");
+                    }
                 } else if(message instanceof JobProgressMessage) {
                     JobProgressMessage jobProgressMessage = (JobProgressMessage) message;
                     log.debug("Message is jobProgressMessage ("+ jobProgressMessage.getJobID() +")");

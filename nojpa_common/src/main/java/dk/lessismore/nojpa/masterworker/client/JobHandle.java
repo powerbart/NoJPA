@@ -54,6 +54,7 @@ public class JobHandle<O> {
         this.jm = jm;
         this.implementationClass = executorClass;
         this.jobData = jobData;
+        log.debug("Constructor and sending jobID("+ jobID +")");
         jm.sendRunJobRequest(jobID, executorClass, jobData, new Listener(), deadline);
     }
 
@@ -237,6 +238,11 @@ public class JobHandle<O> {
 
 
     private class Listener implements JobListener<O> {
+
+        @Override
+        public String getJobID() {
+            return jobID;
+        }
 
         @Override
         public String toString() {
