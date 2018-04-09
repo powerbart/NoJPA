@@ -27,19 +27,13 @@ public class MasterService {
         return new JobHandle<O>(jm, sourceClass);
     }
 
-
     public static <I,O> JobHandle<O> runJob(Class<? extends Executor<I,O>> implementationClass, I jobData, int maxSecondsBeforeFailure) {
-        return runJob(implementationClass, jobData, defaultSerializer(), maxSecondsBeforeFailure);
-    }
-
-    public static <I,O> JobHandle<O> runJob(Class<? extends Executor<I,O>> implementationClass, I jobData, Serializer serializer, int maxSecondsBeforeFailure) {
-        JobHandleToMasterProtocol<O> jm = getNewJobHandleToMasterProtocol(serializer);
+        JobHandleToMasterProtocol<O> jm = getNewJobHandleToMasterProtocol();
         JobHandle<O> jobHandle = new JobHandle<O>(jm, implementationClass, jobData, System.currentTimeMillis() + maxSecondsBeforeFailure * 1000);
         final Object blocker = new Object();
 
         //TODO: In this case, we have one thread living as long as the request is active + 1 second.
         //TODO: We should make one shared thread that is checking all jobHandles and timing it out, when needed.
-        final String DEBUG_ID = jobHandle.getJobID().substring(jobHandle.getJobID().length() - 6);
         MDC.put("jobID", jobHandle.getJobID());
         MDC.put("workerID", jm.getClientLink().getLinkID());
 
@@ -71,7 +65,7 @@ public class MasterService {
         };
 
         if(maxSecondsBeforeFailure > 0) {
-            blockerThread.setName(Thread.currentThread().getName() + "-" + blockerThread.getName() + "-" + DEBUG_ID);
+            blockerThread.setName("TimeoutThread-"+ jobHandle.getJobID().substring(jobHandle.getJobID().length() - 6));
             blockerThread.start();
         }
         return jobHandle;
@@ -82,15 +76,20 @@ public class MasterService {
         //TODO: Should call close on all JobHandleToMasterProtocol objects, and the MasterService should be uncallable after.
     }
 
+    public static <O> void putBackInPool(JobHandleToMasterProtocol<O> jm) {
+        log.debug("putBackInPool for JobHandleToMasterProtocol:");
+        jm.removeAllJobListeners();
+        pool.putBackInPool(jm);
+    }
 
 
     //TODO: Serializer should not be a parameter, we will always use the XmlSerializer....!
-    public synchronized static <O> ResourcePool getJobHandleToMasterProtocolPool(Serializer serializer){
+    public synchronized static <O> ResourcePool getJobHandleToMasterProtocolPool(){
         if(pool == null){
             pool = new ResourcePool(new ResourceFactory() {
                 @Override
                 public Object makeResource() {
-                    return new JobHandleToMasterProtocol<O>(serializer);
+                    return new JobHandleToMasterProtocol<O>(defaultSerializer());
                 }
 
                 @Override
@@ -112,8 +111,9 @@ public class MasterService {
         return pool;
     }
 
-    public static JobHandleToMasterProtocol getNewJobHandleToMasterProtocol(Serializer serializer) {
-        ResourcePool p = getJobHandleToMasterProtocolPool(serializer);
+    public static JobHandleToMasterProtocol getNewJobHandleToMasterProtocol() {
+        ResourcePool p = getJobHandleToMasterProtocolPool();
+        log.debug("getNewJobHandleToMasterProtocol: p.getNrOfResources("+ p.getNrOfResources() +")");
         if (p.getNrOfResources() < 1) {
             p.addNew();
         }
@@ -140,6 +140,7 @@ public class MasterService {
         c.stop();
         return c.getUpdateMessage();
     }
+
 
     private static class CurrentStatus extends AbstractObserver {
 

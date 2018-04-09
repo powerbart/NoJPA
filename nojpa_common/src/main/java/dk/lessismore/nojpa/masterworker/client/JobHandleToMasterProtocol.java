@@ -34,6 +34,9 @@ public class JobHandleToMasterProtocol<O> {
         initConnection();
     }
 
+
+
+
     public ClientLink getClientLink() {
         return clientLink;
     }

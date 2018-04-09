@@ -186,7 +186,7 @@ public class JobHandle<O> {
                 return value;
             }
         } finally {
-            MasterService.getJobHandleToMasterProtocolPool(null).putBackInPool(jm);
+            MasterService.putBackInPool(jm);
         }
     }
 

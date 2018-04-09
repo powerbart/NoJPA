@@ -10,7 +10,7 @@ import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteResultMessage;
 
 public class StartManyClients {
 
-    private static int clientAmount = 1;
+    private static int clientAmount = 100;
 
 //    public static void main(String[] args) throws Exception {
 //        final StartManyClients startManyClients = new StartManyClients();
@@ -31,8 +31,11 @@ public class StartManyClients {
                     System.out.println(finalI + ": Done");
                 }
             }).start();
+            Thread.sleep(5 * i);
         }
+        System.out.println("------------- Almost done ------------");
         Thread.sleep(45 * 1000);
+        System.out.println("------------- done        ------------");
 //        for(int i = 0; i < clientAmount; i++) {
 //            new StartManyClients().startSumClient(10 * i);
 //        }
@@ -53,7 +56,7 @@ public class StartManyClients {
         String name = Thread.currentThread().getName();
         try {
             System.out.println(name +":1");
-            JobHandle<String> jobHandle = MasterService.runJob(SumExecutor.class, 1000l, 15);
+            JobHandle<String> jobHandle = MasterService.runJob(SumExecutor.class, 1000l, 10);
             System.out.println(name +":2");
 //        jobHandle.setJobListener(new VerboseListener(n));
             System.out.format("%d: RESULT: %s\n", n, jobHandle.getResult());
