@@ -40,7 +40,7 @@ public class MasterService {
         Thread blockerThread = new Thread() {
             @Override
             public void run() {
-                for(int i = 0; jobHandle.getStatus() != JobStatus.DONE && i < maxSecondsBeforeFailure; i++){
+                for(int i = 0; jobHandle.getStatus() != JobStatus.DONE && i < maxSecondsBeforeFailure +10; i++){
                     try {
                         synchronized (blocker) {
                             if(jobHandle.getStatus() != JobStatus.DONE){

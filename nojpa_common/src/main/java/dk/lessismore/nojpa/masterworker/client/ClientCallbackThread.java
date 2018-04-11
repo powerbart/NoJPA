@@ -54,7 +54,7 @@ public class ClientCallbackThread<O> extends Thread {
                             jm.notifyResult(jobResultMessage.getResult(serializer));
                         }
                     } else {
-                        log.error("JobID dont matches JobResultMessage("+ jobResultMessage.getJobID() +") ");
+                        log.info("JobID dont matches JobResultMessage("+ jobResultMessage.getJobID() +") ");
                     }
                 } else if(message instanceof JobStatusMessage) {
                     JobStatusMessage jobStatusMessage = (JobStatusMessage) message;
@@ -62,12 +62,16 @@ public class ClientCallbackThread<O> extends Thread {
                     if(jm.matchJobID(jobStatusMessage.getJobID())){
                         jm.notifyStatus(jobStatusMessage.getStatus());
                     } else {
-                        log.error("JobID dont matches JobStatusMessage("+ jobStatusMessage.getJobID() +") ");
+                        log.info("JobID dont matches JobStatusMessage("+ jobStatusMessage.getJobID() +") ");
                     }
                 } else if(message instanceof JobProgressMessage) {
                     JobProgressMessage jobProgressMessage = (JobProgressMessage) message;
-                    log.debug("Message is jobProgressMessage ("+ jobProgressMessage.getJobID() +")");
-                    jm.notifyProgress(jobProgressMessage.getProgress());
+                    if(jm.matchJobID(jobProgressMessage.getJobID())){
+                        log.debug("Message is jobProgressMessage ("+ jobProgressMessage.getJobID() +")");
+                        jm.notifyProgress(jobProgressMessage.getProgress());
+                    } else {
+                        log.info("JobID dont matches JobProgressMessage("+ jobProgressMessage.getJobID() +") ");
+                    }
                 } else {
                     log.error("Don't know message = " + message);
                 }

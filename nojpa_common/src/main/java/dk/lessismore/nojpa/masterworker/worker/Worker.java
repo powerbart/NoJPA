@@ -7,6 +7,8 @@ import dk.lessismore.nojpa.concurrency.WaitForValueRepeat;
 import dk.lessismore.nojpa.masterworker.SystemHealth;
 import dk.lessismore.nojpa.masterworker.bean.RemoteBeanInterface;
 import dk.lessismore.nojpa.masterworker.bean.worker.BeanExecutor;
+import dk.lessismore.nojpa.masterworker.exceptions.JobCancelException;
+import dk.lessismore.nojpa.masterworker.exceptions.TimeoutException;
 import dk.lessismore.nojpa.masterworker.exceptions.WorkerExecutionException;
 import dk.lessismore.nojpa.masterworker.executor.Executor;
 import dk.lessismore.nojpa.masterworker.master.MasterProperties;
@@ -187,7 +189,7 @@ public class Worker {
                         } catch (Exception e) {
                         }
                         log.debug("The job has passed the deadline, so we are closing it...");
-                        resultMessage.setException(new WorkerExecutionException("The job has passed the deadline"), serializer);
+                        resultMessage.setException(new TimeoutException("The job has passed the deadline"), serializer);
                         break;
                     }
                 }
