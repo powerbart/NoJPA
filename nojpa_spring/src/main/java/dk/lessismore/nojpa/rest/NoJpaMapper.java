@@ -2,7 +2,6 @@ package dk.lessismore.nojpa.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import org.springframework.hateoas.hal.Jackson2HalModule;
 
 /**
  * Created with IntelliJ IDEA.
