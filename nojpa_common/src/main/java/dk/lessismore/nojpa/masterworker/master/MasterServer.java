@@ -120,6 +120,8 @@ public class MasterServer {
             try{
                 if(new File(filename).exists()) {
                     counter = new AtomicLong(new Long(SuperIO.readTextFromFile(filename)));
+                } else {
+                    counter = new AtomicLong(0L);
                 }
             } catch (Exception e){
                 counter = new AtomicLong(0L);
