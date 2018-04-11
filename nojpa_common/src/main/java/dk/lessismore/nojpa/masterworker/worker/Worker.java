@@ -183,7 +183,10 @@ public class Worker {
                     }
                     if (linkAndThreads.maybeJob != null && linkAndThreads.maybeJob.getDealline() > 0 && linkAndThreads.maybeJob.getDealline() < System.currentTimeMillis()) {
                         try {
-                            linkAndThreads.executor.stopNicely();
+                            linkAndThreads.executor.cancelCurrentJob();
+                            if (linkAndThreads.executor.isExecutingJob()) {
+                                System.exit(-1);
+                            }
                         } catch (Exception e) {
                         }
                         log.debug("The job has passed the deadline, so we are closing it...");
@@ -327,13 +330,13 @@ public class Worker {
                             waitForValue.setValue(maybeJob);
                         } else if (o instanceof KillMessage) {
                             KillMessage msg = (KillMessage) o;
-                            executor.stopNicely();
+                            executor.cancelCurrentJob();
                             linkAndThreads.clientLink.close();
                             linkAndThreads.clientLink = null;
                             linkAndThreads.stopThreads();
                         } else if (o instanceof CancelJobMessage) {
                             log.info("Stop message recieved from master");
-                            executor.stopNicely();
+                            executor.cancelCurrentJob();
                         } else if (o instanceof PingMessage) {
                             linkAndThreads.clientLink.write(new PongMessage());
                         } else if (o instanceof HealthMessageRequest) {
