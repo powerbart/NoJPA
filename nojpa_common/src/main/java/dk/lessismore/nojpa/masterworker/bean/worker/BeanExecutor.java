@@ -5,7 +5,6 @@ import dk.lessismore.nojpa.masterworker.messages.RunMethodRemoteBeanMessage;
 import dk.lessismore.nojpa.masterworker.messages.NewRemoteBeanMessage;
 import dk.lessismore.nojpa.masterworker.bean.RemoteBeanInterface;
 import dk.lessismore.nojpa.guid.GuidFactory;
-import dk.lessismore.nojpa.reflection.db.DbObjectSelector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +29,7 @@ public class BeanExecutor extends Executor<NewRemoteBeanMessage, Object> {
 
 
     public Object run(NewRemoteBeanMessage n) {
-        while(!done && !isStoppedNicely()) {
+        while(!done && !isRemoteBeanClosing()) {
             log.debug("Waiting for RemoteMethod: " + n + " " + super.toString());
             try {
                 Thread.sleep(5_000);

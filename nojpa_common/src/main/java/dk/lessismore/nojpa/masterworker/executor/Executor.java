@@ -3,7 +3,6 @@ package dk.lessismore.nojpa.masterworker.executor;
 public abstract class Executor<I, O> {
 
     private double progress = 0; // Between 0 and 1
-    private boolean stopNicely = false;
 
     public abstract O run(I input);
 
@@ -15,12 +14,14 @@ public abstract class Executor<I, O> {
         this.progress = Math.max(0.0, Math.min(1.0, progress));
     }
 
-    public void stopNicely(){
-        stopNicely = true;
+    public void cancelCurrentJob(){ }
+
+    public boolean isExecutingJob() {
+        return false;
     }
 
-    public boolean isStoppedNicely() {
-        return stopNicely;
+    public boolean isRemoteBeanClosing() {
+        return false;
     }
 
 }
