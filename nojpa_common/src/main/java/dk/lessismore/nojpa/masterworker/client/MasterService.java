@@ -52,13 +52,13 @@ public class MasterService {
                     }
                     if(jobHandle.getStatus() != JobStatus.DONE){
                         if(i > (maxSecondsBeforeFailure / 2) && (i % 10 == 0)) {
-                            log.warn(" Waiting[" + i + "/" + maxSecondsBeforeFailure + "] for JobHandle(" + jobHandle.getJobID() + ") status(" + jobHandle.getStatus() + ") progress(" + jobHandle.getProgress() + ") TYPE[" + implementationClass.getSimpleName() + "]");
+                            log.info(" Waiting[" + i + "/" + maxSecondsBeforeFailure + "] for JobHandle(" + jobHandle.getJobID() + ") status(" + jobHandle.getStatus() + ") progress(" + jobHandle.getProgress() + ") TYPE[" + implementationClass.getSimpleName() + "]");
                         }
                     }
                 }
                 if(jobHandle.getStatus() != JobStatus.DONE){
-                    log.warn(" MW-NO-RESULT Waiting: We didn't get any result from JobHandle("+ jobHandle.getJobID() +") status(" + jobHandle.getStatus() +") progress(" + jobHandle.getProgress() +")");
-                    log.warn("timeout-TIMEOUT for job("+ jobHandle.getJobID()  +")...!!!!!!!! =!=!=!=!=!=!=!=!=! " + jobHandle.getImplementationClass().getSimpleName());
+                    log.info(" MW-NO-RESULT Waiting: We didn't get any result from JobHandle("+ jobHandle.getJobID() +") status(" + jobHandle.getStatus() +") progress(" + jobHandle.getProgress() +")");
+                    log.info("timeout-TIMEOUT for job("+ jobHandle.getJobID()  +")...!!!!!!!! =!=!=!=!=!=!=!=!=! " + jobHandle.getImplementationClass().getSimpleName());
                     jobHandle.timeout();
                 }
             }
