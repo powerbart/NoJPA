@@ -219,7 +219,7 @@ public class JobHandle<O> {
         //We should NOT call close on the jm.... Since we are reusing the connection ...
         //jm.close();
         if(!result.hasValue()){
-            log.warn("SETTING RESULT TO NULL.....!!!!");
+            log.info("SETTING RESULT TO NULL.....!!!!");
             result.setValue(new Pair<O, RuntimeException>(null, new JobHandleClosedException()));
         }
     }
