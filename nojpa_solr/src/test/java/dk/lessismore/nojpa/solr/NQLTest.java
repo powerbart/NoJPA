@@ -63,6 +63,8 @@ public class NQLTest {
 
     @Test
     public void testDbCreateInlineWithVisitor() throws Exception {
+        DatabaseCreator.createDatabase("dk.lessismore.nojpa.db.testmodel");
+
         Class<Address> addressClass = Address.class;
         List<Class> l = new ArrayList<Class>();
         l.add(addressClass);
