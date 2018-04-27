@@ -428,7 +428,7 @@ public class DatabaseCreator {
     }
 
     public static void createDatabase(List<Class> clazzes, Class[] ignores) {
-        log.debug("********* re/createDatabase ***************** - START");
+        log.info("********* re/createDatabase ***************** - START");
 		List<SQLStatement> tables = new LinkedList<SQLStatement>();
 		for(Class clazz : clazzes) {
             boolean ignore = false;
