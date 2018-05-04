@@ -30,14 +30,18 @@ spring.datasource.password=1234
 spring.datasource.nrOfPoolConnections=10
      */
     public static Properties from(Environment env) throws Exception {
+        return from(env, "spring");
+    }
+
+    public static Properties from(Environment env, String name) throws Exception {
         Properties props = new Properties();
-        props.setProperty("driverName", env.getProperty("spring.datasource.driverClassName"));
+        props.setProperty("driverName", env.getProperty(name + ".datasource.driverClassName"));
 
-        props.setProperty("user", env.getProperty("spring.datasource.username"));
-        props.setProperty("password", env.getProperty("spring.datasource.password"));
-        props.setProperty("nrOfPoolConnections", env.getProperty("spring.datasource.nrOfPoolConnections"));
+        props.setProperty("user", env.getProperty(name + ".datasource.username"));
+        props.setProperty("password", env.getProperty(name + ".datasource.password"));
+        props.setProperty("nrOfPoolConnections", env.getProperty(name + ".datasource.nrOfPoolConnections"));
 
-        String url = env.getProperty("spring.datasource.url");
+        String url = env.getProperty(name + ".datasource.url");
         URI uri = new URI(new URI(url).getSchemeSpecificPart());
         props.setProperty("ip", uri.getHost());
         props.setProperty("database", uri.getScheme());
