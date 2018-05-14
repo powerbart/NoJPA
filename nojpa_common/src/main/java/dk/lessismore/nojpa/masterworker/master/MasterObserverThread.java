@@ -39,7 +39,7 @@ public class MasterObserverThread extends Thread {
         } catch (ClosedChannelException e) {
             log.info("Connection closed - stopping listening to observer");
         } catch (IOException e) {
-            log.error("IOException - stopping listening to observer", e);
+            log.info("IOException - stopping listening to observer", e);
         } finally {
             try{
                 serverLink.close();

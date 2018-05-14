@@ -23,6 +23,7 @@ public class Master {
      * @throws InterruptedException
      */
     public static void main(String[] args) throws IOException, InterruptedException {
+        System.out.println("Master.java:1");
         PropertyResources resources = PropertyService.getInstance().getPropertyResources(Master.class);
         System.out.println("resources = " + resources.getString("clientPort"));
 

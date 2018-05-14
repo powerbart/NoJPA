@@ -181,7 +181,7 @@ public abstract class AbstractLink {
                     try {
                         byteLength = in.read(buffer);
                         totalReadBytes += byteLength;
-                    } catch (SocketException e) {
+                    } catch (Exception e) {
                         throw new ClosedChannelException();
                     }
                     if (byteLength == -1) {
@@ -199,9 +199,14 @@ public abstract class AbstractLink {
                     int endIndex = s.indexOf(SEPARATOR, startIndex);
                     if (endIndex != -1) {
                         String objectStr = s.substring(startIndex, endIndex);
-                        Object o = serializer.unserialize(objectStr);
-                        receivedObjects.addLast(o);
-                        startIndex = endIndex + SEPARATOR.length();
+                        try {
+                            Object o = serializer.unserialize(objectStr);
+                            receivedObjects.addLast(o);
+                            startIndex = endIndex + SEPARATOR.length();
+                        } catch (Exception e) {
+                            log.error("An error happen while unserialize... objectStr = " + objectStr);
+                            throw new IOException(e);
+                        }
                     } else {
                         startIndex = endIndex;
                     }
