@@ -7,10 +7,7 @@ import dk.lessismore.nojpa.db.statements.CreateSQLStatement;
 import dk.lessismore.nojpa.db.statements.DropSQLStatement;
 import dk.lessismore.nojpa.db.statements.SQLStatement;
 import dk.lessismore.nojpa.db.statements.SQLStatementFactory;
-import dk.lessismore.nojpa.reflection.db.annotations.Compressed;
-import dk.lessismore.nojpa.reflection.db.annotations.IgnoreFromTableCreation;
-import dk.lessismore.nojpa.reflection.db.annotations.IndexClass;
-import dk.lessismore.nojpa.reflection.db.annotations.IndexField;
+import dk.lessismore.nojpa.reflection.db.annotations.*;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttribute;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttributeContainer;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
@@ -386,6 +383,7 @@ public class DatabaseCreator {
     }
 
     public static ArrayList<Class> getSubtypes(String rootPackage) {
+        log.warn("------------ Getting all children of MOI from package: " + rootPackage);
         log.debug("------------ Getting all children of MOI from package: " + rootPackage);
         Reflections reflections = new Reflections(new ConfigurationBuilder()
                 .filterInputsBy(new FilterBuilder.Include(FilterBuilder.prefix(rootPackage)))
@@ -395,6 +393,7 @@ public class DatabaseCreator {
                         new ResourcesScanner()));
         ArrayList<Class> annoList = new ArrayList<Class>();
         annoList.addAll(reflections.getTypesAnnotatedWith(IgnoreFromTableCreation.class, true));
+        annoList.addAll(reflections.getTypesAnnotatedWith(DbInline.class, true));
         log.debug("annoList.size()::" + annoList.size());
         ArrayList<Class> subTypesList = new ArrayList<Class>();
         subTypesList.addAll(reflections.getSubTypesOf(ModelObjectInterface.class));
@@ -413,6 +412,7 @@ public class DatabaseCreator {
                         new ResourcesScanner()));
         ArrayList<Class> annoList = new ArrayList<Class>();
         annoList.addAll(reflections.getTypesAnnotatedWith(IgnoreFromTableCreation.class, true));
+        annoList.addAll(reflections.getTypesAnnotatedWith(DbInline.class, true));
         log.debug("annoList.size()::" + annoList.size());
         ArrayList<Class> subTypesList = new ArrayList<Class>();
         subTypesList.addAll(reflections.getSubTypesOf(ModelObjectInterface.class));

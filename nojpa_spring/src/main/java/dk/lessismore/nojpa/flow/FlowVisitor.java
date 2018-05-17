@@ -46,7 +46,7 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
         final int totalCount = getTotalCount();
 
 
-        while (getSplitLimitSize() + currentCount < totalCount) {
+        while (currentCount < totalCount) {
             while (getCurrentQueueSize() < getMinimumQueueSize()) {
                 log.debug("WorkQueue-fill-up: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +")");
                 int start = startFromBeginning() ? 0 : currentCount;
@@ -70,7 +70,7 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
             log.debug("WorkQueue-is-full: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +")");
             int beforeQSize = getCurrentQueueSize();
             int sameCount = 0;
-            for (int i = 0; i < 120; i++) {
+            for (int i = 0; i < 60; i++) {
                 try {
                     Thread.sleep(1_000);
                 } catch (InterruptedException e) {
@@ -80,9 +80,9 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
                     sameCount++;
                 }
                 log.debug("WorkQueue-checking: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +")");
-                if(getCurrentQueueSize() < getMinimumQueueSize()){
-                    break;
-                }
+//                if(getCurrentQueueSize() < getMinimumQueueSize()){
+//                    break;
+//                }
                 log.debug("WorkQueue-is-full: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +")");
             }
             if(sameCount > 110){
