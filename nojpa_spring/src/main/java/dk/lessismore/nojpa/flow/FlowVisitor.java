@@ -2,6 +2,7 @@ package dk.lessismore.nojpa.flow;
 
 import dk.lessismore.nojpa.db.methodquery.MQL;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
+import dk.lessismore.nojpa.utils.MaxSizeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -91,8 +92,6 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
                 break;
 
             }
-
-
         }
 
         // closing things
