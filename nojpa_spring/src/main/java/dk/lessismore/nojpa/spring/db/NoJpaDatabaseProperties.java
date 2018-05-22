@@ -35,7 +35,8 @@ spring.datasource.nrOfPoolConnections=10
 
     public static Properties from(Environment env, String name) throws Exception {
         Properties props = new Properties();
-        props.setProperty("driverName", env.getProperty(name + ".datasource.driverClassName"));
+        String driverName = env.getProperty(name + ".datasource.driverClassName");
+        props.setProperty("driverName", driverName);
 
         props.setProperty("user", env.getProperty(name + ".datasource.username"));
         props.setProperty("password", env.getProperty(name + ".datasource.password"));
@@ -43,11 +44,14 @@ spring.datasource.nrOfPoolConnections=10
 
         String url = env.getProperty(name + ".datasource.url");
         URI uri = new URI(new URI(url).getSchemeSpecificPart());
-        props.setProperty("ip", uri.getHost());
         props.setProperty("database", uri.getScheme());
-        props.setProperty("databaseName", url.substring(url.lastIndexOf('/') + 1));
-        props.setProperty("port", Integer.toString(uri.getPort()));
-
+        if (driverName.contains("h2")) {
+            props.setProperty("databaseName", uri.getSchemeSpecificPart());
+        } else {
+            props.setProperty("ip", uri.getHost());
+            props.setProperty("databaseName", url.substring(url.lastIndexOf('/') + 1));
+            props.setProperty("port", Integer.toString(uri.getPort()));
+        }
         return props;
     }
 }
