@@ -46,7 +46,7 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
     public void runFlow() {
         final int totalCount = getTotalCount();
 
-
+        int sameCount = 0;
         while (currentCount < totalCount) {
             while (getCurrentQueueSize() < getMinimumQueueSize()) {
                 log.debug("WorkQueue-fill-up: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +")");
@@ -67,10 +67,11 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
                     // didn't visit any
                     break;
                 }
+                sameCount = 0;
             }
             log.debug("WorkQueue-is-full: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +")");
             int beforeQSize = getCurrentQueueSize();
-            int sameCount = 0;
+
             for (int i = 0; i < 60; i++) {
                 try {
                     Thread.sleep(1_000);
