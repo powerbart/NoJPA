@@ -76,8 +76,9 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
                     Thread.sleep(30_000);
                 } catch (InterruptedException e) {
                 }
-
-                break;
+                if(getCurrentQueueSize() == 0) {
+                    break;
+                }
             }
 
 
@@ -95,6 +96,7 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
                     sameCount++;
                 } else {
                     sameCount = 0;
+                    i = 0;
                 }
             }
             if(sameCount > 110){
