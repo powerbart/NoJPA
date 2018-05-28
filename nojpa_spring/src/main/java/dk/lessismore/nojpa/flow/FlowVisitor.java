@@ -107,6 +107,25 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
             }
         }
 
+        int beforeQSize = getCurrentQueueSize();
+        for (int i = 0; i < 60; i++) {
+            log.debug("WorkQueue-WAITING-FOR-FINISH: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +") sameCount: " + sameCount);
+            try {
+                Thread.sleep(1_000);
+            } catch (InterruptedException e) {
+            }
+            if(beforeQSize == getCurrentQueueSize()){
+                log.debug("WorkQueue-has-not-changed: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +") sameCount: " + sameCount);
+                sameCount++;
+            } else {
+                log.debug("WorkQueue-HAS-changed: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +") sameCount: " + sameCount);
+                sameCount = 0;
+                i = 0;
+                beforeQSize = getCurrentQueueSize();
+            }
+        }
+
+
         // closing things
         try{
             log.debug("We will close: currentCount("+ currentCount +"), totalCount("+ totalCount +") currentEnd("+ currentEnd +") getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +") sameCount: " + sameCount);
