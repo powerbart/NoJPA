@@ -48,32 +48,41 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
         final int totalCount = getTotalCount();
 
         while (currentCount < totalCount) {
-            while (getCurrentQueueSize() < getMinimumQueueSize()) {
-                log.debug("WorkQueue-fill-up: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +")");
-                int start = startFromBeginning() ? 0 : currentCount;
-                log.debug("WorkQueue-fill-up-end: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +")");
-                int oldCount = currentCount;
-                query().limit(start, start + getSplitLimitSize()).visit(new AbstractCountingVisitor<T>() {
-                    @Override
-                    public void process(T t) {
-                        if (currentCount % (getSplitLimitSize() / 10) == 0) {
-                            log.debug("WorkQueue-PROCESS: currentCount(" + currentCount + ")");
-                        }
-                        currentCount++;
-                        sameCount = 0;
-                        getExecutor().execute(() -> doWork(t));
+            log.debug("WorkQueue-fill-up: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +")");
+            int start = startFromBeginning() ? 0 : currentCount;
+            log.debug("WorkQueue-fill-up-end: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +")");
+            query().limit(start, start + getSplitLimitSize()).visit(new AbstractCountingVisitor<T>() {
+                @Override
+                public void process(T t) {
+                    if (currentCount % (getSplitLimitSize() / 10) == 0) {
+                        log.debug("WorkQueue-PROCESS: currentCount(" + currentCount + ")");
                     }
-                });
-                if (oldCount == currentCount) {
-                    // didn't visit any
-                    break;
+                    currentCount++;
+                    sameCount = 0;
+                    getExecutor().execute(() -> doWork(t));
                 }
+            });
 
-            }
             log.debug("WorkQueue-is-full: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +")");
             int beforeQSize = getCurrentQueueSize();
+            if(beforeQSize == 0){
+                log.debug("WorkQueue-is-done: getCurrentQueueSize("+ beforeQSize +")... So we believe we are done");
+                log.debug("WorkQueue-is-done: We will sleep for 30 secs and then stop... ");
+                try {
+                    Thread.sleep(30_000);
+                } catch (InterruptedException e) {
+                }
+
+                break;
+            }
+
 
             for (int i = 0; i < 60; i++) {
+                log.debug("WorkQueue-checking: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +")");
+                if(getCurrentQueueSize() < getMinimumQueueSize()){
+                    break;
+                }
+                log.debug("WorkQueue-is-full: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +")");
                 try {
                     Thread.sleep(1_000);
                 } catch (InterruptedException e) {
@@ -84,11 +93,6 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
                 } else {
                     sameCount = 0;
                 }
-                log.debug("WorkQueue-checking: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +")");
-//                if(getCurrentQueueSize() < getMinimumQueueSize()){
-//                    break;
-//                }
-                log.debug("WorkQueue-is-full: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +")");
             }
             if(sameCount > 110){
                 log.debug("WorkQueue-has-not-changed-for-long-time: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +")");
