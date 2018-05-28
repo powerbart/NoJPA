@@ -49,11 +49,11 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
         final int totalCount = getTotalCount();
 
         while (currentCount < totalCount && currentEnd < totalCount) {
-            log.debug("WorkQueue-fill-up: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +") sameCount: " + sameCount );
-            int start = startFromBeginning() ? 0 : currentEnd;
-            currentEnd = start + getSplitLimitSize();
-            log.debug("WorkQueue-fill-up-end: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +") sameCount: " + sameCount);
+            log.debug("WorkQueue-fill-up-check: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +") sameCount: " + sameCount );
             if(getCurrentQueueSize() < getMinimumQueueSize()) {
+                log.debug("WorkQueue-will-fill-up: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +") sameCount: " + sameCount);
+                int start = startFromBeginning() ? 0 : currentEnd;
+                currentEnd = start + getSplitLimitSize();
                 query().limit(start, start + getSplitLimitSize()).visit(new AbstractCountingVisitor<T>() {
                     @Override
                     public void process(T t) {
