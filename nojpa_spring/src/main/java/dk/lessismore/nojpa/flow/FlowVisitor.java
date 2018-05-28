@@ -81,6 +81,8 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
                 if(beforeQSize == getCurrentQueueSize()){
                     log.debug("WorkQueue-has-not-changed: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +")");
                     sameCount++;
+                } else {
+                    sameCount = 0;
                 }
                 log.debug("WorkQueue-checking: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +")");
 //                if(getCurrentQueueSize() < getMinimumQueueSize()){
