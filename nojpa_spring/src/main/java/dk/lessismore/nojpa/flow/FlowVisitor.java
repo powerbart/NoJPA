@@ -86,6 +86,8 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
                 } else {
                     sameCount = 0;
                     i = 0;
+                    beforeQSize = getCurrentQueueSize();
+
                 }
             }
             if(sameCount > 110){
