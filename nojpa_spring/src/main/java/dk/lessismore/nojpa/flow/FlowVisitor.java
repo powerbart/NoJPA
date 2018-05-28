@@ -69,17 +69,6 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
 
             log.debug("WorkQueue-is-full: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +") sameCount: " + sameCount);
             int beforeQSize = getCurrentQueueSize();
-            if(beforeQSize == 0){
-                log.debug("WorkQueue-is-done: getCurrentQueueSize("+ beforeQSize +")... So we believe we are done");
-                log.debug("WorkQueue-is-done: We will sleep for 30 secs and then stop... ");
-                try {
-                    Thread.sleep(30_000);
-                } catch (InterruptedException e) {
-                }
-                if(getCurrentQueueSize() == 0) {
-                    break;
-                }
-            }
 
 
             for (int i = 0; i < 60; i++) {
@@ -107,6 +96,7 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
             }
         }
 
+        //Waiting for 60 secs more ....
         int beforeQSize = getCurrentQueueSize();
         for (int i = 0; i < 60; i++) {
             log.debug("WorkQueue-WAITING-FOR-FINISH: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +") sameCount: " + sameCount);
