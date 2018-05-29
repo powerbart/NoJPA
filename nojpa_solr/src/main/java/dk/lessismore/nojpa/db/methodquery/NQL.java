@@ -562,8 +562,8 @@ public class NQL {
 //                timer.markLap("1");
                 SolrService solrServer = ModelObjectSearchService.solrService(selectClass);
 //                timer.markLap("2");
-                solrQuery.setFields("objectID");
-//                solrQuery.setFields("*, score, _explain_");
+//                solrQuery.setFields("objectID");
+                solrQuery.setFields("*, score, _explain_");
 //                solrQuery.setParam("bf", "sum(_Post_pageViewCounter__ID_Counter_count__LONG,8)");
                 long start = System.currentTimeMillis();
                 QueryResponse queryResponse = solrServer.query(solrQuery);
@@ -577,20 +577,20 @@ public class NQL {
 //                timer.markLap("4");
                 for(int i = 0; i < size; i++){
                     SolrDocument entries = queryResponse.getResults().get(i);
-//                    if(i == 0){
-//                        Iterator<String> iterator = entries.getFieldNames().iterator();
-//                        for(; iterator.hasNext() ;){
-//                            String next = iterator.next();
-//                            log.debug("Fieldnames:" + next);
-//                        }
-//                    }
+                    if(i == 0){
+                        Iterator<String> iterator = entries.getFieldNames().iterator();
+                        for(; iterator.hasNext() ;){
+                            String next = iterator.next();
+                            log.debug("Fieldnames:" + next);
+                        }
+                    }
 
                     String objectID = entries.get("objectID").toString();
                     if(entries.containsKey("score")){
-                        log.trace("objectID("+ objectID +") has score("+ entries.get("score")+")");
+                        log.debug("objectID("+ objectID +") has score("+ entries.get("score")+")");
                     }
                     if(entries.containsKey("_explain_")){
-                        log.trace("_explain_ :: ("+ entries.get("_explain_") +")");
+                        log.debug("_explain_ :: ("+ entries.get("_explain_") +")");
                     }
 
 
