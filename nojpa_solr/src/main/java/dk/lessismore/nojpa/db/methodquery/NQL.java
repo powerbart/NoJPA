@@ -46,6 +46,9 @@ public class NQL {
 
     private static final Logger log = LoggerFactory.getLogger(NQL.class);
 
+    public static boolean DEBUG_EXPLAIN = false;
+
+
     public enum Comp {EQUAL, EQUAL_OR_GREATER, EQUAL_OR_LESS, NOT_EQUAL, LIKE}
     public enum Order {ASC, DESC}
     public static final int ANY = 0;
@@ -562,8 +565,11 @@ public class NQL {
 //                timer.markLap("1");
                 SolrService solrServer = ModelObjectSearchService.solrService(selectClass);
 //                timer.markLap("2");
-//                solrQuery.setFields("objectID");
-                solrQuery.setFields("*, score, _explain_");
+                if(!DEBUG_EXPLAIN){
+                    solrQuery.setFields("objectID");
+                } else {
+                    solrQuery.setFields("*, score, _explain_");
+                }
 //                solrQuery.setParam("bf", "sum(_Post_pageViewCounter__ID_Counter_count__LONG,8)");
                 long start = System.currentTimeMillis();
                 QueryResponse queryResponse = solrServer.query(solrQuery);
@@ -577,22 +583,24 @@ public class NQL {
 //                timer.markLap("4");
                 for(int i = 0; i < size; i++){
                     SolrDocument entries = queryResponse.getResults().get(i);
-                    if(i == 0){
-                        Iterator<String> iterator = entries.getFieldNames().iterator();
-                        for(; iterator.hasNext() ;){
-                            String next = iterator.next();
-                            log.debug("Fieldnames:" + next);
+                    String objectID = entries.get("objectID").toString();
+
+                    if(DEBUG_EXPLAIN) {
+                        if (i == 0) {
+                            Iterator<String> iterator = entries.getFieldNames().iterator();
+                            for (; iterator.hasNext(); ) {
+                                String next = iterator.next();
+                                log.debug("Fieldnames:" + next);
+                            }
+                        }
+
+                        if (entries.containsKey("score")) {
+                            log.debug("objectID(" + objectID + ") has score(" + entries.get("score") + ")");
+                        }
+                        if (entries.containsKey("_explain_")) {
+                            log.debug("_explain_ :: (" + entries.get("_explain_") + ")");
                         }
                     }
-
-                    String objectID = entries.get("objectID").toString();
-                    if(entries.containsKey("score")){
-                        log.debug("objectID("+ objectID +") has score("+ entries.get("score")+")");
-                    }
-                    if(entries.containsKey("_explain_")){
-                        log.debug("_explain_ :: ("+ entries.get("_explain_") +")");
-                    }
-
 
                     T t = MQL.selectByID(selectClass, objectID);
                     if(t == null){
