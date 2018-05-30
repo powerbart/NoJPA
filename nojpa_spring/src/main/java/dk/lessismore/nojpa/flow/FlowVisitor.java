@@ -45,6 +45,7 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
 
     int sameCount = 0;
     int currentEnd = 0;
+    int numberOfLoops = 0;
     public void runFlow() {
         final int totalCount = getTotalCount();
 
@@ -62,6 +63,7 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
                         }
                         currentCount++;
                         sameCount = 0;
+                        numberOfLoops = 0;
                         getExecutor().execute(() -> doWork(t));
                     }
                 });
@@ -74,6 +76,7 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
             for (int i = 0; i < 60; i++) {
                 log.debug("WorkQueue-checking: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +") sameCount: " + sameCount);
                 if(getCurrentQueueSize() < getMinimumQueueSize()){
+                    numberOfLoops++;
                     break;
                 }
                 try {
@@ -90,7 +93,7 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
 
                 }
             }
-            if(sameCount > 110){
+            if(numberOfLoops > 5 || sameCount > 110){
                 log.debug("WorkQueue-has-not-changed-for-long-time: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +") sameCount: " + sameCount);
                 log.error("Will now try to force a shutdown... ");
                 break;
