@@ -95,7 +95,7 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
             }
             if(numberOfLoops > 5 || sameCount > 110){
                 log.debug("WorkQueue-has-not-changed-for-long-time: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +") sameCount: " + sameCount);
-                log.error("Will now try to force a shutdown... ");
+                log.info("Will now try to force a shutdown... ");
                 break;
 
             }
