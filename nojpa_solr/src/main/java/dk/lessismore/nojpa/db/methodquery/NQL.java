@@ -569,6 +569,11 @@ public class NQL {
                     solrQuery.setFields("objectID");
                 } else {
                     solrQuery.setFields("*, score, _explain_");
+                    solrQuery.setParam("debug", true);
+                    log.debug("***************** DEBUG = TRUE *************************");
+                    log.debug("***************** DEBUG = TRUE *************************");
+                    log.debug("***************** DEBUG = TRUE *************************");
+                    log.debug("***************** DEBUG = TRUE *************************");
                 }
 //                solrQuery.setParam("bf", "sum(_Post_pageViewCounter__ID_Counter_count__LONG,8)");
                 long start = System.currentTimeMillis();
