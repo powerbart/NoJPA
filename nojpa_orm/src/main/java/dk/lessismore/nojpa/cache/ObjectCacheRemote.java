@@ -9,15 +9,13 @@ import dk.lessismore.nojpa.resources.PropertyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
 import java.util.List;
 
 /**
  * Created : by IntelliJ IDEA.
  * User: seb
  */
-public class ObjectCacheRemote implements ServletContextListener {
+public class ObjectCacheRemote  {
 
     private static final Logger log = LoggerFactory.getLogger(ObjectCacheRemote.class);
 
@@ -29,7 +27,7 @@ public class ObjectCacheRemote implements ServletContextListener {
         return run;
     }
 
-    public void contextInitialized(ServletContextEvent servletContextEvent) {
+    public void startUp() {
         try {
             run = true;
             initCluster();
@@ -39,7 +37,7 @@ public class ObjectCacheRemote implements ServletContextListener {
         }
     }
 
-    public void contextDestroyed(ServletContextEvent servletContextEvent) {
+    public void closeDown() {
         try {
             run = false;
             if (server != null) {
@@ -98,7 +96,9 @@ public class ObjectCacheRemote implements ServletContextListener {
 
 
     static void initCluster() {
+        log.debug("Checking if we should start ... ");
         PropertyResources resources = PropertyService.getInstance().getPropertyResources(clusterFilenameForTest != null ? clusterFilenameForTest : "cluster");
+        log.debug("Checking if we should start ... DONE ... Should we start? : ("+ (resources != null) +")");
         if (resources != null) {
             String portStr = resources.getString("port");
             String bindAddressStr = resources.getString("bindAddress");

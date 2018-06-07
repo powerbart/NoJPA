@@ -1,6 +1,7 @@
 package dk.lessismore.nojpa.reflection.db;
 
 import dk.lessismore.nojpa.cache.ObjectCacheFactory;
+import dk.lessismore.nojpa.cache.ObjectCacheRemote;
 import dk.lessismore.nojpa.db.DbDataType;
 import dk.lessismore.nojpa.db.LimResultSet;
 import dk.lessismore.nojpa.db.SQLStatementExecutor;
@@ -230,8 +231,7 @@ public class DbObjectWriter {
                     //Remove cache entry from other hosts
                     //TODO: PropertyTest if this works :-)
 
-                    // TODO remove comment, after making ObjectCacheRemote not implementing servlet related things
-//                    ObjectCacheRemote.removeFromRemoteCache(modelObject);
+                    ObjectCacheRemote.removeFromRemoteCache(modelObject);
                 }
 
                 insertSQLStatement.addTableName(dbAttributeContainer.getTableName());
