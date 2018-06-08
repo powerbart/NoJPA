@@ -65,7 +65,7 @@ public class ObjectCacheRemotePostThread extends Thread {
     public void run() {
         while (ObjectCacheRemote.shouldRun()) {
             try {
-                log.debug("Is now making connection to host(" + host.host + ") port(" + host.port + ")");
+                if(errorCounter < 5) log.debug("Is now making connection to host(" + host.host + ") port(" + host.port + ")");
                 socket = new Socket(host.host, host.port);
                 outputStream = socket.getOutputStream();
                 while (ObjectCacheRemote.shouldRun()) {
@@ -80,7 +80,7 @@ public class ObjectCacheRemotePostThread extends Thread {
                     }
                 }
             } catch (Exception e) {
-                log.info("Some error in run() when sending data to host(" + host.host + ") port(" + host.port + ") " + e);
+                if(errorCounter < 5) log.info("Some error in run() when sending data to host(" + host.host + ") port(" + host.port + ") " + e);
                 try {
                     if (outputStream != null) outputStream.close();
                 } catch (Exception t) {
@@ -92,10 +92,10 @@ public class ObjectCacheRemotePostThread extends Thread {
                 socket = null;
                 outputStream = null;
                 try {
-                    if(errorCounter > 60){
-                        errorCounter = 60;
+                    if(errorCounter > 120){
+                        errorCounter = 120;
                     }
-                    log.info("Will now sleep in " + errorCounter + " sec. And the retry...");
+                    if(errorCounter < 5 || errorCounter % 10 == 0) log.info("Will now sleep in " + errorCounter + " sec. And the retry...");
                     this.sleep((errorCounter) * 1000); // Will sleep for max 5 mins
                     errorCounter++;
                 } catch (InterruptedException e1) {
