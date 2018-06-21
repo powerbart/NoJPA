@@ -438,6 +438,11 @@ public class MQL {
         public SelectQuery<T> orderBy(T mockValue, Order order) {
             return orderBy(order);
         }
+        public SelectQuery<T> orderBy(Enum mockValue, Order order) {
+            return orderBy(order);
+        }
+
+
         private SelectQuery<T> orderBy(Order order) {
             List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
             Pair<Class, String> pair = getSourceAttributePair();
