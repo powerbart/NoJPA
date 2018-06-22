@@ -48,7 +48,7 @@ public class NoJpaConverter implements GenericConverter {
                 throw new RuntimeException(e);
             }
             if (required && moi == null) {
-                throw new ConversionFailedException(sourceType, targetType, source, new RuntimeException());
+                throw new ConversionFailedException(sourceType, targetType, source, new NullPointerException());
             }
             return moi;
         } else {
