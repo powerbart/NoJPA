@@ -102,6 +102,38 @@ public class ModelObjectService {
     }
 
 
+    public static <M extends ModelObjectInterface> M[] concatArrays(
+            M[] array1,
+            M[] array2, Class interfaceClass) {
+
+        if (array1 == null || array1.length == 0) {
+            return array2;
+        }
+
+        if (array2 == null || array2.length == 0) {
+            return array1;
+        }
+
+        ArrayList arrayList = new ArrayList();
+
+        for (int i = 0; i < array1.length; i++) {
+            if (!arrayList.contains(array1[i])) {
+                arrayList.add(array1[i]);
+            }
+        }
+
+        for (int i = 0; i < array2.length; i++) {
+            if (!arrayList.contains(array2[i])) {
+                arrayList.add(array2[i]);
+            }
+        }
+
+        return (M[]) arrayList.toArray((M[]) java.lang.reflect.Array.newInstance(
+                interfaceClass,
+                arrayList.size()));
+    }
+
+
     public static ModelObject[] concatArrays(
             ModelObject[] array1,
             ModelObject[] array2) {
