@@ -844,6 +844,9 @@ public class NQL {
             }
         } else {
             value = createSearchString(value);
+            if(comp == Comp.EQUAL){
+                value = "\"" + value + "\"";
+            }
         }
         value = (value == null || value.trim().equals("") ? "*" : value);
         SolrExpression expression = null;
@@ -1169,7 +1172,7 @@ public class NQL {
 
 
             s = toReturn.toString();
-            s = (s == null || s.trim().equals("") ? "*" : s);
+            s = (s == null || s.trim().equals("") ? "*" : s.trim());
             log.trace("END: removeFunnyChars returns input ("+ s +")");
             return s;
 
