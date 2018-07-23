@@ -8,6 +8,7 @@ import dk.lessismore.nojpa.reflection.db.DbObjectVisitor;
 import dk.lessismore.nojpa.reflection.db.annotations.SearchField;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttribute;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttributeContainer;
+import dk.lessismore.nojpa.reflection.db.model.solr.SolrService;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrInputDocument;
@@ -41,8 +42,6 @@ public class ModelObjectSearchService {
     private static HashMap<String, SolrClient> servers = new HashMap<>();
     private static HashMap<String, SolrService> serverServices = new HashMap<>();
 
-    //TODO: Should be StreamingUpdateSolrServer
-//    @Deprecated
     public static void addSolrServer(Class className, SolrClient solrServer){
         log.info("Adding solrServer("+ solrServer +") for class("+ className.getSimpleName() +")");
         servers.put(className.getSimpleName(), solrServer);
@@ -103,17 +102,17 @@ public class ModelObjectSearchService {
         }
     }
 
+//
+//    public static <T extends ModelObjectInterface> SolrClient solrServer(T object) {
+//        ModelObject modelObject = (ModelObject) object;
+//        SolrClient solrServer = servers.get(modelObject.getInterface().getSimpleName());
+//        return solrServer;
+//    }
 
-    public static <T extends ModelObjectInterface> SolrClient solrServer(T object) {
-        ModelObject modelObject = (ModelObject) object;
-        SolrClient solrServer = servers.get(modelObject.getInterface().getSimpleName());
-        return solrServer;
-    }
-
-    public static <T extends ModelObjectInterface> SolrClient solrServer(Class<T> aClass) {
-        SolrClient solrServer = servers.get(aClass.getSimpleName());
-        return solrServer;
-    }
+//    public static <T extends ModelObjectInterface> SolrClient solrServer(Class<T> aClass) {
+//        SolrClient solrServer = servers.get(aClass.getSimpleName());
+//        return solrServer;
+//    }
 
     public static <T extends ModelObjectInterface> SolrService solrService(Class<T> aClass) {
         return serverServices.get(aClass.getSimpleName());

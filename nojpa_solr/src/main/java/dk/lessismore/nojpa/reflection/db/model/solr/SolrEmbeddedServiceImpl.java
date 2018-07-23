@@ -1,4 +1,4 @@
-package dk.lessismore.nojpa.reflection.db.model;
+package dk.lessismore.nojpa.reflection.db.model.solr;
 
 import dk.lessismore.nojpa.reflection.translate.TranslateService;
 import org.apache.commons.lang3.StringUtils;
@@ -54,11 +54,6 @@ public class SolrEmbeddedServiceImpl extends SolrServiceImpl {
         return coreName;
     }
 
-    @Override
-    public void addTranslateService(TranslateService translateService, Locale... locales) {
-        SolrEmbeddedServiceImpl.translateService = translateService;
-        SolrEmbeddedServiceImpl.locales = locales;
-    }
 
     protected void startup() {
         log.debug("[void : (" + coreName + ")startup]:HIT: " + this);

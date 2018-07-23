@@ -8,22 +8,20 @@ import dk.lessismore.nojpa.db.methodquery.NStats;
 import dk.lessismore.nojpa.db.testmodel.*;
 import dk.lessismore.nojpa.reflection.db.DatabaseCreator;
 import dk.lessismore.nojpa.reflection.db.DbObjectVisitor;
-import dk.lessismore.nojpa.reflection.db.model.CloudSolrServiceImpl;
+import dk.lessismore.nojpa.reflection.db.model.solr.CloudSolrServiceImpl;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectSearchService;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
-import dk.lessismore.nojpa.reflection.db.model.SolrService;
-import dk.lessismore.nojpa.reflection.db.model.SolrServiceImpl;
+import dk.lessismore.nojpa.reflection.db.model.solr.SolrService;
+import dk.lessismore.nojpa.reflection.db.model.solr.SolrServiceImpl;
 import dk.lessismore.nojpa.reflection.translate.LessismoreTranslateServiceImpl;
 import dk.lessismore.nojpa.utils.Pair;
 import junit.framework.Assert;
-import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.IntervalFacet;
 import org.apache.solr.client.solrj.response.QueryResponse;
-import org.apache.solr.common.SolrDocument;
 import org.apache.solr.client.solrj.response.RangeFacet;
 import org.junit.Test;
 
@@ -1016,7 +1014,7 @@ public class NQLTest {
         String[] descs = new String[]{"Næste generation danske Formel 1-håb er allerede i støbeskeen", "12-årige Noah Watt", "gokart-juniormesterskaber i 2015, EM, VM", "person", "Det koster en hulens masse penge at køre det store program"};
         DatabaseCreator.createDatabase("dk.lessismore.nojpa.db.testmodel");
         SolrServiceImpl solrService = new SolrServiceImpl();
-        solrService.addTranslateService(new LessismoreTranslateServiceImpl("something", "asda"), Locale.US, new Locale("da"),  new Locale("no"),   new Locale("sv"),   new Locale("de"));
+//        solrService.addTranslateService(new LessismoreTranslateServiceImpl("something", "asda"), Locale.US, new Locale("da"),  new Locale("no"),   new Locale("sv"),   new Locale("de"));
         solrService.setCoreName("nojpa");
         solrService.setCleanOnStartup(true);
 
@@ -1316,27 +1314,27 @@ public class NQLTest {
                 System.out.println(i + "::" + nList.get(i).getFun());
             }
         }
-        System.out.println(" ============================= ");
-        {
-            SolrClient solrServer = ModelObjectSearchService.solrServer(Person.class);
-            SolrQuery solrQuery = new SolrQuery("(_Person_countOfCars__INT:[0 TO *]) ( (_Person_fun___da_TXT:( generationer AND allerede AND tiger )) )");
-            solrQuery.setFields("*, score, _explain_");
-            QueryResponse queryResponse = solrServer.query(solrQuery);
-            int size = queryResponse.getResults().size();
-            System.out.println("RAW--size = " + size);
-            for(int i = 0; i < size; i++){
-                SolrDocument entries = queryResponse.getResults().get(i);
-//                    if(i == 0){
-//                        Iterator<String> iterator = entries.getFieldNames().iterator();
-//                        for(; iterator.hasNext() ;){
-//                            String next = iterator.next();
-//                            log.debug("Fieldnames:" + next);
-//                        }
-//                    }
-                String objectID = entries.get("objectID").toString();   //
-                System.out.println(i + "::" + entries.get("_Person_fun___da_TXT").toString());
-            }
-        }
+//        System.out.println(" ============================= ");
+//        {
+//            SolrClient solrServer = ModelObjectSearchService.solrServer(Person.class);
+//            SolrQuery solrQuery = new SolrQuery("(_Person_countOfCars__INT:[0 TO *]) ( (_Person_fun___da_TXT:( generationer AND allerede AND tiger )) )");
+//            solrQuery.setFields("*, score, _explain_");
+//            QueryResponse queryResponse = solrServer.query(solrQuery);
+//            int size = queryResponse.getResults().size();
+//            System.out.println("RAW--size = " + size);
+//            for(int i = 0; i < size; i++){
+//                SolrDocument entries = queryResponse.getResults().get(i);
+////                    if(i == 0){
+////                        Iterator<String> iterator = entries.getFieldNames().iterator();
+////                        for(; iterator.hasNext() ;){
+////                            String next = iterator.next();
+////                            log.debug("Fieldnames:" + next);
+////                        }
+////                    }
+//                String objectID = entries.get("objectID").toString();   //
+//                System.out.println(i + "::" + entries.get("_Person_fun___da_TXT").toString());
+//            }
+//        }
 
     }
 

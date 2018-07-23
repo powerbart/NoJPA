@@ -8,7 +8,7 @@ import dk.lessismore.nojpa.reflection.db.attributes.DbAttribute;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttributeContainer;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectSearchService;
-import dk.lessismore.nojpa.reflection.db.model.SolrService;
+import dk.lessismore.nojpa.reflection.db.model.solr.SolrService;
 import dk.lessismore.nojpa.utils.Pair;
 import org.apache.commons.lang.StringUtils;
 import org.apache.solr.client.solrj.SolrQuery;

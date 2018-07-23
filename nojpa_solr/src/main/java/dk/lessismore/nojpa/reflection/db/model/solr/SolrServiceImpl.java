@@ -1,4 +1,4 @@
-package dk.lessismore.nojpa.reflection.db.model;
+package dk.lessismore.nojpa.reflection.db.model.solr;
 
 import dk.lessismore.nojpa.reflection.translate.TranslateService;
 import org.apache.solr.client.solrj.SolrClient;
@@ -45,11 +45,6 @@ public class SolrServiceImpl implements SolrService {
         this.cleanOnStartup = cleanOnStartup;
     }
 
-    @Override
-    public void addTranslateService(TranslateService translateService, Locale... locales) {
-        SolrServiceImpl.translateService = translateService;
-        SolrServiceImpl.locales = locales;
-    }
 
     public SolrClient getServer() {
         synchronized (this){

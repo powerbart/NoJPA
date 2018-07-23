@@ -1,4 +1,4 @@
-package dk.lessismore.nojpa.reflection.db.model;
+package dk.lessismore.nojpa.reflection.db.model.solr;
 
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.slf4j.Logger;
