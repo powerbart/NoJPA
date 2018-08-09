@@ -1,5 +1,7 @@
 package dk.lessismore.nojpa.reflection.db.model.solr;
 
+import dk.lessismore.nojpa.db.methodquery.NQL;
+import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLResponse;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -33,7 +35,7 @@ public class CloudSolrServiceImpl extends SolrServiceImpl {
         this.collectionName = collectionName;
     }
 
-    protected void startup() {
+    public void startup() {
         log.debug("[void : zkHost (" + zkHost + ")startup]:HIT: " + this);
         try {
             server = new CloudSolrClient.Builder().withZkHost(zkHost).build(); // TODO add collectionName here somehow
@@ -62,10 +64,10 @@ public class CloudSolrServiceImpl extends SolrServiceImpl {
     }
 
     @Override
-    public QueryResponse query(SolrQuery query) {
+    public NoSQLResponse query(NQL.SearchQuery query) {
         try {
             if (server != null) {
-                return server.query(collectionName, query);
+                return new SolrResponseWrapper(server.query(collectionName, ((SolrSearchQuery)query).getSolrQuery()));
             } else {
                 log.error("query() ... server is null ... This is okay doing startup ...");
                 return null;

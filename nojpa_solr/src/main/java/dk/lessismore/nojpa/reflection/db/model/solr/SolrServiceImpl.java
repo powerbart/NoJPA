@@ -1,5 +1,10 @@
 package dk.lessismore.nojpa.reflection.db.model.solr;
 
+import dk.lessismore.nojpa.db.methodquery.NQL;
+import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
+import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLInputDocument;
+import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLQuery;
+import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLResponse;
 import dk.lessismore.nojpa.reflection.translate.TranslateService;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -15,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
@@ -46,7 +52,7 @@ public class SolrServiceImpl implements SolrService {
     }
 
 
-    public SolrClient getServer() {
+    public SolrClient getServerClient() {
         synchronized (this){
             if(server == null){
                 startup();
@@ -59,8 +65,13 @@ public class SolrServiceImpl implements SolrService {
         return coreName;
     }
 
+    @Override
+    public void index(NoSQLInputDocument noSQLInputDocument) {
+        index(((NoSQLInputDocumentWrapper) noSQLInputDocument).document);
+    }
 
-    protected void startup() {
+
+    public void startup() {
         log.debug("[void : (" + coreName + ")startup]:HIT: " + this);
         try {
             if (coreContainer == null) {
@@ -100,10 +111,11 @@ public class SolrServiceImpl implements SolrService {
 
 
     @Override
-    public QueryResponse query(SolrQuery query) {
+    public NoSQLResponse query(NQL.SearchQuery query) {
         try {
             if(server != null){
-                return server.query(query);
+                return new SolrResponseWrapper(server.query(((SolrSearchQuery)query).getSolrQuery()));
+
             } else {
                 log.error("query() ... server is null ... This is okay doing startup ...");
                 return null;
@@ -159,6 +171,73 @@ public class SolrServiceImpl implements SolrService {
         }
     }
 
+    public static class NoSQLInputDocumentWrapper implements NoSQLInputDocument {
+
+        SolrInputDocument document = new SolrInputDocument();;
+
+        @Override
+        public void addField(String objectIDVarName, String objectID) {
+            document.addField(objectIDVarName, objectID);
+        }
+
+        @Override
+        public void addField(String objectIDVarName, Long value) {
+            document.addField(objectIDVarName, value);
+        }
+
+        @Override
+        public void addField(String objectIDVarName, Integer value) {
+            document.addField(objectIDVarName, value);
+        }
+
+        @Override
+        public void addField(String objectIDVarName, Boolean value) {
+            document.addField(objectIDVarName, value);
+        }
+
+        @Override
+        public void addField(String objectIDVarName, Float value) {
+            document.addField(objectIDVarName, value);
+        }
+
+        @Override
+        public void addField(String objectIDVarName, Double value) {
+            document.addField(objectIDVarName, value);
+        }
+
+        @Override
+        public void addField(String objectIDVarName, Calendar value) {
+            document.addField(objectIDVarName, value);
+        }
+
+        @Override
+        public void addField(String objectIDVarName, List values) {
+            document.addField(objectIDVarName, values);
+        }
+//
+//        @Override
+//        public void addField(String objectIDVarName, Object value) {
+//            document.addField(objectIDVarName, value);
+//        }
+
+
+    }
+
+
+    @Override
+    public NoSQLInputDocument createInputDocument(Class<? extends ModelObjectInterface> clazz) {
+        return new NoSQLInputDocumentWrapper();
+    }
+
+
+
+
+
+    @Override
+    public <T extends ModelObjectInterface> NQL.SearchQuery createSearchQuery(Class<T> clazz) {
+        return new SolrSearchQuery(clazz);
+    }
+
     @Override
     public void empty() {
         try {
@@ -172,7 +251,6 @@ public class SolrServiceImpl implements SolrService {
         }
     }
 
-    @Override
     public NamedList<Object> request(SolrRequest req) {
         try {
             return server.request(req);
@@ -189,16 +267,15 @@ public class SolrServiceImpl implements SolrService {
         coreContainer.shutdown();
     }
 
-    @Override
-    public <T> T getByID(String id, Class<T> type) {
-        SolrQuery query = new SolrQuery(id).setRows(1);
-        QueryResponse response = query(query);
-        List<T> beans = response.getBeans(type);
-        if (beans != null && beans.size() > 0) {
-            return beans.get(0);
-        }
-        return null;
-    }
+//    public <T> T getByID(String id, Class<T> type) {
+//        SolrQuery query = new SolrQuery(id).setRows(1);
+//        QueryResponse response = query(query);
+//        List<T> beans = response.getBeans(type);
+//        if (beans != null && beans.size() > 0) {
+//            return beans.get(0);
+//        }
+//        return null;
+//    }
 
 
     public File getSolrXml() {
@@ -209,4 +286,11 @@ public class SolrServiceImpl implements SolrService {
         }
         return null;
     }
+
+
+
+
+//    public static SolrService getSolrClientWrapper(SolrClient solrServer) {
+//        return null;
+//    }
 }

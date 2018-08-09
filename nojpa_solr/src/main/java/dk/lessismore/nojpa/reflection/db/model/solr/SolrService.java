@@ -1,5 +1,6 @@
 package dk.lessismore.nojpa.reflection.db.model.solr;
 
+import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLService;
 import dk.lessismore.nojpa.reflection.translate.TranslateService;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -14,24 +15,25 @@ import java.util.Locale;
 /**
  * Created by seb on 7/23/14.
  */
-public interface SolrService {
+public interface SolrService extends NoSQLService {
 
 
-    SolrClient getServer();
-
-    String getName();
-
-    void index(SolrInputDocument solrInputDocument);
-    QueryResponse query(SolrQuery query);
-    NamedList<Object> request(SolrRequest req);
-    <T> T getByID(String unTransTextSHA, Class<T> type);
-
-    void commit();
-    void optimize();
-    void delete(String id);
-    void empty();
-    void destroy() throws IOException;
-    void deleteAll();
+    SolrClient getServerClient();
+//    SolrClient getServer();
+//
+//    String getName();
+//
+//    void index(SolrInputDocument solrInputDocument);
+//    QueryResponse query(SolrQuery query);
+//    NamedList<Object> request(SolrRequest req);
+//    <T> T getByID(String unTransTextSHA, Class<T> type);
+//
+//    void commit();
+//    void optimize();
+//    void delete(String id);
+//    void empty();
+//    void destroy() throws IOException;
+//    void deleteAll();
     void setCleanOnStartup(boolean cleanOnStartup);
 
 }

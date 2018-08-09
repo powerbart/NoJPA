@@ -8,7 +8,10 @@ import dk.lessismore.nojpa.reflection.db.DbObjectVisitor;
 import dk.lessismore.nojpa.reflection.db.annotations.SearchField;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttribute;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttributeContainer;
+import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLInputDocument;
+import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLService;
 import dk.lessismore.nojpa.reflection.db.model.solr.SolrService;
+import dk.lessismore.nojpa.reflection.db.model.solr.SolrServiceImpl;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrInputDocument;
@@ -39,18 +42,25 @@ public class ModelObjectSearchService {
 
     public static boolean trace = false;
 
-    private static HashMap<String, SolrClient> servers = new HashMap<>();
-    private static HashMap<String, SolrService> serverServices = new HashMap<>();
 
-    public static void addSolrServer(Class className, SolrClient solrServer){
-        log.info("Adding solrServer("+ solrServer +") for class("+ className.getSimpleName() +")");
-        servers.put(className.getSimpleName(), solrServer);
+    private static HashMap<String, NoSQLService> noSQLServices = new HashMap<>();
+//    private static HashMap<String, SolrClient> servers = new HashMap<>();
+//    private static HashMap<String, SolrService> solrServices = new HashMap<>();
+
+    public static void addNoSQLServer(Class className, NoSQLService nosqlServer){
+        log.info("Adding nosqlServer("+ nosqlServer +") for class("+ className.getSimpleName() +")");
+        noSQLServices.put(className.getSimpleName(), nosqlServer);
     }
+
+//    public static void addSolrServer(Class className, SolrClient solrServer){
+//        log.info("Adding solrServer("+ solrServer +") for class("+ className.getSimpleName() +")");
+//        SolrService solrService = SolrServiceImpl.getSolrClientWrapper(solrServer);
+//        addNoSQLServer(className, solrService);
+//    }
 
     public static void addSolrServer(Class className, SolrService solrServer){
         log.info("Adding solrServer("+ solrServer +") for class("+ className.getSimpleName() +")");
-        solrServer.getServer();
-        serverServices.put(className.getSimpleName(), solrServer);
+        noSQLServices.put(className.getSimpleName(), solrServer);
     }
 
     public static <T extends ModelObjectInterface> void deleteAll(T object) {
@@ -68,20 +78,18 @@ public class ModelObjectSearchService {
         return modelObject.getInterface().getSimpleName();
     }
 
+
+    public static <T extends ModelObjectInterface> Class<? extends ModelObjectInterface> getInterfaceClass(T object) {
+        ModelObject modelObject = (ModelObject) object;
+        return modelObject.getInterface();
+    }
+
     public static void deleteAll(Class aClass) {
         String key = serverKey(aClass);
         try {
-            if (serverServices.containsKey(key)) {
-                serverServices.get(key).deleteAll();
-            } else {
-                SolrClient solrServer = servers.get(key);
-                solrServer.deleteByQuery("*:*");
-            }
-        } catch (SolrServerException e) {
+            noSQLServices.get(key).deleteAll();
+        } catch (Exception e) {
             log.error("Some ERROR-1 when deleting all: " + e, e);
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            log.error("Some ERROR-2 when deleting all: " + e, e);
             throw new RuntimeException(e);
         }
     }
@@ -89,33 +97,15 @@ public class ModelObjectSearchService {
     public static <T extends ModelObjectInterface> void delete(T object) {
         String key = serverKey(object);
         try {
-            if (serverServices.containsKey(key)) {
-                serverServices.get(key).delete(object.getObjectID());
-            } else {
-                SolrClient solrServer = servers.get(key);
-                solrServer.deleteById(object.getObjectID(), AUTO_COMMIT_MS);
-            }
-        } catch (SolrServerException e) {
-            log.error("Some error when adding document ... " + e, e);
-        } catch (IOException e) {
+             noSQLServices.get(key).delete(object.getObjectID());
+        } catch (Exception e) {
             log.error("Some error when adding document ... " + e, e);
         }
     }
 
-//
-//    public static <T extends ModelObjectInterface> SolrClient solrServer(T object) {
-//        ModelObject modelObject = (ModelObject) object;
-//        SolrClient solrServer = servers.get(modelObject.getInterface().getSimpleName());
-//        return solrServer;
-//    }
 
-//    public static <T extends ModelObjectInterface> SolrClient solrServer(Class<T> aClass) {
-//        SolrClient solrServer = servers.get(aClass.getSimpleName());
-//        return solrServer;
-//    }
-
-    public static <T extends ModelObjectInterface> SolrService solrService(Class<T> aClass) {
-        return serverServices.get(aClass.getSimpleName());
+    public static <T extends ModelObjectInterface> NoSQLService noSQLService(Class<T> aClass) {
+        return noSQLServices.get(aClass.getSimpleName());
     }
 
     public static <T extends ModelObjectInterface> void put(T object) {
@@ -143,20 +133,15 @@ public class ModelObjectSearchService {
 //            log.debug("DEBUG-TRACE Adding (" + modelObject.getInterface().getSimpleName() + ")[" + object + "]", new Exception("DEBUG-TRACE"));
 
             String key = serverKey(object);
-            if (!serverServices.containsKey(key) && !servers.containsKey(key)) {
-                throw new RuntimeException("Cant find a solrServer for class("+ modelObject.getInterface().getSimpleName() +")");
+            if (!noSQLServices.containsKey(key)) {
+                throw new RuntimeException("Cant find a noSQLServices for class("+ modelObject.getInterface().getSimpleName() +")");
             }
-            SolrInputDocument solrObj = new SolrInputDocument();
-            addAttributesToSolrDocument(object, "", new HashMap<>(), key, solrObj);
+            NoSQLService noSQLService = noSQLServices.get(key);
+            NoSQLInputDocument inDoc = noSQLService.createInputDocument(getInterfaceClass(object));
+            addAttributesToDocument(object, "", new HashMap<>(), key, inDoc);
             try {
-                if (serverServices.containsKey(key)) {
-                    serverServices.get(key).index(solrObj);
-                } else if (servers.containsKey(key)) {
-                    servers.get(key).add(solrObj, AUTO_COMMIT_MS);
-                }
-            } catch (SolrServerException e) {
-                log.error("Some solr error when adding document ... " + e, e);
-            } catch (IOException e) {
+                noSQLService.index(inDoc);
+            } catch (Exception e) {
                 log.error("Some io error when adding document ... " + e, e);
             }
         } catch (Exception e){
@@ -183,20 +168,16 @@ public class ModelObjectSearchService {
             }
 
             String key = serverKey(object);
-            if (!serverServices.containsKey(key) && !servers.containsKey(key)) {
-                throw new RuntimeException("Cant find a solrServer for class("+key +")");
+            if (!noSQLServices.containsKey(key)) {
+                throw new RuntimeException("Cant find a noSQLServices for class("+key +")");
             }
-            SolrInputDocument solrObj = new SolrInputDocument();
-            addAttributesToSolrDocument(object, "", new HashMap<>(), key, solrObj);
+            NoSQLService noSQLService = noSQLServices.get(key);
+            NoSQLInputDocument inDoc = noSQLService.createInputDocument(getInterfaceClass(object));
+            addAttributesToDocument(object, "", new HashMap<>(), key, inDoc);
             try {
-                if (serverServices.containsKey(key)) {
-                    serverServices.get(key).index(solrObj);
-                } else if (servers.containsKey(key)) {
-                    servers.get(key).add(solrObj, AUTO_COMMIT_MS);
-                }
-            } catch (SolrServerException e) {
-                log.error("Some solr error when adding document ... " + e, e);
-            } catch (IOException e) {
+                //TODO: noSQLService.index(inDoc, AUTO_COMMIT_MS);
+                noSQLService.index(inDoc);
+            } catch (Exception e) {
                 log.error("Some io error when adding document ... " + e, e);
             }
         } catch (Exception e){
@@ -206,95 +187,87 @@ public class ModelObjectSearchService {
         }
     }
 
-    public static <T extends ModelObjectInterface> void put(T object, String prefix, HashMap<String, String> storedObjects, String key, SolrInputDocument solrObj) {
+    public static <T extends ModelObjectInterface> void put(T object, String prefix, HashMap<String, String> storedObjects, String key, NoSQLInputDocument solrObj) {
 
-        addAttributesToSolrDocument(object, prefix, storedObjects, key, solrObj);
+        addAttributesToDocument(object, prefix, storedObjects, key, solrObj);
         try {
-            if (serverServices.containsKey(key)) {
-                serverServices.get(key).index(solrObj);
-            } else if (servers.containsKey(key)) {
-                servers.get(key).add(solrObj, AUTO_COMMIT_MS);
-            }
-        } catch (SolrServerException e) {
-            log.error("Some error when adding document ... " + e, e);
-        } catch (IOException e) {
+              noSQLServices.get(key).index(solrObj);
+        } catch (Exception e) {
             log.error("Some error when adding document ... " + e, e);
         }
     }
 
-    // TODO try not to use this
-    @Deprecated
-    public static <T extends ModelObjectInterface> void put(T object, String prefix, HashMap<String, String> storedObjects, SolrClient solrServer, SolrInputDocument solrObj) {
+//    // TODO try not to use this
+//    @Deprecated
+//    public static <T extends ModelObjectInterface> void put(T object, String prefix, HashMap<String, String> storedObjects, SolrClient solrServer, NoSQLInputDocument solrObj) {
+//
+//        String key = null;
+//        for (String serverKey : servers.keySet()) {
+//            if (servers.get(serverKey).equals(solrServer)) {
+//                key = serverKey;
+//                break;
+//            }
+//        }
+//        if (key == null) {
+//            log.error("cannot find proper key for server: " + solrServer);
+//            return;
+//        }
+//        addAttributesToDocument(object, prefix, storedObjects, key, solrObj);
+//        try {
+//            solrServer.add(solrObj, AUTO_COMMIT_MS);
+//        } catch (SolrServerException e) {
+//            log.error("Some solr error when adding document ... " + e, e);
+//        } catch (IOException e) {
+//            log.error("Some io error when adding document ... " + e, e);
+//        }
+//    }
 
-        String key = null;
-        for (String serverKey : servers.keySet()) {
-            if (servers.get(serverKey).equals(solrServer)) {
-                key = serverKey;
-                break;
-            }
-        }
-        if (key == null) {
-            log.error("cannot find proper key for server: " + solrServer);
-            return;
-        }
-        addAttributesToSolrDocument(object, prefix, storedObjects, key, solrObj);
-        try {
-            solrServer.add(solrObj, AUTO_COMMIT_MS);
-        } catch (SolrServerException e) {
-            log.error("Some solr error when adding document ... " + e, e);
-        } catch (IOException e) {
-            log.error("Some io error when adding document ... " + e, e);
-        }
-    }
-
-    private static <T extends ModelObjectInterface> void addAttributesToSolrDocument(T object, String prefix, HashMap<String, String> storedObjects, String key, SolrInputDocument solrObj) {
-        //log.debug("addAttributesToSolrDocument:X0");
+    private static <T extends ModelObjectInterface> void addAttributesToDocument(T object, String prefix, HashMap<String, String> storedObjects, String key, NoSQLInputDocument inputDocument) {
+        //log.debug("addAttributesToDocument:X0");
         ModelObject modelObject = (ModelObject) object;
         DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(modelObject.getInterface());
-        String objectIDInSolr = (prefix.length() == 0 ? "" : prefix + "_") + "objectID" + (prefix.length() == 0 ? "" : "__ID");
+        String objectIDVarName = (prefix.length() == 0 ? "" : prefix + "_") + "objectID" + (prefix.length() == 0 ? "" : "__ID");
         if(prefix.length() == 0) {
-            log.trace("Adding solr-row: objectIDInSolr(" + objectIDInSolr + ")->" + object.getObjectID());
-            solrObj.addField(objectIDInSolr, object.getObjectID());
+            log.trace("Adding solr-row: objectIDVarName(" + objectIDVarName + ")->" + object.getObjectID());
+            inputDocument.addField(objectIDVarName, object.getObjectID());
         }
-        //log.debug("addAttributesToSolrDocument:X1");
+        //log.debug("addAttributesToDocument:X1");
         for (Iterator iterator = dbAttributeContainer.getDbAttributes().values().iterator(); iterator.hasNext();) {
-            //log.debug("addAttributesToSolrDocument:X2");
+            //log.debug("addAttributesToDocument:X2");
             DbAttribute dbAttribute = (DbAttribute) iterator.next();
             SearchField searchField = dbAttribute.getAttribute().getAnnotation(SearchField.class);
             if(searchField != null && dbAttribute.getInlineAttributeName() == null) {
-                //log.debug("addAttributesToSolrDocument:X3");
+                //log.debug("addAttributesToDocument:X3");
                 if(!dbAttribute.isAssociation()) {
-                    //log.debug("addAttributesToSolrDocument:X4");
+                    //log.debug("addAttributesToDocument:X4");
                     Object value = null;
                     value = dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
-                    //log.debug("addAttributesToSolrDocument:X5");
-                    addAttributeValueToStatement(dbAttribute, solrObj, value, prefix);
-                    //log.debug("addAttributesToSolrDocument:X6");
+                    //log.debug("addAttributesToDocument:X5");
+                    addAttributeValueToStatement(dbAttribute, inputDocument, value, prefix);
+                    //log.debug("addAttributesToDocument:X6");
                 } else if (!dbAttribute.isMultiAssociation()) {
-                    //log.debug("addAttributesToSolrDocument:X7");
+                    //log.debug("addAttributesToDocument:X7");
                     ModelObjectInterface value = (ModelObjectInterface) dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
-                    //log.debug("addAttributesToSolrDocument:X8");
-                    addAttributeValueToStatement(dbAttribute, solrObj, value, prefix);
-                    //log.debug("addAttributesToSolrDocument:X9");
+                    //log.debug("addAttributesToDocument:X8");
+                    addAttributeValueToStatement(dbAttribute, inputDocument, value, prefix);
+                    //log.debug("addAttributesToDocument:X9");
                     if(value != null && !storedObjects.containsKey(value.getObjectID())){
-                        //log.debug("addAttributesToSolrDocument:X10");
+                        //log.debug("addAttributesToDocument:X10");
                         storedObjects.put(value.getObjectID(), value.getObjectID());
-                        //log.debug("addAttributesToSolrDocument:X11");
-                        put(value, dbAttribute.getSolrAttributeName(prefix), storedObjects, key, solrObj);
-                        //log.debug("addAttributesToSolrDocument:X12");
+                        //log.debug("addAttributesToDocument:X11");
+                        put(value, dbAttribute.getSolrAttributeName(prefix), storedObjects, key, inputDocument);
+                        //log.debug("addAttributesToDocument:X12");
                     }
-//                    solrObj.addField(attributeName, modelObject.getSingleAssociationID(attributeName));
+//                    inputDocument.addField(attributeName, modelObject.getSingleAssociationID(attributeName));
                 } else { //isMultiAssociation
                     if(dbAttribute.getAttributeClass().isEnum() || dbAttribute.getAttributeClass().isPrimitive()){
-                        //log.debug("addAttributesToSolrDocument:X13");
-                        Object objects = dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
-//                        String attributeName = dbAttribute.getAttributeName();
-                        String solrAttributeName = dbAttribute.getSolrAttributeName(prefix);
-                        solrObj.addField(solrAttributeName, objects);
-                        //log.debug("addAttributesToSolrDocument:X4");
+                        throw new RuntimeException("This is not implemented ... and should not be used... ");
+//                        Object objects = dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
+//                        String solrAttributeName = dbAttribute.getSolrAttributeName(prefix);
+//                        inputDocument.addField(solrAttributeName, objects);
 
                     } else {
-                        //log.debug("addAttributesToSolrDocument:X15");
+                        //log.debug("addAttributesToDocument:X15");
                         ModelObjectInterface[] vs = (ModelObjectInterface[]) dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
                         HashMap<String, ArrayList<Object>> values = new HashMap<String, ArrayList<Object>>();
                         for(int i = 0; vs != null && i < vs.length; i++){
@@ -310,9 +283,9 @@ public class ModelObjectSearchService {
                             ArrayList<Object> objects = values.get(name);
                             String solrArrayName = name + "_ARRAY";
                             log.trace("Adding_to_array.size " + solrArrayName + "("+ (objects == null ? "-1" : (objects.size() == 1 ? ""+ objects.get(0) : ""+ objects.size())) +")");
-                            solrObj.addField(solrArrayName, objects);
+                            inputDocument.addField(solrArrayName, objects);
                         }
-                        //log.debug("addAttributesToSolrDocument:X16");
+                        //log.debug("addAttributesToDocument:X16");
                     }
                 }
             }
@@ -419,24 +392,18 @@ public class ModelObjectSearchService {
 
 
     public static <T extends ModelObjectInterface> void commit(T object) {
-        ModelObject modelObject = (ModelObject) object;
-        SolrClient solrServer = servers.get(modelObject.getInterface().getSimpleName());
         try {
-            solrServer.commit();
-        } catch (SolrServerException e) {
-            log.error("Some error when commit document ... " + e, e);
-        } catch (IOException e) {
+            noSQLServices.get(serverKey(object)).commit();
+        } catch (Exception e) {
             log.error("Some error when commit document ... " + e, e);
         }
     }
 
     public static <T extends ModelObjectInterface> void commit(Class<T> modelObjectClass) {
-        SolrClient solrServer = servers.get(modelObjectClass.getSimpleName());
+
         try {
-            solrServer.commit();
-        } catch (SolrServerException e) {
-            log.error("Some error when commit document ... " + e, e);
-        } catch (IOException e) {
+            noSQLServices.get(serverKey(modelObjectClass)).commit();
+        } catch (Exception e) {
             log.error("Some error when commit document ... " + e, e);
         }
     }
@@ -445,7 +412,7 @@ public class ModelObjectSearchService {
 
 
 
-    private static void addAttributeValueToStatement(DbAttribute dbAttribute, SolrInputDocument solrObj, Object value, String prefix) {
+    private static void addAttributeValueToStatement(DbAttribute dbAttribute, NoSQLInputDocument solrObj, Object value, String prefix) {
         String attributeName = dbAttribute.getAttributeName();
         String solrAttributeName = dbAttribute.getSolrAttributeName(prefix);
         if(value != null && value instanceof Calendar){

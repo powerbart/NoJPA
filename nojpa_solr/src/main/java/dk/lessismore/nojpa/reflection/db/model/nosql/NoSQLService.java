@@ -1,11 +1,8 @@
 package dk.lessismore.nojpa.reflection.db.model.nosql;
 
-import org.apache.solr.client.solrj.SolrClient;
-import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrRequest;
+import dk.lessismore.nojpa.db.methodquery.NQL;
+import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import org.apache.solr.client.solrj.response.QueryResponse;
-import org.apache.solr.common.SolrInputDocument;
-import org.apache.solr.common.util.NamedList;
 
 import java.io.IOException;
 
@@ -15,12 +12,10 @@ import java.io.IOException;
 public interface NoSQLService {
 
 
-    NoSQLClient getServer();
-
     String getName();
 
     void index(NoSQLInputDocument solrInputDocument);
-    QueryResponse query(SolrQuery query);
+    NoSQLResponse query(NQL.SearchQuery query);
 
     void commit();
     void optimize();
@@ -29,4 +24,7 @@ public interface NoSQLService {
     void destroy() throws IOException;
     void deleteAll();
 
+    NoSQLInputDocument createInputDocument(Class<? extends ModelObjectInterface> clazz);
+
+    <T extends ModelObjectInterface> NQL.SearchQuery createSearchQuery(Class<T> clazz);
 }

@@ -18,9 +18,6 @@ import java.util.Locale;
  */
 public class SolrEmbeddedServiceImpl extends SolrServiceImpl {
 
-    private static TranslateService translateService = null;
-    private static Locale[] locales = null;
-
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     private static CoreContainer coreContainer;
@@ -55,7 +52,7 @@ public class SolrEmbeddedServiceImpl extends SolrServiceImpl {
     }
 
 
-    protected void startup() {
+    public void startup() {
         log.debug("[void : (" + coreName + ")startup]:HIT: " + this);
         try {
             if (coreContainer == null) {

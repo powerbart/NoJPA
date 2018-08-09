@@ -16,7 +16,7 @@ public class NQLInlineTest {
 //        inline query: q=+(_Address_a__ID_Phone_funnyD__DOUBLE:(0.1))+
 
         Address mock = NQL.mock(Address.class);
-        System.out.println("inline query: " + NQL.search(mock).search(mock.getA().getFunnyD(), NQL.Comp.EQUAL, 0.1d).buildQuery());
-        System.out.println("normal query: " + NQL.search(mock).search(mock.getArea(), NQL.Comp.EQUAL, "area").buildQuery());
+//        System.out.println("inline query: " + NQL.search(mock).search(mock.getA().getFunnyD(), NQL.Comp.EQUAL, 0.1d).());
+//        System.out.println("normal query: " + NQL.search(mock).search(mock.getArea(), NQL.Comp.EQUAL, "area").buildQuery());
     }
 }
