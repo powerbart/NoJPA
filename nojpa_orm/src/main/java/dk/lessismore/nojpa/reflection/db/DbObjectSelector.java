@@ -61,14 +61,8 @@ public class DbObjectSelector {
             String sqlNameQuery = null;
 //            log.debug("iterateObjectsFromDb:3");
             if (dbAttributeContainer.getSqlNameQuery() == null) {
-                for (Iterator iterator = dbAttributeContainer.getDbAttributes().values().iterator(); iterator.hasNext();)
-                {
-                    DbAttribute dbAttribute = (DbAttribute) iterator.next();
-                    //If the attribute is not an multi association.
-                    if (!dbAttribute.isMultiAssociation())
-                        sqlNameQuery = (sqlNameQuery == null ? "" : sqlNameQuery + ", ") + (dbAttributeContainer.getTableName() + "." + (dbAttribute.getInlineAttributeName() != null ? dbAttribute.getInlineAttributeName() : dbAttribute.getAttributeName()));
-                }
-                dbAttributeContainer.setSqlNameQuery(sqlNameQuery);
+                DbObjectReader.buildSqlNameQueryForDbAttributeContainer(dbAttributeContainer);
+                sqlNameQuery = dbAttributeContainer.getSqlNameQuery();
             } else {
                 sqlNameQuery = dbAttributeContainer.getSqlNameQuery();
             }
@@ -121,14 +115,9 @@ public class DbObjectSelector {
         try{
             DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(targetClass);
             String sqlNameQuery = null;
-            if(dbAttributeContainer.getSqlNameQuery() == null){
-                for (Iterator iterator = dbAttributeContainer.getDbAttributes().values().iterator(); iterator.hasNext();) {
-                    DbAttribute dbAttribute = (DbAttribute) iterator.next();
-                    if(!dbAttribute.isMultiAssociation()){
-                        sqlNameQuery = (sqlNameQuery == null ? "" : sqlNameQuery + ", ") + (dbAttributeContainer.getTableName() + "." + dbAttribute.getAttributeName());
-                    }
-                }
-                dbAttributeContainer.setSqlNameQuery(sqlNameQuery);
+            if (dbAttributeContainer.getSqlNameQuery() == null) {
+                DbObjectReader.buildSqlNameQueryForDbAttributeContainer(dbAttributeContainer);
+                sqlNameQuery = dbAttributeContainer.getSqlNameQuery();
             } else {
                 sqlNameQuery = dbAttributeContainer.getSqlNameQuery();
             }
@@ -196,23 +185,12 @@ public class DbObjectSelector {
 	    DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(targetClass);
 	    String sqlNameQuery = null;
         //log.debug("selectObjectsFromDb:1.2");
-        if(dbAttributeContainer.getSqlNameQuery() == null){
-            //NEW ************************************
-	        //log.debug("selectSqlStatement.makeStatement() = ");
-            //log.debug("selectObjectsFromDb:1.3");
-            for (Iterator iterator = dbAttributeContainer.getDbAttributes().values().iterator(); iterator.hasNext();) {
-                DbAttribute dbAttribute = (DbAttribute) iterator.next();
-                //If the attribute is not an multi association.
-                if(!dbAttribute.isMultiAssociation() && !dbAttribute.isInlineInterface()){
-                    sqlNameQuery = (sqlNameQuery == null ? "" : sqlNameQuery + ", ") + (dbAttributeContainer.getTableName() + "." + (dbAttribute.getInlineAttributeName() != null ? dbAttribute.getInlineAttributeName() : dbAttribute.getAttributeName()) );
-                }
-            }
-            //log.debug("selectObjectsFromDb:1.4");
-            dbAttributeContainer.setSqlNameQuery(sqlNameQuery);
-            //log.debug("selectObjectsFromDb:1.5");
+        if (dbAttributeContainer.getSqlNameQuery() == null) {
+            DbObjectReader.buildSqlNameQueryForDbAttributeContainer(dbAttributeContainer);
+            sqlNameQuery = dbAttributeContainer.getSqlNameQuery();
         } else {
-		    sqlNameQuery = dbAttributeContainer.getSqlNameQuery();
-	    }
+            sqlNameQuery = dbAttributeContainer.getSqlNameQuery();
+        }
         //log.debug("selectObjectsFromDb:1.6");
         selectSqlStatement.addAttributeName(sqlNameQuery);
         //log.debug("selectObjectsFromDb:1.7");

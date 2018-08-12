@@ -1,7 +1,5 @@
 package dk.lessismore.nojpa.db.methodquery;
 
-import dk.lessismore.nojpa.db.statements.ContainerExpression;
-import dk.lessismore.nojpa.db.statements.Expression;
 import dk.lessismore.nojpa.reflection.db.DbClassReflector;
 import dk.lessismore.nojpa.reflection.db.annotations.DbStrip;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttribute;
@@ -10,10 +8,8 @@ import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectSearchService;
 import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLResponse;
 import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLService;
-import dk.lessismore.nojpa.reflection.db.model.solr.SolrExpression;
 import dk.lessismore.nojpa.utils.Pair;
 import org.apache.commons.lang.StringUtils;
-import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.SolrDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,14 +18,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 
 /**
 * Created : with IntelliJ IDEA.
@@ -534,7 +523,7 @@ public class NQL {
 //                noSqlQuery.setParam("bf", "sum(_Post_pageViewCounter__ID_Counter_count__LONG,8)");
                 long start = System.currentTimeMillis();
                 NoSQLResponse queryResponse = noSQLService.query(this);
-                log.info("[{}ms size: {}] Will solr query: {}", System.currentTimeMillis() - start, queryResponse.getNumFound(), toStringDebugQuery());
+                log.info("[{}ms size: {}] Will query: {}", System.currentTimeMillis() - start, queryResponse.getNumFound(), toStringDebugQuery());
 //                log.info("[{}ms size: {}] Will solr query: {}", System.currentTimeMillis() - start, queryResponse.getResults().getNumFound(), toStringDebugQuery());
 
 //                timer.markLap("3");
@@ -647,6 +636,9 @@ public class NQL {
                 Object arg = args[0];
                 return isMock(arg) && ((MockExtra) proxy).mockExtra_getSourceClass().equals(
                         ((MockExtra) arg).mockExtra_getSourceClass());
+            }
+            if (methodName.equals("toString")) {
+                return "STUPID-MOCK-OF-" + sourceClass.getSimpleName();
             }
             if( ! methodName.startsWith("get")) {
                 throw new IllegalArgumentException("Only get-methods may be called on this db instance. " +
@@ -780,7 +772,7 @@ public class NQL {
         List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
         Pair<Class, String> pair = getSourceAttributePair();
         clearMockCallSequence();
-        SolrExpression expression = newLeafExpression().addConstrain(makeAttributeIdentifier(pair), comp, value);
+        NoSQLExpression expression = newLeafExpression().addConstrain(makeAttributeIdentifier(pair), comp, value);
         return new NoSQLConstraint(expression, joints);
     }
 
@@ -788,7 +780,7 @@ public class NQL {
         List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
         Pair<Class, String> pair = getSourceAttributePair();
         clearMockCallSequence();
-        SolrExpression expression = newLeafExpression().addConstrain(makeAttributeIdentifier(pair), comp, value ? 1 : 0);
+        NoSQLExpression expression = newLeafExpression().addConstrain(makeAttributeIdentifier(pair), comp, value ? 1 : 0);
         return new NoSQLConstraint(expression, joints);
     }
 
@@ -810,7 +802,7 @@ public class NQL {
             }
         }
         value = (value == null || value.trim().equals("") ? "*" : value);
-        SolrExpression expression = null;
+        NoSQLExpression expression = null;
         if(joints.size() == 0 && pair.getSecond().equals("objectID")){
             expression = newLeafExpression().addConstrain("objectID", comp, value);
         } else {
@@ -830,7 +822,7 @@ public class NQL {
 ////            joints.remove(joints.size() - 1);
 //        }
         clearMockCallSequence();
-        SolrExpression expression = newLeafExpression().addConstrain(makeAttributeIdentifier(pair), comp, value);
+        NoSQLExpression expression = newLeafExpression().addConstrain(makeAttributeIdentifier(pair), comp, value);
         return new NoSQLConstraint(expression, joints);
     }
 
@@ -838,7 +830,7 @@ public class NQL {
         List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
         Pair<Class, String> pair = getSourceAttributePair();
         clearMockCallSequence();
-        SolrExpression expression = newLeafExpression().addConstrain(makeAttributeIdentifier(pair), comp, value);
+        NoSQLExpression expression = newLeafExpression().addConstrain(makeAttributeIdentifier(pair), comp, value);
         return new NoSQLConstraint(expression, joints);
     }
 
@@ -846,7 +838,7 @@ public class NQL {
         List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
         Pair<Class, String> pair = getSourceAttributePair();
         clearMockCallSequence();
-        SolrExpression expression = newLeafExpression().addConstrain(makeAttributeIdentifier(pair), comp, value);
+        NoSQLExpression expression = newLeafExpression().addConstrain(makeAttributeIdentifier(pair), comp, value);
         return new NoSQLConstraint(expression, joints);
     }
 
@@ -854,7 +846,7 @@ public class NQL {
         List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
         Pair<Class, String> pair = getSourceAttributePair();
         clearMockCallSequence();
-        SolrExpression expression = newLeafExpression().addConstrain(makeAttributeIdentifier(pair), comp, value);
+        NoSQLExpression expression = newLeafExpression().addConstrain(makeAttributeIdentifier(pair), comp, value);
         return new NoSQLConstraint(expression, joints);
     }
 
@@ -863,7 +855,7 @@ public class NQL {
         List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
         Pair<Class, String> pair = getSourceAttributePair();
         clearMockCallSequence();
-        SolrExpression expression;
+        NoSQLExpression expression;
         if (model instanceof MockExtra) {
             expression = trueExpression();
         } else {
@@ -873,7 +865,7 @@ public class NQL {
     }
 
     public static Constraint has(String query) {
-        SolrExpression expression = new SolrExpression();
+        NoSQLExpression expression = new NoSQLExpression();
         expression.addConstrain(query);
         return new NoSQLConstraint(expression, new ArrayList<>());
     }
@@ -882,7 +874,7 @@ public class NQL {
         List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
         Pair<Class, String> pair = getSourceAttributePair();
         clearMockCallSequence();
-        SolrExpression expression = newLeafExpression().isNull(makeAttributeIdentifier(pair), joints);
+        NoSQLExpression expression = newLeafExpression().isNull(makeAttributeIdentifier(pair), joints);
         return new NoSQLConstraint(expression, joints);
     }
 
@@ -890,7 +882,7 @@ public class NQL {
         List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
         Pair<Class, String> pair = getSourceAttributePair();
         clearMockCallSequence();
-        SolrExpression expression = newLeafExpression().isNotNull(makeAttributeIdentifier(pair), joints);
+        NoSQLExpression expression = newLeafExpression().isNotNull(makeAttributeIdentifier(pair), joints);
         return new NoSQLConstraint(expression, joints);
     }
 
@@ -898,7 +890,7 @@ public class NQL {
         List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
         Pair<Class, String> pair = getSourceAttributePair();
         clearMockCallSequence();
-        SolrExpression expression = newLeafExpression().isNull(makeAttributeIdentifier(pair), joints);
+        NoSQLExpression expression = newLeafExpression().isNull(makeAttributeIdentifier(pair), joints);
         return new NoSQLConstraint(expression, joints);
     }
 
@@ -906,7 +898,7 @@ public class NQL {
         List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
         Pair<Class, String> pair = getSourceAttributePair();
         clearMockCallSequence();
-        SolrExpression expression = newLeafExpression().isNull(makeAttributeIdentifier(pair), joints);
+        NoSQLExpression expression = newLeafExpression().isNull(makeAttributeIdentifier(pair), joints);
         return new NoSQLConstraint(expression, joints);
     }
 
@@ -914,7 +906,7 @@ public class NQL {
         List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
         Pair<Class, String> pair = getSourceAttributePair();
         clearMockCallSequence();
-        SolrExpression expression = newLeafExpression().isNotNull(makeAttributeIdentifier(pair), joints);
+        NoSQLExpression expression = newLeafExpression().isNotNull(makeAttributeIdentifier(pair), joints);
         return new NoSQLConstraint(expression, joints);
     }
 
@@ -959,13 +951,13 @@ public class NQL {
 //        return new AnyConstraint(constraints);
 //    }
 
-    private static SolrExpression newLeafExpression(){
+    private static NoSQLExpression newLeafExpression(){
 //        return ModelObjectSearchService.noSQLService(selectClass);
-        return new SolrExpression();
+        return new NoSQLExpression();
     }
 
 
-    public static class SolrNegatingExpression implements NoSQLExpression {
+    public static class NoSQLNegatingExpression extends NoSQLExpression {
         NoSQLExpression expression = null;
         ArrayList<NoSQLFunction> noSQLFunctions = new ArrayList<NoSQLFunction>();
 
@@ -973,92 +965,78 @@ public class NQL {
             this.expression = expression;
         }
 
-        //TODO: noSQLFunctions is not in use in the moment for Containers ...
-        @Override
-        public void addFunction(NoSQLFunction noSQLFunction){
-            noSQLFunctions.add(noSQLFunction);
+        public NoSQLExpression getExpression() {
+            return expression;
         }
 
-        @Override
-        public String updateQuery(SolrQuery solrQuery) {
-            StringBuilder builder = new StringBuilder("-");
-            String subQuery = expression.updateQuery(solrQuery);
-            if(subQuery != null){
-                builder.append(subQuery);
-            }
+        //        //TODO: noSQLFunctions is not in use in the moment for Containers ...
+//        @Override
+//        public void addFunction(NoSQLFunction noSQLFunction){
+//            noSQLFunctions.add(noSQLFunction);
+//        }
 
-            return builder.toString();
-        }
+//        @Override
+//        public String updateQuery(SolrQuery solrQuery) {
+//            StringBuilder builder = new StringBuilder("-");
+//            String subQuery = expression.updateQuery(solrQuery);
+//            if(subQuery != null){
+//                builder.append(subQuery);
+//            }
+//
+//            return builder.toString();
+//        }
 
     }
 
-    public static class SolrContainerExpression implements NoSQLExpression {
+    public static class NoSQLContainerExpression extends NoSQLExpression {
         List<NoSQLExpression> expressions = new ArrayList<NoSQLExpression>();
         List<Integer> conditions = new ArrayList<Integer>();
-        ArrayList<NoSQLFunction> noSQLFunctions = new ArrayList<NoSQLFunction>();
 
-        //TODO: noSQLFunctions is not in use in the moment for Containers ...
-        public void addFunction(NoSQLFunction noSQLFunction){
-            noSQLFunctions.add(noSQLFunction);
-        }
-
-
-        public SolrContainerExpression addExpression(NoSQLExpression expression) {
+        public NoSQLContainerExpression addExpression(NoSQLExpression expression) {
             expressions.add(expression);
             return this;
         }
 
-        public SolrContainerExpression addExpression(int condition, NoSQLExpression expression) {
+        public NoSQLContainerExpression addExpression(int condition, NoSQLExpression expression) {
             addExpression(expression);
             addCondition(condition);
             return this;
         }
 
-        public SolrContainerExpression addCondition(int condition) {
+        public NoSQLContainerExpression addCondition(int condition) {
             conditions.add(condition);
             return this;
         }
 
-        //    public ContainerExpression reAddCondition(int condition) {
-//        return null;  //To change body of implemented methods use File | Settings | File Templates.
-//    }
+        public List<NoSQLExpression> getExpressions() {
+            return expressions;
+        }
+
+        public List<Integer> getConditions() {
+            return conditions;
+        }
+
+        //        public String updateQuery(SolrQuery solrQuery) {
+//            StringBuilder builder = new StringBuilder();
+//            for(int i = 0; i < expressions.size(); i++) {
+//                NoSQLExpression expression = expressions.get(i);
+//                Integer condition = conditions.get(i);
+//                String subQuery = expression.updateQuery(solrQuery);
+////                log.debug("Will add subQuery("+ subQuery +") with " + SolrOperator.name(condition));
+//                if(subQuery != null){
+//                    builder.append(subQuery);
+//                    if(expressions.size() > 1 && i + 1 < expressions.size()){
+//                        builder.append(" " + NoSQLOperator.name(condition) + " ");
+//                    }
+//                }
+//            }
 //
-        public int nrOfExpressions() {
-            int n = 0;
-            Iterator iterator = expressions.iterator();
-            while (iterator.hasNext()) {
-                Expression expression = (Expression) iterator.next();
-                if (expression instanceof ContainerExpression) {
-                    n += ((ContainerExpression) expression).nrOfExpressions();
-                } else {
-                    n++;
-                }
-            }
-            return n;
-        }
-
-
-        public String updateQuery(SolrQuery solrQuery) {
-            StringBuilder builder = new StringBuilder();
-            for(int i = 0; i < expressions.size(); i++) {
-                NoSQLExpression expression = expressions.get(i);
-                Integer condition = conditions.get(i);
-                String subQuery = expression.updateQuery(solrQuery);
-//                log.debug("Will add subQuery("+ subQuery +") with " + SolrOperator.name(condition));
-                if(subQuery != null){
-                    builder.append(subQuery);
-                    if(expressions.size() > 1 && i + 1 < expressions.size()){
-                        builder.append(" " + NoSQLOperator.name(condition) + " ");
-                    }
-                }
-            }
-
-            if(builder.length() > 2){
-                builder.insert(0, "(");
-                builder.append(")");
-            }
-            return builder.toString();
-        }
+//            if(builder.length() > 2){
+//                builder.insert(0, "(");
+//                builder.append(")");
+//            }
+//            return builder.toString();
+//        }
     }
 
 
@@ -1247,16 +1225,163 @@ public class NQL {
 
 
 
-    public interface NoSQLExpression {
+    public static class NoSQLExpression {
 
-        String updateQuery(SolrQuery solrQuery);
-        void addFunction(NoSQLFunction noSQLFunction);
+        private static final Logger log = LoggerFactory.getLogger(NQL.class);
 
-    }
+        protected String attr = null;
+        protected Object value = null;
+        protected Class valueClazz = null;
+        protected boolean isNotNull = false;
+        protected boolean isNull = false;
+        protected boolean isEnum = false;
+        protected List<Pair<Class, String>> joints;
+        protected NQL.Comp comparator;
+        protected ArrayList<NQL.NoSQLFunction> noSQLFunctions = new ArrayList<NQL.NoSQLFunction>();
 
-    public interface NoSQLConstrainBuilder {
+
+        public void addFunction(NQL.NoSQLFunction noSQLFunction){
+            noSQLFunctions.add(noSQLFunction);
+        }
+
+        public NoSQLExpression addConstrain(String attributeName, NQL.Comp comparator, String value) {
+            this.attr = attributeName;
+            this.value = value;
+            this.valueClazz = (value != null ? value.getClass() : null);
+            this.comparator = comparator;
+            return this;
+        }
+
+        public NoSQLExpression addConstrain(String attributeName, NQL.Comp comparator, Enum value) {
+            this.attr = attributeName;
+            this.value = value;
+            this.isEnum = true;
+            this.valueClazz = (value != null ? value.getClass() : null);
+            this.comparator = comparator;
+            return this;
+        }
+
+        public NoSQLExpression addConstrain(String attributeName, NQL.Comp comparator, Calendar value) {
+            this.value = value;
+            this.valueClazz = (value != null ? value.getClass() : null);
+            this.attr = attributeName;
+            this.comparator = comparator;
+            return this;
+        }
+
+        public NoSQLExpression addConstrain(String attributeName, NQL.Comp comparator, int value) {
+            log.trace("addConstrain:int("+ value +")");
+            this.attr = attributeName;
+            this.value = value;
+            this.valueClazz = Integer.class;
+            this.comparator = comparator;
+            return this;
+        }
+
+        public NoSQLExpression addConstrain(String attributeName, NQL.Comp comparator, double value) {
+            log.trace("addConstrain:double("+ value +")");
+            this.attr = attributeName;
+            this.value = value;
+            this.valueClazz = Double.class;
+            this.comparator = comparator;
+            return this;
+        }
+
+        public NoSQLExpression addConstrain(String attributeName, NQL.Comp comparator, float value) {
+            log.trace("addConstrain:float("+ value +")");
+            this.attr = attributeName;
+            this.value = value;
+            this.valueClazz = Float.class;
+            this.comparator = comparator;
+            return this;
+        }
+
+        public NoSQLExpression addConstrain(String attributeName, NQL.Comp comparator, long value) {
+            log.trace("addConstrain:long("+ value +")");
+            this.attr = attributeName;
+            this.value = value;
+            this.valueClazz = Long.class;
+            this.comparator = comparator;
+            return this;
+        }
+        public NoSQLExpression addConstrain(String query) {
+            log.trace("addConstrain:("+ query+")");
+            return this;
+        }
+
+        public NoSQLExpression isNull(String attributeName, List<Pair<Class, String>> joints) {
+            this.attr = NQL.createFinalSolrAttributeName(joints, attributeName);
+            isNull = true;
+            return this;
+        }
+
+        public NoSQLExpression isNotNull(String attributeName, List<Pair<Class, String>> joints) {
+//            log.debug("isNotNull("+ attributeName +")");
+            this.attr = NQL.createFinalSolrAttributeName(joints, attributeName);
+            isNotNull = true;
+            return this;
+        }
+
+        public NoSQLExpression addConstrain(Class sourceClass, String attributeName, NQL.Comp comparator, String value) {
+            return addConstrain(NQL.makeAttributeIdentifier(sourceClass, attributeName), comparator, value);
+        }
+
+        public NoSQLExpression addConstrain(Class sourceClass, String attributeName, NQL.Comp comparator, Calendar value) {
+            return addConstrain(NQL.makeAttributeIdentifier(sourceClass, attributeName), comparator, value);
+        }
 
 
+        public NoSQLExpression addConstrain(Class sourceClass, String attributeName, NQL.Comp comparator, int value) {
+            return addConstrain(NQL.makeAttributeIdentifier(sourceClass, attributeName), comparator, value);
+        }
+
+        public NoSQLExpression addConstrain(Class sourceClass, String attributeName, NQL.Comp comparator, double value) {
+            return addConstrain(NQL.makeAttributeIdentifier(sourceClass, attributeName), comparator, value);
+        }
+
+        public NoSQLExpression addConstrain(Class sourceClass, String attributeName, NQL.Comp comparator, float value) {
+            return addConstrain(NQL.makeAttributeIdentifier(sourceClass, attributeName), comparator, value);
+        }
+
+        public void addJoints(List<Pair<Class, String>> joints) {
+            this.joints = joints;
+        }
+
+        public String getAttr() {
+            return attr;
+        }
+
+        public Object getValue() {
+            return value;
+        }
+
+        public Class getValueClazz() {
+            return valueClazz;
+        }
+
+        public boolean isNotNull() {
+            return isNotNull;
+        }
+
+        public boolean isNull() {
+            return isNull;
+        }
+
+        public List<Pair<Class, String>> getJoints() {
+            return joints;
+        }
+
+        public Comp getComparator() {
+            return comparator;
+        }
+
+        public boolean isEnum() {
+            return isEnum;
+        }
+
+        public ArrayList<NoSQLFunction> getNoSQLFunctions() {
+            return noSQLFunctions;
+        }
     }
 
 
@@ -1298,17 +1423,17 @@ public class NQL {
 
     public static class NoSQLConstraint extends Constraint {
 
-        final SolrExpression expression;
+        final NoSQLExpression expression;
         final List<Pair<Class, String>> joints;
 
-        public NoSQLConstraint(SolrExpression expression, List<Pair<Class, String>> joints) {
+        public NoSQLConstraint(NoSQLExpression expression, List<Pair<Class, String>> joints) {
             this.expression = expression;
             expression.addJoints(joints);
             this.joints = joints;
         }
 
         @Override
-        public SolrExpression getExpression() {
+        public NoSQLExpression getExpression() {
             return expression;
         }
 
@@ -1335,7 +1460,7 @@ public class NQL {
 
 
         public NoSQLExpression getExpression() {
-            SolrContainerExpression container = new SolrContainerExpression();
+            NoSQLContainerExpression container = new NoSQLContainerExpression();
             for (Constraint c: constraints) {
 //                log.debug("getExpression() with operator.operator("+ operator.name() +")");
                 container.addExpression(operator.operator, c.getExpression());
@@ -1374,7 +1499,7 @@ public class NQL {
         @Override
         public NoSQLExpression getExpression() {
             if (! hasConstraints()) {
-                return new SolrExpression();
+                return new NoSQLExpression();
             }
             return super.getExpression();
         }
@@ -1392,7 +1517,7 @@ public class NQL {
 
         @Override
         public NoSQLExpression getExpression() {
-            SolrNegatingExpression container = new SolrNegatingExpression();
+            NoSQLNegatingExpression container = new NoSQLNegatingExpression();
             container.setExpression(constraint.getExpression());
             return container;
         }
@@ -1405,7 +1530,7 @@ public class NQL {
         }
     }
 
-    private static SolrExpression trueExpression() {
+    private static NoSQLExpression trueExpression() {
         return null;
     }
 

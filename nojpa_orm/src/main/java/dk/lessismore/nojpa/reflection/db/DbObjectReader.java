@@ -257,6 +257,26 @@ public class DbObjectReader {
         }
     }
 
+
+    protected static void buildSqlNameQueryForDbAttributeContainer(DbAttributeContainer dbAttributeContainer){
+        String sqlNameQuery = null;
+        if (dbAttributeContainer.getSqlNameQuery() == null) {
+            //NEW ************************************
+            //log.debug("selectSqlStatement.makeStatement() = ");
+            for (Iterator iterator = dbAttributeContainer.getDbAttributes().values().iterator(); iterator.hasNext();) {
+                DbAttribute dbAttribute = (DbAttribute) iterator.next();
+
+                //If the attribute is not an multi association.
+                if (!dbAttribute.isMultiAssociation() && !dbAttribute.isInlineInterface()) {
+                    sqlNameQuery = (sqlNameQuery == null ? "" : sqlNameQuery + ", ") + (dbAttributeContainer.getTableName() + "." + (dbAttribute.getInlineAttributeName() != null ? dbAttribute.getInlineAttributeName() : dbAttribute.getAttributeName()));
+                }
+            }
+            dbAttributeContainer.setSqlNameQuery(sqlNameQuery);
+        }
+    }
+
+
+
     /**                                         
      * This method can make a sql statement which can select the desired tupel from the table.
      *
@@ -271,17 +291,8 @@ public class DbObjectReader {
         //Loop through the attributes.
         String sqlNameQuery = null;
         if (dbAttributeContainer.getSqlNameQuery() == null) {
-            //NEW ************************************
-            //log.debug("selectSqlStatement.makeStatement() = ");
-            for (Iterator iterator = dbAttributeContainer.getDbAttributes().values().iterator(); iterator.hasNext();) {
-                DbAttribute dbAttribute = (DbAttribute) iterator.next();
-
-                //If the attribute is not an multi association.
-                if (!dbAttribute.isMultiAssociation()) {
-                    sqlNameQuery = (sqlNameQuery == null ? "" : sqlNameQuery + ", ") + (dbAttributeContainer.getTableName() + "." + (dbAttribute.getInlineAttributeName() != null ? dbAttribute.getInlineAttributeName() : dbAttribute.getAttributeName()));
-                }
-            }
-            dbAttributeContainer.setSqlNameQuery(sqlNameQuery);
+            buildSqlNameQueryForDbAttributeContainer(dbAttributeContainer);
+            sqlNameQuery = dbAttributeContainer.getSqlNameQuery();
         } else {
             sqlNameQuery = dbAttributeContainer.getSqlNameQuery();
         }

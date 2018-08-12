@@ -11,4 +11,6 @@ public interface ElasticService extends NoSQLService {
 
     void setCleanOnStartup(boolean cleanOnStartup);
 
+    void startup();
+
 }

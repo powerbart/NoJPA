@@ -23,12 +23,16 @@ import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.core.CoreContainer;
 import org.elasticsearch.action.delete.DeleteRequest;
+import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.reindex.BulkByScrollResponse;
+import org.elasticsearch.index.reindex.DeleteByQueryAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +87,7 @@ public class ElasticServiceImpl implements ElasticService {
     }
 
 
-    protected void startup() {
+    public void startup() {
         log.debug("[void : (" + clazz.getSimpleName() + ")startup]:HIT: " + this);
         try {
             if (client == null) {
@@ -105,7 +109,9 @@ public class ElasticServiceImpl implements ElasticService {
             return;
         }
         try {
-            IndexRequest request = new IndexRequest("funny33", clazz.getSimpleName(), inputDocument.node.get("objectID").textValue());
+            IndexRequest request = new IndexRequest(ElasticSearchQuery.INDEX_TMP_NAME, clazz.getSimpleName(), inputDocument.node.get("objectID").textValue());
+            log.debug("Adding: " + inputDocument.json());
+            request.source(inputDocument.json(), XContentType.JSON);
             client.index(request, HEADERS);
         } catch (Exception e) {
             log.error("[void : (" + coreName + ")index]: IOException: " + e.getMessage(), e);
@@ -162,13 +168,14 @@ public class ElasticServiceImpl implements ElasticService {
 
     @Override
     public void deleteAll() {
-        try {
-            final DeleteRequest deleteRequest = new DeleteRequest();
-            deleteRequest.type(coreName);
-            client.delete(deleteRequest, HEADERS);
-        } catch (Exception e) {
-            log.error("[ void: (" + coreName + ")deleteAll index: " + e.getMessage(), e);
-        }
+//        try {
+//            BulkByScrollResponse response = DeleteByQueryAction.INSTANCE.newRequestBuilder(client.)
+//                    .filter(QueryBuilders.matchQuery("gender", "male"))
+//                    .source("persons")
+//                    .get();
+//            long deleted = response.getDeleted();        } catch (Exception e) {
+//            log.error("[ void: (" + coreName + ")deleteAll index: " + e.getMessage(), e);
+//        }
     }
 
     public static class ElasticInputDocumentWrapper implements NoSQLInputDocument {
@@ -241,13 +248,18 @@ public class ElasticServiceImpl implements ElasticService {
 //        }
 
 
+        public String json(){
+            return node.toString();
+        }
+
+
     }
 
 
     @Override
     public NoSQLInputDocument createInputDocument(Class<? extends ModelObjectInterface> clazz) {
 
-        return null;
+        return new ElasticInputDocumentWrapper(clazz);
     }
 
 
@@ -255,7 +267,7 @@ public class ElasticServiceImpl implements ElasticService {
 
     @Override
     public <T extends ModelObjectInterface> NQL.SearchQuery createSearchQuery(Class<T> clazz) {
-        return null;
+        return new ElasticSearchQuery(clazz);
     }
 
     @Override
