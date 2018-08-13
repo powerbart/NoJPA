@@ -225,7 +225,7 @@ public class SolrServiceImpl implements SolrService {
 
 
     @Override
-    public NoSQLInputDocument createInputDocument(Class<? extends ModelObjectInterface> clazz) {
+    public NoSQLInputDocument createInputDocument(Class<? extends ModelObjectInterface> clazz, ModelObjectInterface modelObjectInterface) {
         return new NoSQLInputDocumentWrapper();
     }
 

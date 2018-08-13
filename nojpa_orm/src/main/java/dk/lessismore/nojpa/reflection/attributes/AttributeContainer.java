@@ -1,9 +1,6 @@
 package dk.lessismore.nojpa.reflection.attributes;
 
-import dk.lessismore.nojpa.reflection.db.annotations.LongTextClob;
-import dk.lessismore.nojpa.reflection.db.annotations.DbInline;
-import dk.lessismore.nojpa.reflection.db.annotations.DbStrip;
-import dk.lessismore.nojpa.reflection.db.annotations.SearchField;
+import dk.lessismore.nojpa.reflection.db.annotations.*;
 import dk.lessismore.nojpa.reflection.db.model.ModelObject;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.util.ClassAnalyser;
@@ -57,6 +54,9 @@ public class AttributeContainer {
      * The class which the attribute in this container belongs to.
      */
     private Class _targetClass = null;
+
+    private SearchRoute searchRouteAnnotation = null;
+    private Attribute searchRouteAnnotationAttribute = null;
 
     /**
      * The attributes of the target class. key=attributeName, value=Attribute
@@ -160,6 +160,11 @@ public class AttributeContainer {
                 methodAttribute.setDeclaringClass( methods[i].getDeclaringClass() );
                 SearchField searchFieldAnnotation = method.getAnnotation(SearchField.class);
                 methodAttribute.setSearchFieldAnnotation(searchFieldAnnotation);
+                SearchRoute searchRouteAnnotation = method.getAnnotation(SearchRoute.class);
+                if(searchRouteAnnotation != null){
+                    searchRouteAnnotationAttribute = methodAttribute;
+                }
+                methodAttribute.setSearchRouteAnnotation(searchRouteAnnotation);
 
                 if((method.getName().startsWith("get") && method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(Locale.class))){
                     methodAttribute.setTranslatedAssociation( true );
@@ -427,6 +432,7 @@ public class AttributeContainer {
         return attributes;
     }
 
+
     public <T extends Annotation> List<Attribute> getAttributesWithoutAnnotation(Class<T> annotationsClass) {
         Collection<Attribute> allAttributes = getAttributes().values();
         List<Attribute> selectedAttributes = new ArrayList<Attribute>();
@@ -437,6 +443,14 @@ public class AttributeContainer {
             }
         }
         return selectedAttributes;
+    }
+
+    public SearchRoute getSearchRouteAnnotation() {
+        return searchRouteAnnotation;
+    }
+
+    public Attribute getSearchRouteAnnotationAttribute() {
+        return searchRouteAnnotationAttribute;
     }
 
     public static class AttPair extends Pair<Annotation, Attribute> {

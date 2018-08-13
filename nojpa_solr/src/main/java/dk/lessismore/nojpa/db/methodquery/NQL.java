@@ -730,7 +730,7 @@ public class NQL {
         LinkedList<Pair<Object, Method>> mockSequence = threadMockCallSequenceMap.get(Thread.currentThread());
         List<Pair<Class, String>> joints = new ArrayList<Pair<Class, String>>();
         if (mockSequence == null) {
-            log.debug("Did you mix up MQL and NQL???? ... Or did you call 2 mock-methods in the same statement? .... Some mock calls are expected to have been made at this time Thread.currentThread().getId(" + Thread.currentThread().getId() + ")");
+            log.warn("Did you mix up MQL and NQL???? ... Or did you call 2 mock-methods in the same statement? .... Some mock calls are expected to have been made at this time Thread.currentThread().getId(" + Thread.currentThread().getId() + ")");
             return joints;
         }
 //        log.debug("NQL.getJoinsByMockCallSequence:mockSequence:: " + (mockSequence.size() > 0 ? ((mockSequence.size() > 1 ? mockSequence.get(0).getSecond().getName() + "." + mockSequence.get(1).getSecond().getName() : mockSequence.get(0).getSecond().getName())) : null) );
@@ -860,6 +860,15 @@ public class NQL {
             expression = trueExpression();
         } else {
             expression = newLeafExpression().addConstrain(makeAttributeIdentifier(pair), comp, model.getObjectID());
+            if(joints.size() == 0 && comp == Comp.EQUAL){
+                DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(pair.getFirst());
+                if(dbAttributeContainer.getAttributeContainer().getSearchRouteAnnotationAttribute() != null){
+                    if(dbAttributeContainer.getAttributeContainer().getSearchRouteAnnotationAttribute().getAttributeName().equals(pair.getSecond())){
+                        expression.setRouting(true);
+                    }
+                }
+            }
+
         }
         return new NoSQLConstraint(expression, joints);
     }
@@ -1235,6 +1244,7 @@ public class NQL {
         protected boolean isNotNull = false;
         protected boolean isNull = false;
         protected boolean isEnum = false;
+        protected boolean isRouting = false;
         protected List<Pair<Class, String>> joints;
         protected NQL.Comp comparator;
         protected ArrayList<NQL.NoSQLFunction> noSQLFunctions = new ArrayList<NQL.NoSQLFunction>();
@@ -1307,6 +1317,14 @@ public class NQL {
         public NoSQLExpression addConstrain(String query) {
             log.trace("addConstrain:("+ query+")");
             return this;
+        }
+
+        public boolean isRouting() {
+            return isRouting;
+        }
+
+        public void setRouting(boolean routing) {
+            isRouting = routing;
         }
 
         public NoSQLExpression isNull(String attributeName, List<Pair<Class, String>> joints) {

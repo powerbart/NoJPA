@@ -137,7 +137,7 @@ public class ModelObjectSearchService {
                 throw new RuntimeException("Cant find a noSQLServices for class("+ modelObject.getInterface().getSimpleName() +")");
             }
             NoSQLService noSQLService = noSQLServices.get(key);
-            NoSQLInputDocument inDoc = noSQLService.createInputDocument(getInterfaceClass(object));
+            NoSQLInputDocument inDoc = noSQLService.createInputDocument(getInterfaceClass(object), object);
             addAttributesToDocument(object, "", new HashMap<>(), key, inDoc);
             try {
                 noSQLService.index(inDoc);
@@ -172,7 +172,7 @@ public class ModelObjectSearchService {
                 throw new RuntimeException("Cant find a noSQLServices for class("+key +")");
             }
             NoSQLService noSQLService = noSQLServices.get(key);
-            NoSQLInputDocument inDoc = noSQLService.createInputDocument(getInterfaceClass(object));
+            NoSQLInputDocument inDoc = noSQLService.createInputDocument(getInterfaceClass(object), object);
             addAttributesToDocument(object, "", new HashMap<>(), key, inDoc);
             try {
                 //TODO: noSQLService.index(inDoc, AUTO_COMMIT_MS);

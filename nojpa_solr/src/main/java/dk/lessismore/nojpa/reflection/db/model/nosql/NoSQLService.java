@@ -24,7 +24,7 @@ public interface NoSQLService {
     void destroy() throws IOException;
     void deleteAll();
 
-    NoSQLInputDocument createInputDocument(Class<? extends ModelObjectInterface> clazz);
+    NoSQLInputDocument createInputDocument(Class<? extends ModelObjectInterface> clazz, ModelObjectInterface mm);
 
     <T extends ModelObjectInterface> NQL.SearchQuery createSearchQuery(Class<T> clazz);
 }

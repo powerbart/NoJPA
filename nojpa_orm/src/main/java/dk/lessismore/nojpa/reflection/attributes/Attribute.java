@@ -5,6 +5,7 @@ import dk.lessismore.nojpa.reflection.attributeconverters.AttributeConverter;
 import dk.lessismore.nojpa.reflection.attributeconverters.AttributeConverterFactory;
 import dk.lessismore.nojpa.reflection.db.annotations.DbStrip;
 import dk.lessismore.nojpa.reflection.db.annotations.SearchField;
+import dk.lessismore.nojpa.reflection.db.annotations.SearchRoute;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.util.ClassAnalyser;
 import dk.lessismore.nojpa.reflection.visitors.AttributeContainerVisitor;
@@ -29,6 +30,7 @@ public abstract class Attribute {
     protected boolean translatedAssociation = false;
     protected boolean unique = false;
     private SearchField searchFieldAnnotation;
+    private SearchRoute searchRouteAnnotation;
     private DbStrip dbStripAnnotation;
 
     protected String inlineAttributeName = null;
@@ -308,6 +310,14 @@ public abstract class Attribute {
 
     public SearchField getSearchFieldAnnotation() {
         return searchFieldAnnotation;
+    }
+
+    public SearchRoute getSearchRouteAnnotation() {
+        return searchRouteAnnotation;
+    }
+
+    public void setSearchRouteAnnotation(SearchRoute searchRouteAnnotation) {
+        this.searchRouteAnnotation = searchRouteAnnotation;
     }
 
     public DbStrip getDbStripAnnotation() {

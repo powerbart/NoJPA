@@ -5,6 +5,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dk.lessismore.nojpa.db.methodquery.NQL;
+import dk.lessismore.nojpa.reflection.attributes.Attribute;
+import dk.lessismore.nojpa.reflection.db.DbClassReflector;
+import dk.lessismore.nojpa.reflection.db.attributes.DbAttribute;
+import dk.lessismore.nojpa.reflection.db.attributes.DbAttributeContainer;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLInputDocument;
 import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLQuery;
@@ -109,7 +113,17 @@ public class ElasticServiceImpl implements ElasticService {
             return;
         }
         try {
+            DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(clazz);
+            Attribute searchRouteAttribute = dbAttributeContainer.getAttributeContainer().getSearchRouteAnnotationAttribute();
             IndexRequest request = new IndexRequest(ElasticSearchQuery.INDEX_TMP_NAME, clazz.getSimpleName(), inputDocument.node.get("objectID").textValue());
+
+            if(searchRouteAttribute != null){
+                String routing = "" + dbAttributeContainer.getAttributeContainer().getAttributeValue(inputDocument.getModelObjectInterface(), searchRouteAttribute.getAttributeName());
+                log.debug("Setting ROUTING = " + routing);
+                if(routing != null) {
+                    request.routing(routing);
+                }
+            }
             log.debug("Adding: " + inputDocument.json());
             request.source(inputDocument.json(), XContentType.JSON);
             client.index(request, HEADERS);
@@ -127,6 +141,9 @@ public class ElasticServiceImpl implements ElasticService {
                 SearchRequest searchRequest = new SearchRequest(elasticSearchQuery.getIndices());
                 searchRequest.types(elasticSearchQuery.getType());
                 elasticSearchQuery.buildQuery();
+                if(elasticSearchQuery.getRouting() != null){
+                    searchRequest.routing(elasticSearchQuery.getRouting());
+                }
                 searchRequest.source(elasticSearchQuery.getQueryBuilder());
                 final SearchResponse search = client.search(searchRequest, HEADERS);
                 NoSQLResponse response = new ElasticQueryResponseWrapper(search);
@@ -183,9 +200,11 @@ public class ElasticServiceImpl implements ElasticService {
         final Class<? extends ModelObjectInterface> clazz;
         final ObjectMapper objectMapper;
         final ObjectNode node;
+        final ModelObjectInterface modelObjectInterface;
         
-        public ElasticInputDocumentWrapper(Class<? extends ModelObjectInterface> clazz){
+        public ElasticInputDocumentWrapper(Class<? extends ModelObjectInterface> clazz, ModelObjectInterface modelObjectInterface){
             this.clazz = clazz;
+            this.modelObjectInterface = modelObjectInterface;
             objectMapper = new ObjectMapper();
             node = objectMapper.createObjectNode();
 
@@ -229,9 +248,11 @@ public class ElasticServiceImpl implements ElasticService {
 
         @Override
         public void addField(String varName, Calendar value) {
-            SimpleDateFormat xmlDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'"); //2011-11-28T18:30:30Z
-            xmlDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-            node.put(varName, xmlDateFormat.format(((Calendar) value).getTime()));
+            if(value != null) {
+                SimpleDateFormat xmlDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'"); //2011-11-28T18:30:30Z
+                xmlDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                node.put(varName, xmlDateFormat.format(((Calendar) value).getTime()));
+            }
         }
 
         @Override
@@ -252,14 +273,16 @@ public class ElasticServiceImpl implements ElasticService {
             return node.toString();
         }
 
-
+        public ModelObjectInterface getModelObjectInterface() {
+            return modelObjectInterface;
+        }
     }
 
 
     @Override
-    public NoSQLInputDocument createInputDocument(Class<? extends ModelObjectInterface> clazz) {
+    public NoSQLInputDocument createInputDocument(Class<? extends ModelObjectInterface> clazz, ModelObjectInterface modelObjectInterface) {
 
-        return new ElasticInputDocumentWrapper(clazz);
+        return new ElasticInputDocumentWrapper(clazz, modelObjectInterface);
     }
 
 

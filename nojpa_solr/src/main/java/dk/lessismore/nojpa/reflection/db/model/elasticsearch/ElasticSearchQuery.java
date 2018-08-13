@@ -19,10 +19,13 @@ public class ElasticSearchQuery extends NQL.SearchQuery{
 
     private static final Logger log = LoggerFactory.getLogger(SolrSearchQuery.class);
 
-    public static String INDEX_TMP_NAME = "funny77";
+    public static String INDEX_TMP_NAME = "funny83";
     private String indices = INDEX_TMP_NAME;
 
     private SearchSourceBuilder queryBuilder;
+
+
+    private String routing = null;
 
 
     public ElasticSearchQuery(Class selectClass) {
@@ -30,9 +33,11 @@ public class ElasticSearchQuery extends NQL.SearchQuery{
         queryBuilder = new SearchSourceBuilder();
     }
 
+    public String getRouting() {
+        return routing;
+    }
 
-
-    private static QueryBuilder buildSubQuery(NQL.NoSQLExpression expression){
+    private QueryBuilder buildSubQuery(NQL.NoSQLExpression expression){
         if(expression instanceof NQL.NoSQLNegatingExpression){
             BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
             QueryBuilder qb = buildSubQuery(((NQL.NoSQLNegatingExpression) expression).getExpression());
@@ -76,23 +81,7 @@ public class ElasticSearchQuery extends NQL.SearchQuery{
 
 
             if(!expression.isNotNull() && !expression.isNull()){
-                if(expression.getValueClazz().equals(String.class) || expression.isEnum()){
-                    String statementValue = "" + NQL.removeFunnyChars("" + expression.getValue());
-                    if(expression.getComparator() == NQL.Comp.EQUAL_OR_LESS){
-                        throw new RuntimeException("NQL.Comp.EQUAL_OR_LESS for Strings is not implemented");
-                    } else if(expression.getComparator() == NQL.Comp.EQUAL_OR_GREATER){
-                        throw new RuntimeException("NQL.Comp.EQUAL_OR_GREATER for Strings is not implemented");
-                    } else if(expression.getComparator() == NQL.Comp.NOT_EQUAL){
-                        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-                        MatchQueryBuilder matchQueryBuilder = new MatchQueryBuilder(attributeName, statementValue);
-                        boolQueryBuilder.mustNot(matchQueryBuilder);
-                        return boolQueryBuilder;
-                    } else {
-                        MatchQueryBuilder matchQueryBuilder = new MatchQueryBuilder(attributeName, statementValue);
-                        return matchQueryBuilder;
-                    }
-
-                } else if(expression.getValue() instanceof Calendar){
+                if(expression.getValue() instanceof Calendar){
                     SimpleDateFormat xmlDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'"); //2011-11-28T18:30:30Z
                     xmlDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
                     //solrObj.addField(attributeName, xmlDateFormat.format(((Calendar) value).getTime()));
@@ -131,7 +120,27 @@ public class ElasticSearchQuery extends NQL.SearchQuery{
                         MatchQueryBuilder matchQueryBuilder = new MatchQueryBuilder(attributeName,  expression.getValue());
                         return matchQueryBuilder;
                     }
+                } else {
+                    if(expression.isRouting() && expression.getValue() != null){
+                        this.routing = "" + expression.getValue();
+                    }
+                    String statementValue = "" + NQL.removeFunnyChars("" + expression.getValue());
+                    if (expression.getComparator() == NQL.Comp.EQUAL_OR_LESS) {
+                        throw new RuntimeException("NQL.Comp.EQUAL_OR_LESS for Strings is not implemented");
+                    } else if (expression.getComparator() == NQL.Comp.EQUAL_OR_GREATER) {
+                        throw new RuntimeException("NQL.Comp.EQUAL_OR_GREATER for Strings is not implemented");
+                    } else if (expression.getComparator() == NQL.Comp.NOT_EQUAL) {
+                        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+                        MatchQueryBuilder matchQueryBuilder = new MatchQueryBuilder(attributeName, statementValue);
+                        boolQueryBuilder.mustNot(matchQueryBuilder);
+                        return boolQueryBuilder;
+                    } else {
+                        MatchQueryBuilder matchQueryBuilder = new MatchQueryBuilder(attributeName, statementValue);
+                        return matchQueryBuilder;
+                    }
                 }
+
+
             } else if(expression.isNull()){
                 throw new RuntimeException("expression.isNull() is not implemented");
             } else if(expression.isNotNull()){
@@ -166,12 +175,12 @@ public class ElasticSearchQuery extends NQL.SearchQuery{
             NQL.NoSQLExpression expression = constraint.getExpression();
             QueryBuilder subQuery = buildSubQuery(expression);
             boolQueryBuilder.must(subQuery);
+
         }
         if(rootConstraints.isEmpty()){
             queryBuilder.query(QueryBuilders.matchAllQuery());
         } else {
             queryBuilder.query(boolQueryBuilder);
-
         }
         log.debug("We will query elasticsearch = " + toStringDebugQuery());
         if (startLimit != -1) {
