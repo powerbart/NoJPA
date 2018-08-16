@@ -2,6 +2,7 @@ package dk.lessismore.nojpa.db.methodquery;
 
 import dk.lessismore.nojpa.reflection.db.DbClassReflector;
 import dk.lessismore.nojpa.reflection.db.annotations.DbStrip;
+import dk.lessismore.nojpa.reflection.db.annotations.SearchIndex;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttribute;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttributeContainer;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
@@ -14,6 +15,7 @@ import org.apache.solr.common.SolrDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -831,6 +833,17 @@ public class NQL {
         Pair<Class, String> pair = getSourceAttributePair();
         clearMockCallSequence();
         NoSQLExpression expression = newLeafExpression().addConstrain(makeAttributeIdentifier(pair), comp, value);
+
+        if(joints.size() == 0 && pair.getSecond().equals("creationDate")){
+            if(comp == Comp.EQUAL){
+                expression.setTo(value);
+                expression.setFrom(value);
+            } else if(comp == Comp.EQUAL_OR_GREATER){
+                expression.setFrom(value);
+            } else if(comp == Comp.EQUAL_OR_LESS){
+                expression.setTo(value);
+            }
+        }
         return new NoSQLConstraint(expression, joints);
     }
 
@@ -1245,6 +1258,8 @@ public class NQL {
         protected boolean isNull = false;
         protected boolean isEnum = false;
         protected boolean isRouting = false;
+        protected Calendar from = null;
+        protected Calendar to = null;
         protected List<Pair<Class, String>> joints;
         protected NQL.Comp comparator;
         protected ArrayList<NQL.NoSQLFunction> noSQLFunctions = new ArrayList<NQL.NoSQLFunction>();
@@ -1325,6 +1340,22 @@ public class NQL {
 
         public void setRouting(boolean routing) {
             isRouting = routing;
+        }
+
+        public Calendar getFrom() {
+            return from;
+        }
+
+        public void setFrom(Calendar from) {
+            this.from = from;
+        }
+
+        public Calendar getTo() {
+            return to;
+        }
+
+        public void setTo(Calendar to) {
+            this.to = to;
         }
 
         public NoSQLExpression isNull(String attributeName, List<Pair<Class, String>> joints) {

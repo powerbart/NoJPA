@@ -43,10 +43,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
+import java.time.LocalDate;
+import java.util.*;
 
 /**
  * Created by seb on 7/23/14.
@@ -115,7 +113,9 @@ public class ElasticServiceImpl implements ElasticService {
         try {
             DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(clazz);
             Attribute searchRouteAttribute = dbAttributeContainer.getAttributeContainer().getSearchRouteAnnotationAttribute();
-            IndexRequest request = new IndexRequest(ElasticSearchQuery.INDEX_TMP_NAME, clazz.getSimpleName(), inputDocument.node.get("objectID").textValue());
+            String indexName = getIndexName(inputDocument);
+
+            IndexRequest request = new IndexRequest(indexName, clazz.getSimpleName().toLowerCase(), inputDocument.node.get("objectID").textValue());
 
             if(searchRouteAttribute != null){
                 String routing = "" + dbAttributeContainer.getAttributeContainer().getAttributeValue(inputDocument.getModelObjectInterface(), searchRouteAttribute.getAttributeName());
@@ -124,7 +124,7 @@ public class ElasticServiceImpl implements ElasticService {
                     request.routing(routing);
                 }
             }
-            log.debug("Adding: " + inputDocument.json());
+            log.debug("Adding to index["+ indexName +"]: " + inputDocument.json());
             request.source(inputDocument.json(), XContentType.JSON);
             client.index(request, HEADERS);
         } catch (Exception e) {
@@ -132,30 +132,75 @@ public class ElasticServiceImpl implements ElasticService {
         }
     }
 
+    private String getIndexName(ElasticInputDocumentWrapper inputDocument){
+        Calendar creationDate = inputDocument.getModelObjectInterface().getCreationDate();
+        LocalDate dd = LocalDate.of(creationDate.get(Calendar.YEAR), 1+creationDate.get(Calendar.MONTH), creationDate.get(Calendar.DAY_OF_MONTH));
+//        return "funny87";
+        return ("NoJPA2-" + inputDocument.getModelObjectInterface().getInterface().getSimpleName() + "-" + dd).toLowerCase();
+    }
+
+    private String[] getIndexName(ElasticSearchQuery query){
+        ArrayList<String> toReturn = new ArrayList<>();
+        String prefix = "NoJPA2-" + query.getType() + "-";
+        String[] indexs = query.getIndexs();
+        if(indexs != null){
+            for(int i = 0; i < indexs.length; i++){
+                toReturn.add((prefix + indexs[i]).toLowerCase());
+            }
+        } else {
+            toReturn.add(prefix.toLowerCase() + "*");
+        }
+        //For debug...
+        for(int i = 0; i < toReturn.size(); i++){
+            log.debug("We will send query to index["+ i +"]: " + toReturn.get(i));
+        }
+//        return new String[] {"funny87"};
+        return toReturn.toArray(new String[toReturn.size()]);
+    }
+
+
+
 
     @Override
     public NoSQLResponse query(NQL.SearchQuery query) {
         try {
             if(client != null){
                 ElasticSearchQuery elasticSearchQuery = (ElasticSearchQuery) query;
-                SearchRequest searchRequest = new SearchRequest(elasticSearchQuery.getIndices());
-                searchRequest.types(elasticSearchQuery.getType());
-                elasticSearchQuery.buildQuery();
-                if(elasticSearchQuery.getRouting() != null){
-                    searchRequest.routing(elasticSearchQuery.getRouting());
-                }
-                searchRequest.source(elasticSearchQuery.getQueryBuilder());
-                final SearchResponse search = client.search(searchRequest, HEADERS);
-                NoSQLResponse response = new ElasticQueryResponseWrapper(search);
-                return response;
+                String[] indexName = getIndexName(elasticSearchQuery);
+                return query(query, indexName);
             } else {
-                log.error("query() ... server is null ... This is okay doing startup ...");
-                return null;
+                Exception exp = new RuntimeException("We don't have a client...!!!! ");
+                log.error("Error: " , exp);
+                throw exp;
             }
         } catch (Exception e) {
-            log.error("[QueryResponse : (" + coreName + ")query]: SolrException: " + e.getMessage(), e);
+            try {
+                if (e.toString().contains("index_not_found_exception")) {
+                    ElasticSearchQuery elasticSearchQuery = (ElasticSearchQuery) query;
+                    return query(query, new String[]{("nojpa2-" + elasticSearchQuery.getType()).toLowerCase() + "-*"});
+                } else {
+                    log.error("[QueryResponse : (" + coreName + ")query]: ElasticException: " + e.getMessage(), e);
+                }
+            } catch (Exception e2){
+                log.error("[QueryResponse : (" + coreName + ")query]: ElasticException: " + e.getMessage(), e2);
+            }
+
+
         }
         return null;
+    }
+
+    public NoSQLResponse query(NQL.SearchQuery query, String[] indexs) throws Exception {
+        ElasticSearchQuery elasticSearchQuery = (ElasticSearchQuery) query;
+        SearchRequest searchRequest = new SearchRequest(indexs);
+        searchRequest.types(elasticSearchQuery.getType().toLowerCase());
+        if(elasticSearchQuery.getRouting() != null){
+            searchRequest.routing(elasticSearchQuery.getRouting());
+        }
+        searchRequest.source(elasticSearchQuery.getQueryBuilder());
+        final SearchResponse search = client.search(searchRequest, HEADERS);
+        NoSQLResponse response = new ElasticQueryResponseWrapper(search);
+        return response;
     }
 
     @Override

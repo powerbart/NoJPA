@@ -181,7 +181,7 @@ public class DbAttributeContainer {
                 parentValue = ModelObjectService.create(attribute.getInlineParentClass());
                 attributeContainer.setAttributeValue(objectToSetOn, attribute.getInlineParentName(), parentValue);
             }
-            log.debug("SETTING: parentValue("+ parentValue +")/"+ attribute.getInlineParentClass() +" att("+ attribute.getInlineParentName() +") -> " + value);
+//            log.debug("SETTING: parentValue("+ parentValue +")/"+ attribute.getInlineParentClass() +" att("+ attribute.getInlineParentName() +") -> " + value);
             return parentDbAttributeContainer.setAttributeValue(parentValue, attribute.getInlineChildName(), value);
 
         } else {

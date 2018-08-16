@@ -1,6 +1,7 @@
 package dk.lessismore.nojpa.reflection.db.model.elasticsearch;
 
 import dk.lessismore.nojpa.db.methodquery.NQL;
+import dk.lessismore.nojpa.reflection.db.annotations.SearchIndex;
 import dk.lessismore.nojpa.reflection.db.model.solr.SolrSearchQuery;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.elasticsearch.action.search.SearchRequest;
@@ -10,8 +11,13 @@ import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.annotation.Annotation;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.TimeZone;
 
 public class ElasticSearchQuery extends NQL.SearchQuery{
@@ -19,13 +25,14 @@ public class ElasticSearchQuery extends NQL.SearchQuery{
 
     private static final Logger log = LoggerFactory.getLogger(SolrSearchQuery.class);
 
-    public static String INDEX_TMP_NAME = "funny83";
-    private String indices = INDEX_TMP_NAME;
-
     private SearchSourceBuilder queryBuilder;
 
 
+    Calendar from = null;
+    Calendar to = null;
+    
     private String routing = null;
+    private String[] indexs = null;
 
 
     public ElasticSearchQuery(Class selectClass) {
@@ -82,6 +89,15 @@ public class ElasticSearchQuery extends NQL.SearchQuery{
 
             if(!expression.isNotNull() && !expression.isNull()){
                 if(expression.getValue() instanceof Calendar){
+                    
+                    if(expression.getFrom() != null){
+                        from = expression.getFrom();
+                    }
+                    if(expression.getTo() != null){
+                        to = expression.getTo();
+                    }
+                    
+                    
                     SimpleDateFormat xmlDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'"); //2011-11-28T18:30:30Z
                     xmlDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
                     //solrObj.addField(attributeName, xmlDateFormat.format(((Calendar) value).getTime()));
@@ -175,8 +191,18 @@ public class ElasticSearchQuery extends NQL.SearchQuery{
             NQL.NoSQLExpression expression = constraint.getExpression();
             QueryBuilder subQuery = buildSubQuery(expression);
             boolQueryBuilder.must(subQuery);
-
         }
+        if(from != null) {
+            SearchIndex searchIndexAnnotation = (SearchIndex) selectClass.getAnnotation(SearchIndex.class);
+            if(searchIndexAnnotation != null) {
+                indexs = calculateIndexs(from, to, searchIndexAnnotation.timeFrame());
+                for(int i = 0; indexs != null && i < indexs.length; i++){
+//                    log.debug("We will use index-suffix["+ (i) +"/"+ indexs.length +"]: " + indexs[i]);
+                }
+            }
+        }
+
+
         if(rootConstraints.isEmpty()){
             queryBuilder.query(QueryBuilders.matchAllQuery());
         } else {
@@ -193,14 +219,50 @@ public class ElasticSearchQuery extends NQL.SearchQuery{
         }
     }
 
+    public static String[] calculateIndexs(Calendar from, Calendar to,  SearchIndex.TimeFrame searchIndexAnnotation) {
+        if(from == null){
+            return null;
+        }
+        if(to == null){
+            to = Calendar.getInstance();
+        }
+        List<String> toReturn = new ArrayList<>(10);
+        LocalDate fromDate = LocalDate.of(from.get(Calendar.YEAR), 1+from.get(Calendar.MONTH), from.get(Calendar.DAY_OF_MONTH));
+        LocalDate toDate = LocalDate.of(to.get(Calendar.YEAR), 1+to.get(Calendar.MONTH), to.get(Calendar.DAY_OF_MONTH));
+        long daysBetween = ChronoUnit.DAYS.between(fromDate, toDate);
+        long monthsBetween = ChronoUnit.MONTHS.between(fromDate, toDate);
+
+
+
+
+        if(daysBetween < 10){
+//            System.out.println("toDate = " + toDate);
+            for(int i = 0; fromDate.isBefore(toDate) || fromDate.equals(toDate); i++){
+                toReturn.add("" + fromDate);
+                from.add(Calendar.DAY_OF_YEAR, 1);
+                fromDate = LocalDate.of(from.get(Calendar.YEAR), 1+from.get(Calendar.MONTH), from.get(Calendar.DAY_OF_MONTH));
+            }
+            return toReturn.toArray(new String[toReturn.size()]);
+        } else if (monthsBetween < 10){
+//            System.out.println("toDate = " + toDate);
+            for(int i = 0;  fromDate.isBefore(toDate) || fromDate.equals(toDate); i++){
+                toReturn.add(("" + fromDate).substring(0, 7) + "-*");
+                from.add(Calendar.MONTH, 1);
+                fromDate = LocalDate.of(from.get(Calendar.YEAR), 1+from.get(Calendar.MONTH), 1);
+            }
+            return toReturn.toArray(new String[toReturn.size()]);
+        }
+        return null;
+    }
+
     @Override
     protected String toStringDebugQuery() {
         return queryBuilder.toString();
     }
 
 
-    public String getIndices() {
-        return indices;
+    public String[] getIndexs() {
+        return indexs;
     }
 
     public String getType() {
