@@ -1,6 +1,7 @@
 package dk.lessismore.nojpa.cache;
 
 import dk.lessismore.nojpa.db.methodquery.MQL;
+import dk.lessismore.nojpa.db.testmodel.Company;
 import dk.lessismore.nojpa.db.testmodel.InitTestDatabase;
 import dk.lessismore.nojpa.db.testmodel.Person;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
@@ -13,6 +14,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+import static dk.lessismore.nojpa.reflection.db.model.ModelObjectService.save;
+
 /**
  * Created : by IntelliJ IDEA.
  * User: seb
@@ -21,15 +24,25 @@ import java.util.List;
 public class RemoteCacheTest {
 
     private static final Logger log = LoggerFactory.getLogger(RemoteCacheTest.class);
-//
-//
-//    @BeforeClass
-//    public static void initDatabase() {
-//        InitTestDatabase.initPlanetExpress();
-//        InitTestDatabase.createTestData();
-//    }
-//
-//
+
+
+    @BeforeClass
+    public static void initDatabase() {
+        InitTestDatabase.initPlanetExpress();
+        InitTestDatabase.createTestData();
+    }
+
+
+    @Test
+    public void testSave_not_working() throws Exception {
+        Company planetExpress = ModelObjectService.create(Company.class);
+        planetExpress.setName("Planet Express");
+        save(planetExpress);
+
+    }
+
+
+
 //    @Test
 //    public void testStartUpOfOne() throws Exception {
 //        ObjectCacheRemote s1 = new ObjectCacheRemote();
