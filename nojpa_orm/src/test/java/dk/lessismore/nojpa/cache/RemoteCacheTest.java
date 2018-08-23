@@ -35,9 +35,22 @@ public class RemoteCacheTest {
 
     @Test
     public void testSave_not_working() throws Exception {
+        Person ceo = ModelObjectService.create(Person.class);
+        ceo.setName("nas");
+        ModelObjectService.save(ceo);
+
+        Thread.sleep(5_000);
+
         Company planetExpress = ModelObjectService.create(Company.class);
         planetExpress.setName("Planet Express");
+
+        planetExpress.setCeo(ceo);
+
+
+
+        System.out.println("ceo.getLastModified() = " + ceo.getLastModified());
         save(planetExpress);
+        System.out.println("ceo.getLastModified() = " + ceo.getLastModified());
 
     }
 

@@ -24,7 +24,7 @@ public interface SolrService extends NoSQLService {
 //    String getName();
 //
 //    void index(SolrInputDocument solrInputDocument);
-//    QueryResponse query(SolrQuery query);
+    QueryResponse query(SolrQuery query);
 //    NamedList<Object> request(SolrRequest req);
 //    <T> T getByID(String unTransTextSHA, Class<T> type);
 //

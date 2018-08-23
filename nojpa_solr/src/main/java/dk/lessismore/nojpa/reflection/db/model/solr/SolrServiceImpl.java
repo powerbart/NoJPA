@@ -3,7 +3,6 @@ package dk.lessismore.nojpa.reflection.db.model.solr;
 import dk.lessismore.nojpa.db.methodquery.NQL;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLInputDocument;
-import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLQuery;
 import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLResponse;
 import dk.lessismore.nojpa.reflection.translate.TranslateService;
 import org.apache.solr.client.solrj.SolrClient;
@@ -116,6 +115,21 @@ public class SolrServiceImpl implements SolrService {
             if(server != null){
                 return new SolrResponseWrapper(server.query(((SolrSearchQuery)query).getSolrQuery()));
 
+            } else {
+                log.error("query() ... server is null ... This is okay doing startup ...");
+                return null;
+            }
+        } catch (Exception e) {
+            log.error("[QueryResponse : (" + coreName + ")query]: SolrException: " + e.getMessage(), e);
+        }
+        return null;
+    }
+
+    @Override
+    public QueryResponse query(SolrQuery query) {
+        try {
+            if(server != null){
+                return server.query(query);
             } else {
                 log.error("query() ... server is null ... This is okay doing startup ...");
                 return null;
