@@ -16,12 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * This class can read an tupel from a database into a model object which match the
@@ -406,18 +402,29 @@ public class DbObjectReader {
                         String strValue = resultSet.getString(name);
                         if (strValue != null) {
                             if (!strValue.equals("0000-00-00")) {
-                                if (resultSet.getTime(name) != null) {
-                                    if (resultSet.getDate(name) != null) {
-                                        Calendar time = Calendar.getInstance();
-                                        Calendar date = Calendar.getInstance();
+                                try {
+                                    if (resultSet.getTime(name) != null) {
+                                        if (resultSet.getDate(name) != null) {
+                                            Calendar time = Calendar.getInstance();
+                                            Calendar date = Calendar.getInstance();
 
-                                        time.setTime(resultSet.getTime(name));
-                                        date.setTime(resultSet.getDate(name));
-                                        date.set(Calendar.HOUR_OF_DAY, time.get(Calendar.HOUR_OF_DAY));
-                                        date.set(Calendar.MINUTE, time.get(Calendar.MINUTE));
-                                        date.set(Calendar.SECOND, time.get(Calendar.SECOND));
-                                        //log.debug("*** Time " + name + ":" + date.getTime());
-                                        return date;
+                                            time.setTime(resultSet.getTime(name));
+                                            date.setTime(resultSet.getDate(name));
+                                            date.set(Calendar.HOUR_OF_DAY, time.get(Calendar.HOUR_OF_DAY));
+                                            date.set(Calendar.MINUTE, time.get(Calendar.MINUTE));
+                                            date.set(Calendar.SECOND, time.get(Calendar.SECOND));
+                                            //log.debug("*** Time " + name + ":" + date.getTime());
+                                            return date;
+                                        }
+                                    }
+                                } catch (java.sql.SQLException msg){
+                                    if(msg.toString().contains("Bad format for Time")){
+                                        final Date parse = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(strValue);
+                                        Calendar c = Calendar.getInstance();
+                                        c.setTime(parse);
+                                        return c;
+                                    } else {
+                                        throw  msg;
                                     }
                                 }
                             }
