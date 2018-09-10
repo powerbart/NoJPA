@@ -426,6 +426,9 @@ public class MQL {
         public SelectQuery<T> orderBy(int mockValue, Order order) {
             return orderBy(order);
         }
+        public SelectQuery<T> orderBy(boolean mockValue, Order order) {
+            return orderBy(order);
+        }
         public SelectQuery<T> orderBy(String mockValue, Order order) {
             return orderBy(order);
         }
