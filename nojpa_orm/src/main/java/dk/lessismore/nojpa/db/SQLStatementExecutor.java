@@ -218,7 +218,7 @@ public class SQLStatementExecutor {
             connection = (Connection) ConnectionPoolFactory.getPool().getFromPool();
             long start = System.currentTimeMillis();
             statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-            log.debug("doQuery::Will run: " + sqlStatement.replaceAll("\n", " "));
+//            log.debug("doQuery::Will run: " + sqlStatement.replaceAll("\n", " "));
 
             resultSet = statement.executeQuery(sqlStatement);
             long end = System.currentTimeMillis();
@@ -269,14 +269,15 @@ public class SQLStatementExecutor {
             PreparedStatement statement = null;
             Connection connection = null;
             ResultSet resultSet = null;
+            String initStatement = null;
             try {
                 PreparedSQLStatement preSQLStatement = new MySqlPreparedSQLStatement();
-                String initStatement = selectSQLStatement.makePreparedStatement(preSQLStatement);
+                initStatement = selectSQLStatement.makePreparedStatement(preSQLStatement);
                 connection = (Connection) ConnectionPoolFactory.getPool().getFromPool();
                 long start = System.currentTimeMillis();
                 statement = connection.prepareStatement(initStatement, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
                 preSQLStatement.makeStatementReadyToExcute(statement);
-                log.debug("doQuery::Will run" + initStatement.replaceAll("\n", " "));
+//                log.debug("doQuery::Will run" + initStatement.replaceAll("\n", " "));
 
                 resultSet = statement.executeQuery();
                 long end = System.currentTimeMillis();
@@ -292,7 +293,7 @@ public class SQLStatementExecutor {
                 ConnectionPoolFactory.getPool().putBackInPool(connection);
                 return toReturn;
             } catch (Exception e) {
-                log.warn("doQuery: query sql execution failed. We will try again: " + e, e);
+                log.warn("doQuery: query sql execution failed. "+ initStatement.replaceAll("\n", " ") +". We will try again: " + e, e);
                 try {
                     ConnectionPoolFactory.getPool().addNew();
                     close(statement, connection);
@@ -301,7 +302,6 @@ public class SQLStatementExecutor {
                 }
                 try {
                     PreparedSQLStatement preSQLStatement = new MySqlPreparedSQLStatement();
-                    String initStatement = selectSQLStatement.makePreparedStatement(preSQLStatement);
                     connection = (Connection) ConnectionPoolFactory.getPool().getFromPool();
                     statement = connection.prepareStatement(initStatement, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
                     log.debug("doQuery: Will run (AGAIN): " + initStatement.replaceAll("\n", " "));
@@ -311,7 +311,7 @@ public class SQLStatementExecutor {
                     ConnectionPoolFactory.getPool().putBackInPool(connection);
                     return toReturn;
                 } catch (Exception exp) {
-                    log.error("doQuery: query sql execution failed (GIVING-UP-1):" + e, e);
+                    log.error("doQuery: query sql ("+ initStatement.replaceAll("\n", " ") +") execution failed (GIVING-UP-1):" + e, e);
                     log.error("doQuery: query sql execution failed (GIVING-UP-2):" + exp, exp);
                     try {
                         ConnectionPoolFactory.getPool().addNew();
