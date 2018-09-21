@@ -127,6 +127,15 @@ public class DatabaseCreator {
                     indices.put(idx, databaseIndex);
                 }
             }
+            if (classAnno instanceof IndexUniqueClass) {
+                for (String idx : ((IndexUniqueClass) classAnno).value()) {
+                    DatabaseIndex databaseIndex = new DatabaseIndex();
+                    databaseIndex.setName(getIndexName(targetClass.getSimpleName(), idx));
+                    databaseIndex.setIdx(idx);
+                    databaseIndex.setClz(IndexField.DatabaseIndexClass.UNIQUE);
+                    indices.put(idx, databaseIndex);
+                }
+            }
         }
         return indices;
     }
