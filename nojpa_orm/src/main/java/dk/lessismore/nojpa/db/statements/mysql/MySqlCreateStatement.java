@@ -105,7 +105,7 @@ public class MySqlCreateStatement extends MySqlStatement implements CreateSQLSta
         for (String index : namesToIndex.keySet()) {
             DatabaseCreator.DatabaseIndex indexName = namesToIndex.get(index);
             if(indexName.getClz() == IndexField.DatabaseIndexClass.UNIQUE){
-                statement.append(",  CONSTRAINT " + indexName.getName() + " UNIQUE ( " + index + ")");
+                statement.append(",  CONSTRAINT " + indexName.getName() + " UNIQUE INDEX ( " + index + ")");
             } else {
                 statement.append(", INDEX " + indexName.getName() + " ( " + index + ")");
             }
