@@ -17,4 +17,10 @@ public @interface IndexField {
 
     String value() default "";
 
+    DatabaseIndexClass clz() default DatabaseIndexClass.NORMAL;
+
+    public enum DatabaseIndexClass {
+        NORMAL, UNIQUE, FULLTEXT, SPATIAL
+    }
+
 }

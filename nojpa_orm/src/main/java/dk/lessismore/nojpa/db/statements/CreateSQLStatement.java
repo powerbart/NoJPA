@@ -1,6 +1,7 @@
 package dk.lessismore.nojpa.db.statements;
 
 import dk.lessismore.nojpa.db.*;
+import dk.lessismore.nojpa.reflection.db.DatabaseCreator;
 
 import java.util.Map;
 
@@ -29,7 +30,7 @@ public interface CreateSQLStatement extends SQLStatement {
 
     public void addPrimaryKey(String attributeName);
 
-    public void setNamesToIndex(Map<String, String> namesToIndex);
+    public void setNamesToIndex(Map<String, DatabaseCreator.DatabaseIndex> namesToIndex);
 
     void addCompressed(int key_block_size);
 }

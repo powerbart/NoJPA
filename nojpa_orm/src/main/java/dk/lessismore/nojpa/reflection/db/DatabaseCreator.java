@@ -54,8 +54,41 @@ public class DatabaseCreator {
     public DatabaseCreator() { }
 
 
-    private static Map<String, String> getIndexFromClass(Class targetClass){
-        LinkedHashMap<String, String> indices = new LinkedHashMap<>();
+    public static class DatabaseIndex {
+
+        private String name;
+        private String idx;
+        private IndexField.DatabaseIndexClass clz;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getIdx() {
+            return idx;
+        }
+
+        public void setIdx(String idx) {
+            this.idx = idx;
+        }
+
+        public IndexField.DatabaseIndexClass getClz() {
+            return clz;
+        }
+
+        public void setClz(IndexField.DatabaseIndexClass clz) {
+            this.clz = clz;
+        }
+    }
+
+
+
+    private static Map<String, DatabaseIndex> getIndexFromClass(Class targetClass){
+        LinkedHashMap<String, DatabaseIndex> indices = new LinkedHashMap<>();
         if (!ModelObjectInterface.class.isAssignableFrom(targetClass)) {
             // it is not a ModelObjectInterface derivate
             return Collections.emptyMap();
@@ -71,7 +104,13 @@ public class DatabaseCreator {
                         } else {
                             indexName = getIndexName(targetClass.getSimpleName(), method.getName());
                         }
-                        indices.put(getFieldName(method.getName()), indexName);
+
+                        DatabaseIndex databaseIndex = new DatabaseIndex();
+                        databaseIndex.setName(indexName);
+                        databaseIndex.setIdx(getFieldName(method.getName()));
+                        databaseIndex.setClz(indexField.clz());
+
+                        indices.put(getFieldName(method.getName()), databaseIndex);
                     } else {
                         log.warn("Will ignore index on " + targetClass.getSimpleName() + "." + method.getName());
                     }
@@ -81,7 +120,11 @@ public class DatabaseCreator {
         for (Annotation classAnno : targetClass.getAnnotations()) {
             if (classAnno instanceof IndexClass) {
                 for (String idx : ((IndexClass) classAnno).value()) {
-                    indices.put(idx, getIndexName(targetClass.getSimpleName(), idx));
+                    DatabaseIndex databaseIndex = new DatabaseIndex();
+                    databaseIndex.setName(getIndexName(targetClass.getSimpleName(), idx));
+                    databaseIndex.setIdx(idx);
+                    databaseIndex.setClz(IndexField.DatabaseIndexClass.NORMAL);
+                    indices.put(idx, databaseIndex);
                 }
             }
         }
@@ -89,20 +132,13 @@ public class DatabaseCreator {
     }
 
     public static List<SQLStatement> makeTableFromClass(Class targetClass) {
-        Map<String, String> indices = getIndexFromClass( targetClass );
-        String logMsg = "Will create table for class " + targetClass.getCanonicalName() + " with indices [";
-
-        for (String index: indices.values()) {
-            logMsg += " '" + index + "'";
-        }
-        logMsg += "]";
-        log.debug(logMsg);
+        Map<String, DatabaseIndex> indices = getIndexFromClass( targetClass );
         return DatabaseCreator.makeTableFromClass(targetClass, indices);
 
     }
 
 
-    public static List<SQLStatement> makeTableFromClass(Class targetClass, Map<String, String> namesToIndex) {
+    public static List<SQLStatement> makeTableFromClass(Class targetClass, Map<String, DatabaseIndex> namesToIndex) {
         List<SQLStatement> tables = new LinkedList<SQLStatement>();
         //log.debug("makeTableFromClass : 1");
         DbAttributeContainer attributeContainer = DbClassReflector.getDbAttributeContainer(targetClass);

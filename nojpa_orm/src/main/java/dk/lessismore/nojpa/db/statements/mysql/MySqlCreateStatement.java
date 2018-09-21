@@ -2,6 +2,8 @@ package dk.lessismore.nojpa.db.statements.mysql;
 
 import dk.lessismore.nojpa.db.DbDataType;
 import dk.lessismore.nojpa.db.statements.CreateSQLStatement;
+import dk.lessismore.nojpa.reflection.db.DatabaseCreator;
+import dk.lessismore.nojpa.reflection.db.annotations.IndexField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +30,7 @@ public class MySqlCreateStatement extends MySqlStatement implements CreateSQLSta
 
     private List<String> attributes = null;
     private List<String> primaryKeys = null;
-    private Map<String, String> namesToIndex = Collections.emptyMap();
+    private Map<String, DatabaseCreator.DatabaseIndex> namesToIndex = Collections.emptyMap();
     private int key_block_size = -1;
 
     public List<String> getAttributes() {
@@ -38,7 +40,7 @@ public class MySqlCreateStatement extends MySqlStatement implements CreateSQLSta
         return attributes;
     }
 
-    public void setNamesToIndex(Map<String, String> namesToIndex) {
+    public void setNamesToIndex(Map<String, DatabaseCreator.DatabaseIndex> namesToIndex) {
         this.namesToIndex = namesToIndex;
     }
 
@@ -101,8 +103,13 @@ public class MySqlCreateStatement extends MySqlStatement implements CreateSQLSta
         statement.append("\n\n");
 
         for (String index : namesToIndex.keySet()) {
-            String indexName = namesToIndex.get(index);
-            statement.append(", INDEX " + indexName + " ( " + index + ")");
+            DatabaseCreator.DatabaseIndex indexName = namesToIndex.get(index);
+            if(indexName.getClz() == IndexField.DatabaseIndexClass.UNIQUE){
+                statement.append(",  CONSTRAINT " + indexName.getName() + " UNIQUE ( " + index + ")");
+            } else {
+                statement.append(", INDEX " + indexName.getName() + " ( " + index + ")");
+            }
+
         }
 
         // TODO set charset and collation as parameter
