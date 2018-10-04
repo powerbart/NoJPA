@@ -163,7 +163,7 @@ public class ResourcePool {
                 //log.debug("getFromPool:2");
                 int countOfWait = 0;
                 while (_pool.isEmpty()) {
-                    log.error("Waiting for "+ _resourceFactory.debugName() +"..... size(" + _pool.size() + ") #"+ (waiting_global++));
+                    log.warn("Waiting for "+ _resourceFactory.debugName() +"..... size(" + _pool.size() + ") #"+ (waiting_global++));
                     try {
                         //log.error("getFromPool:2.1 - wait - start");
                         try {
