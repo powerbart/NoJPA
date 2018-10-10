@@ -42,14 +42,13 @@ public class NQLTest {
 
     @Test
     public void testBig10() {
-        DatabaseCreator.createDatabase("dk.lessismore.nojpa.db.testmodel");
-        SolrServiceImpl solrService = new SolrServiceImpl();
-        solrService.setCoreName("nojpa");
-        solrService.setCleanOnStartup(true);
-
-        Person person = ModelObjectService.create(Person.class);
-        person.setDescription("Funny");
-        ModelObjectService.save(person);
+//        DatabaseCreator.createDatabase("dk.lessismore.nojpa.db.testmodel");
+//        SolrServiceImpl solrService = new SolrServiceImpl();
+//        solrService.setCoreName("nojpa");
+//
+//        Person person = ModelObjectService.create(Person.class);
+//        person.setDescription("Funny");
+//        ModelObjectService.save(person);
 
 
 //        ModelObjectSearchService.addSolrServer(Person.class, solrService.getServerClient());

@@ -44,8 +44,6 @@ public class ModelObjectSearchService {
 
 
     private static HashMap<String, NoSQLService> noSQLServices = new HashMap<>();
-//    private static HashMap<String, SolrClient> servers = new HashMap<>();
-//    private static HashMap<String, SolrService> solrServices = new HashMap<>();
 
     public static void addNoSQLServer(Class className, NoSQLService nosqlServer){
         log.info("Adding nosqlServer("+ nosqlServer +") for class("+ className.getSimpleName() +")");
@@ -57,11 +55,11 @@ public class ModelObjectSearchService {
 //        SolrService solrService = SolrServiceImpl.getSolrClientWrapper(solrServer);
 //        addNoSQLServer(className, solrService);
 //    }
-
-    public static void addSolrServer(Class className, SolrService solrServer){
-        log.info("Adding solrServer("+ solrServer +") for class("+ className.getSimpleName() +")");
-        noSQLServices.put(className.getSimpleName(), solrServer);
-    }
+//
+//    public static void addSolrServer(Class className, SolrService solrServer){
+//        log.info("Adding solrServer("+ solrServer +") for class("+ className.getSimpleName() +")");
+//        noSQLServices.put(className.getSimpleName(), solrServer);
+//    }
 
     public static <T extends ModelObjectInterface> void deleteAll(T object) {
         ModelObject modelObject = (ModelObject) object;

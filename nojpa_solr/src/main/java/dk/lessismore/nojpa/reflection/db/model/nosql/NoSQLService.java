@@ -2,7 +2,6 @@ package dk.lessismore.nojpa.reflection.db.model.nosql;
 
 import dk.lessismore.nojpa.db.methodquery.NQL;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
-import org.apache.solr.client.solrj.response.QueryResponse;
 
 import java.io.IOException;
 
@@ -20,7 +19,6 @@ public interface NoSQLService {
     void commit();
     void optimize();
     void delete(String id);
-    void empty();
     void destroy() throws IOException;
     void deleteAll();
 

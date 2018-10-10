@@ -10,7 +10,7 @@ import java.io.IOException;
 /**
  * Created by niakoi on 16/3/16.
  */
-public class SolrRemoteServiceImpl extends SolrEmbeddedServiceImpl {
+public class SolrRemoteServiceImpl extends SolrServiceImpl {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 

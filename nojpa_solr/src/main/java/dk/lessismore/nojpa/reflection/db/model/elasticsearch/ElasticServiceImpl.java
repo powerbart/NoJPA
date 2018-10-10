@@ -1,50 +1,35 @@
 package dk.lessismore.nojpa.reflection.db.model.elasticsearch;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dk.lessismore.nojpa.db.methodquery.NQL;
 import dk.lessismore.nojpa.reflection.attributes.Attribute;
 import dk.lessismore.nojpa.reflection.db.DbClassReflector;
-import dk.lessismore.nojpa.reflection.db.attributes.DbAttribute;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttributeContainer;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLInputDocument;
-import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLQuery;
 import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLResponse;
-import dk.lessismore.nojpa.reflection.translate.TranslateService;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
 import org.apache.http.message.BasicHeader;
-import org.apache.solr.client.solrj.SolrClient;
-import org.apache.solr.client.solrj.SolrRequest;
-import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
-import org.apache.solr.client.solrj.response.QueryResponse;
-import org.apache.solr.common.SolrInputDocument;
-import org.apache.solr.common.util.NamedList;
-import org.apache.solr.core.CoreContainer;
 import org.elasticsearch.action.delete.DeleteRequest;
-import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.reindex.BulkByScrollResponse;
-import org.elasticsearch.index.reindex.DeleteByQueryAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.TimeZone;
 
 /**
  * Created by seb on 7/23/14.
@@ -62,7 +47,6 @@ public class ElasticServiceImpl implements ElasticService {
     protected String coreName;
 
     protected RestHighLevelClient client;
-    private boolean cleanOnStartup;
 
     public ElasticServiceImpl(String host, int port, Class<? extends ModelObjectInterface> clazz) {
         log.debug("[: constructor]:HIT: host("+ host +":"+ port +") for " + clazz.getSimpleName());
@@ -70,12 +54,8 @@ public class ElasticServiceImpl implements ElasticService {
         this.port = port;
         this.clazz = clazz;
         this.coreName = clazz.getSimpleName();
+        startup();
     }
-
-    public void setCleanOnStartup(boolean cleanOnStartup) {
-        this.cleanOnStartup = cleanOnStartup;
-    }
-
 
 
     public String getName() {
@@ -94,10 +74,6 @@ public class ElasticServiceImpl implements ElasticService {
         try {
             if (client == null) {
                 client = new RestHighLevelClient(RestClient.builder(new HttpHost(host, port, "http")));
-            }
-
-            if (cleanOnStartup) {
-                empty();
             }
 
         } catch (Exception e) {
@@ -230,6 +206,7 @@ public class ElasticServiceImpl implements ElasticService {
 
     @Override
     public void deleteAll() {
+        // TODO implement
 //        try {
 //            BulkByScrollResponse response = DeleteByQueryAction.INSTANCE.newRequestBuilder(client.)
 //                    .filter(QueryBuilders.matchQuery("gender", "male"))
@@ -338,15 +315,6 @@ public class ElasticServiceImpl implements ElasticService {
         return new ElasticSearchQuery(clazz);
     }
 
-    @Override
-    public void empty() {
-        try {
-            log.debug("[void : (" + coreName + ")empty]:EMPTY : ");
-            deleteAll();
-        } catch (Exception e) {
-            log.error("[ void: (" + coreName + ")empty ]: IOException empty index: " + e.getMessage(), e);
-        }
-    }
 
     @Override
     public void destroy() throws IOException {

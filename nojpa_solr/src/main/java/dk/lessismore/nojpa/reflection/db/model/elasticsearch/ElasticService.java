@@ -9,8 +9,4 @@ import org.apache.solr.client.solrj.SolrClient;
 public interface ElasticService extends NoSQLService {
 
 
-    void setCleanOnStartup(boolean cleanOnStartup);
-
-    void startup();
-
 }

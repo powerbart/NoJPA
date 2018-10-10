@@ -17,23 +17,6 @@ import java.util.Locale;
  */
 public interface SolrService extends NoSQLService {
 
-
-    SolrClient getServerClient();
-//    SolrClient getServer();
-//
-//    String getName();
-//
-//    void index(SolrInputDocument solrInputDocument);
     QueryResponse query(SolrQuery query);
-//    NamedList<Object> request(SolrRequest req);
-//    <T> T getByID(String unTransTextSHA, Class<T> type);
-//
-//    void commit();
-//    void optimize();
-//    void delete(String id);
-//    void empty();
-//    void destroy() throws IOException;
-//    void deleteAll();
-    void setCleanOnStartup(boolean cleanOnStartup);
 
 }

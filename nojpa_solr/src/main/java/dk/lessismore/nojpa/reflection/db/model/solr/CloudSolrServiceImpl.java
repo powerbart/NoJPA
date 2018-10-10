@@ -2,11 +2,9 @@ package dk.lessismore.nojpa.reflection.db.model.solr;
 
 import dk.lessismore.nojpa.db.methodquery.NQL;
 import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLResponse;
-import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
-import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.util.NamedList;
 import org.slf4j.Logger;
@@ -33,17 +31,21 @@ public class CloudSolrServiceImpl extends SolrServiceImpl {
         log.info("[ : constructor]:HIT:zkHost({}) collectionName({})", zkHost, collectionName);
         this.zkHost = zkHost;
         this.collectionName = collectionName;
+        startup();
     }
 
+    @Override
     public void startup() {
         log.debug("[void : zkHost (" + zkHost + ")startup]:HIT: " + this);
         try {
-            server = new CloudSolrClient.Builder().withZkHost(zkHost).build(); // TODO add collectionName here somehow
+            server = new CloudSolrClient.Builder().withZkHost(zkHost).build();
+            ((CloudSolrClient) server).setDefaultCollection(collectionName);
         } catch (Exception e) {
             log.error("[ void: (" + zkHost + ")startup ]: exception constructing embedded server: " + e.getMessage(), e);
         }
     }
 
+    @Override
     @PreDestroy
     public void destroy() throws IOException {
         log.debug("closing down solr [{}]", getName());
@@ -91,6 +93,7 @@ public class CloudSolrServiceImpl extends SolrServiceImpl {
         return null;
     }
 
+    @Override
     public void index(SolrInputDocument solrInputDocument) {
         if (solrInputDocument == null) {
             log.error("index()::solrInputDocument is null");
@@ -120,21 +123,8 @@ public class CloudSolrServiceImpl extends SolrServiceImpl {
     @Override
     public void deleteAll() {
         try {
-            server.deleteByQuery(collectionName, "*:*");
-        } catch (SolrServerException e) {
-            log.error("[ void: (" + collectionName + ")deleteAll index: " + e.getMessage(), e);
-        } catch (IOException e) {
-            log.error("[ void: (" + collectionName + ")deleteAll index: " + e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public void empty() {
-        try {
             server.deleteByQuery(collectionName, "*:*", AUTO_COMMIT_MS);
-        } catch (SolrServerException e) {
-            log.error("[ void: (" + collectionName + ")deleteAll index: " + e.getMessage(), e);
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("[ void: (" + collectionName + ")deleteAll index: " + e.getMessage(), e);
         }
     }
