@@ -233,7 +233,7 @@ public class SQLStatementExecutor {
 //                log.debug("ZZZZZZZZZZ toReturn("+ toReturn +"), resultSet("+ resultSet +"), toReturn("+ toReturn +"), toReturn.getResultSet("+ ( toReturn != null ? toReturn.getResultSet() : null ) +")");
             return toReturn;
         } catch (Exception e) {
-            log.error("query sql execution failed \nstmt=" + sqlStatement, e);
+            log.info("query sql execution failed \nstmt=" + sqlStatement + " GOT " + e);
             try {
                 ConnectionPoolFactory.getPool().addNew();
                 close(resultSet, statement, connection);
@@ -248,7 +248,7 @@ public class SQLStatementExecutor {
                 ConnectionPoolFactory.getPool().putBackInPool(connection);
                 return toReturn;
             } catch (Exception ex) {
-                log.error("Some error in doQuery " + e.toString());
+                log.error("Error in 2. attempt of doQuery " + e, e);
                 try {
                     ConnectionPoolFactory.getPool().addNew();
                     close(resultSet, statement, connection);
