@@ -15,7 +15,7 @@
 
 
     <properties>
-        <solr.version>6.6.0</solr.version>
+        <solr.version>6.6.5</solr.version>
     </properties>
 
     <dependencies>
