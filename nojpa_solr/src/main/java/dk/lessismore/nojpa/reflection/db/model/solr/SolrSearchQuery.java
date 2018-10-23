@@ -55,7 +55,6 @@ public class SolrSearchQuery extends NQL.SearchQuery{
             return builder.toString();
 
         } else if(expression.getClass().equals(NQL.NoSQLExpression.class)){
-            StringBuilder builder = new StringBuilder();
             String solrAttributeName = NQL.createFinalSolrAttributeName(expression.getJoints(), expression.getAttr());
             String boostQuery = "";
             String otherFunctions = " ";
@@ -69,6 +68,9 @@ public class SolrSearchQuery extends NQL.SearchQuery{
             }
             if (expression.getValue() == null) {
                 return otherFunctions;
+            }
+            if (expression.getRaw() != null) {
+                return  "(" +  expression.getRaw() +")";
             }
 
             String statementValue = null;

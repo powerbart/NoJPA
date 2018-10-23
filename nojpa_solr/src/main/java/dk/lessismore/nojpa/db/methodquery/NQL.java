@@ -1258,6 +1258,7 @@ public class NQL {
         protected boolean isNull = false;
         protected boolean isEnum = false;
         protected boolean isRouting = false;
+        protected String raw = null;
         protected Calendar from = null;
         protected Calendar to = null;
         protected List<Pair<Class, String>> joints;
@@ -1331,7 +1332,12 @@ public class NQL {
         }
         public NoSQLExpression addConstrain(String query) {
             log.trace("addConstrain:("+ query+")");
+            raw = query;
             return this;
+        }
+
+        public String getRaw() {
+            return raw;
         }
 
         public boolean isRouting() {
