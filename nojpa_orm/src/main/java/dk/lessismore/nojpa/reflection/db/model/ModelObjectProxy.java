@@ -1058,9 +1058,19 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
     }
 
 
-    protected void makesDirtyForAssociation(Calendar value1, Calendar value2, String fieldName) {
-        if (value1 != value2 || (value1 != null && value2 != null && value1.getTimeInMillis() != value2.getTimeInMillis())) {
-            isDirty = true;
+    protected void makesDirtyForAssociation(Calendar obj1, Calendar obj2, String fieldName) {
+        if (!isDirty && !isNew) {
+            if (obj1 == null) {
+                if (obj2 != null) {
+                    isDirty = true;
+                }
+            } else if (obj2 == null) {
+                isDirty = true;
+            } else {
+                if (obj1.getTimeInMillis() != obj2.getTimeInMillis()) {
+                    isDirty = true;
+                }
+            }
         }
     }
 

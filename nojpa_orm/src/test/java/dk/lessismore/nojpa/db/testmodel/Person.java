@@ -14,6 +14,12 @@ import java.util.Locale;
 public interface Person extends ModelObjectInterface {
 
 
+    public enum SEX { MALE, FEMALE, NEW_SHIT }
+
+
+    SEX getSex();
+    void setSex(SEX sex);
+
     @Default (value = "MyName")
     @IndexField
     @SearchField()

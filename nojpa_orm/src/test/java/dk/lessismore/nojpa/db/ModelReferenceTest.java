@@ -10,6 +10,11 @@ import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
 import org.junit.Test;
 import org.junit.BeforeClass;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
 import static org.junit.Assert.*;
 
 public class ModelReferenceTest {
@@ -25,6 +30,63 @@ public class ModelReferenceTest {
     }
 
 
+
+    @Test
+    public void getFunTestWithDirty() throws ParseException {
+        Person person = ModelObjectService.create(Person.class);
+        person.setName("John");
+
+        SimpleDateFormat xmlDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); //2011-11-28T18:30:30Z
+
+        Calendar b1 = Calendar.getInstance();
+        Date d = new Date();
+        b1.setTime(xmlDateFormat.parse("2012-12-12 12:12:12"));
+        Calendar b2 = Calendar.getInstance();
+        b2.setTime(xmlDateFormat.parse("2012-12-12 12:12:12"));
+
+        person.setBirthDate(b1);
+
+        Car car = ModelObjectService.create(Car.class);
+        car.setBrand("Ford Taunus");
+        Car alfa = ModelObjectService.create(Car.class);
+        alfa.setBrand("Alpha");
+        save(alfa);
+
+        Person female = ModelObjectService.create(Person.class);
+        female.setName("Ina");
+        female.setCar(alfa);
+        System.out.println("Ina.isDirty:  ........ " + (female.isDirty() || female.isNew()));
+        System.out.println("Alfa.isDirty:  ........ " + (alfa.isDirty() || alfa.isNew()));
+
+
+
+        person.setCar(car);
+
+        person.setSex( Person.SEX.MALE);
+
+        save(person);
+
+
+        person.setBirthDate(b2);
+
+
+        car.setBrand("Ford Taunus2");
+        person.setCar(car);
+        person.setName("John");
+        person.setSex( Person.SEX.MALE);
+
+
+        System.out.println("Person.isDirty:  ........ " + (person.isDirty() || person.isNew()));
+        System.out.println("Car.isDirty:  ........ " + (car.isDirty() || car.isNew()));
+        System.out.println(" ........ " + b1.getTimeInMillis());
+        System.out.println(" ........ " + b2.getTimeInMillis());
+
+
+        save(person);
+
+//        ObjectCacheFactory.getInstance().getObjectCache(Person.class).removeFromCache(person.getObjectID());
+
+    }
 
     @Test
     public void getAfterSetTest() {
