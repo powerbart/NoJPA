@@ -89,6 +89,38 @@ public class ModelReferenceTest {
     }
 
     @Test
+    public void getFunTestWithDirty2() throws ParseException {
+
+        Car alfa = ModelObjectService.create(Car.class);
+        alfa.setBrand("Alpha");
+        save(alfa);
+
+        Person female = ModelObjectService.create(Person.class);
+        female.setName("Ina");
+        female.setCar(alfa);
+        save(female);
+
+
+
+        female.setCar(alfa);
+
+
+
+
+        System.out.println("Ina.isDirty:  ........ " + (female.isDirty() || female.isNew()));
+        System.out.println("Alfa.isDirty:  ........ " + (alfa.isDirty() || alfa.isNew()));
+
+
+
+        assertFalse(female.isDirty());
+
+
+
+//        ObjectCacheFactory.getInstance().getObjectCache(Person.class).removeFromCache(person.getObjectID());
+
+    }
+
+    @Test
     public void getAfterSetTest() {
         Person person = ModelObjectService.create(Person.class);
         person.setName("John");
