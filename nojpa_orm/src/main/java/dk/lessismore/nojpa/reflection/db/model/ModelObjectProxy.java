@@ -583,6 +583,7 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
             if (associationPrimaryKey != null && !associationPrimaryKey.equals("null")) {
 //                log.debug("getAssociation :: getting singleAssociationsIDs - has hashKey " + associationPrimaryKey);
                 toReturn = DbObjectReader.readObjectFromDb(associationPrimaryKey, dbAttribute.getAttributeClass());
+                // TODO don't forget singleAssociations.put here
             } else {
 //                log.debug("getAssociation :: getting singleAssociation - DONT HAVE hashKey " + fieldName + " in " + this);
             }
