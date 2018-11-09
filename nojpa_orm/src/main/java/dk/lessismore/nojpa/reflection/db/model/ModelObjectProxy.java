@@ -985,7 +985,7 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
                 isDirty = true;
             } else {
 //                if (!obj1.equals(obj2)) {
-                if (! (obj1 == obj2)) { // Compare by reference! See ModelReferenceTest
+                if (! (obj1 == obj2 || ((ModelObject) obj1).equalsRef((ModelObject) obj2))) { // Compare by reference! See ModelReferenceTest
                     isDirty = true;
                 }
             }
@@ -1139,6 +1139,10 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
     /**
      * Implementes the equals - metode.
      */
+    public boolean equalsRef(ModelObject obj) {
+        return obj != null && obj.getProxyObject() == proxyObject;
+    }
+
     public boolean equals(Object obj) {
         return obj != null && obj.toString().equals(this.toString());
     }

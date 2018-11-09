@@ -100,7 +100,21 @@ public class ModelReferenceTest {
         female.setCar(alfa);
         save(female);
 
+        Car f1 = female.getCar();
+        Car f2 = female.getCar();
+        Car f3 = female.getCar();
+        Car f4 = female.getCar();
+        System.out.println("...");
 
+        System.out.println("f1.isDirty() = " + f1.isDirty());
+        System.out.println("f2.isDirty() = " + f2.isDirty());
+        System.out.println("f3.isDirty() = " + f3.isDirty());
+        System.out.println("f4.isDirty() = " + f4.isDirty());
+        f1.setBrand("asdadsads");
+        System.out.println("f1.isDirty() = " + f1.isDirty());
+        System.out.println("f2.isDirty() = " + f2.isDirty());
+        System.out.println("f3.isDirty() = " + f3.isDirty());
+        System.out.println("f4.isDirty() = " + f4.isDirty());
 
         female.setCar(alfa);
 
@@ -110,6 +124,14 @@ public class ModelReferenceTest {
         System.out.println("Ina.isDirty:  ........ " + (female.isDirty() || female.isNew()));
         System.out.println("Alfa.isDirty:  ........ " + (alfa.isDirty() || alfa.isNew()));
 
+
+        System.out.println("....");
+        System.out.println("....");
+        System.out.println("....");
+        System.out.println("....");
+        System.out.println("....");
+        System.out.println("....");
+        System.out.println("....");
 
 
         assertFalse(female.isDirty());

@@ -84,6 +84,8 @@ public interface ModelObject extends Serializable, ModelObjectInterface, Compara
      */
     public boolean equals(Object obj);
 
+    public boolean equalsRef(ModelObject obj);
+
     /**
      * Implementes the toString - metode. DO NOT Attemt to overload this !!
      */
