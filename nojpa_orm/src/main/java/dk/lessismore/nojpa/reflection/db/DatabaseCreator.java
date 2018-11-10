@@ -484,7 +484,10 @@ public class DatabaseCreator {
 		}
         for (SQLStatement sqlStatement : tables) {
             String tableStr = sqlStatement.makeStatement();
-            SQLStatementExecutor.doUpdate(tableStr);
+            boolean update = SQLStatementExecutor.doUpdate(tableStr);
+            if(!update){
+                throw new RuntimeException("Failed to create database... Please find the issue ;-) ");
+            }
         }
         log.debug("********* re/createDatabase ********************* - DONE");
     }
