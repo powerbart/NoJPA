@@ -158,7 +158,7 @@ public class ResourcePool {
     static long waiting_global = 0;
     public Object getFromPool() {
         synchronized (log) {
-            log.debug("getFromPool " + _resourceFactory.debugName());
+//            log.debug("getFromPool " + _resourceFactory.debugName());
             try {
                 //log.debug("getFromPool:2");
                 int countOfWait = 0;
@@ -201,7 +201,7 @@ public class ResourcePool {
      */
     public void putBackInPool(Object poolObj) {
 	//notifyAll();
-	log.debug("putBackInPool " + _resourceFactory.debugName());
+//	log.debug("putBackInPool " + _resourceFactory.debugName());
         _pool.push(poolObj);
         try{
             synchronized (log) {

@@ -5,6 +5,7 @@ import dk.lessismore.nojpa.masterworker.messages.observer.ObserverWorkerMessage;
 import dk.lessismore.nojpa.net.Server;
 import dk.lessismore.nojpa.net.link.ServerLink;
 import dk.lessismore.nojpa.properties.PropertiesProxy;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,11 +50,13 @@ public class WorkerPool {
             return null;
         }
         WorkerEntry stepEntry = null;
+        boolean allFull = true;
         for (WorkerEntry entry: pool.values()) {
             if (!entry.available()) {
 //                    log.debug("Worker("+ entry +") not available: " + inapplicableReason);
                 continue;
             }
+            allFull = false;
             if (entry.knownClasses.contains(executorClass)) {
                 if (stepEntry == null || entry.lastIdleStart < stepEntry.lastIdleStart) {
                     if(stepEntry != null){
@@ -62,11 +65,17 @@ public class WorkerPool {
                     stepEntry = entry;
                 }
             }
-
         }
 
         if (stepEntry == null) {
             log.warn("No available or compatible worker in pool(size:"+ pool.size() +") for executor: "+executorClass);
+
+            //Will print de available workers
+            if(!allFull){
+                for (WorkerEntry entry: pool.values()) {
+                    log.debug("No-match of executorClass("+ executorClass +") in " + StringUtils.join(entry.knownClasses, ", "));
+                }
+            }
         }
         return stepEntry;
     }
@@ -251,7 +260,8 @@ public class WorkerPool {
                     "{" + rightAlign(""+ myID +"", 10)
                             + rightAlign(""+ idle, 8)
                             + rightAlign(""+ printNice(systemLoad), 8)
-                            + rightAlign(""+ (serverLink.getLinkID()) + " "+ ("" + (debugNameOfWorker != null && debugNameOfWorker.length() > 7 ? debugNameOfWorker : serverLink.getOtherHost())), 42)
+                            + rightAlign(""+ (serverLink.getLinkID()) + " "+ ("" + (debugNameOfWorker != null && debugNameOfWorker.length() > 7 ? debugNameOfWorker : serverLink.getOtherHost())), 72)
+                            + rightAlign(""+ (serverLink.getOtherHost()), 32)
                             + rightAlign(""+ printNice(getWorkLoad()), 8)
                             + rightAlign(""+ (getJobTime()), 8)
                             + rightAlign(""+ (getIdleTime()), 8)
@@ -271,7 +281,8 @@ public class WorkerPool {
                     "{" + rightAlign("Worker No", 10)
                             + rightAlign("idle", 8)
                             + rightAlign("Load", 8)
-                            + rightAlign("Name", 42)
+                            + rightAlign("Name", 72)
+                            + rightAlign("Host", 32)
                             + rightAlign("Load%", 8)
                             + rightAlign("JobT", 8)
                             + rightAlign("IdleT", 8)
