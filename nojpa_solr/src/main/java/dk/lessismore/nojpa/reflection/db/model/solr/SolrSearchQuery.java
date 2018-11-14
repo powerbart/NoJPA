@@ -66,11 +66,11 @@ public class SolrSearchQuery extends NQL.SearchQuery{
                     otherFunctions += " " + noSQLFunction;
                 }
             }
-            if (expression.getValue() == null) {
-                return otherFunctions;
-            }
             if (expression.getRaw() != null) {
                 return  "(" +  expression.getRaw() +")";
+            }
+            if (expression.getValue() == null) {
+                return otherFunctions;
             }
 
             String statementValue = null;
