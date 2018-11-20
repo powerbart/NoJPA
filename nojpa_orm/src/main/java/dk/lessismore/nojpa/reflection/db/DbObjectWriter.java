@@ -488,7 +488,7 @@ public class DbObjectWriter {
      * @param associations         The associations.
      */
     private static boolean updateAssociationTable(ModelObject modelObject, DbAttributeContainer dbAttributeContainer, DbAttribute dbAttribute, Object[] associations) {
-        if (modelObject.isNew() || associations == null || associations.length < 10 || !(associations instanceof ModelObjectInterface[])) {
+        if (modelObject.isNew() || associations == null || associations.length < 1 || !(associations instanceof ModelObjectInterface[])) {
             //log.debug("updateAssociationTable old !! ");
 //            boolean successfull = modelObject.isNew() || deleteAssociations(modelObject.getPrimaryKeyValue(), dbAttributeContainer, dbAttribute);
             boolean successfull = deleteAssociations(modelObject.getPrimaryKeyValue(), dbAttributeContainer, dbAttribute);
