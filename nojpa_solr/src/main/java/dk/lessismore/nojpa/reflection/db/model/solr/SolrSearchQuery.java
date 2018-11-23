@@ -123,6 +123,9 @@ public class SolrSearchQuery extends NQL.SearchQuery{
             NQL.NoSQLExpression expression = constraint.getExpression();
             String subQuery = buildSubQuery(expression);
             if (subQuery != null) {
+                if(builder.length() > 1){
+                    builder.append(" AND ");
+                }
                 builder.append(subQuery);
             }
         }
