@@ -4,7 +4,6 @@ import dk.lessismore.nojpa.cache.ObjectCacheFactory;
 import dk.lessismore.nojpa.db.methodquery.MQL;
 import dk.lessismore.nojpa.db.methodquery.NList;
 import dk.lessismore.nojpa.db.methodquery.NQL;
-import dk.lessismore.nojpa.db.methodquery.NStats;
 import dk.lessismore.nojpa.db.testmodel.*;
 import dk.lessismore.nojpa.reflection.db.DatabaseCreator;
 import dk.lessismore.nojpa.reflection.db.DbObjectVisitor;

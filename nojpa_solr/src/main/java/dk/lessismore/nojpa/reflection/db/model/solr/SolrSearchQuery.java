@@ -1,25 +1,30 @@
 package dk.lessismore.nojpa.reflection.db.model.solr;
 
 import dk.lessismore.nojpa.db.methodquery.NQL;
+import dk.lessismore.nojpa.utils.Pair;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.List;
 import java.util.TimeZone;
+
+import static dk.lessismore.nojpa.db.methodquery.NQL.makeAttributeIdentifier;
 
 public class SolrSearchQuery extends NQL.SearchQuery{
 
     private static final Logger log = LoggerFactory.getLogger(SolrSearchQuery.class);
 
-
+    boolean addStats = false;
     SolrQuery solrQuery;
 
     public SolrSearchQuery(Class selectClass) {
         super(selectClass);
         solrQuery = new SolrQuery();
     }
+
 
     public SolrQuery getSolrQuery() {
         return solrQuery;
@@ -148,6 +153,16 @@ public class SolrSearchQuery extends NQL.SearchQuery{
             solrQuery.addSort(this.orderByAttribute, this.orderByORDER == NQL.Order.ASC ? SolrQuery.ORDER.asc : SolrQuery.ORDER.desc);
         }
     }
+
+
+
+
+
+
+
+
+
+
 
     @Override
     protected String toStringDebugQuery() {

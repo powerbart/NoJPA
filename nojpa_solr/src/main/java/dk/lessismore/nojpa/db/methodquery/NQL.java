@@ -117,6 +117,10 @@ public class NQL {
         protected int startLimit = -1;
         protected int endLimit = -1;
         protected String preBoost = null;
+        protected boolean addStats = false;
+        protected List<String> statsAttributeIdentifier = new ArrayList<>();
+
+
 
         public SearchQuery(Class<T> selectClass) {
             this.selectClass = selectClass;
@@ -297,6 +301,27 @@ public class NQL {
         public long getCount() {
             return limit(1).getList().getNumberFound();
         }
+
+
+
+
+
+        public <N extends Number> void addStats(N variable){
+            addStats = true;
+            List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
+            Pair<Class, String> pair = getSourceAttributePair();
+            String attributeIdentifier = makeAttributeIdentifier(pair);
+            statsAttributeIdentifier.add(attributeIdentifier);
+            NQL.clearMockCallSequence();
+        }
+
+
+
+
+
+
+
+
 
 //        public <N> List<Pair<String, Long>> getCloud(N variable, int limit) {
 //            List<Pair<String, Long>> toReturn = new ArrayList<Pair<String, Long>>();
