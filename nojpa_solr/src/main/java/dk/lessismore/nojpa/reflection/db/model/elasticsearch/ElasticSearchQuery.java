@@ -40,6 +40,11 @@ public class ElasticSearchQuery extends NQL.SearchQuery{
         queryBuilder = new SearchSourceBuilder();
     }
 
+    @Override
+    public void addStats(Number variable) {
+        //TODO: Will make this in the future ...
+    }
+
     public String getRouting() {
         return routing;
     }

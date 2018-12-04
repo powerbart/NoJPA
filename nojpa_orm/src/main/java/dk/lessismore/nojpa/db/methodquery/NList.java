@@ -10,4 +10,11 @@ import java.util.List;
  */
 public interface NList<C extends ModelObjectInterface> extends List<C> {
     long getNumberFound();
+
+
+    <N extends Number> NStats<N> getStats(N variable);
+
+
+
+
 }
