@@ -118,7 +118,10 @@ public class NQL {
         protected int endLimit = -1;
         protected String preBoost = null;
         protected boolean addStats = false;
+        protected boolean addFacets = false;
+        protected int facetLimit = 10;
         protected List<String> statsAttributeIdentifier = new ArrayList<>();
+        protected List<String> facetAttributeIdentifier = new ArrayList<>();
 
 
 
@@ -306,13 +309,27 @@ public class NQL {
 
 
 
-        public <N extends Number> void addStats(N variable){
+        public <N extends Number> SearchQuery<T> addStats(N variable){
             addStats = true;
             List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
             Pair<Class, String> pair = getSourceAttributePair();
-            String attributeIdentifier = makeAttributeIdentifier(pair);
+            String shortName = makeAttributeIdentifier(pair);
+            String attributeIdentifier = createFinalSolrAttributeName(joints, shortName);
             statsAttributeIdentifier.add(attributeIdentifier);
             NQL.clearMockCallSequence();
+            return this;
+        }
+
+        public SearchQuery<T> addFacet(Object variable, int facetLimit){
+            addFacets = true;
+            this.facetLimit = facetLimit;
+            List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
+            Pair<Class, String> pair = getSourceAttributePair();
+            String shortName = makeAttributeIdentifier(pair);
+            String attributeIdentifier = createFinalSolrAttributeName(joints, shortName);
+            facetAttributeIdentifier.add(attributeIdentifier);
+            NQL.clearMockCallSequence();
+            return this;
         }
 
 
@@ -628,14 +645,25 @@ public class NQL {
         }
 
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-//            log.debug("RListImpl::Calling " + method.getName() + "()");
             String methodName = method.getName();
             if (methodName.equals("getNumberFound")) {
                 return queryResponse.getNumFound();
+            } else if (methodName.equals("getStats")) {
+                List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
+                Pair<Class, String> pair = getSourceAttributePair();
+                String attributeIdentifier = makeAttributeIdentifier(pair);
+                NQL.clearMockCallSequence();
+                return queryResponse.getStats(attributeIdentifier);
+            } else if (methodName.equals("getFacet")) {
+                List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
+                Pair<Class, String> pair = getSourceAttributePair();
+                String solrName = makeAttributeIdentifier(pair);
+                String attributeIdentifier = createFinalSolrAttributeName(joints, solrName);
+                NQL.clearMockCallSequence();
+                return queryResponse.getFacet(attributeIdentifier);
             }
             return method.invoke(resultList, args);
         }
-
     }
 
 
@@ -892,6 +920,11 @@ public class NQL {
     public static <M extends ModelObjectInterface> Constraint has(M mockValue, Comp comp, M model) {
         List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
         Pair<Class, String> pair = getSourceAttributePair();
+
+        String solrName = makeAttributeIdentifier(pair);
+        String sortByAttributeName = createFinalSolrAttributeName(joints, solrName);
+
+
         clearMockCallSequence();
         NoSQLExpression expression;
         if (model instanceof MockExtra) {
@@ -1233,14 +1266,18 @@ public class NQL {
         if(joints == null || joints.isEmpty()){
             return attr;
         } else {
+            boolean isMultiAss = false;
             String attributeName = "";
             for(int i = 0; i < joints.size(); i++){
                 Pair<Class, String> classStringPair = joints.get(i);
                 DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(classStringPair.getFirst());
                 DbAttribute dbAttribute = dbAttributeContainer.getDbAttribute(classStringPair.getSecond());
+                if(dbAttribute.isMultiAssociation()){
+                    isMultiAss = true;
+                }
                 attributeName = dbAttribute.getSolrAttributeName(attributeName);
             }
-            return attributeName + attr + (attributeName.contains("_ARRAY") ? "_ARRAY" : "");
+            return attributeName + attr + (isMultiAss ? "_ARRAY" : "");
         }
     }
 

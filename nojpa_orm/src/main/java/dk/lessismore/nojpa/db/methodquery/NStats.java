@@ -37,4 +37,28 @@ public class NStats<N extends Number> {
     public Double getStddev() {
         return stddev;
     }
+
+    public void setMin(Double min) {
+        this.min = min;
+    }
+
+    public void setMax(Double max) {
+        this.max = max;
+    }
+
+    public void setSum(Double sum) {
+        this.sum = sum;
+    }
+
+    public void setCount(Long count) {
+        this.count = count;
+    }
+
+    public void setMean(Double mean) {
+        this.mean = mean;
+    }
+
+    public void setStddev(Double stddev) {
+        this.stddev = stddev;
+    }
 }

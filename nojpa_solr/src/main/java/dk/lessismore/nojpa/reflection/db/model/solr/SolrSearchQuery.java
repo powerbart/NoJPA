@@ -17,7 +17,6 @@ public class SolrSearchQuery extends NQL.SearchQuery{
 
     private static final Logger log = LoggerFactory.getLogger(SolrSearchQuery.class);
 
-    boolean addStats = false;
     SolrQuery solrQuery;
 
     public SolrSearchQuery(Class selectClass) {
@@ -142,6 +141,18 @@ public class SolrSearchQuery extends NQL.SearchQuery{
                 query = preBoost + " " + query;
             }
         }
+        if(addStats){
+            String[] statsFields = (String[]) statsAttributeIdentifier.toArray(new String[0]);
+            solrQuery.addGetFieldStatistics(statsFields);
+        }
+        if(addFacets){
+            String[] facetFields = (String[]) facetAttributeIdentifier.toArray(new String[0]);
+            solrQuery.addFacetField(facetFields);
+            if(facetLimit > 0) {
+                solrQuery.setFacetLimit(facetLimit);
+            }
+        }
+
         log.debug("We will query = " + query);
         solrQuery.setQuery(query);
         if (startLimit != -1) {

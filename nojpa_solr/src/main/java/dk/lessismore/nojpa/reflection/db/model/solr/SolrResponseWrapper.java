@@ -1,7 +1,15 @@
 package dk.lessismore.nojpa.reflection.db.model.solr;
 
+import dk.lessismore.nojpa.db.methodquery.NStats;
 import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLResponse;
+import dk.lessismore.nojpa.utils.Pair;
+import org.apache.solr.client.solrj.response.FacetField;
+import org.apache.solr.client.solrj.response.FieldStatsInfo;
 import org.apache.solr.client.solrj.response.QueryResponse;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class SolrResponseWrapper implements NoSQLResponse {
 
@@ -30,4 +38,46 @@ public class SolrResponseWrapper implements NoSQLResponse {
     public Object getRaw(int i) {
         return query.getResults().get(i);
     }
+
+    @Override
+    public <N extends Number> NStats<N> getStats(String attributeIdentifier) {
+        NStats<N> nStats = new NStats<N>();
+        Map<String, FieldStatsInfo> fieldStatsInfo = this.query.getFieldStatsInfo();
+
+        FieldStatsInfo sInfo = fieldStatsInfo.get(attributeIdentifier);
+        if(sInfo == null){
+            return nStats;
+        }
+        nStats.setMin((Double) sInfo.getMin());
+        nStats.setMax((Double) sInfo.getMax());
+        nStats.setSum((Double) sInfo.getSum());
+        nStats.setCount(sInfo.getCount());
+        nStats.setMean((Double) sInfo.getMean());
+        nStats.setStddev((Double) sInfo.getStddev());
+
+        return nStats;
+
+    }
+
+    @Override
+    public List<Pair<String, Long>> getFacet(String attributeIdentifier) {
+
+        List<Pair<String, Long>> toReturn = new ArrayList<Pair<String, Long>>();
+
+        List<FacetField> facetFields = this.query.getFacetFields();
+        for(int i = 0; i < facetFields.size(); i++){
+            FacetField facetField = facetFields.get(i);
+            String name = facetField.getName();
+            if(name.equals(attributeIdentifier)){
+                for (FacetField.Count facet : facetField.getValues()) {
+                    toReturn.add(new Pair<>(facet.getName(), facet.getCount()));
+                }
+
+            }
+        }
+
+        return toReturn;
+    }
+
+
 }

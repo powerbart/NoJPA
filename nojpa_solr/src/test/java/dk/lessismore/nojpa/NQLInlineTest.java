@@ -32,7 +32,7 @@ public class NQLInlineTest {
 
                 )
 
-        ).getFirst();
+        ).addStats(mock.getZip()).getFirst();
 
 
 //        System.out.println("inline query: " + NQL.search(mock).search(mock.getA().getFunnyD(), NQL.Comp.EQUAL, 0.1d).());

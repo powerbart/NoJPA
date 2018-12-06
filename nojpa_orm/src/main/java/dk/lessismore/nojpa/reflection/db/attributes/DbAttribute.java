@@ -241,7 +241,10 @@ public class DbAttribute implements Serializable {
     }
 
     public String getSolrAttributeName(String prefix){
-        String solrAttributeName = (prefix != null && prefix.length() > 0 ? prefix : "") + getTableName() + (getAttributeName().equals("objectID") ? "" : "_" + getAttributeName()) + "__" + (attribute.getSearchFieldAnnotation() != null && attribute.getSearchFieldAnnotation().dynamicSolrPostName() != null && attribute.getSearchFieldAnnotation().dynamicSolrPostName().length() > 1 ? attribute.getSearchFieldAnnotation().dynamicSolrPostName() :  toDefaultSolrType());
+        String solrAttributeName =
+                (prefix != null && prefix.length() > 0 ? prefix : "") +
+                getTableName() +
+                (getAttributeName().equals("objectID") ? "" : "_" + getAttributeName()) + "__" + (attribute.getSearchFieldAnnotation() != null && attribute.getSearchFieldAnnotation().dynamicSolrPostName() != null && attribute.getSearchFieldAnnotation().dynamicSolrPostName().length() > 1 ? attribute.getSearchFieldAnnotation().dynamicSolrPostName() :  toDefaultSolrType());
         return solrAttributeName;
     }
 
