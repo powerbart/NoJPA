@@ -22,7 +22,7 @@ public class ModelReferenceTest {
     @BeforeClass
     public static void initDatabase() {
         InitTestDatabase.initPlanetExpress();
-        InitTestDatabase.createTestData();
+//        InitTestDatabase.createTestData();
     }
 
     private static void save(ModelObjectInterface o){

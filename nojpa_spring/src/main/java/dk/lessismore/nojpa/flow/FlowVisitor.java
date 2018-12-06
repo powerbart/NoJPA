@@ -134,11 +134,19 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
 
     }
 
+    // what's the query to execute
     public abstract MQL.SelectQuery<T> query();
 
+    // Take always the first page (query will be limit 0, getSplitLimitSize();
     public abstract boolean startFromBeginning();
+
+    // process the row
     public abstract void doWork(T t);
+
+    // cleanup, maybe kill the thing
     public abstract void close();
+
+    // the flow will visit that much rows
     public abstract int getTotalCount();
 
 }
