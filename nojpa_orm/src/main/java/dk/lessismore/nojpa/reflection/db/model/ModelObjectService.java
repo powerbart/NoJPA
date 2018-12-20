@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 
 public class ModelObjectService {
 
@@ -131,6 +133,28 @@ public class ModelObjectService {
         return (M[]) arrayList.toArray((M[]) java.lang.reflect.Array.newInstance(
                 interfaceClass,
                 arrayList.size()));
+    }
+
+
+
+    public static <M extends ModelObjectInterface> M[] removeDoubles(
+            M[] array,
+            Class interfaceClass) {
+
+        if (array == null || array.length == 0) {
+            return array;
+        }
+
+        HashMap<String, M> map = new HashMap<>();
+
+        for(int i = 0; i < array.length; i++){
+            map.put(array[i].getObjectID(), array[i]);
+        }
+
+        Collection<M> values = map.values();
+        return (M[]) values.toArray((M[]) java.lang.reflect.Array.newInstance(
+                interfaceClass,
+                values.size()));
     }
 
 
