@@ -302,7 +302,7 @@ public class AttributeContainer {
         }
 
 
-        if(attribute.getAttributeClass().isEnum()){
+        if(attribute.getAttributeClass().isEnum() && !attribute.isArray()){
             if(value == null){
                 attribute.setAttributeValuePlain(objectToSetOn, null);
             } else {

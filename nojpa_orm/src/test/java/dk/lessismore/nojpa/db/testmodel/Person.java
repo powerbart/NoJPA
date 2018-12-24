@@ -6,6 +6,7 @@ import dk.lessismore.nojpa.reflection.db.annotations.IndexField;
 import dk.lessismore.nojpa.reflection.db.annotations.SearchField;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 
+import javax.persistence.Column;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.Calendar;
 import java.util.Locale;
@@ -25,6 +26,12 @@ public interface Person extends ModelObjectInterface {
     @SearchField()
     String getName();
     void setName(String name);
+
+
+    @Column(length = 512)
+    SEX[] getPartners();
+    void setPartners(SEX[] partners);
+
 
     @SearchField()
     String getUrl();

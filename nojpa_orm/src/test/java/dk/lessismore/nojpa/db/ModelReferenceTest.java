@@ -7,13 +7,16 @@ import dk.lessismore.nojpa.db.testmodel.Person;
 import dk.lessismore.nojpa.db.testmodel.InitTestDatabase;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.BeforeClass;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -27,6 +30,71 @@ public class ModelReferenceTest {
 
     private static void save(ModelObjectInterface o){
         ModelObjectService.save(o);
+    }
+
+
+
+    @Test
+    public void getEnumsArray() throws ParseException {
+        {
+            Person person = ModelObjectService.create(Person.class);
+            person.setName("John");
+            person.setPartners(Person.SEX.values());
+            Assert.assertEquals(person.getPartners().length, 3);
+            person.setPartners(null);
+            Assert.assertNull(person.getPartners());
+            person.setPartners(new Person.SEX[]{Person.SEX.MALE} );
+            Assert.assertEquals(person.getPartners().length, 1);
+            save(person);
+            ObjectCacheFactory.getInstance().getObjectCache(Person.class).removeFromCache(person.getObjectID());
+        }
+        {
+            Person person = ModelObjectService.create(Person.class);
+            person.setName("John");
+            person.setPartners(Person.SEX.values());
+            save(person);
+            Assert.assertEquals(person.getPartners().length, 3);
+            person.setPartners(null);
+            save(person);
+            Assert.assertNull(person.getPartners());
+            person.setPartners(new Person.SEX[]{Person.SEX.MALE} );
+            save(person);
+            Assert.assertEquals(person.getPartners().length, 1);
+            save(person);
+            ObjectCacheFactory.getInstance().getObjectCache(Person.class).removeFromCache(person.getObjectID());
+        }
+        {
+            Person person = ModelObjectService.create(Person.class);
+            person.setName("John");
+            person.setPartners(Person.SEX.values());
+            Assert.assertEquals(person.getPartners().length, 3);
+            save(person);
+            person.setPartners(null);
+            Assert.assertNull(person.getPartners());
+            save(person);
+            person.setPartners(new Person.SEX[]{Person.SEX.MALE} );
+            Assert.assertEquals(person.getPartners().length, 1);
+            save(person);
+            ObjectCacheFactory.getInstance().getObjectCache(Person.class).removeFromCache(person.getObjectID());
+        }
+        {
+            List<Person> personList = MQL.select(Person.class).getList();
+            for(Person p : personList){
+                System.out.println( p + " -> " + Arrays.toString(p.getPartners()));
+            }
+        }
+        {
+            Person person = ModelObjectService.create(Person.class);
+            person.setName("John");
+            save(person);
+            ObjectCacheFactory.getInstance().getObjectCache(Person.class).removeFromCache(person.getObjectID());
+        }
+        {
+            List<Person> personList = MQL.select(Person.class).getList();
+            for(Person p : personList){
+                System.out.println( p + " -> " + Arrays.toString(p.getPartners()));
+            }
+        }
     }
 
 

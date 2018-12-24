@@ -22,12 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 //import dk.lessismore.reusable_v4.db.pooling.*;
 
@@ -291,7 +286,7 @@ public class DbObjectWriter {
             if(dbAttribute.getInlineAttributeName() != null){
                 Object value = dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
                 addAttributeValueToStatement(dbAttribute, insertSQLStatement, value);
-            } else if (!dbAttribute.isAssociation()) {
+            } else if (!dbAttribute.isAssociation() || (dbAttribute.getAttribute().getAttributeClass().isEnum() && dbAttribute.isMultiAssociation())) {
                 Object value = null;
                 if(attributeName.equals("lastModified")){
                     value = Calendar.getInstance();
@@ -351,6 +346,8 @@ public class DbObjectWriter {
                             } else {
                                 valueStr = converter.arrayToString((Object[]) value);
                             }
+                        } else if(dbAttribute.isMultiAssociation() && dbAttribute.getAttributeClass().isEnum() ){
+                            valueStr = Arrays.toString((Object[]) value);
                         } else {
                             valueStr = value.toString();
                         }
@@ -407,7 +404,7 @@ public class DbObjectWriter {
             String attributeName = dbAttribute.getAttributeName();
             //log.debug("saveAssociations:1:(" + attributeName + ") for " + modelObject.getClass().getSimpleName() + " ID:" + modelObject);
             //If its an association attribute.
-            if (dbAttribute.isAssociation()) {
+            if (dbAttribute.isAssociation() && !(dbAttribute.getAttribute().getAttributeClass().isEnum() && dbAttribute.isMultiAssociation())) {
 
                 if(dbAttribute.isInlineInterface()){
                     //log.debug("saveAssociations:2:(" + attributeName + ") continue ... not in cache.  for " + modelObject.getClass().getSimpleName() + " ID:" + modelObject);
@@ -631,7 +628,7 @@ public class DbObjectWriter {
             InsertSQLStatement insertSQLStatement = SQLStatementFactory.getInsertSQLStatement();
             insertSQLStatement.addTableName(associationTableName);
             insertSQLStatement.addAttributeValue(/*AssociationTable.SOURCE*/dbAttributeContainer.getAttributeContainer().getClassName() + "_" + dbAttributeContainer.getPrimaryKeyAttribute().getAttributeName(), sourceId);
-            if (!dbAttribute.isPrimitivArrayAssociation()) {
+            if (!dbAttribute.isPrimitivArrayAssociation() && !(dbAttribute.getAttribute().getAttributeClass().isEnum() && dbAttribute.isMultiAssociation())) {
                 DbAttributeContainer associationContainer = DbClassReflector.getDbAttributeContainer(association);
                 if (associationContainer != null) {
                     String targetId = associationContainer.getPrimaryKeyValue((ModelObject) association);

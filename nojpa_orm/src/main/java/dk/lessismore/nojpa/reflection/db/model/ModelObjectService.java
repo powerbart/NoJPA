@@ -8,9 +8,7 @@ import dk.lessismore.nojpa.reflection.util.ReflectionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
+import java.util.*;
 
 public class ModelObjectService {
 
@@ -106,7 +104,7 @@ public class ModelObjectService {
 
     public static <M extends ModelObjectInterface> M[] concatArrays(
             M[] array1,
-            M[] array2, Class interfaceClass) {
+            M[] array2, Class<M> interfaceClass) {
 
         if (array1 == null || array1.length == 0) {
             return array2;
@@ -129,6 +127,69 @@ public class ModelObjectService {
                 arrayList.add(array2[i]);
             }
         }
+
+        return (M[]) arrayList.toArray((M[]) java.lang.reflect.Array.newInstance(
+                interfaceClass,
+                arrayList.size()));
+    }
+
+
+    public static <M extends Enum> M[] concatArrays(
+            M[] array1,
+            M[] array2, Class<M> interfaceClass) {
+
+        if (array1 == null || array1.length == 0) {
+            return array2;
+        }
+
+        if (array2 == null || array2.length == 0) {
+            return array1;
+        }
+
+        ArrayList arrayList = new ArrayList();
+
+        for (int i = 0; i < array1.length; i++) {
+            if (!arrayList.contains(array1[i])) {
+                arrayList.add(array1[i]);
+            }
+        }
+
+        for (int i = 0; i < array2.length; i++) {
+            if (!arrayList.contains(array2[i])) {
+                arrayList.add(array2[i]);
+            }
+        }
+
+        return (M[]) arrayList.toArray((M[]) java.lang.reflect.Array.newInstance(
+                interfaceClass,
+                arrayList.size()));
+    }
+
+
+    public static <M extends Enum> M[] substractArrays(
+            M[] array1,
+            M[] array2, Class<M> interfaceClass) {
+
+        if (array1 == null || array1.length == 0) {
+            return array1;
+        }
+
+        if (array2 == null || array2.length == 0) {
+            return array1;
+        }
+
+        List arrayList = new ArrayList(Arrays.asList(array1));
+
+        for (int i = 0; i < array2.length; i++) {
+            for(int j = 0; j < arrayList.size(); j++){
+                if(arrayList.get(j).equals(array2[i])){
+                    arrayList.remove(j);
+                    break;
+                }
+            }
+
+        }
+
 
         return (M[]) arrayList.toArray((M[]) java.lang.reflect.Array.newInstance(
                 interfaceClass,

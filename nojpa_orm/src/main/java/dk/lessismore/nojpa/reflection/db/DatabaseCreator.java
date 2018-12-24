@@ -182,7 +182,7 @@ public class DatabaseCreator {
 
             if(dbAttribute.getInlineAttributeName() != null) {
                 statement.addAttribute(dbAttribute.getInlineAttributeName(), new DbDataType(dbAttribute));
-            } else if (!dbAttribute.isAssociation()) {
+            } else if (!dbAttribute.isAssociation() ||  (dbAttribute.getAttribute().getAttributeClass().isEnum() && dbAttribute.isMultiAssociation())) {
                 //This is not an association.
 
                 String attributeName = dbAttribute.getAttributeName();

@@ -24,12 +24,7 @@ import javax.persistence.Id;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.StringTokenizer;
+import java.util.*;
 
 /**
  * This dynamically implements the getters and setters as well as various other ModelObject methods.
@@ -186,6 +181,8 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
         Class<?> parameterClass = method.getParameterTypes()[0];
         if(ModelObjectInterface.class.isAssignableFrom(parameterClass)) {
             setAssociation((ModelObjectInterface) object, name);
+        } else if(Enum[].class.isAssignableFrom(parameterClass)) {
+            setAssociation((Enum[]) object, name);
         } else if(ModelObjectInterface[].class.isAssignableFrom(parameterClass)) {
             setAssociation((ModelObjectInterface[]) object, name);
         } else if(Calendar.class.isAssignableFrom(parameterClass)) {
@@ -399,9 +396,9 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
         this.isNew = isNew;
     }
 
-    private ModelObjectInterface[] getArrayFromCache(String fieldName) {
+    private Object[] getArrayFromCache(String fieldName) {
         ////log.debug("getArrayFromCache called");
-        return (ModelObjectInterface[]) objectArrayCache.getFromCache(this.getPrimaryKeyValue() + ":" + fieldName);
+        return (Object[]) objectArrayCache.getFromCache(this.getPrimaryKeyValue() + ":" + fieldName);
     }
 
     public void removeAllListnersForFieldName(String fieldName) {
@@ -413,13 +410,15 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
 
         Class arrayClass = (Class) cachedMultiAssociations.get(fieldName);
         if (arrayClass != null) {
-            ModelObjectInterface[] array = getArrayFromCache(fieldName);
+            Object[] array = getArrayFromCache(fieldName);
             ObjectCache objectCacheForArrayClass = ObjectCacheFactory.getInstance().getObjectCache(arrayClass);
-            for (int i = 0; array != null && i < array.length; i++) {
-                //log.debug("removeAllListnersForFieldName loop "+ i +" / "+ array.length);
-                //log.debug("array[i].getPrimaryKeyValue() = "+ array[i].getPrimaryKeyValue());
-                //log.debug("this = " + this);
-                objectCacheForArrayClass.removeListener(array[i].getObjectID(), this, fieldName);
+            if(array != null && array.length > 0 && array[0].getClass().isAssignableFrom(ModelObjectInterface.class)) {
+                for (int i = 0; array != null && i < array.length; i++) {
+                    //log.debug("removeAllListnersForFieldName loop "+ i +" / "+ array.length);
+                    //log.debug("array[i].getPrimaryKeyValue() = "+ array[i].getPrimaryKeyValue());
+                    //log.debug("this = " + this);
+                    objectCacheForArrayClass.removeListener(((ModelObjectInterface) array[i]).getObjectID(), this, fieldName);
+                }
             }
             cachedMultiAssociations.remove(fieldName);
         }
@@ -460,6 +459,20 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
         objectArrayCache.putInCache(arrayID, array);
         cachedMultiAssociations.put(fieldName, arrayClass);
         ////log.debug("putArrayInCache end -- " + fieldName);
+    }
+
+
+    private void putArrayInCache(Enum[] array, Class arrayClass, String fieldName) {
+        ////log.debug("putArrayInCache start -- " + fieldName);
+        String arrayID = this.getPrimaryKeyValue() + ":" + fieldName;
+        if (array == null || array.length == 0) {
+            //multiAssociations.put(fieldName, THE_NULL_OBJECT);
+            //multiAssociationsWithResultEqualToNull.put(fieldName, new Object());
+            return;
+        }
+
+        objectArrayCache.putInCache(arrayID, array);
+        cachedMultiAssociations.put(fieldName, arrayClass);
     }
 
 
@@ -559,13 +572,13 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
                 DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(interfaceClass);
                 toReturn = DbObjectReader.getMultiAssociation(this, dbAttributeContainer, dbAttribute, new HashMap(), new AssociationConstrain(), "", true);
 //                log.debug("getAssociation("+ fieldName +") toReturn :: " + (toReturn != null ? ((Object[] )toReturn).length : -1));
-                if(toReturn != null && ((ModelObjectInterface[]) toReturn).length == 0){
+                if(toReturn != null && ((Object[]) toReturn).length == 0){
                     toReturn = null;
                 } else if(toReturn != null) {
                     putArrayInCache((ModelObjectInterface[]) toReturn, dbAttribute.getAttributeClass(), fieldName);
                 }
             }
-            if (toReturn == null || ((ModelObjectInterface[]) toReturn).length == 0) {
+            if (toReturn == null || ((Object[]) toReturn).length == 0) {
                 multiAssociationsWithResultEqualToNull.put(fieldName, new Object());
             } else if (multiAssociationsWithResultEqualToNull.containsKey(fieldName)) {
                 multiAssociationsWithResultEqualToNull.remove(fieldName);
@@ -873,6 +886,40 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
     }
 
 
+    protected void setAssociation(Enum[] object, String fieldName) {
+        if (object != null && object.length == 0) {
+            object = null;
+        }
+        //log.debug("setAssociation :: multiAssociation :: setting " + fieldName + " isDirty = " + isDirty);
+        if (multiAssociationsWithResultEqualToNull.containsKey(fieldName) && object != null && object.length > 0) {
+            isDirty = true;
+        }
+        if (!isDirty && !isNew) {
+            makesDirtyForAssociation((Enum[]) getAssociation(fieldName), object, fieldName);
+        }
+        ////log.debug("setAssociation :: multiAssociation :: setting " + fieldName + " isDirty = " + isDirty);
+        if (object == null) {
+            multiAssociationsWithResultEqualToNull.put(fieldName, new Object());
+        } else if (multiAssociationsWithResultEqualToNull.containsKey(fieldName)) {
+            multiAssociationsWithResultEqualToNull.remove(fieldName);
+        }
+        if (isDirty || isNew) {
+            multiAssociations.put(fieldName, (object == null ? THE_NULL_OBJECT : object));
+            //removeAllListnersForFieldName(fieldName);
+            //objectArrayCache.removeFromCache(this.getPrimaryKeyValue()+":"+fieldName);
+        } else {
+        }
+        DbAttribute dbAttribute = (DbAttribute) mapOfDbAttributes.get(fieldName);
+        if (dbAttribute == null) {
+            DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(interfaceClass);
+            dbAttribute = dbAttributeContainer.getDbAttribute(fieldName);
+            mapOfDbAttributes.put(fieldName, dbAttribute);
+        }
+        putArrayInCache(object, dbAttribute.getAttributeClass(), fieldName);
+
+    }
+
+
 //    protected void setAssociation(String[] object, String fieldName) {
 //        if (object != null && object.length == 0) {
 //            object = null;
@@ -1029,6 +1076,31 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
                         if (makesDirtyForAssociation((ModelObject) obj1[i], (ModelObject) obj2[i], fieldName)) {
                             break;
                         }
+                    }
+                }
+            }
+        }
+    }
+
+    private void makesDirtyForAssociation(Enum[] obj1, Enum[] obj2, String fieldName) {
+
+        if (!isDirty && !isNew) {
+            if (obj1 == null) {
+                if (obj2 != null) {
+                    isDirty = true;
+                }
+            } else if (obj2 == null) {
+                isDirty = true;
+            } else {
+                if (obj1.length != obj2.length) {
+                    isDirty = true;
+                } else {
+                    List<Enum> enums = Arrays.asList(obj2);
+                    for (int i = 0; i < obj1.length; i++) {
+                        enums.remove(obj1[i]);
+                    }
+                    if(!enums.isEmpty()){
+                        isDirty = true;
                     }
                 }
             }

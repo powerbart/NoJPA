@@ -263,7 +263,7 @@ public class DbObjectReader {
                 DbAttribute dbAttribute = (DbAttribute) iterator.next();
 
                 //If the attribute is not an multi association.
-                if (!dbAttribute.isMultiAssociation() && !dbAttribute.isInlineInterface()) {
+                if ((!dbAttribute.isMultiAssociation() && !dbAttribute.isInlineInterface()) || (dbAttribute.isMultiAssociation() && dbAttribute.getAttributeClass().isEnum())) {
                     sqlNameQuery = (sqlNameQuery == null ? "" : sqlNameQuery + ", ") + (dbAttributeContainer.getTableName() + "." + (dbAttribute.getInlineAttributeName() != null ? dbAttribute.getInlineAttributeName() : dbAttribute.getAttributeName()));
                 }
             }
@@ -340,7 +340,7 @@ public class DbObjectReader {
                     //    dbAttributeContainer.setAttributeValue(objectToFillInto, dbAttribute, association);
                 }
                 //If this attribute is not an association
-                else if (!dbAttribute.isAssociation()) {
+                else if (!dbAttribute.isAssociation() || (dbAttribute.isMultiAssociation() && dbAttribute.getAttributeClass().isEnum())) {
                     Object value = null;
                     value = readObjectFromResultSet(dbAttribute, resultSet);
 //                    log.debug("Adding to object("+ objectToFillInto +")." + dbAttribute.getAttributeName() + "("+ value +")");
@@ -374,6 +374,25 @@ public class DbObjectReader {
 //            dbAttribute.setColumnIndex(attributeIndex);
 //        }
         try {
+
+            if(dbAttribute.isMultiAssociation() && dbAttribute.getAttributeClass().isEnum()){
+                String s = resultSet.getString(name);
+                if(s == null){
+                    return null;
+                } else {
+                    List result = new ArrayList();
+                    StringTokenizer toks = new StringTokenizer(s, " ,[]");
+                    for(; toks.hasMoreTokens() ;){
+                        result.add(Enum.valueOf(dbAttribute.getAttributeClass(), toks.nextToken()));
+                    }
+                    return result.toArray((Enum[]) java.lang.reflect.Array.newInstance(
+                            dbAttribute.getAttributeClass(),
+                            result.size()));
+
+                }
+            }
+
+
 
             //Convert the data type to the class type.
             switch (dbAttribute.getDataType().getType()) {
