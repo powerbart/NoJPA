@@ -110,9 +110,7 @@ public class ElasticServiceImpl implements ElasticService {
 
     private String getIndexName(ElasticInputDocumentWrapper inputDocument){
         Calendar creationDate = inputDocument.getModelObjectInterface().getCreationDate();
-        LocalDate dd = LocalDate.of(creationDate.get(Calendar.YEAR), 1+creationDate.get(Calendar.MONTH), creationDate.get(Calendar.DAY_OF_MONTH));
-//        return "funny87";
-        return ("NoJPA2-" + inputDocument.getModelObjectInterface().getInterface().getSimpleName() + "-" + dd).toLowerCase();
+        return ("NoJPA2-" + inputDocument.getModelObjectInterface().getInterface().getSimpleName() + "-" + creationDate.get(Calendar.YEAR) + "-" + (1+creationDate.get(Calendar.MONTH))).toLowerCase();
     }
 
     private String[] getIndexName(ElasticSearchQuery query){
