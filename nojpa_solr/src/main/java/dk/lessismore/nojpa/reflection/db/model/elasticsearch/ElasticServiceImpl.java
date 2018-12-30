@@ -81,6 +81,10 @@ public class ElasticServiceImpl implements ElasticService {
         }
     }
 
+    static int errors = 0;
+    static long totalTime = 0;
+    static long counter = 0;
+
     public void index(ElasticInputDocumentWrapper inputDocument){
         if (inputDocument == null) {
             log.error("index()::solrInputDocument is null");
@@ -102,7 +106,13 @@ public class ElasticServiceImpl implements ElasticService {
             }
             log.debug("Adding to index["+ indexName +"]: " + inputDocument.json());
             request.source(inputDocument.json(), XContentType.JSON);
+            counter++;
+            long startTime = System.currentTimeMillis();
             client.index(request, HEADERS);
+            long currentTime = System.currentTimeMillis() - startTime;
+            totalTime = totalTime + currentTime;
+            log.debug("INDEX-TIME: currentTime("+ currentTime +") AVG("+ (totalTime / counter) +") ("+ (currentTime > 1.3 * totalTime / counter ? "SLOW,SLOW,SLOW" : "OK" ) +").... ");
+
         } catch (Exception e) {
             log.error("[void : (" + coreName + ")index]: IOException: " + e.getMessage(), e);
         }
