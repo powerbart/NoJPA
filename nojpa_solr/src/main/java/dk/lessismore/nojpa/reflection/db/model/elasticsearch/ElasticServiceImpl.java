@@ -111,7 +111,7 @@ public class ElasticServiceImpl implements ElasticService {
             client.index(request, HEADERS);
             long currentTime = System.currentTimeMillis() - startTime;
             totalTime = totalTime + currentTime;
-            log.debug("INDEX-TIME: currentTime("+ currentTime +") AVG("+ (totalTime / counter) +") ("+ (currentTime > 1.3 * totalTime / counter ? "SLOW,SLOW,SLOW" : "OK" ) +").... ");
+            log.debug("INDEX-TIME: currentTime("+ currentTime +") AVG("+ (totalTime / counter) +") ("+ (currentTime > 1.2 * totalTime / counter ? "SLOW,SLOW,SLOW" : "OK" ) +").... ");
 
         } catch (Exception e) {
             log.error("[void : (" + coreName + ")index]: IOException: " + e.getMessage(), e);
