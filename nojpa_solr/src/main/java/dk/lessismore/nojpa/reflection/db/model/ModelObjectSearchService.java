@@ -252,8 +252,9 @@ public class ModelObjectSearchService {
                     if(value != null && !storedObjects.containsKey(value.getObjectID())){
                         //log.debug("addAttributesToDocument:X10");
                         storedObjects.put(value.getObjectID(), value.getObjectID());
+                        addAttributesToDocument(value, dbAttribute.getSolrAttributeName(prefix), storedObjects, key, inputDocument);
                         //log.debug("addAttributesToDocument:X11");
-                        put(value, dbAttribute.getSolrAttributeName(prefix), storedObjects, key, inputDocument);
+//TODO: Don't think this is needed...  Was making too m  put(value, dbAttribute.getSolrAttributeName(prefix), storedObjects, key, inputDocument);
                         //log.debug("addAttributesToDocument:X12");
                     }
 //                    inputDocument.addField(attributeName, modelObject.getSingleAssociationID(attributeName));
