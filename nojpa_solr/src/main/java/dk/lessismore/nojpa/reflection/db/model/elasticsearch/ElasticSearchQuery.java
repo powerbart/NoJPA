@@ -6,6 +6,7 @@ import dk.lessismore.nojpa.reflection.db.model.solr.SolrSearchQuery;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.index.query.*;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
@@ -33,7 +34,6 @@ public class ElasticSearchQuery extends NQL.SearchQuery{
     
     private String routing = null;
     private String[] indexs = null;
-
 
     public ElasticSearchQuery(Class selectClass) {
         super(selectClass);

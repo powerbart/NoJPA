@@ -12,6 +12,7 @@ import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLService;
 import dk.lessismore.nojpa.utils.Pair;
 import org.apache.commons.lang.StringUtils;
 import org.apache.solr.common.SolrDocument;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -542,6 +543,16 @@ public class NQL {
         protected abstract String toStringDebugQuery();
 
 
+        AggregationBuilder aggregation = null;
+
+        public void setAggregation(AggregationBuilder aggregation){
+            this.aggregation = aggregation;
+        }
+
+        public AggregationBuilder getAggregationBuilder() {
+            return aggregation;
+        }
+
         @SuppressWarnings("unchecked")
         private NList<T> selectObjectsFromDb() {
 //            TimerWithPrinter timer = new TimerWithPrinter("selectObjectsFromDb", "/tmp/luuux-timer-getPosts.log");
@@ -625,6 +636,7 @@ public class NQL {
             rootConstraints.add(has(query));
             return this;
         }
+
 
 //        private int selectCountFromDb() {
 //            statement.addExpression(getExpressionAddJoins());

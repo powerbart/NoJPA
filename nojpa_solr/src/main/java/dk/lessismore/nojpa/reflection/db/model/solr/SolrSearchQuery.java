@@ -3,6 +3,7 @@ package dk.lessismore.nojpa.reflection.db.model.solr;
 import dk.lessismore.nojpa.db.methodquery.NQL;
 import dk.lessismore.nojpa.utils.Pair;
 import org.apache.solr.client.solrj.SolrQuery;
+import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -168,6 +169,9 @@ public class SolrSearchQuery extends NQL.SearchQuery{
 
 
 
+    public void addAggregation(AggregationBuilder aggregation){
+        throw new RuntimeException("NOT-IMPLEMENTED... addAggregation@Solr");
+    }
 
 
 

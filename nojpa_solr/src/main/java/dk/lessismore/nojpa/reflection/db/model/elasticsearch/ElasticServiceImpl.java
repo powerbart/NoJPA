@@ -17,9 +17,11 @@ import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -181,8 +183,12 @@ public class ElasticServiceImpl implements ElasticService {
         if(elasticSearchQuery.getRouting() != null){
             searchRequest.routing(elasticSearchQuery.getRouting());
         }
-        searchRequest.source(elasticSearchQuery.getQueryBuilder());
-        final SearchResponse search = client.search(searchRequest, HEADERS);
+        SearchSourceBuilder queryBuilder = elasticSearchQuery.getQueryBuilder();
+        if(query.getAggregationBuilder() != null){
+            queryBuilder.aggregation(query.getAggregationBuilder());
+        }
+        searchRequest.source(queryBuilder);
+        final SearchResponse search = client.search(searchRequest, RequestOptions.DEFAULT);
         NoSQLResponse response = new ElasticQueryResponseWrapper(search);
         return response;
     }
