@@ -5,6 +5,7 @@ import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLResponse;
 import dk.lessismore.nojpa.utils.Pair;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.document.DocumentField;
+import org.elasticsearch.search.aggregations.Aggregations;
 
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,11 @@ public class ElasticQueryResponseWrapper implements NoSQLResponse {
         this.response = response;
     }
 
+
+    @Override
+    public Aggregations getAggregations() {
+        return response.getAggregations();
+    }
 
     @Override
     public long getNumFound() {

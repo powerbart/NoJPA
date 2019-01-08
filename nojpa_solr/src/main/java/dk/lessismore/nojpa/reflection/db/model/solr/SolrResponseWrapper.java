@@ -6,6 +6,7 @@ import dk.lessismore.nojpa.utils.Pair;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.FieldStatsInfo;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.elasticsearch.search.aggregations.Aggregations;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,11 @@ public class SolrResponseWrapper implements NoSQLResponse {
 
     public SolrResponseWrapper(QueryResponse query) {
         this.query = query;
+    }
+
+    @Override
+    public Aggregations getAggregations() {
+        throw new RuntimeException("Not implemented getAggregations() on Solr");
     }
 
     @Override

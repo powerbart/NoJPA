@@ -673,6 +673,8 @@ public class NQL {
                 String attributeIdentifier = createFinalSolrAttributeName(joints, solrName);
                 NQL.clearMockCallSequence();
                 return queryResponse.getFacet(attributeIdentifier);
+            } else if (methodName.equals("getAggregations")) {
+                return queryResponse.getAggregations();
             }
             return method.invoke(resultList, args);
         }
