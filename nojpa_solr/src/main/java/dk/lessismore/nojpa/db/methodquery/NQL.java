@@ -136,7 +136,13 @@ public class NQL {
 
 
         public SearchQuery<T> addFunction(NoSQLFunction solrMathFunction) {
-            rootConstraints.get(rootConstraints.size()-1).getExpression().addFunction(solrMathFunction);
+            NoSQLExpression expression = rootConstraints.get(rootConstraints.size() - 1).getExpression();
+            if(expression instanceof NoSQLContainerExpression){
+                NoSQLContainerExpression noSQLContainerExpression = (NoSQLContainerExpression) expression;
+                noSQLContainerExpression.getExpressions().get(noSQLContainerExpression.getExpressions().size() - 1).addFunction(solrMathFunction);
+            } else {
+                expression.addFunction(solrMathFunction);
+            }
             return this;
         }
 
@@ -1595,6 +1601,7 @@ public class NQL {
             for (Constraint c: constraints) {
 //                log.debug("getExpression() with operator.operator("+ operator.name() +")");
                 container.addExpression(operator.operator, c.getExpression());
+
             }
             return container;
         }
