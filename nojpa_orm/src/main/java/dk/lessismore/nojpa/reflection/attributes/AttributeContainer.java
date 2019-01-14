@@ -125,7 +125,7 @@ public class AttributeContainer {
                     methodAttribute = new MethodAttribute();
                     methodAttribute.setGetMethod(method);
                     if(method.getReturnType().isAnnotationPresent(DbInline.class)){
-                        log.debug("We have DbInline");
+//                        log.debug("We have DbInline");
                         getAttributes().put(methodAttribute.getAttributeName(), methodAttribute); //Adding the normal attribute
 
                         AttributeContainer inlineAttributeContainer = new AttributeContainer();
