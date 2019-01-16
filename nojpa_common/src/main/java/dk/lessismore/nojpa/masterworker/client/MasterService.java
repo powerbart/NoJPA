@@ -77,7 +77,7 @@ public class MasterService {
     }
 
     public static <O> void putBackInPool(JobHandleToMasterProtocol<O> jm) {
-        log.debug("putBackInPool for JobHandleToMasterProtocol:");
+        log.debug("putBackInPool for JobHandleToMasterProtocol: " + jm);
         jm.removeAllJobListeners();
         pool.putBackInPool(jm);
     }
@@ -118,9 +118,6 @@ public class MasterService {
             p.addNew();
         }
         JobHandleToMasterProtocol protocol = (JobHandleToMasterProtocol) p.getFromPool();
-        if (!protocol.getClientLink().isWorking()) {
-            return (JobHandleToMasterProtocol) p.addNew();
-        }
         return protocol;
     }
 

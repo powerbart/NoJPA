@@ -7,6 +7,21 @@ public class SumExecutor extends Executor<Long, String> {
 
 
     public String run(Long n) {
+        try {
+            System.out.println("Start sleeping - START");
+            Thread.sleep(30_000);
+            System.out.println("Start sleeping - DONE");
+        } catch (InterruptedException e) {
+
+        }
+        try {
+            System.out.println("Start sleeping - START - AGAIN");
+            Thread.sleep(30_000);
+            System.out.println("Start sleeping - DONE - AGAIN");
+        } catch (InterruptedException e) {
+
+        }
+
         if(countOfCalls++ % 10 == 0){
             System.out.println("We will sleep for 10 sec - START");
             try {
@@ -23,7 +38,7 @@ public class SumExecutor extends Executor<Long, String> {
             sum += i;
             sumString = sum.toString();
             setProgress(((double) i) / n);
-            System.out.println("*** SumExecutor("+ n +") " + getProgress());
+            System.out.print("*** SumExecutor("+ n +") " + getProgress());
             try {
                 Thread.sleep(5);
             } catch (InterruptedException e) {

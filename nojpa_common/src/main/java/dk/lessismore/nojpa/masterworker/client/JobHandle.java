@@ -173,19 +173,22 @@ public class JobHandle<O> {
      * Checked Exception (Errors) thrown from the executed job are wrapped in a WrappedErrorException.
      */
     public O getResult() {
+        O value = null;
+        RuntimeException exception = null;
         try {
             if (jobStatus != JobStatus.DONE && closed) {
                 throw new JobHandleClosedException();
             }
             Pair<O, RuntimeException> pair = result.getValue();
-            O value = pair.getFirst();
-            RuntimeException exception = pair.getSecond();
+            value = pair.getFirst();
+            exception = pair.getSecond();
             if (exception != null) {
                 throw exception;
             } else {
                 return value;
             }
         } finally {
+            log.debug("getResult() return: value("+ value +"), exception("+ exception +")");
             MasterService.putBackInPool(jm);
         }
     }
@@ -258,7 +261,7 @@ public class JobHandle<O> {
         }
 
         public void onResult(O value) {
-            log.debug("Setting result for jobID[" + jobID + "]");
+            log.debug("Setting result for jobID[" + jobID + "] result ["+ value +"]" );
             jobProgress = 1;
             jobStatus = JobStatus.DONE;
             result.setValue(new Pair<O, RuntimeException>(value, null));

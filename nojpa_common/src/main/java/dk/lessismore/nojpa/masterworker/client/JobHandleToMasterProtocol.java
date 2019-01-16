@@ -35,7 +35,10 @@ public class JobHandleToMasterProtocol<O> {
     }
 
 
-
+    @Override
+    public String toString() {
+        return super.toString() + "@@@ listener("+ listener +") clientLink("+ clientLink +")";
+    }
 
     public ClientLink getClientLink() {
         return clientLink;
@@ -61,7 +64,9 @@ public class JobHandleToMasterProtocol<O> {
     }
 
     public void sendRunJobRequest(String jobID, Class executorClass, Object jobData, JobListener<O> listener, long deadline) {
+        log.debug("sendRunJobRequest:1: jobID("+ jobID +"): executorClass("+ executorClass +") listener("+ listener +")");
         removeAllJobListeners();
+        log.debug("sendRunJobRequest:2: jobID("+ jobID +"): executorClass("+ executorClass +") listener("+ listener +")");
         String serializedJobDate = serializer.serialize(jobData);
         JobMessage jobMessage = new JobMessage(jobID, executorClass, serializedJobDate, deadline);
         try {
@@ -124,6 +129,7 @@ public class JobHandleToMasterProtocol<O> {
         if(waitForValueOrNull != null){
             waitForValueOrNull.setValue(new Pair<Object, RuntimeException>(null, new RuntimeException("ServerLink closed by Master/Worker")));
         }
+        log.debug("close():" + listener);
         removeAllJobListeners();
         clientLink.close();
     }

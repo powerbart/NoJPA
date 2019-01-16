@@ -164,6 +164,7 @@ public class Worker {
             } catch (Exception e) {
                 submit.cancel(true);
                 log.error("We killed the Thread because we hitted the deadline " + jobMessage.getJobID());
+                resultMessage.setException(new TimeoutException("The job has passed the deadline!!!"), serializer);
             }
 
 
@@ -189,7 +190,7 @@ public class Worker {
                             }
                         } catch (Exception e) {
                         }
-                        log.debug("The job has passed the deadline, so we are closing it...");
+                        log.debug("The job has passed the deadline, so we are closing it... Will send TimeoutException");
                         resultMessage.setException(new TimeoutException("The job has passed the deadline"), serializer);
                         break;
                     }

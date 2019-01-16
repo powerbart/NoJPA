@@ -1,9 +1,6 @@
 package dk.lessismore.nojpa.masterworker;
 
-import dk.lessismore.nojpa.masterworker.executor.Executor;
-import dk.lessismore.nojpa.masterworker.executor.SumExecutor;
-import dk.lessismore.nojpa.masterworker.executor.ToLowerExecutor;
-import dk.lessismore.nojpa.masterworker.executor.ToUpperExecutor;
+import dk.lessismore.nojpa.masterworker.executor.*;
 import dk.lessismore.nojpa.masterworker.worker.Worker;
 
 import java.util.*;
@@ -11,7 +8,7 @@ import java.util.*;
 public class StartManyWorkers {
 
     private static int workerAmount = 10;
-    List<Class<? extends Executor>> executorClasses = Arrays.asList(SumExecutor.class, ToUpperExecutor.class, ToLowerExecutor.class);
+    List<Class<? extends Executor>> executorClasses = Arrays.asList(SumExecutor.class, ToUpperExecutor.class, ToLowerExecutor.class, FibExecutor.class);
 
     public static void main(String[] args) {
         new StartManyWorkers();
