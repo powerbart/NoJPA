@@ -53,7 +53,7 @@ public class SolrSearchQuery extends NQL.SearchQuery{
                 }
             }
 
-            if(builder.length() > 2){
+            if(builder.length() > 2 && root.getConditions().size() > 0 && NQL.NoSQLOperator.name(root.getConditions().get(0)).equals("OR")){
                 builder.insert(0, "(");
                 builder.append(")");
             }
@@ -72,7 +72,8 @@ public class SolrSearchQuery extends NQL.SearchQuery{
                 }
             }
             if (expression.getRaw() != null) {
-                return  "(" +  expression.getRaw() +")";
+//                return  "(" +  expression.getRaw() +")";
+                return  expression.getRaw();
             }
             if (expression.getValue() == null) {
                 return otherFunctions;
