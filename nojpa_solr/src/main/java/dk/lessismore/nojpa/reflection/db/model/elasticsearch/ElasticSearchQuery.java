@@ -16,10 +16,7 @@ import java.lang.annotation.Annotation;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.*;
 
 public class ElasticSearchQuery extends NQL.SearchQuery{
 
@@ -109,11 +106,15 @@ public class ElasticSearchQuery extends NQL.SearchQuery{
                     String statementValue = xmlDateFormat.format(((Calendar) expression.getValue()).getTime());
                     if(expression.getComparator() == NQL.Comp.EQUAL_OR_LESS){
 //                        RangeQueryBuilder to = QueryBuilders.rangeQuery(attributeName).to((Calendar) expression.getValue());
-                        RangeQueryBuilder to = QueryBuilders.rangeQuery(attributeName).to(statementValue);
+                        Calendar end = Calendar.getInstance();
+                        end.setTime(new Date(0));
+                        RangeQueryBuilder to = QueryBuilders.rangeQuery(attributeName).lte(statementValue).gte(end);
                         return to;
                     } else if(expression.getComparator() == NQL.Comp.EQUAL_OR_GREATER){
 //                        RangeQueryBuilder to = QueryBuilders.rangeQuery(attributeName).from((Calendar) expression.getValue());
-                        RangeQueryBuilder to = QueryBuilders.rangeQuery(attributeName).from(statementValue);
+                        Calendar end = Calendar.getInstance();
+//                        end.setTime(new Date(Long.MAX_VALUE - 1));
+                        RangeQueryBuilder to = QueryBuilders.rangeQuery(attributeName).gte(statementValue).lte(end);
                         return to;
                     } else if(expression.getComparator() == NQL.Comp.NOT_EQUAL){
                         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();

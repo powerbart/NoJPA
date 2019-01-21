@@ -129,7 +129,7 @@ public class ElasticServiceImpl implements ElasticService {
         ArrayList<String> toReturn = new ArrayList<>();
         String prefix = "NoJPA2-" + query.getType() + "-";
         String[] indexs = query.getIndexs();
-        if(indexs != null){
+        if(false && indexs != null){ //TODO: Remove false later, when index are workings ...
             for(int i = 0; i < indexs.length; i++){
                 toReturn.add((prefix + indexs[i]).toLowerCase());
             }
