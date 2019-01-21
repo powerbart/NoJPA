@@ -303,6 +303,7 @@ public class MasterServer {
             } else {
                 if(jobEntry.jobMessage.getDealline() > 0 && jobEntry.jobMessage.getDealline() < System.currentTimeMillis()){
                     log.warn("Job was timeout before starting ... Will remove it from queue: " + jobEntry.jobMessage.getJobID());
+                    jobPool.removeJob(jobEntry.jobMessage.getJobID());
                     return;
                 }
             }
