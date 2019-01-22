@@ -261,7 +261,7 @@ public class JobHandle<O> {
         }
 
         public void onResult(O value) {
-            log.debug("Setting result for jobID[" + jobID + "] result ["+ value +"]" );
+            log.debug("Setting result for jobID[" + jobID + "] hasResult ["+ (value != null) +"]" );
             jobProgress = 1;
             jobStatus = JobStatus.DONE;
             result.setValue(new Pair<O, RuntimeException>(value, null));
