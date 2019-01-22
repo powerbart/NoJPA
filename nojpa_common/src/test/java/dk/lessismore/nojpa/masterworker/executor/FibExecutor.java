@@ -6,6 +6,11 @@ public class FibExecutor  extends Executor<FibInData, FibOutData> {
 
     @Override
     public FibOutData run(FibInData input) {
+        try {
+            Thread.sleep(15 * 1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         FibOutData out = new FibOutData();
         out.setText(input.getText() + "::" + input.getText());
         return out;

@@ -202,13 +202,13 @@ public abstract class AbstractLink {
                     if (endIndex != -1) {
                         String objectStr = s.substring(startIndex, endIndex);
                         try {
-                            try{
-                                String root = "/tmp/mw-all-files/" + getLinkID();
-                                new File(root).mkdirs();
-                                SuperIO.writeTextToFile(root + "/" + System.currentTimeMillis() + "-" + GuidFactory.getInstance().makeGuid(), objectStr);
-                            } catch (Throwable t){
-
-                            }
+//                            try{
+//                                String root = "/tmp/mw-all-files/" + getLinkID();
+//                                new File(root).mkdirs();
+//                                SuperIO.writeTextToFile(root + "/" + System.currentTimeMillis() + "-" + GuidFactory.getInstance().makeGuid(), objectStr);
+//                            } catch (Throwable t){
+//
+//                            }
 
                             Object o = serializer.unserialize(objectStr);
                             receivedObjects.addLast(o);
