@@ -5,9 +5,11 @@ import dk.lessismore.nojpa.guid.GuidFactory;
 import dk.lessismore.nojpa.masterworker.executor.Executor;
 import dk.lessismore.nojpa.serialization.Serializer;
 import dk.lessismore.nojpa.serialization.XmlSerializer;
+import dk.lessismore.nojpa.utils.SuperIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -200,6 +202,14 @@ public abstract class AbstractLink {
                     if (endIndex != -1) {
                         String objectStr = s.substring(startIndex, endIndex);
                         try {
+                            try{
+                                String root = "/tmp/mw-all-files/" + getLinkID();
+                                new File(root).mkdirs();
+                                SuperIO.writeTextToFile(root + "/" + System.currentTimeMillis() + "-" + GuidFactory.getInstance().makeGuid(), objectStr);
+                            } catch (Throwable t){
+
+                            }
+
                             Object o = serializer.unserialize(objectStr);
                             receivedObjects.addLast(o);
                             startIndex = endIndex + SEPARATOR.length();

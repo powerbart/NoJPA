@@ -49,6 +49,7 @@ public class JobHandle<O> {
             if(id != null && (("" + id).length() > 2)){
                 tmpObjectID = "" + id;
             }
+            log.debug("Mapping jobID("+ tmpObjectID +") to linkID("+ jm.getClientLink().getLinkID() +")");
         } catch (Exception e){}
         this.jobID = tmpObjectID;
         this.jm = jm;
