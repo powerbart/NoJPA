@@ -53,7 +53,7 @@ public class SolrSearchQuery extends NQL.SearchQuery{
                 }
             }
 
-            if(builder.length() > 2 && root.getConditions().size() > 0 && NQL.NoSQLOperator.name(root.getConditions().get(0)).equals("OR")){
+            if(builder.length() > 2 && root.getConditions().size() > 1 && NQL.NoSQLOperator.name(root.getConditions().get(0)).equals("OR")){
                 builder.insert(0, "(");
                 builder.append(")");
             }
