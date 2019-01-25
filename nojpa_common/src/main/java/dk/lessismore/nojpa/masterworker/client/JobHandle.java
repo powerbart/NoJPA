@@ -189,7 +189,7 @@ public class JobHandle<O> {
                 return value;
             }
         } finally {
-            log.debug("getResult() return: value("+ value +"), exception("+ exception +")");
+            log.debug("getResult() return: value("+ (value != null ? "Has-value" : "NULL") +"), exception("+ exception +")");
             MasterService.putBackInPool(jm);
         }
     }
