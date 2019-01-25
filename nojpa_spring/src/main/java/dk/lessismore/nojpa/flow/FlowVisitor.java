@@ -3,6 +3,7 @@ package dk.lessismore.nojpa.flow;
 import dk.lessismore.nojpa.db.methodquery.MQL;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.utils.MaxSizeMap;
+import dk.lessismore.nojpa.utils.MaxSizeMaxTimeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -43,6 +44,8 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
         return getExecutor().getThreadPoolExecutor().getQueue().size();
     }
 
+    private static MaxSizeMaxTimeMap<String> visitedMap = new MaxSizeMaxTimeMap<String>(20000, 600);
+
     int sameCount = 0;
     int currentEnd = 0;
     int numberOfLoops = 0;
@@ -64,7 +67,17 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
                         currentCount++;
                         sameCount = 0;
                         numberOfLoops = 0;
-                        getExecutor().execute(() -> doWork(t));
+
+                        if(visitedMap.get("" + t) != null){
+                            log.debug("Will ignore Item("+ t +")... since all ready processed");
+                            log.debug("------------------------------------------------------------------------------------------------------------------------------------ IGNORE ");
+
+                        } else {
+                            visitedMap.put("" + t, "s");
+                            getExecutor().execute(() -> doWork(t));
+                        }
+
+
                     }
                 });
             }
