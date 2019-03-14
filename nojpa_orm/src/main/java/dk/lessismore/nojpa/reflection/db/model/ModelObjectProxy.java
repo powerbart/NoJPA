@@ -566,7 +566,7 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
             }
 
             toReturn = getArrayFromCache(fieldName);
-            if (toReturn == null) {
+            if (toReturn == null && !dbAttribute.getAttributeClass().isEnum()) {
 //                log.debug(debugMessage + "::NOT FOUND in cache::ENDS");
                 getAssociationNOT_FOUND++;
                 DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(interfaceClass);

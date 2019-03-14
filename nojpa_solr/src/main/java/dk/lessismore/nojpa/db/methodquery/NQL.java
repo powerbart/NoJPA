@@ -168,6 +168,11 @@ public class NQL {
             return this;
         }
 
+        public SearchQuery<T> search(Enum mockValue, Comp comp, String value) {
+            rootConstraints.add(has(mockValue, comp, value));
+            return this;
+        }
+
         public SearchQuery<T> search(Calendar mockValue, Comp comp, Calendar value) {
             rootConstraints.add(has(mockValue, comp, value));
             return this;
@@ -891,11 +896,14 @@ public class NQL {
     public static Constraint has(Enum mockValue, Comp comp, Enum value) {
         List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
         Pair<Class, String> pair = getSourceAttributePair();
-//        if(pair.getFirst().isEnum() && pair.getSecond().equals("objectID")){ //Enum-array
-//            Pair<Class, String> classStringPair = joints.get(joints.size() - 1);
-//            pair = new Pair<Class, String>(classStringPair.getFirst(), classStringPair.getSecond());
-////            joints.remove(joints.size() - 1);
-//        }
+        clearMockCallSequence();
+        NoSQLExpression expression = newLeafExpression().addConstrain(makeAttributeIdentifier(pair), comp, value);
+        return new NoSQLConstraint(expression, joints);
+    }
+
+    public static Constraint has(Enum mockValue, Comp comp, String value) {
+        List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
+        Pair<Class, String> pair = getSourceAttributePair();
         clearMockCallSequence();
         NoSQLExpression expression = newLeafExpression().addConstrain(makeAttributeIdentifier(pair), comp, value);
         return new NoSQLConstraint(expression, joints);

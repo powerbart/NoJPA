@@ -15,6 +15,7 @@ public class InitTestDatabase {
     private static final Logger log = LoggerFactory.getLogger(InitTestDatabase.class);
 
     public static void createTables() {
+        DatabaseCreator.createDatabase( Person.class );
         DatabaseCreator.createDatabase("dk.lessismore.nojpa.db.testmodel");
     }
 

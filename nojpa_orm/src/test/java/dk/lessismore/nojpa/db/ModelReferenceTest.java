@@ -39,6 +39,21 @@ public class ModelReferenceTest {
         {
             Person person = ModelObjectService.create(Person.class);
             person.setName("John");
+            save(person);
+            ObjectCacheFactory.getInstance().getObjectCache(Person.class).removeFromCache(person.getObjectID());
+            MQL.selectByID(Person.class, person.getObjectID()).getPartners();
+        }
+        {
+            Person person = ModelObjectService.create(Person.class);
+            person.setName("John0");
+            person.setPartners(Person.SEX.values());
+            Assert.assertEquals(person.getPartners().length, 3);
+            save(person);
+            ObjectCacheFactory.getInstance().getObjectCache(Person.class).removeFromCache(person.getObjectID());
+        }
+        {
+            Person person = ModelObjectService.create(Person.class);
+            person.setName("John1");
             person.setPartners(Person.SEX.values());
             Assert.assertEquals(person.getPartners().length, 3);
             person.setPartners(null);
@@ -50,7 +65,7 @@ public class ModelReferenceTest {
         }
         {
             Person person = ModelObjectService.create(Person.class);
-            person.setName("John");
+            person.setName("John2");
             person.setPartners(Person.SEX.values());
             save(person);
             Assert.assertEquals(person.getPartners().length, 3);
@@ -65,7 +80,7 @@ public class ModelReferenceTest {
         }
         {
             Person person = ModelObjectService.create(Person.class);
-            person.setName("John");
+            person.setName("John3");
             person.setPartners(Person.SEX.values());
             Assert.assertEquals(person.getPartners().length, 3);
             save(person);
@@ -92,7 +107,7 @@ public class ModelReferenceTest {
         {
             List<Person> personList = MQL.select(Person.class).getList();
             for(Person p : personList){
-                System.out.println( p + " -> " + Arrays.toString(p.getPartners()));
+                System.out.println( p + "("+ p.getName() +") -> " + Arrays.toString(p.getPartners()));
             }
         }
     }
