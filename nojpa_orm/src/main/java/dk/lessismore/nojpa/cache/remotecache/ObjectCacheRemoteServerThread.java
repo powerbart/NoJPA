@@ -164,7 +164,7 @@ public class ObjectCacheRemoteServerThread extends Thread {
                 }
 
 
-                log.debug("reading readLine("+ readLine +")");
+//                log.debug("reading readLine("+ readLine.replaceAll("\n", "").trim() +")");
                 StringTokenizer toks = new StringTokenizer(readLine, "\n");
 
                 while (toks.hasMoreTokens()) {
