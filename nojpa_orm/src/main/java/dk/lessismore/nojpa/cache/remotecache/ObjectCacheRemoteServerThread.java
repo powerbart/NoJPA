@@ -163,7 +163,8 @@ public class ObjectCacheRemoteServerThread extends Thread {
                     continue;
                 }
 
-
+//http://www.finans.dk/debat/ECE11259335/hvis-vi-kan-passe-paa-hinanden-hvordan-skal-vi-saa-kunne-passe-paa-miljoeet/
+//http://www.finans.dk/debat/ECE11259335/hvis-vi-ikke-kan-passe-paa-hinanden-hvordan-skal-vi-saa-kunne-passe-paa-miljoeet/
 //                    log.debug("reading readLine("+ readLine.replaceAll("\n", "").trim() +")");
                 StringTokenizer toks = new StringTokenizer(readLine, "\n");
 
