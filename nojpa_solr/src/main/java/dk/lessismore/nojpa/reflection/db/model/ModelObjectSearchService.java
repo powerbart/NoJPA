@@ -249,9 +249,9 @@ public class ModelObjectSearchService {
                     //log.debug("addAttributesToDocument:X8");
                     addAttributeValueToStatement(dbAttribute, inputDocument, value, prefix);
                     //log.debug("addAttributesToDocument:X9");
-                    if(value != null && !storedObjects.containsKey(value.getObjectID())){
+                    if(value != null && !storedObjects.containsKey(((ModelObject) value).getInterface() + ":" + value.getObjectID())){
                         //log.debug("addAttributesToDocument:X10");
-                        storedObjects.put(value.getObjectID(), value.getObjectID());
+                        storedObjects.put(((ModelObject) value).getInterface() + ":" + value.getObjectID(), value.getObjectID());
                         addAttributesToDocument(value, dbAttribute.getSolrAttributeName(prefix), storedObjects, key, inputDocument);
                         //log.debug("addAttributesToDocument:X11");
 //TODO: Don't think this is needed...  Was making too m  put(value, dbAttribute.getSolrAttributeName(prefix), storedObjects, key, inputDocument);
@@ -271,8 +271,8 @@ public class ModelObjectSearchService {
                         HashMap<String, ArrayList<Object>> values = new HashMap<String, ArrayList<Object>>();
                         for(int i = 0; vs != null && i < vs.length; i++){
                             ModelObjectInterface value = vs[i];
-                            if(value != null && !storedObjects.containsKey(value.getObjectID())){
-                                storedObjects.put(value.getObjectID(), value.getObjectID());
+                            if(value != null && !storedObjects.containsKey(((ModelObject) value).getInterface() + ":" + value.getObjectID())){
+                                storedObjects.put(((ModelObject) value).getInterface() + ":" + value.getObjectID(), value.getObjectID());
                                 getSearchValues(value, dbAttribute.getSolrAttributeName(prefix), storedObjects, values);
                             }
                         }
@@ -313,8 +313,8 @@ public class ModelObjectSearchService {
                     }
                 } else if (!dbAttribute.isMultiAssociation()) {
                     ModelObjectInterface value = (ModelObjectInterface) dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
-                    if(value != null && !storedObjects.containsKey(value.getObjectID())){
-                        storedObjects.put(value.getObjectID(), value.getObjectID());
+                    if(value != null && !storedObjects.containsKey(((ModelObject) value).getInterface() + ":" +value.getObjectID())){
+                        storedObjects.put(((ModelObject) value).getInterface() + ":" + value.getObjectID(), value.getObjectID());
                         getSearchValues(value, dbAttribute.getSolrAttributeName(prefix), storedObjects, values);
                     }
                 } else {
@@ -322,7 +322,7 @@ public class ModelObjectSearchService {
                     for(int i = 0; vs != null && i < vs.length; i++){
                         ModelObjectInterface value = vs[i];
                         if(value != null && !storedObjects.containsKey(value.getObjectID())){
-                            storedObjects.put(value.getObjectID(), value.getObjectID());
+                            storedObjects.put(((ModelObject) value).getInterface() + ":" + value.getObjectID(), value.getObjectID());
                             getSearchValues(value, dbAttribute.getSolrAttributeName(prefix), storedObjects, values);
                         }
                     }
