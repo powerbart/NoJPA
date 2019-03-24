@@ -201,6 +201,7 @@ public class SQLStatementExecutor {
                     return false;
                 }
             } else { //The insert fail, because it is already there ... So therefore true ;-)
+                ConnectionPoolFactory.getPool().putBackInPool(connection);
                 return true;
             }
         } finally {
