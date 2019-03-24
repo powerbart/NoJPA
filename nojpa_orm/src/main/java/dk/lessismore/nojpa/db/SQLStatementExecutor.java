@@ -200,8 +200,9 @@ public class SQLStatementExecutor {
                     }
                     return false;
                 }
+            } else { //The insert fail, because it is already there ... So therefore true ;-)
+                return true;
             }
-            return false;
         } finally {
             try {
                 close(statement);
