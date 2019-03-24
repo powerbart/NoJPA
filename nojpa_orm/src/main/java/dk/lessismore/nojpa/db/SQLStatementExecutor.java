@@ -177,28 +177,31 @@ public class SQLStatementExecutor {
             return true;
         } catch (Exception e) {
             log.warn("Update/Insert sql execution failed (will try to recover) \nstmt=" + sqlStatement, e);
-            try {
-                ConnectionPoolFactory.getPool().addNew();
-                close(statement, connection);
-            } catch (Exception ex) {
-                log.warn("Trying to close connection because of error ..." + ex.toString());
-            }
-            connection = (Connection) ConnectionPoolFactory.getPool().getFromPool();
-            try {
-                statement = connection.createStatement();
-                statement.execute(sqlStatement);
-                ConnectionPoolFactory.getPool().putBackInPool(connection);
-                return true;
-            } catch (Exception ex) {
-                log.error("Update/Insert sql execution failed 2nd try (GIVING UP) \nstmt=" + sqlStatement, e);
+            if(e.toString() != null && !e.toString().contains("ConstraintViolation")) {
                 try {
                     ConnectionPoolFactory.getPool().addNew();
                     close(statement, connection);
-                } catch (Exception exp) {
-                    log.warn("Trying to close connection because of error ..." + exp.toString());
+                } catch (Exception ex) {
+                    log.warn("Trying to close connection because of error ..." + ex.toString());
                 }
-                return false;
+                connection = (Connection) ConnectionPoolFactory.getPool().getFromPool();
+                try {
+                    statement = connection.createStatement();
+                    statement.execute(sqlStatement);
+                    ConnectionPoolFactory.getPool().putBackInPool(connection);
+                    return true;
+                } catch (Exception ex) {
+                    log.error("Update/Insert sql execution failed 2nd try (GIVING UP) \nstmt=" + sqlStatement, e);
+                    try {
+                        ConnectionPoolFactory.getPool().addNew();
+                        close(statement, connection);
+                    } catch (Exception exp) {
+                        log.warn("Trying to close connection because of error ..." + exp.toString());
+                    }
+                    return false;
+                }
             }
+            return false;
         } finally {
             try {
                 close(statement);
