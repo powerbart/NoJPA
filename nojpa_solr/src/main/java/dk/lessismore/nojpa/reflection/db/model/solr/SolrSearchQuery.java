@@ -33,7 +33,7 @@ public class SolrSearchQuery extends NQL.SearchQuery{
 
     private String buildSubQuery(NQL.NoSQLExpression expression){
         if(expression instanceof NQL.NoSQLNegatingExpression){
-            StringBuilder builder = new StringBuilder("-");
+            StringBuilder builder = new StringBuilder("*:* -");
             String subQuery = buildSubQuery(((NQL.NoSQLNegatingExpression) expression).getExpression());
             if(subQuery != null){
                 builder.append(subQuery);
@@ -97,7 +97,7 @@ public class SolrSearchQuery extends NQL.SearchQuery{
                 } else if(expression.getComparator() == NQL.Comp.EQUAL_OR_GREATER){
                     return " (" + solrAttributeName + ":[" + statementValue + " TO *]"+ boostQuery +")" + otherFunctions;
                 } else if(expression.getComparator() == NQL.Comp.NOT_EQUAL){
-                    return " -(" + solrAttributeName + ":("+ statementValue +") "+ boostQuery +")" + otherFunctions;
+                    return " (*:* -" + solrAttributeName + ":("+ statementValue +") "+ boostQuery +")" + otherFunctions;
                 } else {
                     return " (" + solrAttributeName + ":("+ statementValue +") "+ boostQuery +")" + otherFunctions;
                 }
