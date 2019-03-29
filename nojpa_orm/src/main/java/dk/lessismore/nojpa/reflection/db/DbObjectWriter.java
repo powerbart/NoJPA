@@ -497,11 +497,10 @@ public class DbObjectWriter {
                 //log.debug("updateAssociationTable:  1: associations = " + associations);
                 //log.debug("updateAssociationTable:  1: associations[0] = " + associations[0]);
                 DbAttributeContainer associationContainer = DbClassReflector.getDbAttributeContainer(associations[0]);
-                ArrayList arrayList = new ArrayList(associations.length);
+                HashMap<String, Object> assoMap = new HashMap<>();
                 for (int i = 0; i < associations.length; i++) {
-                    arrayList.add(associations[i]);
+                    assoMap.put(associations[i].toString(), associations[i]);
                 }
-                Collections.sort(arrayList, new ModelObjectComparator());
 
                 SelectSQLStatement selectSQLStatement = SQLStatementFactory.getSelectSQLStatement();
                 selectSQLStatement.addTableName(AssociationTable.makeAssociationTableName(dbAttributeContainer, dbAttribute));
@@ -515,38 +514,52 @@ public class DbObjectWriter {
                 LimResultSet limSet = SQLStatementExecutor.doQuery(selectSQLStatement);
                 ResultSet associationResultSet = limSet.getResultSet();
                 if (associationResultSet == null) {
+                    log.debug("Found NO associations for " + modelObject.getPrimaryKeyValue());
                     boolean successfull = deleteAssociations(modelObject.getPrimaryKeyValue(), dbAttributeContainer, dbAttribute);
                     successfull = successfull && insertAssociations(modelObject, dbAttributeContainer, dbAttribute, associations);
                     return successfull;
                 } else {
                     try {
-                        String associationId = "0";
-                        String arrayId = "0";
-                        for (int arrayCount = 0; (arrayId != null || associationId != null);) {
-                            if (arrayId != null && (associationId == null || arrayId.compareTo(associationId) < 0)) {
-                                //log.debug("updateAssociationTable: do a insert .. ");
-                                while (arrayId != null && (associationId == null || arrayId.compareTo(associationId) < 0)) {
-                                    //Insert arrayId
-                                    insertSingleAssociationId(modelObject, dbAttributeContainer, dbAttribute, arrayId, associationContainer);
-                                    arrayId = (arrayCount < arrayList.size() ? arrayList.get(arrayCount++).toString() : null);
-                                }
-                            } else if (associationId != null && (arrayId == null || arrayId.compareTo(associationId) > 0)) {
-                                while (associationId != null && (arrayId == null || arrayId.compareTo(associationId) > 0)) {
-                                    //Delete associationId
-                                    //log.debug("updateAssociationTable: do a delete .. ");
-                                    deleteSingleAssociationId(modelObject, dbAttributeContainer, dbAttribute, associationId, associationContainer);
-                                    associationId = (associationResultSet.next() ? associationResultSet.getString(
-                                            associationContainer.getPrimaryKeyAttribute().getAttributeName()) : null);
-                                }
+                        while(associationResultSet.next()){
+                            String dbId = associationResultSet.getString(associationContainer.getPrimaryKeyAttribute().getAttributeName());
+                            Object a = assoMap.get(dbId);
+                            if(a == null){
+                                deleteSingleAssociationId(modelObject, dbAttributeContainer, dbAttribute, dbId, associationContainer);
                             } else {
-                                //log.debug("updateAssociationTable: do nothing .. ");
-                                arrayId = (arrayCount < arrayList.size() ? arrayList.get(arrayCount++).toString() : null);
-                                associationId = (associationResultSet.next() ? associationResultSet.getString(
-                                        associationContainer.getPrimaryKeyAttribute().getAttributeName()) : null);
+                                assoMap.remove(dbId);
                             }
                         }
+                        for(Iterator<Object> iterator = assoMap.values().iterator(); iterator.hasNext(); ){
+                            ModelObject next = (ModelObject) iterator.next();
+                            insertSingleAssociationId(modelObject, dbAttributeContainer, dbAttribute, next.getPrimaryKeyValue(), associationContainer);
+                        }
+//                        String associationId = "0";
+//                        String arrayId = "0";
+//                        for (int arrayCount = 0; (arrayId != null || associationId != null);) {
+//                            if (arrayId != null && (associationId == null || arrayId.compareTo(associationId) < 0)) {
+//                                //log.debug("updateAssociationTable: do a insert .. ");
+//                                while (arrayId != null && (associationId == null || arrayId.compareTo(associationId) < 0)) {
+//                                    //Insert arrayId
+//                                    insertSingleAssociationId(modelObject, dbAttributeContainer, dbAttribute, arrayId, associationContainer);
+//                                    arrayId = (arrayCount < arrayList.size() ? arrayList.get(arrayCount++).toString() : null);
+//                                }
+//                            } else if (associationId != null && (arrayId == null || arrayId.compareTo(associationId) > 0)) {
+//                                while (associationId != null && (arrayId == null || arrayId.compareTo(associationId) > 0)) {
+//                                    //Delete associationId
+//                                    //log.debug("updateAssociationTable: do a delete .. ");
+//                                    deleteSingleAssociationId(modelObject, dbAttributeContainer, dbAttribute, associationId, associationContainer);
+//                                    associationId = (associationResultSet.next() ? associationResultSet.getString(
+//                                            associationContainer.getPrimaryKeyAttribute().getAttributeName()) : null);
+//                                }
+//                            } else {
+//                                //log.debug("updateAssociationTable: do nothing .. ");
+//                                arrayId = (arrayCount < arrayList.size() ? arrayList.get(arrayCount++).toString() : null);
+//                                associationId = (associationResultSet.next() ? associationResultSet.getString(
+//                                        associationContainer.getPrimaryKeyAttribute().getAttributeName()) : null);
+//                            }
+//                        }
                     } catch (Exception e) {
-
+                        log.error("Some error when updateAssociationTable for " + modelObject + " : " + e, e);
                     } finally {
                         try {
                             if (limSet != null) {
