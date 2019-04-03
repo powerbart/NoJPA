@@ -1,5 +1,7 @@
 package dk.lessismore.nojpa.reflection.db.model.solr;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import dk.lessismore.nojpa.db.methodquery.NQL;
 import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLResponse;
 import org.apache.solr.client.solrj.SolrRequest;
@@ -38,7 +40,7 @@ public class CloudSolrServiceImpl extends SolrServiceImpl {
     public void startup() {
         log.debug("[void : zkHost (" + zkHost + ")startup]:HIT: " + this);
         try {
-            server = new CloudSolrClient.Builder().withZkHost(zkHost).build();
+            server = new CloudSolrClient.Builder(ImmutableList.of(zkHost), java.util.Optional.empty()).build();
             ((CloudSolrClient) server).setDefaultCollection(collectionName);
         } catch (Exception e) {
             log.error("[ void: (" + zkHost + ")startup ]: exception constructing embedded server: " + e.getMessage(), e);
