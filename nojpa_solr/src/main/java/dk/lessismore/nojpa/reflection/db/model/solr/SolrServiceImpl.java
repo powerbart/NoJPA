@@ -34,6 +34,11 @@ public abstract class SolrServiceImpl implements SolrService {
         this.coreName = coreName;
     }
 
+
+    public SolrClient getSolrClient() {
+        return server;
+    }
+
     public String getName() {
         return coreName;
     }
