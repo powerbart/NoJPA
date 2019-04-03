@@ -82,7 +82,7 @@ public class SolrSearchQuery extends NQL.SearchQuery{
             String statementValue = null;
             if(!expression.isNotNull() && !expression.isNull()){
                 if(expression.getValueClazz().equals(String.class) || expression.isEnum()){
-                    statementValue = "" + NQL.removeFunnyChars("" + expression.getValue());
+                    statementValue = "" + expression.getValue();
                 } else if(expression.getValue() instanceof Calendar){
                     SimpleDateFormat xmlDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'"); //2011-11-28T18:30:30Z
                     xmlDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));

@@ -876,8 +876,8 @@ public class NQL {
                 value = "\"" + value + "\"";
             }
         } else {
-            value = createSearchString(value);
-            if(comp == Comp.EQUAL){
+            value = value.startsWith("\"") && value.endsWith("\"~1") ? value : createSearchString(value);
+            if(comp == Comp.EQUAL && !value.startsWith("\"")){
                 value = "\"" + value + "\"";
             }
         }
