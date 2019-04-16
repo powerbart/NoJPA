@@ -889,7 +889,7 @@ public class NQL {
             }
         } else {
             value = value.startsWith("\"") && value.endsWith("\"~1") ? value : createSearchString(value);
-            if(comp == Comp.EQUAL && !value.startsWith("\"")){
+            if(comp == Comp.EQUAL && !value.startsWith("\"") && !value.equals("*")){
                 value = "\"" + value + "\"";
             }
         }
