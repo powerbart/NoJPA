@@ -122,27 +122,54 @@ public class SolrSearchQuery extends NQL.SearchQuery{
 
 
     protected void buildQuery(){
-        StringBuilder builder = new StringBuilder();
-        solrQuery.setQuery("*:*");
-        for (int i = 0; i < rootConstraints.size(); i++) {
-            NQL.Constraint constraint = (NQL.Constraint) rootConstraints.get(i);
-            NQL.NoSQLExpression expression = constraint.getExpression();
-            String subQuery = buildSubQuery(expression);
-            if (subQuery != null) {
-                if(builder.length() > 1){
-                    builder.append(" AND ");
+        {
+            StringBuilder builder = new StringBuilder();
+            solrQuery.setQuery("*:*");
+            for (int i = 0; i < rootConstraints.size(); i++) {
+                NQL.Constraint constraint = (NQL.Constraint) rootConstraints.get(i);
+                NQL.NoSQLExpression expression = constraint.getExpression();
+                String subQuery = buildSubQuery(expression);
+                if (subQuery != null) {
+                    if (builder.length() > 1) {
+                        builder.append(" AND ");
+                    }
+                    builder.append(subQuery);
                 }
-                builder.append(subQuery);
+            }
+            String query = builder.toString();
+            if (query == null || query.length() < 2) {
+                query = "*:*";
+            } else {
+                if (preBoost != null) {
+                    query = preBoost + " " + query;
+                }
+            }
+            log.debug("We will query = " + query);
+            solrQuery.setQuery(query);
+        }
+        {
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < filterConstraints.size(); i++) {
+                NQL.Constraint constraint = (NQL.Constraint) filterConstraints.get(i);
+                NQL.NoSQLExpression expression = constraint.getExpression();
+                String subQuery = buildSubQuery(expression);
+                if (subQuery != null) {
+                    if (builder.length() > 1) {
+                        builder.append(" AND ");
+                    }
+                    builder.append(subQuery);
+                }
+            }
+            String query = builder.toString();
+            if (query == null || query.length() < 2) {
+                query = null;
+            }
+            if(query != null) {
+                log.debug("We will add filters = " + query);
+                solrQuery.setFilterQueries(query);
             }
         }
-        String query = builder.toString();
-        if (query == null || query.length() < 2) {
-            query = "*:*";
-        } else {
-            if (preBoost != null) {
-                query = preBoost + " " + query;
-            }
-        }
+
         if(addStats){
             String[] statsFields = (String[]) statsAttributeIdentifier.toArray(new String[0]);
             solrQuery.addGetFieldStatistics(statsFields);
@@ -155,8 +182,7 @@ public class SolrSearchQuery extends NQL.SearchQuery{
             }
         }
 
-        log.debug("We will query = " + query);
-        solrQuery.setQuery(query);
+//        solrQuery.setFilterQueries("_Article_downloaded__ID_ArticleDownloaded_domainEnding__ID:(\"dk\")");
         if (startLimit != -1) {
             solrQuery.setStart(startLimit);
             solrQuery.setRows(endLimit - startLimit);

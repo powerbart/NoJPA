@@ -111,6 +111,7 @@ public class NQL {
 
         protected final Class<T> selectClass;
         protected ArrayList<Constraint> rootConstraints;
+        protected ArrayList<Constraint> filterConstraints;
 //        protected NoSQLQuery noSqlQuery;
         protected NoSQLService noSQLService;
         protected String orderByAttribute;
@@ -131,6 +132,7 @@ public class NQL {
             NoSQLService noSQLService = ModelObjectSearchService.noSQLService(selectClass);
 //            noSqlQuery = noSQLService.createQuery(selectClass);
             rootConstraints = new ArrayList<Constraint>();
+            filterConstraints = new ArrayList<Constraint>();
         }
 
 
@@ -165,6 +167,11 @@ public class NQL {
 
         public SearchQuery<T> search(Enum mockValue, Comp comp, Enum value) {
             rootConstraints.add(has(mockValue, comp, value));
+            return this;
+        }
+
+        public SearchQuery<T> filter(Enum mockValue, Comp comp, Enum value) {
+            filterConstraints.add(has(mockValue, comp, value));
             return this;
         }
 
@@ -216,6 +223,11 @@ public class NQL {
 
         public SearchQuery<T> search(Constraint constraint) {
             rootConstraints.add(constraint);
+            return this;
+        }
+
+        public SearchQuery<T> filter(Constraint constraint) {
+            filterConstraints.add(constraint);
             return this;
         }
 
