@@ -12,7 +12,7 @@ import dk.lessismore.nojpa.reflection.db.DbObjectDeleter;
 import dk.lessismore.nojpa.reflection.db.DbObjectReader;
 import dk.lessismore.nojpa.reflection.db.DbObjectWriter;
 import dk.lessismore.nojpa.reflection.db.annotations.DbStrip;
-import dk.lessismore.nojpa.reflection.db.annotations.IgnoreRemoteCache;
+import dk.lessismore.nojpa.reflection.db.annotations.DoRemoteCache;
 import dk.lessismore.nojpa.reflection.db.annotations.ModelObjectMethodListener;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttribute;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttributeContainer;
@@ -236,7 +236,7 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
     
     private ModelObjectProxy(Class<? extends ModelObjectInterface> interfaceClass) {
         this.interfaceClass = interfaceClass;
-        this.doRemoteCache = interfaceClass.getAnnotation(IgnoreRemoteCache.class) != null;
+        this.doRemoteCache = interfaceClass.getAnnotation(DoRemoteCache.class) != null;
         objectArrayCache = ObjectCacheFactory.getInstance().getObjectArrayCache(this);
         objectCache = ObjectCacheFactory.getInstance().getObjectCache(this);
         if(countOfObjects % 50 == 0){
