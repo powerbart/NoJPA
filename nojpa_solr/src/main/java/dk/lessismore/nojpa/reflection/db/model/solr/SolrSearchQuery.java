@@ -173,15 +173,15 @@ public class SolrSearchQuery extends NQL.SearchQuery{
         if(addStats){
             String[] statsFields = (String[]) statsAttributeIdentifier.toArray(new String[0]);
             solrQuery.addGetFieldStatistics(statsFields);
-        }
-        if(addFacets){
+        } else if(addFacets){
             String[] facetFields = (String[]) facetAttributeIdentifier.toArray(new String[0]);
             solrQuery.addFacetField(facetFields);
             if(facetLimit > 0) {
                 solrQuery.setFacetLimit(facetLimit);
             }
+        } else {
+            solrQuery.setFields("objectID");
         }
-        solrQuery.setFields("objectID");
 
 //        solrQuery.setFilterQueries("_Article_downloaded__ID_ArticleDownloaded_domainEnding__ID:(\"dk\")");
         if (startLimit != -1) {
