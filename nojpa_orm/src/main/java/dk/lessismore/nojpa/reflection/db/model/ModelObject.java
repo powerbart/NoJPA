@@ -112,6 +112,8 @@ public interface ModelObject extends Serializable, ModelObjectInterface, Compara
 
     public void doneSavingByDbObjectWriter();
 
+    boolean doRemoteCache();
+
     static enum ArrayIsNullResult { YES_IS_NULL, NO_NOT_NULL, DONT_KNOW };
     ArrayIsNullResult isArrayNull(String fieldName);
 

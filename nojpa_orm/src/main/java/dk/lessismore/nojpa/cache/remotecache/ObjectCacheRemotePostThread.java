@@ -40,12 +40,15 @@ public class ObjectCacheRemotePostThread extends Thread {
     }
 
     public void add(ModelObjectInterface modelObjectInterface) {
-        synchronized (toPost) {
-            String strToSend = "r:"+ (lastRemoveCounter++) +":" + ((ModelObject) modelObjectInterface).getInterface().getName() + ":" + modelObjectInterface;
-            toPost.add(strToSend);
-        }
-        synchronized (this) {
-            notify();
+        ModelObject mo = (ModelObject) modelObjectInterface;
+        if(mo.doRemoteCache()) {
+            synchronized (toPost) {
+                String strToSend = "r:" + (lastRemoveCounter++) + ":" + mo.getInterface().getName() + ":" + modelObjectInterface;
+                toPost.add(strToSend);
+            }
+            synchronized (this) {
+                notify();
+            }
         }
     }
 
