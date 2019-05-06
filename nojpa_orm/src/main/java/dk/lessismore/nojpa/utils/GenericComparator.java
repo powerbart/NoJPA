@@ -33,10 +33,10 @@ public class GenericComparator<T> implements Comparator<T> {
                 this.getMethod = someClass.getMethod(someAttribute, (Class[]) null);
             }
             this.invertDirection = invertDirection;
-            log.debug("GenericComparator :: someAttribute : " + someAttribute);
-            log.debug("GenericComparator :: someClass : " + someClass);
-            log.debug("GenericComparator :: getMethod : " + getMethod);
-            log.debug("GenericComparator :: this : " + this);
+//            log.debug("GenericComparator :: someAttribute : " + someAttribute);
+//            log.debug("GenericComparator :: someClass : " + someClass);
+//            log.debug("GenericComparator :: getMethod : " + getMethod);
+//            log.debug("GenericComparator :: this : " + this);
         } catch (Exception e) {
             e.printStackTrace();
             log.error("Some error in GenericComparator::construtor " + someAttribute);

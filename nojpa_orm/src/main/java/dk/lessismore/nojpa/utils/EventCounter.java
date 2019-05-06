@@ -79,7 +79,7 @@ public class EventCounter {
             e.countOfEvents++;
             e.totalTime += time;
         }
-        log.debug("**************** AVG-TIME("+ (totalTime / totalCounter) +") count("+ totalCounter +") totalTime("+ totalTime +") lastTime("+ time +")");
+//        log.debug("**************** AVG-TIME("+ (totalTime / totalCounter) +") count("+ totalCounter +") totalTime("+ totalTime +") lastTime("+ time +")");
     }
 
     public synchronized List<Event> getStatus(){
