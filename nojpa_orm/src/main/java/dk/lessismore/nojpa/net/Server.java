@@ -73,7 +73,7 @@ public class Server  extends Thread {
             System.out.print(s);
             System.err.print(s);
 
-            System.exit(1);
+//            System.exit(1);
         } catch (Throwable e) {
             log.error("Some exception in Server - bindAddress("+ bindAddress +") serverThreadClass("+ serverThreadClass.getSimpleName() +") port("+ port +")... " + e.toString(), e);
         }
