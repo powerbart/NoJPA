@@ -984,6 +984,7 @@ public class NQL {
                 }
             }
             if(boost > 0){
+                log.debug("Adding boost function");
                 expression.addFunction(new Boost(boost));
             }
         }
