@@ -31,10 +31,10 @@ public class SolrSearchQuery extends NQL.SearchQuery{
     }
 
 
-    private String buildSubQuery(NQL.NoSQLExpression expression){
+    private String buildSubQuery(NQL.NoSQLExpression expression, NQL.Constraint constraint){
         if(expression instanceof NQL.NoSQLNegatingExpression){
             StringBuilder builder = new StringBuilder("*:* -");
-            String subQuery = buildSubQuery(((NQL.NoSQLNegatingExpression) expression).getExpression());
+            String subQuery = buildSubQuery(((NQL.NoSQLNegatingExpression) expression).getExpression(), constraint);
             if(subQuery != null){
                 builder.append(subQuery);
             }
@@ -45,7 +45,7 @@ public class SolrSearchQuery extends NQL.SearchQuery{
             for(int i = 0; i < root.getExpressions().size(); i++) {
                 NQL.NoSQLExpression exp = root.getExpressions().get(i);
                 Integer condition = root.getConditions().get(i);
-                String subQuery = buildSubQuery(exp);
+                String subQuery = buildSubQuery(exp, constraint);
 //                log.debug("Will add subQuery("+ subQuery +") with " + NQL.NoSQLOperator.name(condition));
                 builder.append(subQuery);
                 if(root.getExpressions().size() > 1 && i + 1 < root.getExpressions().size()){
@@ -66,7 +66,7 @@ public class SolrSearchQuery extends NQL.SearchQuery{
             for(int i = 0; i < expression.getNoSQLFunctions().size(); i++){
                 NQL.NoSQLFunction noSQLFunction = expression.getNoSQLFunctions().get(i);
                 if(noSQLFunction instanceof NQL.Boost){
-    //                boostQuery = "^" + ((NQL.Boost)noSQLFunction).boost;
+                    boostQuery = "^" + ((NQL.Boost)noSQLFunction).getBoost();
                 } else {
                     otherFunctions += " " + noSQLFunction;
                 }
@@ -99,7 +99,7 @@ public class SolrSearchQuery extends NQL.SearchQuery{
                 } else if(expression.getComparator() == NQL.Comp.NOT_EQUAL){
                     return " (*:* -" + solrAttributeName + ":("+ statementValue +") "+ boostQuery +")" + otherFunctions;
                 } else {
-                    return " (" + solrAttributeName + ":("+ statementValue +") "+ boostQuery +")" + otherFunctions;
+                    return " (" + solrAttributeName + ":("+ statementValue +")"+ boostQuery +")" + otherFunctions;
                 }
             } else if(expression.isNull()){
                 if (solrAttributeName.endsWith("__DATE")) {
@@ -128,7 +128,7 @@ public class SolrSearchQuery extends NQL.SearchQuery{
             for (int i = 0; i < rootConstraints.size(); i++) {
                 NQL.Constraint constraint = (NQL.Constraint) rootConstraints.get(i);
                 NQL.NoSQLExpression expression = constraint.getExpression();
-                String subQuery = buildSubQuery(expression);
+                String subQuery = buildSubQuery(expression, constraint);
                 if (subQuery != null) {
                     if (builder.length() > 1) {
                         builder.append(" AND ");
@@ -152,7 +152,7 @@ public class SolrSearchQuery extends NQL.SearchQuery{
             for (int i = 0; i < filterConstraints.size(); i++) {
                 NQL.Constraint constraint = (NQL.Constraint) filterConstraints.get(i);
                 NQL.NoSQLExpression expression = constraint.getExpression();
-                String subQuery = buildSubQuery(expression);
+                String subQuery = buildSubQuery(expression, constraint);
                 if (subQuery != null) {
                     if (builder.length() > 1) {
                         builder.append(" AND ");

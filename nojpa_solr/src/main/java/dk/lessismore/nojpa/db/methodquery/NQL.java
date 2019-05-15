@@ -958,6 +958,10 @@ public class NQL {
 
 
     public static <M extends ModelObjectInterface> Constraint has(M mockValue, Comp comp, M model) {
+        return has(mockValue, comp, model, 0);
+    }
+
+    public static <M extends ModelObjectInterface> Constraint has(M mockValue, Comp comp, M model, int boost) {
         List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
         Pair<Class, String> pair = getSourceAttributePair();
 
@@ -979,7 +983,9 @@ public class NQL {
                     }
                 }
             }
-
+            if(boost > 0){
+                expression.addFunction(new Boost(boost));
+            }
         }
         return new NoSQLConstraint(expression, joints);
     }
@@ -1568,6 +1574,10 @@ public class NQL {
         int boost;
         public Boost(int boost){
             this.boost = boost;
+        }
+
+        public int getBoost() {
+            return boost;
         }
     }
 
