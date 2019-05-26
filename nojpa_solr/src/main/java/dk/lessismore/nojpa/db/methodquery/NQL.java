@@ -904,6 +904,34 @@ public class NQL {
     }
 
 
+    public static Constraint hasWithOr(String mockValue, Comp comp, String value) {
+        List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
+        Pair<Class, String> pair = getSourceAttributePair();
+        clearMockCallSequence();
+        DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(pair.getFirst());
+        DbAttribute dbAttribute = dbAttributeContainer.getDbAttribute(pair.getSecond());
+        DbStrip dbStripAnnotation = dbAttribute.getAttribute().getDbStripAnnotation();
+        if(dbStripAnnotation != null && !dbStripAnnotation.stripItHard() && !dbStripAnnotation.stripItSoft()){
+            if(value != null && value.length() > 0) {
+                value = "\"" + value + "\"";
+            }
+        } else {
+            value = value.startsWith("\"") && value.endsWith("\"~1") ? value : createSearchString(value);
+            if(comp == Comp.EQUAL && !value.startsWith("\"") && !value.equals("*")){
+                value = value;
+            }
+        }
+        value = (value == null || value.trim().equals("") ? "*" : value);
+        NoSQLExpression expression = null;
+        if(joints.size() == 0 && pair.getSecond().equals("objectID")){
+            expression = newLeafExpression().addConstrain("objectID", comp, value);
+        } else {
+            expression = newLeafExpression().addConstrain(makeAttributeIdentifier(pair), comp, value);
+        }
+        return new NoSQLConstraint(expression, joints);
+    }
+
+
 
     public static Constraint has(Enum mockValue, Comp comp, Enum value) {
         List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
