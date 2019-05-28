@@ -172,6 +172,7 @@ public class AttributeContainer {
                 SearchShard searchShardAnnotation = method.getAnnotation(SearchShard.class);
                 if(searchShardAnnotation != null){
                     searchShardAnnotationAttribute = methodAttribute;
+                    this.searchShardAnnotation = searchShardAnnotation;
                 }
                 methodAttribute.setSearchShardAnnotation(searchShardAnnotation);
 
@@ -466,7 +467,7 @@ public class AttributeContainer {
     }
 
     public Attribute getSearchShardAnnotationAttribute() {
-        return searchRouteAnnotationAttribute;
+        return searchShardAnnotationAttribute;
     }
 
     public static class AttPair extends Pair<Annotation, Attribute> {

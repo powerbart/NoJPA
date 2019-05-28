@@ -75,7 +75,7 @@ public class CloudSolrServiceImpl extends SolrServiceImpl {
                 SolrSearchQuery solrSearchQuery = (SolrSearchQuery) query;
                 String shard = solrSearchQuery.getShard();
                 SolrQuery solrQuery = ((SolrSearchQuery) query).getSolrQuery();
-                String colName = collectionName + (shard != null ? "_" + shard : "");
+                String colName = collectionName + (shard != null ? "_" + shard.replaceAll("\"", "") : "");
                 return new SolrResponseWrapper(server.query(colName, solrQuery));
             } else {
                 log.error("query() ... server is null ... This is okay doing startup ...");
@@ -122,7 +122,7 @@ public class CloudSolrServiceImpl extends SolrServiceImpl {
             return;
         }
         try {
-            server.add(collectionName + (shard != null ? "_" + shard : ""), solrInputDocument, AUTO_COMMIT_MS);
+            server.add(collectionName + (shard != null ? "_" + shard.replaceAll("\"", "") : ""), solrInputDocument, AUTO_COMMIT_MS);
         } catch (SolrServerException e) {
             log.error("[void : (" + collectionName + ")index]: SolrServerException: " + e.getMessage(), e);
         } catch (IOException e) {
