@@ -251,6 +251,15 @@ public class ElasticServiceImpl implements ElasticService {
         }
 
 
+        @Override
+        public void addShard(String shard) {
+
+        }
+
+        @Override
+        public String getShard() {
+            return null;
+        }
 
         @Override
         public void addField(String varName, String objectID) {

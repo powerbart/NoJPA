@@ -4,6 +4,8 @@ import java.util.Calendar;
 import java.util.List;
 
 public interface NoSQLInputDocument {
+    void addShard(String shard);
+    String getShard();
     void addField(String varName, String objectID);
     void addField(String varName, Long value);
     void addField(String varName, Integer value);

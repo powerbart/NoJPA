@@ -236,6 +236,13 @@ public class ModelObjectSearchService {
             SearchField searchField = dbAttribute.getAttribute().getAnnotation(SearchField.class);
             if(searchField != null && dbAttribute.getInlineAttributeName() == null) {
                 //log.debug("addAttributesToDocument:X3");
+                if(dbAttribute.getAttribute().getSearchShardAnnotation() != null){
+                    Object value = dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
+                    inputDocument.addShard("" + value);
+                }
+
+
+
                 if(!dbAttribute.isAssociation()) {
                     //log.debug("addAttributesToDocument:X4");
                     Object value = null;

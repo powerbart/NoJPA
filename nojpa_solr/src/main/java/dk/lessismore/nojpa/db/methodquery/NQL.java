@@ -946,6 +946,15 @@ public class NQL {
         Pair<Class, String> pair = getSourceAttributePair();
         clearMockCallSequence();
         NoSQLExpression expression = newLeafExpression().addConstrain(makeAttributeIdentifier(pair), comp, value);
+
+        DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(pair.getFirst());
+        if(dbAttributeContainer.getAttributeContainer().getSearchShardAnnotation() != null){
+            if(dbAttributeContainer.getAttributeContainer().getSearchShardAnnotationAttribute().getAttributeName().equals(pair.getSecond())){
+                expression.setSharding(true);
+            }
+        }
+
+
         return new NoSQLConstraint(expression, joints);
     }
 
@@ -1395,6 +1404,7 @@ public class NQL {
         protected boolean isNull = false;
         protected boolean isEnum = false;
         protected boolean isRouting = false;
+        protected boolean isSharding = false;
         protected String raw = null;
         protected Calendar from = null;
         protected Calendar to = null;
@@ -1483,6 +1493,14 @@ public class NQL {
 
         public void setRouting(boolean routing) {
             isRouting = routing;
+        }
+
+        public boolean isSharding() {
+            return isSharding;
+        }
+
+        public void setSharding(boolean sharding) {
+            isSharding = sharding;
         }
 
         public Calendar getFrom() {

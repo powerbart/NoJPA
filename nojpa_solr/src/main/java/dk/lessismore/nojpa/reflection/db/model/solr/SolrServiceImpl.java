@@ -45,12 +45,12 @@ public abstract class SolrServiceImpl implements SolrService {
 
     @Override
     public void index(NoSQLInputDocument noSQLInputDocument) {
-        index(((NoSQLInputDocumentWrapper) noSQLInputDocument).document);
+        index(((NoSQLInputDocumentWrapper) noSQLInputDocument).document, noSQLInputDocument.getShard());
     }
 
     public abstract void startup();
 
-    public void index(SolrInputDocument solrInputDocument){
+    public void index(SolrInputDocument solrInputDocument, String shard){
         if (solrInputDocument == null) {
             log.error("index()::solrInputDocument is null");
             return;
@@ -142,6 +142,18 @@ public abstract class SolrServiceImpl implements SolrService {
     public static class NoSQLInputDocumentWrapper implements NoSQLInputDocument {
 
         SolrInputDocument document = new SolrInputDocument();
+
+        String shard = null;
+
+        @Override
+        public void addShard(String shard) {
+            this.shard = shard;
+        }
+
+        @Override
+        public String getShard() {
+            return shard;
+        }
 
         @Override
         public void addField(String objectIDVarName, String objectID) {

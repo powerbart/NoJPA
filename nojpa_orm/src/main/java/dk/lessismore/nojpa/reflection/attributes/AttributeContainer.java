@@ -58,6 +58,9 @@ public class AttributeContainer {
     private SearchRoute searchRouteAnnotation = null;
     private Attribute searchRouteAnnotationAttribute = null;
 
+    private SearchShard searchShardAnnotation = null;
+    private Attribute searchShardAnnotationAttribute = null;
+
     /**
      * The attributes of the target class. key=attributeName, value=Attribute
      */
@@ -165,6 +168,12 @@ public class AttributeContainer {
                     searchRouteAnnotationAttribute = methodAttribute;
                 }
                 methodAttribute.setSearchRouteAnnotation(searchRouteAnnotation);
+
+                SearchShard searchShardAnnotation = method.getAnnotation(SearchShard.class);
+                if(searchShardAnnotation != null){
+                    searchShardAnnotationAttribute = methodAttribute;
+                }
+                methodAttribute.setSearchShardAnnotation(searchShardAnnotation);
 
                 if((method.getName().startsWith("get") && method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(Locale.class))){
                     methodAttribute.setTranslatedAssociation( true );
@@ -448,8 +457,15 @@ public class AttributeContainer {
     public SearchRoute getSearchRouteAnnotation() {
         return searchRouteAnnotation;
     }
+    public SearchShard getSearchShardAnnotation() {
+        return searchShardAnnotation;
+    }
 
     public Attribute getSearchRouteAnnotationAttribute() {
+        return searchRouteAnnotationAttribute;
+    }
+
+    public Attribute getSearchShardAnnotationAttribute() {
         return searchRouteAnnotationAttribute;
     }
 

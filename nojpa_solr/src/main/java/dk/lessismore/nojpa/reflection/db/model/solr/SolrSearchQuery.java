@@ -20,6 +20,9 @@ public class SolrSearchQuery extends NQL.SearchQuery{
 
     SolrQuery solrQuery;
 
+    private String shard = null;
+
+
     public SolrSearchQuery(Class selectClass) {
         super(selectClass);
         solrQuery = new SolrQuery();
@@ -29,6 +32,11 @@ public class SolrSearchQuery extends NQL.SearchQuery{
     public SolrQuery getSolrQuery() {
         return solrQuery;
     }
+
+    public String getShard() {
+        return shard;
+    }
+
 
 
     private String buildSubQuery(NQL.NoSQLExpression expression, NQL.Constraint constraint){
@@ -81,6 +89,9 @@ public class SolrSearchQuery extends NQL.SearchQuery{
 
             String statementValue = null;
             if(!expression.isNotNull() && !expression.isNull()){
+                if(expression.isSharding() && expression.getValue() != null){
+                    this.shard = "" + expression.getValue();
+                }
                 if(expression.getValueClazz().equals(String.class) || expression.isEnum()){
                     statementValue = "" + expression.getValue();
                 } else if(expression.getValue() instanceof Calendar){

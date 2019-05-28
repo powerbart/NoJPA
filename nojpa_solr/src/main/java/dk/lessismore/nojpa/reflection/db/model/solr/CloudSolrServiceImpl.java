@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import dk.lessismore.nojpa.db.methodquery.NQL;
 import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLResponse;
+import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
@@ -71,6 +72,25 @@ public class CloudSolrServiceImpl extends SolrServiceImpl {
     public NoSQLResponse query(NQL.SearchQuery query) {
         try {
             if (server != null) {
+                SolrSearchQuery solrSearchQuery = (SolrSearchQuery) query;
+                String shard = solrSearchQuery.getShard();
+                SolrQuery solrQuery = ((SolrSearchQuery) query).getSolrQuery();
+                String colName = collectionName + (shard != null ? "_" + shard : "");
+                return new SolrResponseWrapper(server.query(colName, solrQuery));
+            } else {
+                log.error("query() ... server is null ... This is okay doing startup ...");
+                return null;
+            }
+        } catch (Exception e) {
+            log.error("[QueryResponse : (" + collectionName + ")query]: SolrException: " + e.getMessage(), e);
+        }
+        return null;
+
+    }
+
+    private NoSQLResponse query(NQL.SearchQuery query, String collectionName) {
+        try {
+            if (server != null) {
                 return new SolrResponseWrapper(server.query(collectionName, ((SolrSearchQuery)query).getSolrQuery()));
             } else {
                 log.error("query() ... server is null ... This is okay doing startup ...");
@@ -96,13 +116,13 @@ public class CloudSolrServiceImpl extends SolrServiceImpl {
     }
 
     @Override
-    public void index(SolrInputDocument solrInputDocument) {
+    public void index(SolrInputDocument solrInputDocument, String shard) {
         if (solrInputDocument == null) {
             log.error("index()::solrInputDocument is null");
             return;
         }
         try {
-            server.add(collectionName, solrInputDocument, AUTO_COMMIT_MS);
+            server.add(collectionName + (shard != null ? "_" + shard : ""), solrInputDocument, AUTO_COMMIT_MS);
         } catch (SolrServerException e) {
             log.error("[void : (" + collectionName + ")index]: SolrServerException: " + e.getMessage(), e);
         } catch (IOException e) {
