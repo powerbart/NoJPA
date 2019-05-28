@@ -91,27 +91,26 @@ public class SolrSearchQuery extends NQL.SearchQuery{
             if(!expression.isNotNull() && !expression.isNull()){
                 if(expression.isSharding() && expression.getValue() != null){
                     this.shard = "" + expression.getValue();
-                } else {
-                    if(expression.getValueClazz().equals(String.class) || expression.isEnum()){
-                        statementValue = "" + expression.getValue();
-                    } else if(expression.getValue() instanceof Calendar){
-                        SimpleDateFormat xmlDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'"); //2011-11-28T18:30:30Z
-                        xmlDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-                        //solrObj.addField(solrAttributeName, xmlDateFormat.format(((Calendar) value).getTime()));
-                        statementValue = xmlDateFormat.format(((Calendar) expression.getValue()).getTime());
-                    } else if(expression.getValueClazz().equals(Integer.class) || expression.getValueClazz().equals(Float.class) || expression.getValueClazz().equals(Long.class) || expression.getValueClazz().equals(Double.class) || expression.getValueClazz().equals(Number.class) ){
-                        statementValue = "" + expression.getValue();
-                    }
+                }
+                if(expression.getValueClazz().equals(String.class) || expression.isEnum()){
+                    statementValue = "" + expression.getValue();
+                } else if(expression.getValue() instanceof Calendar){
+                    SimpleDateFormat xmlDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'"); //2011-11-28T18:30:30Z
+                    xmlDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                    //solrObj.addField(solrAttributeName, xmlDateFormat.format(((Calendar) value).getTime()));
+                    statementValue = xmlDateFormat.format(((Calendar) expression.getValue()).getTime());
+                } else if(expression.getValueClazz().equals(Integer.class) || expression.getValueClazz().equals(Float.class) || expression.getValueClazz().equals(Long.class) || expression.getValueClazz().equals(Double.class) || expression.getValueClazz().equals(Number.class) ){
+                    statementValue = "" + expression.getValue();
+                }
 
-                    if(expression.getComparator() == NQL.Comp.EQUAL_OR_LESS){
-                        return " (" + solrAttributeName + ":[* TO " + statementValue + "]"+ boostQuery +")" + otherFunctions;
-                    } else if(expression.getComparator() == NQL.Comp.EQUAL_OR_GREATER){
-                        return " (" + solrAttributeName + ":[" + statementValue + " TO *]"+ boostQuery +")" + otherFunctions;
-                    } else if(expression.getComparator() == NQL.Comp.NOT_EQUAL){
-                        return " (*:* -" + solrAttributeName + ":("+ statementValue +") "+ boostQuery +")" + otherFunctions;
-                    } else {
-                        return " (" + solrAttributeName + ":("+ statementValue +")"+ boostQuery +")" + otherFunctions;
-                    }
+                if(expression.getComparator() == NQL.Comp.EQUAL_OR_LESS){
+                    return " (" + solrAttributeName + ":[* TO " + statementValue + "]"+ boostQuery +")" + otherFunctions;
+                } else if(expression.getComparator() == NQL.Comp.EQUAL_OR_GREATER){
+                    return " (" + solrAttributeName + ":[" + statementValue + " TO *]"+ boostQuery +")" + otherFunctions;
+                } else if(expression.getComparator() == NQL.Comp.NOT_EQUAL){
+                    return " (*:* -" + solrAttributeName + ":("+ statementValue +") "+ boostQuery +")" + otherFunctions;
+                } else {
+                    return " (" + solrAttributeName + ":("+ statementValue +")"+ boostQuery +")" + otherFunctions;
                 }
             } else if(expression.isNull()){
                 if (solrAttributeName.endsWith("__DATE")) {
