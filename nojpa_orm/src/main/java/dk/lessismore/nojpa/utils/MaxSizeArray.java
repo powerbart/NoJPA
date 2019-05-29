@@ -23,7 +23,7 @@ public class MaxSizeArray<E> {
     }
 
 
-    public void add(E e){
+    public synchronized void add(E e){
         popCounter = popCounter % maxSize;
         if(array[popCounter] != null){
             pullCounter = ++pullCounter % maxSize;
@@ -31,7 +31,7 @@ public class MaxSizeArray<E> {
         array[popCounter++] = e;
     }
 
-    public E pop(){
+    public synchronized E pop(){
         if(popCounter == 0){
             popCounter = maxSize;
         }
@@ -45,7 +45,7 @@ public class MaxSizeArray<E> {
         }
     }
 
-    public E pull(){
+    public synchronized E pull(){
         if(array[pullCounter] != null){
             E toReturn = (E) array[pullCounter];
             array[pullCounter] = null;

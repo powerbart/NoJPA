@@ -5,6 +5,8 @@ import dk.lessismore.nojpa.reflection.ClassReflector;
 import dk.lessismore.nojpa.reflection.attributes.AttributeContainer;
 import dk.lessismore.nojpa.reflection.db.annotations.ModelObjectLifeCycleListener;
 import dk.lessismore.nojpa.reflection.util.ReflectionUtil;
+import dk.lessismore.nojpa.utils.MaxSizeArray;
+import dk.lessismore.nojpa.utils.MaxSizeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,6 +69,66 @@ public class ModelObjectService {
             }
 
         }
+    }
+
+
+
+
+    protected static class SaveLaterQueue {
+
+        Thread lazyThread = null;
+        private final MaxSizeArray<ModelObjectInterface> objectsToSave = new MaxSizeArray<>(50);
+
+        public SaveLaterQueue(){
+            lazyThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+
+                    while (true){
+                        try {
+                            ModelObjectInterface m = null;
+                            while((m = objectsToSave.pull()) != null){
+                                save(m);
+                            }
+                        } catch (Exception e){
+                            log.error("Some error in LazyThread: " + e, e);
+                        }
+                        try {
+                            synchronized (lazyThread){
+                                this.wait(1_000);
+                            }
+                        } catch (Exception e) {
+                        }
+                    }
+
+                }
+            });
+            lazyThread.setName("lazyThread");
+            lazyThread.start();
+        }
+
+        public void add(ModelObjectInterface m){
+            try{
+                objectsToSave.add(m);
+                synchronized (lazyThread){
+                    lazyThread.notify();
+                }
+            } catch (Exception e){
+                log.error("Adding to LazyThread: " + e, e);
+            }
+        }
+
+
+    }
+
+    private static SaveLaterQueue saveLaterQueue = null;
+
+
+    public static <T extends ModelObjectInterface> void maybeSaveLazy(T object) {
+        if(saveLaterQueue == null){
+            saveLaterQueue = new SaveLaterQueue();
+        }
+        saveLaterQueue.add(object);
     }
 
     public static <T extends ModelObjectInterface> void delete(T object) {
