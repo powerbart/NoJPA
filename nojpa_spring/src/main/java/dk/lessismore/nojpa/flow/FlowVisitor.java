@@ -86,7 +86,7 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
             int beforeQSize = getCurrentQueueSize();
 
 
-            for (int i = 0; i < 60; i++) {
+            for (int i = 0; i < 30; i++) {
                 log.debug("WorkQueue-checking: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +") sameCount: " + sameCount);
                 if(getCurrentQueueSize() < getMinimumQueueSize()){
                     numberOfLoops++;
