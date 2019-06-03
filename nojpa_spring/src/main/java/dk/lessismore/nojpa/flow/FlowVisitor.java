@@ -116,7 +116,7 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
 
         //Waiting for 60 secs more ....
         int beforeQSize = getCurrentQueueSize();
-        for (int i = 0; i < 30 || (getCurrentQueueSize() > 0 && i < 60); i++) {
+        for (int i = 0; i < 60 || (getCurrentQueueSize() > 0 && i < 90); i++) {
             log.debug("WorkQueue-WAITING-FOR-FINISH: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +") sameCount: " + sameCount);
             try {
                 Thread.sleep(1_000);
