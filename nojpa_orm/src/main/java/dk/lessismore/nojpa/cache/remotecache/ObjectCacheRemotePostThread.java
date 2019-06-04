@@ -68,15 +68,10 @@ public class ObjectCacheRemotePostThread extends Thread {
     public void run() {
         while (ObjectCacheRemote.shouldRun()) {
             try {
-                log.debug("run:1");
                 if(errorCounter < 5) log.debug("Is now making connection to host(" + host.host + ") port(" + host.port + ")");
-                log.debug("run:2");
                 socket = new Socket(host.host, host.port);
-                log.debug("run:3");
                 outputStream = socket.getOutputStream();
-                log.debug("run:4");
                 while (ObjectCacheRemote.shouldRun()) {
-                    log.debug("run:5");
                     String s = null;
                     while ((s = pull()) != null) {
                         log.debug("Will write to host(" + host.host + ") port(" + host.port + ") -> " + s);
@@ -84,12 +79,15 @@ public class ObjectCacheRemotePostThread extends Thread {
                         errorCounter = 1;
                     }
                     synchronized (this) {
-                        log.debug("run:8");
-                        wait(5 * 1000);
-                        log.debug("run:9");
+                        wait(10_000);
                     }
                 }
             } catch (Exception e) {
+                try {
+                    this.sleep(5_000);
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
                 if(errorCounter < 5) log.info("Some error in run() when sending data to host(" + host.host + ") port(" + host.port + ") " + e);
                 try {
                     if (outputStream != null) outputStream.close();
@@ -102,23 +100,17 @@ public class ObjectCacheRemotePostThread extends Thread {
                 socket = null;
                 outputStream = null;
                 try {
-                    log.debug("run:11");
                     if(errorCounter > 120){
-                        log.debug("run:12");
-                        errorCounter = 120;
+                        errorCounter = 0;
                     }
-                    log.debug("run:13");
                     if(errorCounter < 5 || errorCounter % 10 == 0) log.info("Will now sleep in " + errorCounter + " sec. And the retry...");
                     this.sleep((errorCounter) * 1000); // Will sleep for max 5 mins
-                    log.debug("run:14");
                     errorCounter++;
                 } catch (InterruptedException e1) {
                     e1.printStackTrace();
                 }
             }
-            log.debug("run:15");
         }
-        log.debug("run:16");
     }
 
     public void close() {
