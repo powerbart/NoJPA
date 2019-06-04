@@ -87,21 +87,15 @@ public class ModelObjectService {
 
                     while (true){
                         try {
-                            log.debug("SaveLaterQueue:1");
                             ModelObjectInterface m = null;
                             while((m = objectsToSave.pull()) != null){
-                                log.debug("SaveLaterQueue:2");
                                 save(m);
-                                log.debug("SaveLaterQueue:3");
                             }
-                            log.debug("SaveLaterQueue:4");
                         } catch (Exception e){
                             log.error("Some error in LazyThread: " + e, e);
                         }
                         try {
-                            log.debug("SaveLaterQueue:5");
                             synchronized (this){
-                                log.debug("SaveLaterQueue:6");
                                 long start = System.currentTimeMillis();
                                 this.wait(10_000);
                                 log.debug("Was sleeping in " + (System.currentTimeMillis() - start) + "ms");
