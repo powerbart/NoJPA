@@ -98,10 +98,8 @@ public class ModelObjectService {
                             synchronized (this){
                                 long start = System.currentTimeMillis();
                                 this.wait(10_000);
-                                log.debug("Was sleeping in " + (System.currentTimeMillis() - start) + "ms");
                             }
                         } catch (Exception e) {
-                            log.debug("SaveLaterQueue:7:" + e, e);
                         }
                     }
 
@@ -118,7 +116,6 @@ public class ModelObjectService {
                     lazyThread.notify();
                 }
             } catch (Exception e){
-                log.error("Adding to LazyThread: " + e, e);
             }
         }
 
