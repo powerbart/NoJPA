@@ -191,7 +191,7 @@ public class SolrSearchQuery extends NQL.SearchQuery{
                 solrQuery.setFacetLimit(facetLimit);
             }
         } else {
-            solrQuery.setFields("objectID");
+            solrQuery.setFields("objectID,score");
         }
 
 //        solrQuery.setFilterQueries("_Article_downloaded__ID_ArticleDownloaded_domainEnding__ID:(\"dk\")");
