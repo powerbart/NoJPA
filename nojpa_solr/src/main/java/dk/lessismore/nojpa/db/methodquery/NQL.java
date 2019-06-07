@@ -888,7 +888,7 @@ public class NQL {
                 value = "\"" + value + "\"";
             }
         } else {
-            value = value.startsWith("\"") && value.endsWith("\"~1") ? value : createSearchString(value);
+            value = value.startsWith("\"") && value.contains("\"~") ? value : createSearchString(value);
             if(comp == Comp.EQUAL && !value.startsWith("\"") && !value.equals("*")){
                 value = "\"" + value + "\"";
             }
