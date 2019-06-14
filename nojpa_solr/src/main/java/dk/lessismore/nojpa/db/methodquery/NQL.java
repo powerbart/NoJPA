@@ -317,6 +317,11 @@ public class NQL {
             return list;
         }
 
+        public NList<T> getList(float scoreAbove) {
+            NList<T> list = selectObjectsFromDb(scoreAbove);
+            return list;
+        }
+
         public T getFirst() {
             NList<T> list = limit(1).getList();
             if (list.size() > 0) {
@@ -578,6 +583,10 @@ public class NQL {
 
         @SuppressWarnings("unchecked")
         private NList<T> selectObjectsFromDb() {
+            return selectObjectsFromDb(-1);
+        }
+
+        private NList<T> selectObjectsFromDb(float scoreAbove) {
 //            TimerWithPrinter timer = new TimerWithPrinter("selectObjectsFromDb", "/tmp/luuux-timer-getPosts.log");
 //            log.debug("DEBUG-TRACE", new Exception("DEBUG"));
             List<T> toReturn = new ArrayList<T>();
@@ -611,6 +620,7 @@ public class NQL {
 //                int size = queryResponse.getResults().size();
                 int size = queryResponse.size();
 //                timer.markLap("4");
+                boolean loadObject = true;
                 for(int i = 0; i < size; i++){
 //                    SolrDocument entries = queryResponse.getResults().get(i);
 //                    String objectID = entries.get("objectID").toString();
@@ -628,18 +638,24 @@ public class NQL {
                         }
 
                         if (entries.containsKey("score")) {
-                            log.debug("objectID(" + objectID + ") has score(" + entries.get("score") + ")");
+                            float score = new Float("" + entries.get("score"));
+                            log.debug("objectID(" + objectID + ") has score(" + score + ")");
+                            if(scoreAbove > 0 && score < scoreAbove){
+                                loadObject = false;
+                            }
                         }
                         if (entries.containsKey("_explain_")) {
                             log.debug("_explain_ :: (" + entries.get("_explain_") + ")");
                         }
                     }
 
-                    T t = MQL.selectByID(selectClass, objectID);
-                    if(t == null){
-                        log.error("We have a problem with the sync between the DB & Solr ... Can't find objectID("+ objectID +") class("+ selectClass +")" , new Exception("Sync problem"));
-                    } else {
-                        toReturn.add(t);
+                    if(loadObject) {
+                        T t = MQL.selectByID(selectClass, objectID);
+                        if (t == null) {
+                            log.error("We have a problem with the sync between the DB & Solr ... Can't find objectID(" + objectID + ") class(" + selectClass + ")", new Exception("Sync problem"));
+                        } else {
+                            toReturn.add(t);
+                        }
                     }
                 }
 //                timer.markLap("5");
