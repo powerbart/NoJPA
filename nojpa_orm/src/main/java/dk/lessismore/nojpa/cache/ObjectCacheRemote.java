@@ -3,6 +3,7 @@ package dk.lessismore.nojpa.cache;
 import dk.lessismore.nojpa.cache.remotecache.ObjectCacheRemotePostThread;
 import dk.lessismore.nojpa.cache.remotecache.ObjectCacheRemoteServerThread;
 import dk.lessismore.nojpa.net.Server;
+import dk.lessismore.nojpa.reflection.db.model.ModelObject;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.resources.PropertyResources;
 import dk.lessismore.nojpa.resources.PropertyService;
@@ -145,9 +146,12 @@ public class ObjectCacheRemote  {
 
 
     public static void removeFromRemoteCache(ModelObjectInterface modelObject) {
-        for (int i = 0; postThreads != null && i < postThreads.length; i++) {
-            log.debug("removeFromRemoteCache(" + i + "/" + postThreads.length + ")->" + postThreads[i] + " please remove ("+ (modelObject == null ? null : modelObject.getInterface().getSimpleName() + ":" + modelObject)+")");
-            postThreads[i].add(modelObject);
+        ModelObject mo = (ModelObject) modelObject;
+        if(mo.doRemoteCache()){
+            for (int i = 0; postThreads != null && i < postThreads.length; i++) {
+                log.debug("removeFromRemoteCache(" + i + "/" + postThreads.length + ")->" + postThreads[i] + " please remove ("+ (modelObject == null ? null : modelObject.getInterface().getSimpleName() + ":" + modelObject)+")");
+                postThreads[i].add(modelObject);
+            }
         }
     }
 }

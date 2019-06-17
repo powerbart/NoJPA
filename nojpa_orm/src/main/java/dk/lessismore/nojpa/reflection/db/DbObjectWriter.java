@@ -435,6 +435,7 @@ public class DbObjectWriter {
                             //if(associationModelObject.isNew() || associationModelObject.isDirty()) { TODO: Import this line again?
                                 //log.debug("saveAssociations:6:(" + attributeName + ")");
                                 successfull = successfull && DbObjectWriter.writeObjectToDb(associationModelObject, modelObjects, associationConstrain, newAttributePath, deep);
+                                ObjectCacheRemote.removeFromRemoteCache(associationModelObject);
                             //}
                         }
                     } else {
