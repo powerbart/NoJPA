@@ -828,7 +828,7 @@ public class MQL {
             log.debug("Will run: DbObjectSelector.iterateObjectsFromDb(selectClass, statement, visitor)");
             statement.addExpression(getExpressionAddJoins());
             int count = this.getCount();
-            for(int i = 0; i < count; ) {
+            for(int i = 0; i < count && !visitor.getDone(); ) {
                 this.limit(i, i + interval);
                 DbObjectSelector.iterateObjectsFromDb(selectClass, statement, visitor);
                 i = i + interval;
