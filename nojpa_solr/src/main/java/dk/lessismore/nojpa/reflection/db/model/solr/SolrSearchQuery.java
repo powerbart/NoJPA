@@ -8,9 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.*;
 
 import static dk.lessismore.nojpa.db.methodquery.NQL.makeAttributeIdentifier;
 
@@ -184,6 +182,49 @@ public class SolrSearchQuery extends NQL.SearchQuery{
         if(addStats){
             String[] statsFields = (String[]) statsAttributeIdentifier.toArray(new String[0]);
             solrQuery.addGetFieldStatistics(statsFields);
+        } else if(addDateFacets){
+            DateRangeFacet dateRangeFacet = (DateRangeFacet) dateFacetAttributeIdentifier.get(0);
+            String[] facetFields = (String[]) facetAttributeIdentifier.toArray(new String[0]);
+//            solrQuery.addFacetField(facetFields);
+//            solrQuery.addGetFieldStatistics(facetFields);
+
+//            Map<String, String> inner = new HashMap<>();
+//            inner.put("myavg", "avg(_Article_analyzed__ID_ArticleAnalyzed_negative__DOUBLE)");
+//            Map<String, Object> m = new HashMap<>();
+//            m.put("type", "range");
+//            m.put("field", "_Article_creationDate__DATE");
+//            m.put("start", "NOW-28DAYS");
+//            m.put("end", "NOW/DAY");
+//            m.put("gap", "+1DAY");
+//            m.put("facet", inner);
+
+            String json = "" +
+                    "{ nqlFacet:{\n" +
+                    "    type : range,\n" +
+                    "    field : \"_Article_creationDate__DATE\",\n" +
+                    "    start :\""+ dateRangeFacet.getStart() +"\", \n" +
+                    "    end : \""+ dateRangeFacet.getEnd() +"\", \n" +
+                    "    gap : \""+ dateRangeFacet.getGap() +"\"\n" +
+                    "    facet:{\n";
+            for(int i = 0; i < facetFields.length; i++){
+                DateRangeFacet.STATS[] stats = dateRangeFacet.getStats();
+                for(int s = 0; s < stats.length; s++) {
+                    json += "      " + stats[s] + facetFields[i] + " : \""+ stats[s].toString().toLowerCase() +"(" + facetFields[i] + ")\"" + (i + 1 < facetFields.length || s + 1 < stats.length  ? ", \n" : "\n");
+                }
+            }
+            json +=   "    }\n" +
+                    "  }" +
+                    "}" +
+                    "";
+            System.out.println("");
+            System.out.println(json);
+            System.out.println("");
+
+            solrQuery.add("json.facet", json);
+
+//            solrQuery.addFacetQuery("avg("+ facetFields[0] +")");
+            //solrQuery.addStatsFieldFacets(dateRangeFacet.getVariable(), facetFields);
+            //solrQuery.addDateRangeFacet(dateRangeFacet.getVariable(), dateRangeFacet.getEnd().getTime(), dateRangeFacet.getStart().getTime(), dateRangeFacet.getGap());
         } else if(addFacets){
             String[] facetFields = (String[]) facetAttributeIdentifier.toArray(new String[0]);
             solrQuery.addFacetField(facetFields);

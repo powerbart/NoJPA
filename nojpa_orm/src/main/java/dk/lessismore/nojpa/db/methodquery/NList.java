@@ -4,6 +4,7 @@ import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.utils.Pair;
 import org.elasticsearch.search.aggregations.Aggregations;
 
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -16,6 +17,7 @@ public interface NList<C extends ModelObjectInterface> extends List<C> {
 
     <N extends Number> NStats<N> getStats(N variable);
     List<Pair<String, Long>> getFacet(Object variable);
+    Object getDateRangeFacet(Object variable);
     Aggregations getAggregations();
 
 

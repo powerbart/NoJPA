@@ -9,6 +9,7 @@ import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectSearchService;
 import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLResponse;
 import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLService;
+import dk.lessismore.nojpa.reflection.db.model.solr.SolrResponseWrapper;
 import dk.lessismore.nojpa.utils.Pair;
 import org.apache.commons.lang.StringUtils;
 import org.apache.solr.common.SolrDocument;
@@ -121,9 +122,11 @@ public class NQL {
         protected String preBoost = null;
         protected boolean addStats = false;
         protected boolean addFacets = false;
+        protected boolean addDateFacets = false;
         protected int facetLimit = 10;
         protected List<String> statsAttributeIdentifier = new ArrayList<>();
         protected List<String> facetAttributeIdentifier = new ArrayList<>();
+        protected List<DateRangeFacet> dateFacetAttributeIdentifier = new ArrayList<>();
 
 
 
@@ -357,6 +360,58 @@ public class NQL {
             String shortName = makeAttributeIdentifier(pair);
             String attributeIdentifier = createFinalSolrAttributeName(joints, shortName);
             facetAttributeIdentifier.add(attributeIdentifier);
+            NQL.clearMockCallSequence();
+            return this;
+        }
+
+
+        public static class DateRangeFacet {
+
+            public enum STATS { AVG, SUM, MEAN, MIN, MAX};
+
+            String variable;
+            String start;
+            String end;
+            String gap;
+            STATS[] stats;
+
+            public DateRangeFacet(String variable, String start, String end, String gap, STATS ... stats) {
+                this.variable = variable;
+                this.start = start;
+                this.end = end;
+                this.gap = gap;
+                this.stats = stats;
+            }
+
+            public String getVariable() {
+                return variable;
+            }
+
+            public String getStart() {
+                return start;
+            }
+
+            public String getEnd() {
+                return end;
+            }
+
+            public String getGap() {
+                return gap;
+            }
+
+            public STATS[] getStats() {
+                return stats;
+            }
+        }
+
+
+        public SearchQuery<T> getDateRangeFacet(Object variable, String start, String end, String gap, DateRangeFacet.STATS... stats){
+            addDateFacets = true;
+            List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
+            Pair<Class, String> pair = getSourceAttributePair();
+            String shortName = makeAttributeIdentifier(pair);
+            String attributeIdentifier = createFinalSolrAttributeName(joints, shortName);
+            dateFacetAttributeIdentifier.add(new DateRangeFacet(attributeIdentifier, start, end, gap, stats));
             NQL.clearMockCallSequence();
             return this;
         }
@@ -712,6 +767,13 @@ public class NQL {
                 String attributeIdentifier = createFinalSolrAttributeName(joints, solrName);
                 NQL.clearMockCallSequence();
                 return queryResponse.getFacet(attributeIdentifier);
+            } else if (methodName.equals("getDateRangeFacet")) {
+                List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
+                Pair<Class, String> pair = getSourceAttributePair();
+                String solrName = makeAttributeIdentifier(pair);
+                String attributeIdentifier = createFinalSolrAttributeName(joints, solrName);
+                NQL.clearMockCallSequence();
+                return queryResponse.getDateRangeFacet();
             } else if (methodName.equals("getAggregations")) {
                 return queryResponse.getAggregations();
             }

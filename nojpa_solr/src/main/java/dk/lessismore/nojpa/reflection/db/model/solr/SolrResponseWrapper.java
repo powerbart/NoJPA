@@ -6,6 +6,7 @@ import dk.lessismore.nojpa.utils.Pair;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.FieldStatsInfo;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.response.json.BucketJsonFacet;
 import org.elasticsearch.search.aggregations.Aggregations;
 
 import java.util.ArrayList;
@@ -83,6 +84,10 @@ public class SolrResponseWrapper implements NoSQLResponse {
         }
 
         return toReturn;
+    }
+
+    public List<BucketJsonFacet> getDateRangeFacet() {
+        return this.query.getJsonFacetingResponse().getBucketBasedFacets("nqlFacet").getBuckets();
     }
 
 
