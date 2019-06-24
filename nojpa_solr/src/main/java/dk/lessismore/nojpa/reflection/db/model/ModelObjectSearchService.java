@@ -106,29 +106,9 @@ public class ModelObjectSearchService {
         return noSQLServices.get(aClass.getSimpleName());
     }
 
-    public static <T extends ModelObjectInterface> void put(T object) {
+    public static <T extends ModelObjectInterface> void put(T object, String postfixShardName) {
         try{
-
-
-
             ModelObject modelObject = (ModelObject) object;
-
-
-            log.info("Adding (" + modelObject.getInterface().getSimpleName() + ")[" + object + "]");
-            try{
-                if(trace){
-                    FileWriter fileWriter = new FileWriter("/tmp/trace-ModelObjectSearchService.log", true);
-                    PrintWriter pw = new PrintWriter(fileWriter);
-                    new Exception("DEBUG-TRACE").printStackTrace(pw);
-                    pw.flush();
-                    pw.close();
-                    fileWriter.close();
-                }
-            } catch (Exception e){
-                log.error("Can't trace the puts...  " + e, e);
-            }
-
-//            log.debug("DEBUG-TRACE Adding (" + modelObject.getInterface().getSimpleName() + ")[" + object + "]", new Exception("DEBUG-TRACE"));
 
             String key = serverKey(object);
             if (!noSQLServices.containsKey(key)) {
@@ -136,6 +116,7 @@ public class ModelObjectSearchService {
             }
             NoSQLService noSQLService = noSQLServices.get(key);
             NoSQLInputDocument inDoc = noSQLService.createInputDocument(getInterfaceClass(object), object);
+            inDoc.addPostfixShardName(postfixShardName);
             addAttributesToDocument(object, "", new HashMap<>(), key, inDoc);
             try {
                 noSQLService.index(inDoc);
@@ -147,6 +128,10 @@ public class ModelObjectSearchService {
             throw new RuntimeException(e);
 
         }
+    }
+
+    public static <T extends ModelObjectInterface> void put(T object) {
+        put(object, null);
     }
 
     public static <T extends ModelObjectInterface> void putWithoutCommit(T object) {

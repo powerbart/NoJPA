@@ -308,6 +308,16 @@ public class ElasticServiceImpl implements ElasticService {
 //            node.set(varName, values);
         }
 
+        @Override
+        public void addPostfixShardName(String postfixShardName) {
+
+        }
+
+        @Override
+        public String getPostfixShardName() {
+            return null;
+        }
+
 //        @Override
 //        public void addField(String varName, Enum value) {
 //            node.put(varName, "" + value);

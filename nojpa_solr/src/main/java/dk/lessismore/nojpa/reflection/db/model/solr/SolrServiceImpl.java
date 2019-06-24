@@ -45,7 +45,7 @@ public abstract class SolrServiceImpl implements SolrService {
 
     @Override
     public void index(NoSQLInputDocument noSQLInputDocument) {
-        index(((NoSQLInputDocumentWrapper) noSQLInputDocument).document, noSQLInputDocument.getShard());
+        index(((NoSQLInputDocumentWrapper) noSQLInputDocument).document, noSQLInputDocument.getShard() + (noSQLInputDocument.getPostfixShardName() != null ? noSQLInputDocument.getPostfixShardName() : ""));
     }
 
     public abstract void startup();
@@ -144,6 +144,7 @@ public abstract class SolrServiceImpl implements SolrService {
         SolrInputDocument document = new SolrInputDocument();
 
         String shard = null;
+        String postfixShardName = null;
 
         @Override
         public void addShard(String shard) {
@@ -193,6 +194,16 @@ public abstract class SolrServiceImpl implements SolrService {
         @Override
         public void addField(String objectIDVarName, List values) {
             document.addField(objectIDVarName, values);
+        }
+
+        @Override
+        public void addPostfixShardName(String postfixShardName) {
+            this.postfixShardName = postfixShardName;
+        }
+
+        @Override
+        public String getPostfixShardName() {
+            return postfixShardName;
         }
 //
 //        @Override

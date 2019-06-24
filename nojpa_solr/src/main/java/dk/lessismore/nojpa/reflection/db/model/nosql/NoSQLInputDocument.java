@@ -14,5 +14,8 @@ public interface NoSQLInputDocument {
     void addField(String varName, Double value);
     void addField(String varName, Calendar value);
     void addField(String varName, List values);
+
+    void addPostfixShardName(String postfixShardName);
+    String getPostfixShardName();
 //    void addField(String varName, Object values);
 }
