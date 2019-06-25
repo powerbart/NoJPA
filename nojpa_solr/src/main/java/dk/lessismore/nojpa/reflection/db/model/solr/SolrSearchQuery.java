@@ -138,7 +138,7 @@ public class SolrSearchQuery extends NQL.SearchQuery{
                 NQL.Constraint constraint = (NQL.Constraint) rootConstraints.get(i);
                 NQL.NoSQLExpression expression = constraint.getExpression();
                 String subQuery = buildSubQuery(expression, constraint);
-                if (subQuery != null) {
+                if (subQuery != null && subQuery.length() > 0) {
                     if (builder.length() > 1) {
                         builder.append(" AND ");
                     }
@@ -162,7 +162,7 @@ public class SolrSearchQuery extends NQL.SearchQuery{
                 NQL.Constraint constraint = (NQL.Constraint) filterConstraints.get(i);
                 NQL.NoSQLExpression expression = constraint.getExpression();
                 String subQuery = buildSubQuery(expression, constraint);
-                if (subQuery != null) {
+                if (subQuery != null && subQuery.length() > 0) {
                     if (builder.length() > 1) {
                         builder.append(" AND ");
                     }
