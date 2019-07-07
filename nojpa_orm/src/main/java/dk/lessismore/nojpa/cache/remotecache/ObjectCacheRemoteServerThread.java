@@ -63,7 +63,9 @@ public class ObjectCacheRemoteServerThread extends Thread {
                 log.debug("validateRemoveCounter: first number is " + lastRemoveCounter);
             } else {
                 if(n == lastRemoveCounter + 1){
-                    log.debug("validateRemoveCounter: FINE("+ n +") " + lastRemoveCounter);
+                    if(n % 10 == 0) {
+                        log.debug("validateRemoveCounter: FINE(" + n + ") " + lastRemoveCounter);
+                    }
                 } else {
                     log.error("validateRemoveCounter: EXPECTED(" + (lastRemoveCounter + 1) +") GOT("+ n +")");
 
@@ -138,6 +140,7 @@ public class ObjectCacheRemoteServerThread extends Thread {
             int byteLength = 0;
             StringTokenizer tok = null;
             input = client.getInputStream();
+            int debugCounter = 0;
             while (run) {
                 try {
                     byteLength = input.read(dataBytes, 0, dataBytes.length);
@@ -179,11 +182,13 @@ public class ObjectCacheRemoteServerThread extends Thread {
                             validateRemoveCounter(number);
                             String clazzName = curLineToks.nextToken();
                             String objectID = curLineToks.nextToken();
-                            log.debug("Parameters: clazz(" + clazzName + ") objectID(" + objectID + ")");
+//                            log.debug("Parameters: clazz(" + clazzName + ") objectID(" + objectID + ")");
                             Class<?> aClass = Class.forName(clazzName);
                             ObjectCache objectCache = ObjectCacheFactory.getInstance().getObjectCache(aClass);
                             if (objectCache != null) {
-                                log.debug("Removing from cache: clazz(" + clazzName + ") objectID(" + objectID + ")");
+                                if(debugCounter++ < 200 || debugCounter % 100 == 0) {
+                                    log.debug("Removing from cache: clazz(" + clazzName + ") objectID(" + objectID + ")");
+                                }
                                 objectCache.removeFromCache(objectID);
                             }
                         } else if (curLine.startsWith("ll:")) {
