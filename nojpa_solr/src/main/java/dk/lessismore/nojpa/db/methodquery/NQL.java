@@ -686,6 +686,7 @@ public class NQL {
                 int size = queryResponse.size();
 //                timer.markLap("4");
                 boolean loadObject = true;
+                int loadedObjects = this.startLimit;
                 for(int i = 0; i < size; i++){
 //                    SolrDocument entries = queryResponse.getResults().get(i);
 //                    String objectID = entries.get("objectID").toString();
@@ -705,7 +706,7 @@ public class NQL {
                         if (entries.containsKey("score")) {
                             float score = new Float("" + entries.get("score"));
                             log.debug("objectID(" + objectID + ") has score(" + score + ")");
-                            if(scoreAbove > 0 && score < scoreAbove){
+                            if(loadedObjects > 6 && (scoreAbove > 0 && score < scoreAbove)){
                                 loadObject = false;
                             }
                         }
@@ -715,6 +716,7 @@ public class NQL {
                     }
 
                     if(loadObject) {
+                        loadedObjects++;
                         T t = MQL.selectByID(selectClass, objectID);
                         if (t == null) {
                             log.error("We have a problem with the sync between the DB & Solr ... Can't find objectID(" + objectID + ") class(" + selectClass + ")", new Exception("Sync problem"));
