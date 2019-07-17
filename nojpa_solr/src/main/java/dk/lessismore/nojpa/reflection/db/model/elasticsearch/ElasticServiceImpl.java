@@ -148,7 +148,7 @@ public class ElasticServiceImpl implements ElasticService {
 
 
     @Override
-    public NoSQLResponse query(NQL.SearchQuery query) {
+    public NoSQLResponse query(NQL.SearchQuery query, String postShardName) {
         try {
             if(client != null){
                 ElasticSearchQuery elasticSearchQuery = (ElasticSearchQuery) query;

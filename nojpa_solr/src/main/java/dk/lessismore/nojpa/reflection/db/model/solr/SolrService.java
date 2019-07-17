@@ -17,6 +17,6 @@ import java.util.Locale;
  */
 public interface SolrService extends NoSQLService {
 
-    QueryResponse query(SolrQuery query);
+    QueryResponse query(SolrQuery query, String postShardName);
 
 }

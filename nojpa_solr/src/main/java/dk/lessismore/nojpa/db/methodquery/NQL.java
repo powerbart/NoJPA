@@ -321,7 +321,17 @@ public class NQL {
         }
 
         public NList<T> getList(float scoreAbove) {
-            NList<T> list = selectObjectsFromDb(scoreAbove);
+            NList<T> list = selectObjectsFromDb(scoreAbove, null);
+            return list;
+        }
+
+        public NList<T> getList(String postShardName) {
+            NList<T> list = selectObjectsFromDb(-1, postShardName);
+            return list;
+        }
+
+        public NList<T> getList(float scoreAbove, String postShardName) {
+            NList<T> list = selectObjectsFromDb(scoreAbove, postShardName);
             return list;
         }
 
@@ -638,10 +648,10 @@ public class NQL {
 
         @SuppressWarnings("unchecked")
         private NList<T> selectObjectsFromDb() {
-            return selectObjectsFromDb(-1);
+            return selectObjectsFromDb(-1, null);
         }
 
-        private NList<T> selectObjectsFromDb(float scoreAbove) {
+        private NList<T> selectObjectsFromDb(float scoreAbove, String postShardName) {
 //            TimerWithPrinter timer = new TimerWithPrinter("selectObjectsFromDb", "/tmp/luuux-timer-getPosts.log");
 //            log.debug("DEBUG-TRACE", new Exception("DEBUG"));
             List<T> toReturn = new ArrayList<T>();
@@ -664,7 +674,7 @@ public class NQL {
 //                }
 //                noSqlQuery.setParam("bf", "sum(_Post_pageViewCounter__ID_Counter_count__LONG,8)");
                 long start = System.currentTimeMillis();
-                NoSQLResponse queryResponse = noSQLService.query(this);
+                NoSQLResponse queryResponse = noSQLService.query(this, postShardName);
                 log.info("[{}ms size: {}] Will query: {}", System.currentTimeMillis() - start, queryResponse.getNumFound(), toStringDebugQuery());
 //                log.info("[{}ms size: {}] Will solr query: {}", System.currentTimeMillis() - start, queryResponse.getResults().getNumFound(), toStringDebugQuery());
 
