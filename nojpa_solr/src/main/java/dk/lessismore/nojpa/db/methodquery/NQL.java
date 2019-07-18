@@ -655,6 +655,7 @@ public class NQL {
 //            TimerWithPrinter timer = new TimerWithPrinter("selectObjectsFromDb", "/tmp/luuux-timer-getPosts.log");
 //            log.debug("DEBUG-TRACE", new Exception("DEBUG"));
             List<T> toReturn = new ArrayList<T>();
+            List<Float> scoresList = new ArrayList<Float>();
             try {
 
                 buildQuery();
@@ -708,6 +709,8 @@ public class NQL {
                             log.debug("objectID(" + objectID + ") has score(" + score + ")");
                             if(loadedObjects > 6 && (scoreAbove > 0 && score < scoreAbove)){
                                 loadObject = false;
+                            } else {
+                                scoresList.add(score);
                             }
                         }
                         if (entries.containsKey("_explain_")) {
@@ -730,7 +733,7 @@ public class NQL {
                 return (NList<T>) Proxy.newProxyInstance(
                         this.getClass().getClassLoader(),
                         new Class[]{NList.class},
-                        new NListImpl(queryResponse, toReturn));
+                        new NListImpl(queryResponse, toReturn, scoresList));
 
             } catch (Exception e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
@@ -756,16 +759,25 @@ public class NQL {
 
         private final NoSQLResponse queryResponse;
         private final List resultList;
+        private final List<Float> scoreList;
 
-        public NListImpl(NoSQLResponse queryResponse, List resultList) {
+        public NListImpl(NoSQLResponse queryResponse, List resultList, List<Float> scoreList) {
             this.queryResponse = queryResponse;
             this.resultList = resultList;
+            this.scoreList = scoreList;
         }
 
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             String methodName = method.getName();
             if (methodName.equals("getNumberFound")) {
                 return queryResponse.getNumFound();
+            } else if (methodName.equals("getScore")) {
+                int i = (int) args[0];
+                if(scoreList != null && scoreList.size() > i){
+                    return scoreList.get(i);
+                } else {
+                    return null;
+                }
             } else if (methodName.equals("getStats")) {
                 List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
                 Pair<Class, String> pair = getSourceAttributePair();
