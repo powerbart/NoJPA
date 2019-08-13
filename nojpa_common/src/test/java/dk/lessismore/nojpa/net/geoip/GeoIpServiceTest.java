@@ -6,8 +6,38 @@ import dk.lessismore.nojpa.net.geo.GeoClient;
 import org.apache.http.client.fluent.Request;
 import org.junit.Test;
 
+import java.net.InetAddress;
+
 public class GeoIpServiceTest {
 
+
+    @Test
+    public void firstAsia() throws Exception {
+
+        String[] hs = new String[]{"scmp.com", "bangkokpost.com", "channelnewsasia.com", "afr.com", "thehindu.com"};
+        for(int i = 0; i < hs.length; i++){
+            InetAddress byName = InetAddress.getByName(hs[i]);
+            System.out.println(byName);
+            GeoClient.Geo lookup = GeoClient.lookup(byName.getHostAddress());
+            System.out.println("-----------------------------------");
+            System.out.println(hs[i] + "->" + lookup);
+            System.out.println("-----------------------------------");
+        }
+    }
+
+    @Test
+    public void firstUs() throws Exception {
+
+        String[] hs = new String[]{"rollingstone.com", "nypost.com", "jezebel.com", "denverpost.com", "usatoday.com"};
+        for(int i = 0; i < hs.length; i++){
+            InetAddress byName = InetAddress.getByName(hs[i]);
+            System.out.println(byName);
+            GeoClient.Geo lookup = GeoClient.lookup(byName.getHostAddress());
+            System.out.println("-----------------------------------");
+            System.out.println(hs[i] + "->" + lookup);
+            System.out.println("-----------------------------------");
+        }
+    }
 
     @Test
     public void firstTest() throws Exception {
