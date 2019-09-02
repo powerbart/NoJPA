@@ -21,7 +21,7 @@ public interface NList<C extends ModelObjectInterface> extends List<C> {
     Float getScore(int index);
     Aggregations getAggregations();
 
-
+    Object getImpl();
 
 
 }

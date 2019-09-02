@@ -754,6 +754,15 @@ public class NQL {
     }
 
 
+    public static <T extends ModelObjectInterface> NList<T> reInit(NList<T> prev, List<T> newContent){
+        NList<T> ts = (NList<T>) Proxy.newProxyInstance(
+                prev.getClass().getClassLoader(),
+                new Class[]{NList.class},
+                new NListImpl(((NListImpl) prev.getImpl()).queryResponse, newContent, ((NListImpl) prev.getImpl()).scoreList));
+        log.debug("reInit-ts : " + ts.size());
+        return ts;
+    }
+
 
     private static class NListImpl implements InvocationHandler {
 
@@ -771,6 +780,8 @@ public class NQL {
             String methodName = method.getName();
             if (methodName.equals("getNumberFound")) {
                 return queryResponse.getNumFound();
+            } else if (methodName.equals("getImpl")) {
+                return this;
             } else if (methodName.equals("getScore")) {
                 int i = (int) args[0];
                 if(scoreList != null && scoreList.size() > i){
