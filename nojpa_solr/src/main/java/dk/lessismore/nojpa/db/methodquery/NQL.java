@@ -733,7 +733,7 @@ public class NQL {
                 return (NList<T>) Proxy.newProxyInstance(
                         this.getClass().getClassLoader(),
                         new Class[]{NList.class},
-                        new NListImpl(queryResponse, toReturn, scoresList));
+                        new NListImpl(queryResponse, toReturn, scoresList, postShardName));
 
             } catch (Exception e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
@@ -758,7 +758,7 @@ public class NQL {
         NList<T> ts = (NList<T>) Proxy.newProxyInstance(
                 prev.getClass().getClassLoader(),
                 new Class[]{NList.class},
-                new NListImpl(((NListImpl) prev.getImpl()).queryResponse, newContent, ((NListImpl) prev.getImpl()).scoreList));
+                new NListImpl(((NListImpl) prev.getImpl()).queryResponse, newContent, ((NListImpl) prev.getImpl()).scoreList, ((NListImpl) prev.getImpl()).postShardName));
         log.debug("reInit-ts : " + ts.size());
         return ts;
     }
@@ -769,17 +769,21 @@ public class NQL {
         private final NoSQLResponse queryResponse;
         private final List resultList;
         private final List<Float> scoreList;
+        private final String postShardName;
 
-        public NListImpl(NoSQLResponse queryResponse, List resultList, List<Float> scoreList) {
+        public NListImpl(NoSQLResponse queryResponse, List resultList, List<Float> scoreList, String postShardName) {
             this.queryResponse = queryResponse;
             this.resultList = resultList;
             this.scoreList = scoreList;
+            this.postShardName = postShardName;
         }
 
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             String methodName = method.getName();
             if (methodName.equals("getNumberFound")) {
                 return queryResponse.getNumFound();
+            } else if (methodName.equals("getPostShardName")) {
+                return postShardName;
             } else if (methodName.equals("getImpl")) {
                 return this;
             } else if (methodName.equals("getScore")) {
