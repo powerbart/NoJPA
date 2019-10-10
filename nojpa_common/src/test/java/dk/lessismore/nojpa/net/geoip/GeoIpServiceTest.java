@@ -14,7 +14,7 @@ public class GeoIpServiceTest {
     @Test
     public void firstAsia() throws Exception {
 
-        String[] hs = new String[]{"scmp.com", "bangkokpost.com", "channelnewsasia.com", "afr.com", "thehindu.com"};
+        String[] hs = new String[]{"scmp.com", "bangkokpost.com", "channelnewsasia.com", "afr.com", "thehindu.com", "allafrica.com", "arabnews.com"};
         for(int i = 0; i < hs.length; i++){
             InetAddress byName = InetAddress.getByName(hs[i]);
             System.out.println(byName);
