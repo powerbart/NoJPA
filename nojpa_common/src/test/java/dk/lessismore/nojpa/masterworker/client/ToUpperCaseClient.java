@@ -21,6 +21,14 @@ public class ToUpperCaseClient {
 
     public static void main(String[] args) throws Exception {
 
+
+        String s = "Some is this,, and this is not";
+
+        System.out.println(s.replaceAll(",,", ","));
+
+
+
+
         log.debug("debugg");
         log.warn("warnnn");
         log.error("errr");
