@@ -14,7 +14,7 @@ public interface NoSQLService {
     String getName();
 
     void index(NoSQLInputDocument solrInputDocument);
-    NoSQLResponse query(NQL.SearchQuery query);
+    NoSQLResponse query(NQL.SearchQuery query, String postShardName);
 
     void commit();
     void optimize();

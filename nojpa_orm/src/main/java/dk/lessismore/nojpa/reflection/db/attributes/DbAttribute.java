@@ -2,6 +2,7 @@ package dk.lessismore.nojpa.reflection.db.attributes;
 
 import dk.lessismore.nojpa.reflection.attributes.*;
 import dk.lessismore.nojpa.reflection.db.annotations.DbInline;
+import dk.lessismore.nojpa.reflection.db.annotations.DontFollowField;
 import dk.lessismore.nojpa.reflection.db.model.*;
 import dk.lessismore.nojpa.db.*;
 
@@ -181,6 +182,11 @@ public class DbAttribute implements Serializable {
 
     public boolean isInlineInterface() {
         return attribute.getAttributeClass().getAnnotation(DbInline.class) != null;
+//Shouldn't be: (because the creation of database breaks... )        return attribute.getDeclaringClass().getAnnotation(DbInline.class) != null;
+    }
+
+    public boolean isDontFollowField() {
+        return attribute.getAnnotation(DontFollowField.class) != null;
 //Shouldn't be: (because the creation of database breaks... )        return attribute.getDeclaringClass().getAnnotation(DbInline.class) != null;
     }
 

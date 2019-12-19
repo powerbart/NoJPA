@@ -406,6 +406,10 @@ public class DbObjectWriter {
             //If its an association attribute.
             if (dbAttribute.isAssociation() && !(dbAttribute.getAttribute().getAttributeClass().isEnum() && dbAttribute.isMultiAssociation())) {
 
+                if(dbAttribute.isDontFollowField()){
+                    //log.debug("saveAssociations:2:(" + attributeName + ") continue ... not in cache.  for " + modelObject.getClass().getSimpleName() + " ID:" + modelObject);
+                    continue;
+                }
                 if(dbAttribute.isInlineInterface()){
                     //log.debug("saveAssociations:2:(" + attributeName + ") continue ... not in cache.  for " + modelObject.getClass().getSimpleName() + " ID:" + modelObject);
                     continue;

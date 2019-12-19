@@ -69,13 +69,13 @@ public class CloudSolrServiceImpl extends SolrServiceImpl {
     }
 
     @Override
-    public NoSQLResponse query(NQL.SearchQuery query) {
+    public NoSQLResponse query(NQL.SearchQuery query, String postShardName) {
         try {
             if (server != null) {
                 SolrSearchQuery solrSearchQuery = (SolrSearchQuery) query;
                 String shard = solrSearchQuery.getShard();
                 SolrQuery solrQuery = ((SolrSearchQuery) query).getSolrQuery();
-                String colName = collectionName + (shard != null ? "_" + shard.replaceAll("\"", "") : "");
+                String colName = collectionName + (shard != null ? "_" + shard.replaceAll("\"", "") : "") + (postShardName != null ? postShardName : "");
                 return new SolrResponseWrapper(server.query(colName, solrQuery));
             } else {
                 log.error("query() ... server is null ... This is okay doing startup ...");
@@ -87,21 +87,21 @@ public class CloudSolrServiceImpl extends SolrServiceImpl {
         return null;
 
     }
-
-    private NoSQLResponse query(NQL.SearchQuery query, String collectionName) {
-        try {
-            if (server != null) {
-                return new SolrResponseWrapper(server.query(collectionName, ((SolrSearchQuery)query).getSolrQuery()));
-            } else {
-                log.error("query() ... server is null ... This is okay doing startup ...");
-                return null;
-            }
-        } catch (Exception e) {
-            log.error("[QueryResponse : (" + collectionName + ")query]: SolrException: " + e.getMessage(), e);
-        }
-        return null;
-
-    }
+//
+//    private NoSQLResponse query(NQL.SearchQuery query, String collectionName) {
+//        try {
+//            if (server != null) {
+//                return new SolrResponseWrapper(server.query(collectionName, ((SolrSearchQuery)query).getSolrQuery()));
+//            } else {
+//                log.error("query() ... server is null ... This is okay doing startup ...");
+//                return null;
+//            }
+//        } catch (Exception e) {
+//            log.error("[QueryResponse : (" + collectionName + ")query]: SolrException: " + e.getMessage(), e);
+//        }
+//        return null;
+//
+//    }
 
     @Override
     public NamedList<Object> request(SolrRequest req) {

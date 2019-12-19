@@ -321,7 +321,17 @@ public class NQL {
         }
 
         public NList<T> getList(float scoreAbove) {
-            NList<T> list = selectObjectsFromDb(scoreAbove);
+            NList<T> list = selectObjectsFromDb(scoreAbove, null);
+            return list;
+        }
+
+        public NList<T> getList(String postShardName) {
+            NList<T> list = selectObjectsFromDb(-1, postShardName);
+            return list;
+        }
+
+        public NList<T> getList(float scoreAbove, String postShardName) {
+            NList<T> list = selectObjectsFromDb(scoreAbove, postShardName);
             return list;
         }
 
@@ -638,13 +648,14 @@ public class NQL {
 
         @SuppressWarnings("unchecked")
         private NList<T> selectObjectsFromDb() {
-            return selectObjectsFromDb(-1);
+            return selectObjectsFromDb(-1, null);
         }
 
-        private NList<T> selectObjectsFromDb(float scoreAbove) {
+        private NList<T> selectObjectsFromDb(float scoreAbove, String postShardName) {
 //            TimerWithPrinter timer = new TimerWithPrinter("selectObjectsFromDb", "/tmp/luuux-timer-getPosts.log");
 //            log.debug("DEBUG-TRACE", new Exception("DEBUG"));
             List<T> toReturn = new ArrayList<T>();
+            List<Float> scoresList = new ArrayList<Float>();
             try {
 
                 buildQuery();
@@ -664,7 +675,7 @@ public class NQL {
 //                }
 //                noSqlQuery.setParam("bf", "sum(_Post_pageViewCounter__ID_Counter_count__LONG,8)");
                 long start = System.currentTimeMillis();
-                NoSQLResponse queryResponse = noSQLService.query(this);
+                NoSQLResponse queryResponse = noSQLService.query(this, postShardName);
                 log.info("[{}ms size: {}] Will query: {}", System.currentTimeMillis() - start, queryResponse.getNumFound(), toStringDebugQuery());
 //                log.info("[{}ms size: {}] Will solr query: {}", System.currentTimeMillis() - start, queryResponse.getResults().getNumFound(), toStringDebugQuery());
 
@@ -676,6 +687,7 @@ public class NQL {
                 int size = queryResponse.size();
 //                timer.markLap("4");
                 boolean loadObject = true;
+                int loadedObjects = this.startLimit;
                 for(int i = 0; i < size; i++){
 //                    SolrDocument entries = queryResponse.getResults().get(i);
 //                    String objectID = entries.get("objectID").toString();
@@ -695,8 +707,10 @@ public class NQL {
                         if (entries.containsKey("score")) {
                             float score = new Float("" + entries.get("score"));
                             log.debug("objectID(" + objectID + ") has score(" + score + ")");
-                            if(scoreAbove > 0 && score < scoreAbove){
+                            if(loadedObjects > 6 && (scoreAbove > 0 && score < scoreAbove)){
                                 loadObject = false;
+                            } else {
+                                scoresList.add(score);
                             }
                         }
                         if (entries.containsKey("_explain_")) {
@@ -705,6 +719,7 @@ public class NQL {
                     }
 
                     if(loadObject) {
+                        loadedObjects++;
                         T t = MQL.selectByID(selectClass, objectID);
                         if (t == null) {
                             log.error("We have a problem with the sync between the DB & Solr ... Can't find objectID(" + objectID + ") class(" + selectClass + ")", new Exception("Sync problem"));
@@ -718,7 +733,7 @@ public class NQL {
                 return (NList<T>) Proxy.newProxyInstance(
                         this.getClass().getClassLoader(),
                         new Class[]{NList.class},
-                        new NListImpl(queryResponse, toReturn));
+                        new NListImpl(queryResponse, toReturn, scoresList, postShardName));
 
             } catch (Exception e) {
                 e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
@@ -739,21 +754,45 @@ public class NQL {
     }
 
 
+    public static <T extends ModelObjectInterface> NList<T> reInit(NList<T> prev, List<T> newContent){
+        NList<T> ts = (NList<T>) Proxy.newProxyInstance(
+                prev.getClass().getClassLoader(),
+                new Class[]{NList.class},
+                new NListImpl(((NListImpl) prev.getImpl()).queryResponse, newContent, ((NListImpl) prev.getImpl()).scoreList, ((NListImpl) prev.getImpl()).postShardName));
+        log.debug("reInit-ts : " + ts.size());
+        return ts;
+    }
+
 
     private static class NListImpl implements InvocationHandler {
 
         private final NoSQLResponse queryResponse;
         private final List resultList;
+        private final List<Float> scoreList;
+        private final String postShardName;
 
-        public NListImpl(NoSQLResponse queryResponse, List resultList) {
+        public NListImpl(NoSQLResponse queryResponse, List resultList, List<Float> scoreList, String postShardName) {
             this.queryResponse = queryResponse;
             this.resultList = resultList;
+            this.scoreList = scoreList;
+            this.postShardName = postShardName;
         }
 
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
             String methodName = method.getName();
             if (methodName.equals("getNumberFound")) {
                 return queryResponse.getNumFound();
+            } else if (methodName.equals("getPostShardName")) {
+                return postShardName;
+            } else if (methodName.equals("getImpl")) {
+                return this;
+            } else if (methodName.equals("getScore")) {
+                int i = (int) args[0];
+                if(scoreList != null && scoreList.size() > i){
+                    return scoreList.get(i);
+                } else {
+                    return null;
+                }
             } else if (methodName.equals("getStats")) {
                 List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
                 Pair<Class, String> pair = getSourceAttributePair();

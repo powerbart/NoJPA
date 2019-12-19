@@ -18,9 +18,11 @@ public interface NList<C extends ModelObjectInterface> extends List<C> {
     <N extends Number> NStats<N> getStats(N variable);
     List<Pair<String, Long>> getFacet(Object variable);
     Object getDateRangeFacet(Object variable);
+    Float getScore(int index);
+    String getPostShardName();
     Aggregations getAggregations();
 
-
+    Object getImpl();
 
 
 }

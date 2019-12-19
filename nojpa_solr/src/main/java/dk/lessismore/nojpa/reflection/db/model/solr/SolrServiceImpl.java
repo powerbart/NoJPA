@@ -66,7 +66,7 @@ public abstract class SolrServiceImpl implements SolrService {
 
 
     @Override
-    public NoSQLResponse query(NQL.SearchQuery query) {
+    public NoSQLResponse query(NQL.SearchQuery query, String postShardName) {
         try {
             if(server != null){
                 return new SolrResponseWrapper(server.query(((SolrSearchQuery)query).getSolrQuery()));
@@ -82,7 +82,7 @@ public abstract class SolrServiceImpl implements SolrService {
     }
 
     @Override
-    public QueryResponse query(SolrQuery query) {
+    public QueryResponse query(SolrQuery query, String postShardName) {
         try {
             if(server != null){
                 return server.query(query);
