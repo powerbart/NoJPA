@@ -11,6 +11,7 @@ import dk.lessismore.nojpa.reflection.db.annotations.*;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttribute;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttributeContainer;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
+import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
@@ -36,6 +37,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -117,25 +119,34 @@ public class DatabaseCreator {
                 }
             }
         }
-        for (Annotation classAnno : targetClass.getAnnotations()) {
-            if (classAnno instanceof IndexClass) {
-                for (String idx : ((IndexClass) classAnno).value()) {
-                    DatabaseIndex databaseIndex = new DatabaseIndex();
-                    databaseIndex.setName(getIndexName(targetClass.getSimpleName(), idx));
-                    databaseIndex.setIdx(idx);
-                    databaseIndex.setClz(IndexField.DatabaseIndexClass.NORMAL);
-                    indices.put(idx, databaseIndex);
+        Set<Class<?>> allInterfaces = new LinkedHashSet<>();
+        allInterfaces.add(targetClass);
+        allInterfaces.addAll(ClassUtils.getAllInterfaces(targetClass));
+
+        Set<String> classIndeces = new LinkedHashSet<>();
+        Set<String> classUniqueIndeces = new LinkedHashSet<>();
+        for (Class<?> parent : allInterfaces) {
+            for (Annotation anno : parent.getAnnotations()) {
+                if (anno instanceof IndexClass) {
+                    classIndeces.addAll(Arrays.asList(((IndexClass) anno).value()));
+                } else if (anno instanceof IndexUniqueClass) {
+                    classUniqueIndeces.addAll(Arrays.asList(((IndexUniqueClass) anno).value()));
                 }
             }
-            if (classAnno instanceof IndexUniqueClass) {
-                for (String idx : ((IndexUniqueClass) classAnno).value()) {
-                    DatabaseIndex databaseIndex = new DatabaseIndex();
-                    databaseIndex.setName(getIndexName(targetClass.getSimpleName(), idx));
-                    databaseIndex.setIdx(idx);
-                    databaseIndex.setClz(IndexField.DatabaseIndexClass.UNIQUE);
-                    indices.put(idx, databaseIndex);
-                }
-            }
+        }
+        for (String idx : classIndeces) {
+            DatabaseIndex databaseIndex = new DatabaseIndex();
+            databaseIndex.setName(getIndexName(targetClass.getSimpleName(), idx));
+            databaseIndex.setIdx(idx);
+            databaseIndex.setClz(IndexField.DatabaseIndexClass.NORMAL);
+            indices.put(idx, databaseIndex);
+        }
+        for (String idx : classUniqueIndeces) {
+            DatabaseIndex databaseIndex = new DatabaseIndex();
+            databaseIndex.setName(getIndexName(targetClass.getSimpleName(), idx));
+            databaseIndex.setIdx(idx);
+            databaseIndex.setClz(IndexField.DatabaseIndexClass.UNIQUE);
+            indices.put(idx, databaseIndex);
         }
         return indices;
     }
