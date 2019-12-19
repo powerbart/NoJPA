@@ -41,6 +41,13 @@ public class MySqlLeafExpression implements LeafExpression {
         return this;
     }
 
+    public LeafExpression addConstrainOwnAttribute(String leftAttributeName, int comparator, String rightAttributeName) {
+        statement = leftAttributeName + " " + WhereSQLStatement.comparatorAsStr[comparator] + " " + rightAttributeName;
+        preparedStatement = leftAttributeName + " " + WhereSQLStatement.comparatorAsStr[comparator] + " " + rightAttributeName;
+        preparedValue = "";
+        return this;
+    }
+
 //    public LeafExpression whereIn(String attributeName, String[] values) {
 //        statement = attributeName + " IN " + MySqlUtil.convertToSql(values);
 //        preparedStatement = attributeName + " IN ?";

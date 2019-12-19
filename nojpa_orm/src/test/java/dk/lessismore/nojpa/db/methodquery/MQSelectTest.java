@@ -8,6 +8,8 @@ import org.junit.Test;
 import static dk.lessismore.nojpa.db.methodquery.MQL.*;
 import static dk.lessismore.nojpa.db.methodquery.MQL.Comp.EQUAL;
 import static dk.lessismore.nojpa.db.methodquery.MQL.Comp.EQUAL_OR_GREATER;
+import static dk.lessismore.nojpa.db.methodquery.MQL.Comp.GREATER;
+import static dk.lessismore.nojpa.db.methodquery.MQL.Comp.LESS;
 import static dk.lessismore.nojpa.db.methodquery.MQL.Comp.LIKE;
 import static dk.lessismore.nojpa.db.methodquery.MQL.Order.ASC;
 
@@ -101,6 +103,19 @@ public class MQSelectTest {
                 .orderBy(carMock.getBrand(), ASC)
                 .getArray();
         assertArrayEquals(new Car[] {ford}, cars);
+    }
+
+
+    @Test
+    public void testSelectByOwnAttribute() throws Exception {
+        Person personMock = MQL.mock(Person.class);
+
+        MQL.select(personMock)
+                .where(MQL.hasOwnAttribute("name", LESS, "url"))
+                .where(MQL.hasOwnAttribute("birthDate", GREATER, "lastModified"))
+                .where(personMock.getName(), EQUAL, "A")
+                .orderBy(personMock.getBirthDate(), ASC)
+                .getList();
     }
 
     @Test
@@ -279,7 +294,7 @@ public class MQSelectTest {
         assertNull(planetExpress);
     }
 
-    
+
     @Test
     public void testDefault() throws Exception {
         BigAttObject bigAttObject = ModelObjectService.create(BigAttObject.class);
@@ -301,8 +316,8 @@ public class MQSelectTest {
         assertNotNull(bigAttObject.getCalendarNow());
 
     }
-    
-    
+
+
     @Test
     public void testDoubleReferences() throws Exception {
         Company m = MQL.mock(Company.class);
