@@ -279,7 +279,7 @@ public class MQL {
             rootConstraints.add(has(mockValue, comp, value));
             return this;
         }
-        
+
         public SelectQuery<T> where(double mockValue, Comp comp, double value) {
             rootConstraints.add(has(mockValue, comp, value));
             return this;
@@ -1179,6 +1179,11 @@ public class MQL {
     // This is only needed for reflection
     public static Constraint hasUnsafe(Class<? extends ModelObjectInterface> modelInterface, String attributeName, Comp comp, String value) {
         Expression expression = newLeafExpression().addConstrain(makeAttributeIdentifier(modelInterface, attributeName), compToNum(comp), value);
+        return new ExpressionConstraint(expression, Collections.<Pair<Class, String>>emptyList());
+    }
+
+    public static Constraint hasOwnAttribute(String leftAttributeName, Comp comp, String rightAttributeName) {
+        Expression expression = newLeafExpression().addConstrainOwnAttribute(leftAttributeName, compToNum(comp), rightAttributeName);
         return new ExpressionConstraint(expression, Collections.<Pair<Class, String>>emptyList());
     }
 
