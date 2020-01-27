@@ -45,6 +45,11 @@ public class GeoIpServiceTest {
     }
 
     @Test
+    public void firstLt() throws Exception {
+            System.out.println(GeoClient.lookup("78.56.95.51"));
+    }
+
+    @Test
     public void first0Test() throws Exception {
         System.out.println(GeoClient.lookup("78.56.108.121"));
     }
