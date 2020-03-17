@@ -205,6 +205,11 @@ public class ModelObjectSearchService {
 //        }
 //    }
 
+    private static String storedObjectsKey(String prefix, String objectID, DbAttribute dbAttribute){
+        return prefix + ":" + dbAttribute.getAttributeName() + ":" + objectID;
+
+    }
+
     private static <T extends ModelObjectInterface> void addAttributesToDocument(T object, String prefix, HashMap<String, String> storedObjects, String key, NoSQLInputDocument inputDocument) {
         //log.debug("addAttributesToDocument:X0");
         ModelObject modelObject = (ModelObject) object;
@@ -241,9 +246,10 @@ public class ModelObjectSearchService {
                     //log.debug("addAttributesToDocument:X8");
                     addAttributeValueToStatement(dbAttribute, inputDocument, value, prefix);
                     //log.debug("addAttributesToDocument:X9");
-                    if(value != null && !storedObjects.containsKey(((ModelObject) value).getInterface() + ":" + value.getObjectID())){
+                    if(value != null && !storedObjects.containsKey(storedObjectsKey(prefix, value.getObjectID(), dbAttribute))){
+//                    if(value != null && !storedObjects.containsKey(((ModelObject) value).getInterface() + ":" + value.getObjectID())){
                         //log.debug("addAttributesToDocument:X10");
-                        storedObjects.put(((ModelObject) value).getInterface() + ":" + value.getObjectID(), value.getObjectID());
+                        storedObjects.put(storedObjectsKey(prefix, value.getObjectID(), dbAttribute), value.getObjectID());
                         addAttributesToDocument(value, dbAttribute.getSolrAttributeName(prefix), storedObjects, key, inputDocument);
                         //log.debug("addAttributesToDocument:X11");
 //TODO: Don't think this is needed...  Was making too m  put(value, dbAttribute.getSolrAttributeName(prefix), storedObjects, key, inputDocument);
@@ -263,8 +269,8 @@ public class ModelObjectSearchService {
                         HashMap<String, ArrayList<Object>> values = new HashMap<String, ArrayList<Object>>();
                         for(int i = 0; vs != null && i < vs.length; i++){
                             ModelObjectInterface value = vs[i];
-                            if(value != null && !storedObjects.containsKey(((ModelObject) value).getInterface() + ":" + value.getObjectID())){
-                                storedObjects.put(((ModelObject) value).getInterface() + ":" + value.getObjectID(), value.getObjectID());
+                            if(value != null && !storedObjects.containsKey(storedObjectsKey(prefix, value.getObjectID(), dbAttribute))){
+                                storedObjects.put(storedObjectsKey(prefix, value.getObjectID(), dbAttribute), value.getObjectID());
                                 getSearchValues(value, dbAttribute.getSolrAttributeName(prefix), storedObjects, values);
                             }
                         }
@@ -305,16 +311,16 @@ public class ModelObjectSearchService {
                     }
                 } else if (!dbAttribute.isMultiAssociation()) {
                     ModelObjectInterface value = (ModelObjectInterface) dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
-                    if(value != null && !storedObjects.containsKey(((ModelObject) value).getInterface() + ":" +value.getObjectID())){
-                        storedObjects.put(((ModelObject) value).getInterface() + ":" + value.getObjectID(), value.getObjectID());
+                    if(value != null && !storedObjects.containsKey(storedObjectsKey(prefix, value.getObjectID(), dbAttribute))){
+                        storedObjects.put(storedObjectsKey(prefix, value.getObjectID(), dbAttribute), value.getObjectID());
                         getSearchValues(value, dbAttribute.getSolrAttributeName(prefix), storedObjects, values);
                     }
                 } else {
                     ModelObjectInterface[] vs = (ModelObjectInterface[]) dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
                     for(int i = 0; vs != null && i < vs.length; i++){
                         ModelObjectInterface value = vs[i];
-                        if(value != null && !storedObjects.containsKey(value.getObjectID())){
-                            storedObjects.put(((ModelObject) value).getInterface() + ":" + value.getObjectID(), value.getObjectID());
+                        if(value != null && !storedObjects.containsKey(storedObjectsKey(prefix, value.getObjectID(), dbAttribute))){
+                            storedObjects.put(storedObjectsKey(prefix, value.getObjectID(), dbAttribute), value.getObjectID());
                             getSearchValues(value, dbAttribute.getSolrAttributeName(prefix), storedObjects, values);
                         }
                     }
