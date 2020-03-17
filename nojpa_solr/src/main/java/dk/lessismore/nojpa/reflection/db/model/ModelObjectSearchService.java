@@ -206,7 +206,7 @@ public class ModelObjectSearchService {
 //    }
 
     private static String storedObjectsKey(String prefix, String objectID, DbAttribute dbAttribute){
-        return prefix + ":" + dbAttribute.getAttributeName() + ":" + objectID;
+        return dbAttribute.getAttributeName() + ":" + objectID;
 
     }
 
@@ -302,6 +302,7 @@ public class ModelObjectSearchService {
 
 
             SearchField searchField = dbAttribute.getAttribute().getAnnotation(SearchField.class);
+            log.debug("getSearchValues:"+ object +":attributeName:" + attributeName + " with values("+ (values != null ? values.size() : -1) +")");
             if(searchField != null) {
                 if(!dbAttribute.isAssociation()) {
                     Object value = null;
