@@ -302,7 +302,7 @@ public class ModelObjectSearchService {
 
 
             SearchField searchField = dbAttribute.getAttribute().getAnnotation(SearchField.class);
-            log.debug("getSearchValues:"+ object +":attributeName:" + attributeName + " with values("+ (values != null ? values.size() : -1) +")");
+//            log.debug("getSearchValues:"+ object +":attributeName:" + attributeName + " with values("+ (values != null ? values.size() : -1) +")");
             if(searchField != null) {
                 if(!dbAttribute.isAssociation()) {
                     Object value = null;
