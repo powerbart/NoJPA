@@ -4,4 +4,4 @@ build:
 upload:
     script: 
         - env
-        - sudo su - git /home/push_nojpa_to_github.sh
+        - sudo su - git /home/push_nojpa_to_github.sh  $CI_PROJECT_DIR
