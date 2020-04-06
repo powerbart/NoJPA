@@ -3,5 +3,7 @@ build:
         - mvn deploy -Dmaven.test.skip=true -DaltDeploymentRepository=internal.repo::default::file://///raid0//maven_repo
 upload:
     script: 
+        - id
+        - pwd
         - env
-        - sudo su - git /home/push_nojpa_to_github.sh
+        - /home/push_nojpa_to_github.sh
