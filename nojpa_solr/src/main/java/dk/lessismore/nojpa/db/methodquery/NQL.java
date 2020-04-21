@@ -997,6 +997,7 @@ public class NQL {
         List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
         Pair<Class, String> pair = getSourceAttributePair();
         clearMockCallSequence();
+        String attributeName = makeAttributeIdentifier(pair);
         DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(pair.getFirst());
         DbAttribute dbAttribute = dbAttributeContainer.getDbAttribute(pair.getSecond());
         DbStrip dbStripAnnotation = dbAttribute.getAttribute().getDbStripAnnotation();
@@ -1005,7 +1006,7 @@ public class NQL {
                 value = "\"" + value + "\"";
             }
         } else {
-            value = value.startsWith("\"") && value.contains("\"~") ? value : createSearchString(value);
+            value = value.startsWith("\"") && value.contains("\"~") ? value : (attributeName.endsWith("ID") && !dbStripAnnotation.stripItHard() && dbStripAnnotation.stripItSoft() ? value : createSearchString(value));
             if(comp == Comp.EQUAL && !value.startsWith("\"") && !value.equals("*")){
                 value = "\"" + value + "\"";
             }
@@ -1015,7 +1016,7 @@ public class NQL {
         if(joints.size() == 0 && pair.getSecond().equals("objectID")){
             expression = newLeafExpression().addConstrain("objectID", comp, value);
         } else {
-            expression = newLeafExpression().addConstrain(makeAttributeIdentifier(pair), comp, value);
+            expression = newLeafExpression().addConstrain(attributeName, comp, value);
         }
         if(dbAttributeContainer.getAttributeContainer().getSearchShardAnnotation() != null){
             if(dbAttributeContainer.getAttributeContainer().getSearchShardAnnotationAttribute().getAttributeName().equals(pair.getSecond())){
