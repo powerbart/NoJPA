@@ -1006,7 +1006,7 @@ public class NQL {
                 value = "\"" + value + "\"";
             }
         } else {
-            value = value.startsWith("\"") && value.contains("\"~") ? value : (attributeName.endsWith("ID") && !dbStripAnnotation.stripItHard() && dbStripAnnotation.stripItSoft() ? value : createSearchString(value));
+            value = value.startsWith("\"") && value.contains("\"~") ? value : (attributeName.endsWith("ID") && (dbStripAnnotation != null && !dbStripAnnotation.stripItHard() && dbStripAnnotation.stripItSoft()) ? value : createSearchString(value));
             if(comp == Comp.EQUAL && !value.startsWith("\"") && !value.equals("*")){
                 value = "\"" + value + "\"";
             }
