@@ -280,7 +280,9 @@ public class ModelObjectSearchService {
                             ArrayList<Object> objects = values.get(name);
                             String solrArrayName = name + "_ARRAY";
                             log.trace("Adding_to_array.size " + solrArrayName + "("+ (objects == null ? "-1" : (objects.size() == 1 ? ""+ objects.get(0) : ""+ objects.size())) +")");
-                            inputDocument.addField(solrArrayName, objects);
+                            if(!solrArrayName.contains("creationDate")) {
+                                inputDocument.addField(solrArrayName, objects);
+                            }
                         }
                         //log.debug("addAttributesToDocument:X16");
                     }
