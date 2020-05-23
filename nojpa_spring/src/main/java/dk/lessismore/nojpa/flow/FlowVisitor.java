@@ -50,7 +50,9 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
     int currentEnd = 0;
     int numberOfLoops = 0;
     public void runFlow() {
+        log.debug("Getting total count.... - START");
         final int totalCount = getTotalCount();
+        log.debug("Getting total count.... - END : " + totalCount);
 
         while (currentCount < totalCount && currentEnd < totalCount) {
             log.debug("WorkQueue-fill-up-check: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +") sameCount: " + sameCount );
