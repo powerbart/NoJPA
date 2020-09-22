@@ -106,7 +106,12 @@ public class SolrSearchQuery extends NQL.SearchQuery{
                 } else if(expression.getComparator() == NQL.Comp.EQUAL_OR_GREATER){
                     return " (" + solrAttributeName + ":[" + statementValue + " TO *]"+ boostQuery +")" + otherFunctions;
                 } else if(expression.getComparator() == NQL.Comp.NOT_EQUAL){
-                    return " (*:* -" + solrAttributeName + ":("+ statementValue +") "+ boostQuery +")" + otherFunctions;
+                    //return " (*:* -" + solrAttributeName + ":("+ statementValue +") "+ boostQuery +")" + otherFunctions;
+                    if(expression.isEnum() || !statementValue.contains(" ")){
+                        return " -" + solrAttributeName + ":"+ statementValue +" ";
+                    } else {
+                        return " (*:* -" + solrAttributeName + ":("+ statementValue +") "+ boostQuery +")" + otherFunctions;
+                    }
                 } else {
                     return " (" + solrAttributeName + ":("+ statementValue +")"+ boostQuery +")" + otherFunctions;
                 }
