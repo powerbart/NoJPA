@@ -76,7 +76,7 @@ public class CloudSolrServiceImpl extends SolrServiceImpl {
                 String shard = solrSearchQuery.getShard();
                 SolrQuery solrQuery = ((SolrSearchQuery) query).getSolrQuery();
                 String colName = collectionName + (shard != null ? "_" + shard.replaceAll("\"", "") : "") + (postShardName != null ? postShardName : "");
-                return new SolrResponseWrapper(server.query(colName, solrQuery));
+                return new SolrResponseWrapper(server.query(colName, solrQuery, SolrRequest.METHOD.POST));
             } else {
                 log.error("query() ... server is null ... This is okay doing startup ...");
                 return null;
