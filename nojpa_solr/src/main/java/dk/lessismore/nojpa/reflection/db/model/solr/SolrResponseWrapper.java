@@ -1,5 +1,6 @@
 package dk.lessismore.nojpa.reflection.db.model.solr;
 
+import dk.lessismore.nojpa.db.methodquery.NQL;
 import dk.lessismore.nojpa.db.methodquery.NStats;
 import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLResponse;
 import dk.lessismore.nojpa.utils.Pair;
@@ -8,12 +9,16 @@ import org.apache.solr.client.solrj.response.FieldStatsInfo;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.json.BucketJsonFacet;
 import org.elasticsearch.search.aggregations.Aggregations;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class SolrResponseWrapper implements NoSQLResponse {
+
+    private static final Logger log = LoggerFactory.getLogger(SolrResponseWrapper.class);
 
     private final QueryResponse query;
 
@@ -72,6 +77,9 @@ public class SolrResponseWrapper implements NoSQLResponse {
         List<Pair<String, Long>> toReturn = new ArrayList<Pair<String, Long>>();
 
         List<FacetField> facetFields = this.query.getFacetFields();
+        if(facetFields == null){
+            log.warn("Are you calling getFacet, when you should have been calling getDateRangeFacet? ... This will end bad ... ");
+        }
         for(int i = 0; i < facetFields.size(); i++){
             FacetField facetField = facetFields.get(i);
             String name = facetField.getName();
