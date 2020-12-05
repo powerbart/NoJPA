@@ -1,8 +1,8 @@
 package dk.lessismore.nojpa.utils;
 
-import java.util.Map;
-import java.util.HashMap;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created : by IntelliJ IDEA.
@@ -11,7 +11,34 @@ import java.util.Arrays;
  * Time: 11:01:42
  * To change this template use File | Settings | File Templates.
  */
-public class MaxSizeMaxTimeMap<E> {
+public class MaxSizeFixedTimeMap<E> {
+
+    public static class FixedTimeCounterMap {
+        MaxSizeFixedTimeMap<Integer> counterMap;
+
+        public FixedTimeCounterMap(int maxCacheSize, long maxSeconds) {
+            counterMap = new MaxSizeFixedTimeMap<Integer>(maxCacheSize, maxSeconds);
+        }
+
+        public int count(String key) {
+            TimeMapEntry<Integer> timeMapEntry = counterMap.getEntry(key);
+            if(timeMapEntry == null) {
+                timeMapEntry = new TimeMapEntry(0);
+            }
+            timeMapEntry.value = timeMapEntry.value + 1;
+            counterMap.put(key, timeMapEntry);
+            return timeMapEntry.value;
+        }
+
+        public int getWithoutCounting(String key) {
+            TimeMapEntry<Integer> timeMapEntry = counterMap.getEntry(key);
+            if(timeMapEntry == null) {
+                timeMapEntry = new TimeMapEntry(0);
+            }
+            return timeMapEntry.value;
+        }
+    }
+
 
     private final Map<String, TimeMapEntry<E>> cachedObjects[] = new Map[] {new HashMap<String, TimeMapEntry<E>>(), new HashMap<String, TimeMapEntry<E>>()};
     private int nrOfOldBucket = 0;
@@ -19,7 +46,7 @@ public class MaxSizeMaxTimeMap<E> {
     private long maxSeconds;
 
     protected static class TimeMapEntry<E> {
-        public long lastAccessed = System.currentTimeMillis();
+        public long firstAccessed = System.currentTimeMillis();
         public E value;
 
 
@@ -33,7 +60,7 @@ public class MaxSizeMaxTimeMap<E> {
 
     }
 
-    public MaxSizeMaxTimeMap(int maxCacheSize, long maxSeconds) {
+    public MaxSizeFixedTimeMap(int maxCacheSize, long maxSeconds) {
         this.maxCacheSize = maxCacheSize;
         this.maxSeconds = maxSeconds;
     }
@@ -61,6 +88,10 @@ public class MaxSizeMaxTimeMap<E> {
 
 
     public synchronized void put(String key, E object) {
+        put(key, new TimeMapEntry<>(object));
+    }
+
+    protected synchronized void put(String key, TimeMapEntry<E> timeMapEntry) {
         try {
           if (isFull(getNewBucket())) {
             shiftBuckets();
@@ -69,15 +100,15 @@ public class MaxSizeMaxTimeMap<E> {
           Map<String, TimeMapEntry<E>> newBucket = getNewBucket();
           Map<String, TimeMapEntry<E>> oldBucket = getOldBucket();
           if (newBucket.containsKey(key)) {
-              newBucket.put(key, new TimeMapEntry<E>(object));
+              newBucket.put(key, timeMapEntry);
               return;
           }
           if (oldBucket.containsKey(key)) {
             TimeMapEntry<E> o = oldBucket.get(key);
             oldBucket.remove(o);
-            newBucket.put(key, new TimeMapEntry<E>(o));
+            newBucket.put(key, o);
           } else {
-              newBucket.put(key, new TimeMapEntry<E>(object));
+              newBucket.put(key, timeMapEntry);
           }
         } catch (Exception e) {
           e.printStackTrace();
@@ -95,13 +126,36 @@ public class MaxSizeMaxTimeMap<E> {
             entry = oldBucket.get(primaryKey);
             if (entry != null && validTime( entry )) {
               oldBucket.remove(primaryKey);
-              put(primaryKey, entry.value);
+              put(primaryKey, entry);
               return entry.value;
             } else {
               return null;
             }
           } else {
             return validTime(entry) ? entry.value : null;
+          }
+        } catch (Exception e) {
+          e.printStackTrace();
+          return null;
+        }
+    }
+
+    protected synchronized TimeMapEntry<E> getEntry(String primaryKey) {
+        try {
+          Map<String, TimeMapEntry<E>> newBucket = getNewBucket();
+          TimeMapEntry<E> entry = newBucket.get(primaryKey);
+          if (entry == null) {
+            Map<String, TimeMapEntry<E>> oldBucket = getOldBucket();
+            entry = oldBucket.get(primaryKey);
+            if (entry != null && validTime( entry )) {
+              oldBucket.remove(primaryKey);
+              put(primaryKey, entry);
+              return entry;
+            } else {
+              return null;
+            }
+          } else {
+            return validTime(entry) ? entry : null;
           }
         } catch (Exception e) {
           e.printStackTrace();
@@ -121,7 +175,7 @@ public class MaxSizeMaxTimeMap<E> {
 
     private  boolean validTime(TimeMapEntry<E> entry){
         long now = System.currentTimeMillis();
-        return now < maxSeconds * 1000 + entry.lastAccessed;
+        return now < maxSeconds * 1000 + entry.firstAccessed;
     }
 
 
@@ -139,34 +193,31 @@ public class MaxSizeMaxTimeMap<E> {
 
 
     public static void main(String[] args) throws InterruptedException {
-        MaxSizeMaxTimeMap map = new MaxSizeMaxTimeMap(5, 1);
-        for(int i = 0; i < 20; i++){
-            map.put("" + i, "" + i);
-            //if(i % 3 == 0) {
-            System.out.println("map.get(\"3\") = " + map.get("3"));
-            System.out.println("NewMap: " + Arrays.toString(map.getNewBucket().values().toArray()));
-            System.out.println("OldMap: " + Arrays.toString(map.getOldBucket().values().toArray()));
+        FixedTimeCounterMap counterMap = new FixedTimeCounterMap(20, 1);
+        for(int i = 0; i < 20; i++) {
+            System.out.println("0:" + counterMap.count("0"));
+            System.out.println( i+ ":--" + counterMap.count("" + i));
             Thread.sleep(200);
         }
-
-        System.out.println("map.get(\"3\") = " + map.get("3"));
-        System.out.println("Sleeping ... ");
-        Thread.sleep(2 * 1000);
-        System.out.println("map.get(\"3\") = " + map.get("3"));
-
-
-
-
     }
 
 
 
-
-
-
-
-
-
-
-
+//    public static void main(String[] args) throws InterruptedException {
+//        MaxSizeFixedTimeMap map = new MaxSizeFixedTimeMap(5, 1);
+//        for(int i = 0; i < 20; i++){
+//            map.put("" + i, "" + i);
+//            //if(i % 3 == 0) {
+//            System.out.println("map.get(\"3\") = " + map.get("3"));
+//            System.out.println("NewMap: " + Arrays.toString(map.getNewBucket().values().toArray()));
+//            System.out.println("OldMap: " + Arrays.toString(map.getOldBucket().values().toArray()));
+//            Thread.sleep(200);
+//        }
+//
+//        System.out.println("map.get(\"3\") = " + map.get("3"));
+//        System.out.println("Sleeping ... ");
+//        Thread.sleep(2 * 1000);
+//        System.out.println("map.get(\"3\") = " + map.get("3"));
+//
+//    }
 }
