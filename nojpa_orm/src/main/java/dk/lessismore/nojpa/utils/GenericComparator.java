@@ -29,7 +29,6 @@ public class GenericComparator<T> implements Comparator<T> {
             try {
                 this.getMethod = someClass.getMethod(someAttributeGet, (Class[]) null);
             } catch (Exception e) {
-                log.error("Some error in GenericComparator("+ someClass.getSimpleName() +"."+ someAttribute +")");
                 this.getMethod = someClass.getMethod(someAttribute, (Class[]) null);
             }
             this.invertDirection = invertDirection;
