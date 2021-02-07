@@ -991,8 +991,9 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
     }
 
     protected void setAssociation(String object, String fieldName) {
-        makesDirtyForAssociation((String) getAssociation(fieldName), object, fieldName);
-        primitiveAssociationsOfStrings.put(fieldName, charFilter(setFirstCharacter(object)));
+        String filter = charFilter(setFirstCharacter(object));
+        makesDirtyForAssociation((String) getAssociation(fieldName), filter, fieldName);
+        primitiveAssociationsOfStrings.put(fieldName, filter);
     }
 
     protected void setAssociationWithOutAnyFilters(String object, String fieldName) {
