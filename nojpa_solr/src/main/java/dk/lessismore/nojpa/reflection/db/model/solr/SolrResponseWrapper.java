@@ -1,6 +1,6 @@
 package dk.lessismore.nojpa.reflection.db.model.solr;
 
-import dk.lessismore.nojpa.db.methodquery.NQL;
+import com.google.common.collect.Iterables;
 import dk.lessismore.nojpa.db.methodquery.NStats;
 import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLResponse;
 import dk.lessismore.nojpa.utils.Pair;
@@ -43,7 +43,18 @@ public class SolrResponseWrapper implements NoSQLResponse {
 
     @Override
     public String getID(int i) {
-        return (String) query.getResults().get(i).get("objectID");
+        Object objectID = query.getResults().get(i).get("objectID");
+        // TODO This hack is needed for solr 8.10, spring 5, spring boot 2, or is it?
+        if (objectID == null) {
+            return null;
+        }
+        if (objectID instanceof String) {
+            return (String) objectID;
+        } else if (objectID instanceof List) {
+            List<String> list = (List<String>) objectID;
+            return Iterables.getFirst(list, null);
+        }
+        return null;
     }
 
     @Override
