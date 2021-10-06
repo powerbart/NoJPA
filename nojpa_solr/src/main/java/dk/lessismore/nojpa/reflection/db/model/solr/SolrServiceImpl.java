@@ -45,7 +45,8 @@ public abstract class SolrServiceImpl implements SolrService {
 
     @Override
     public void index(NoSQLInputDocument noSQLInputDocument) {
-        index(((NoSQLInputDocumentWrapper) noSQLInputDocument).document, noSQLInputDocument.getShard() + (noSQLInputDocument.getPostfixShardName() != null ? noSQLInputDocument.getPostfixShardName() : ""));
+        String shard = noSQLInputDocument.getShard() != null ? noSQLInputDocument.getShard() + (noSQLInputDocument.getPostfixShardName() != null ? noSQLInputDocument.getPostfixShardName() : "") :  null;
+        index(((NoSQLInputDocumentWrapper) noSQLInputDocument).document, shard);
     }
 
     public abstract void startup();
