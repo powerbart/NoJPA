@@ -13,6 +13,10 @@ public interface NoSQLResponse {
 
     long getNumFound();
 
+    long getQTime();
+
+    long getQTimeIncludingNetwork();
+
     int size();
 
     String getID(int i);

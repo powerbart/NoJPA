@@ -70,8 +70,9 @@ public abstract class SolrServiceImpl implements SolrService {
     public NoSQLResponse query(NQL.SearchQuery query, String postShardName) {
         try {
             if(server != null){
-                return new SolrResponseWrapper(server.query(((SolrSearchQuery)query).getSolrQuery(), SolrRequest.METHOD.POST));
-
+                long start = System.currentTimeMillis();
+                QueryResponse queryResponse = server.query(((SolrSearchQuery) query).getSolrQuery(), SolrRequest.METHOD.POST);
+                return new SolrResponseWrapper(queryResponse, System.currentTimeMillis() - start);
             } else {
                 log.error("query() ... server is null ... This is okay doing startup ...");
                 return null;

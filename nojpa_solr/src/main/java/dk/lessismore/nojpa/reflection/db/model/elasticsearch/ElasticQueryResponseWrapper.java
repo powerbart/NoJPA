@@ -14,8 +14,11 @@ public class ElasticQueryResponseWrapper implements NoSQLResponse {
 
     private final SearchResponse response;
 
-    public ElasticQueryResponseWrapper(SearchResponse response){
+    private final long qtimeIncludingNetwork;
+
+    public ElasticQueryResponseWrapper(SearchResponse response, long ms){
         this.response = response;
+        this.qtimeIncludingNetwork = ms;
     }
 
 
@@ -27,6 +30,16 @@ public class ElasticQueryResponseWrapper implements NoSQLResponse {
     @Override
     public long getNumFound() {
         return response.getHits().getTotalHits();
+    }
+
+    @Override
+    public long getQTime() {
+        return response.getTook().millis();
+    }
+
+    @Override
+    public long getQTimeIncludingNetwork() {
+        return qtimeIncludingNetwork;
     }
 
     @Override

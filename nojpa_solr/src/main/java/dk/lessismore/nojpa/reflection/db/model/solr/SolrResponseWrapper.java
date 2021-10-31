@@ -22,8 +22,11 @@ public class SolrResponseWrapper implements NoSQLResponse {
 
     private final QueryResponse query;
 
-    public SolrResponseWrapper(QueryResponse query) {
+    private final long qtimeIncludingNetwork;
+
+    public SolrResponseWrapper(QueryResponse query, long ms) {
         this.query = query;
+        this.qtimeIncludingNetwork = ms;
     }
 
     @Override
@@ -34,6 +37,16 @@ public class SolrResponseWrapper implements NoSQLResponse {
     @Override
     public long getNumFound() {
         return query.getResults().getNumFound();
+    }
+
+    @Override
+    public long getQTime() {
+        return query.getQTime();
+    }
+
+    @Override
+    public long getQTimeIncludingNetwork() {
+        return qtimeIncludingNetwork;
     }
 
     @Override

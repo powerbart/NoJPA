@@ -177,6 +177,8 @@ public class ElasticServiceImpl implements ElasticService {
     }
 
     public NoSQLResponse query(NQL.SearchQuery query, String[] indexs) throws Exception {
+        long start = System.currentTimeMillis();
+
         ElasticSearchQuery elasticSearchQuery = (ElasticSearchQuery) query;
         SearchRequest searchRequest = new SearchRequest(indexs);
         searchRequest.types(elasticSearchQuery.getType().toLowerCase());
@@ -189,7 +191,8 @@ public class ElasticServiceImpl implements ElasticService {
         }
         searchRequest.source(queryBuilder);
         final SearchResponse search = client.search(searchRequest, RequestOptions.DEFAULT);
-        NoSQLResponse response = new ElasticQueryResponseWrapper(search);
+
+        NoSQLResponse response = new ElasticQueryResponseWrapper(search, System.currentTimeMillis() - start);
         return response;
     }
 

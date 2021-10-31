@@ -8,6 +8,7 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
+import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.util.NamedList;
 import org.slf4j.Logger;
@@ -72,11 +73,13 @@ public class CloudSolrServiceImpl extends SolrServiceImpl {
     public NoSQLResponse query(NQL.SearchQuery query, String postShardName) {
         try {
             if (server != null) {
+                long start = System.currentTimeMillis();
                 SolrSearchQuery solrSearchQuery = (SolrSearchQuery) query;
                 String shard = solrSearchQuery.getShard();
                 SolrQuery solrQuery = ((SolrSearchQuery) query).getSolrQuery();
                 String colName = collectionName + (shard != null ? "_" + shard.replaceAll("\"", "") : "") + (postShardName != null ? postShardName : "");
-                return new SolrResponseWrapper(server.query(colName, solrQuery, SolrRequest.METHOD.POST));
+                QueryResponse queryResponse = server.query(colName, solrQuery, SolrRequest.METHOD.POST);
+                return new SolrResponseWrapper(queryResponse, System.currentTimeMillis() - start);
             } else {
                 log.error("query() ... server is null ... This is okay doing startup ...");
                 return null;

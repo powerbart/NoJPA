@@ -678,7 +678,6 @@ public class NQL {
                 NoSQLResponse queryResponse = noSQLService.query(this, postShardName);
                 log.info("[{}ms size: {}] Will query: {}", System.currentTimeMillis() - start, queryResponse.getNumFound(), toStringDebugQuery());
 //                log.info("[{}ms size: {}] Will solr query: {}", System.currentTimeMillis() - start, queryResponse.getResults().getNumFound(), toStringDebugQuery());
-
 //                timer.markLap("3");
 //                log.debug("queryResponse = " + queryResponse.getResults().size());
 //                log.debug("queryResponse = " + queryResponse.getResults().getNumFound());
@@ -782,6 +781,10 @@ public class NQL {
             String methodName = method.getName();
             if (methodName.equals("getNumberFound")) {
                 return queryResponse.getNumFound();
+            } else if (methodName.equals("getQTime")) {
+                return queryResponse.getQTime();
+            } else if (methodName.equals("getQTimeIncludingNetwork")) {
+                return queryResponse.getQTimeIncludingNetwork();
             } else if (methodName.equals("getPostShardName")) {
                 return postShardName;
             } else if (methodName.equals("getImpl")) {
