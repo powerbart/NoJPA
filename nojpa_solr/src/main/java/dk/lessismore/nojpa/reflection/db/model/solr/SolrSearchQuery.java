@@ -135,7 +135,7 @@ public class SolrSearchQuery extends NQL.SearchQuery{
     }
 
 
-    protected void buildQuery(){
+    public void buildQuery(){
         {
             StringBuilder builder = new StringBuilder();
             solrQuery.setQuery("*:*");
