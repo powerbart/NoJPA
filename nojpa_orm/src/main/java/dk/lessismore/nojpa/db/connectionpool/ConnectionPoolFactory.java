@@ -58,7 +58,8 @@ public class ConnectionPoolFactory  {
         return connectionPool;
     }
 
-
-
+    public static synchronized boolean havingPool() {
+        return connectionPool != null;
+    }
 
 }
