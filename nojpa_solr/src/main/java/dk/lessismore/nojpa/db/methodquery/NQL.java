@@ -121,6 +121,7 @@ public class NQL {
         protected int endLimit = -1;
         protected String preBoost = null;
         protected boolean addStats = false;
+        protected boolean enableHighlighting = false;
         protected boolean addFacets = false;
         protected boolean addDateFacets = false;
         protected int facetLimit = 10;
@@ -359,6 +360,11 @@ public class NQL {
             String attributeIdentifier = createFinalSolrAttributeName(joints, shortName);
             statsAttributeIdentifier.add(attributeIdentifier);
             NQL.clearMockCallSequence();
+            return this;
+        }
+
+        public SearchQuery<T> enableHighlighting() {
+            enableHighlighting = true;
             return this;
         }
 

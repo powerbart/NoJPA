@@ -3,6 +3,7 @@ package dk.lessismore.nojpa.reflection.db.model.solr;
 import dk.lessismore.nojpa.db.methodquery.NQL;
 import dk.lessismore.nojpa.utils.Pair;
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.common.params.HighlightParams;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -184,6 +185,14 @@ public class SolrSearchQuery extends NQL.SearchQuery{
             }
         }
 
+        if (enableHighlighting) {
+            solrQuery.setHighlight(true);
+            solrQuery.setHighlightSimplePre("__");
+            solrQuery.setHighlightSimplePost("__");
+            solrQuery.setParam(HighlightParams.USE_PHRASE_HIGHLIGHTER, true);
+            solrQuery.setParam(HighlightParams.HIGHLIGHT_MULTI_TERM, true);
+
+        }
         if(addStats){
             String[] statsFields = (String[]) statsAttributeIdentifier.toArray(new String[0]);
             solrQuery.addGetFieldStatistics(statsFields);
