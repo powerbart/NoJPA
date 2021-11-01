@@ -189,6 +189,7 @@ public class SolrSearchQuery extends NQL.SearchQuery{
             solrQuery.setHighlight(true);
             solrQuery.setHighlightSimplePre("__");
             solrQuery.setHighlightSimplePost("__");
+            solrQuery.setParam(HighlightParams.FIELDS, "*");
             solrQuery.setParam(HighlightParams.USE_PHRASE_HIGHLIGHTER, true);
             solrQuery.setParam(HighlightParams.HIGHLIGHT_MULTI_TERM, true);
 
