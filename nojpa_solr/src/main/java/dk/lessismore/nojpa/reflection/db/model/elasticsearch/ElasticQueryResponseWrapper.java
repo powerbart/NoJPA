@@ -8,6 +8,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.search.aggregations.Aggregations;
 
 import java.util.List;
+import java.util.Map;
 
 public class ElasticQueryResponseWrapper implements NoSQLResponse {
 
@@ -40,6 +41,11 @@ public class ElasticQueryResponseWrapper implements NoSQLResponse {
     @Override
     public long getQTimeIncludingNetwork() {
         return qtimeIncludingNetwork;
+    }
+
+    @Override
+    public Map<String, Map<String, List<String>>> getHighlighting() {
+        return null; // not implemented for es
     }
 
     @Override

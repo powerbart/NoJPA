@@ -50,6 +50,11 @@ public class SolrResponseWrapper implements NoSQLResponse {
     }
 
     @Override
+    public Map<String, Map<String, List<String>>> getHighlighting() {
+        return query.getHighlighting();
+    }
+
+    @Override
     public int size() {
         return query.getResults().size();
     }

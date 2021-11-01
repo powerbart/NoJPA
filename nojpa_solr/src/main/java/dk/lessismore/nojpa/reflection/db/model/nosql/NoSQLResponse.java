@@ -6,6 +6,7 @@ import org.apache.solr.client.solrj.response.json.BucketJsonFacet;
 import org.elasticsearch.search.aggregations.Aggregations;
 
 import java.util.List;
+import java.util.Map;
 
 public interface NoSQLResponse {
 
@@ -16,6 +17,8 @@ public interface NoSQLResponse {
     long getQTime();
 
     long getQTimeIncludingNetwork();
+
+    Map<String, Map<String, List<String>>> getHighlighting();
 
     int size();
 

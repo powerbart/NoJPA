@@ -785,6 +785,8 @@ public class NQL {
                 return queryResponse.getQTime();
             } else if (methodName.equals("getQTimeIncludingNetwork")) {
                 return queryResponse.getQTimeIncludingNetwork();
+            } else if (methodName.equals("getHighlighting")) {
+                return queryResponse.getHighlighting();
             } else if (methodName.equals("getPostShardName")) {
                 return postShardName;
             } else if (methodName.equals("getImpl")) {
