@@ -6,6 +6,7 @@ import org.elasticsearch.search.aggregations.Aggregations;
 
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created : with IntelliJ IDEA.
@@ -15,6 +16,7 @@ public interface NList<C extends ModelObjectInterface> extends List<C> {
     long getNumberFound();
     long getQTime();
     long getQTimeIncludingNetwork();
+    Map<String, Map<String, List<String>>> getHighlighting();
 
 
     <N extends Number> NStats<N> getStats(N variable);
