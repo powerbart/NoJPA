@@ -993,6 +993,11 @@ public class NQL {
         Pair<Class, String> pair = getSourceAttributePair();
         clearMockCallSequence();
         NoSQLExpression expression = newLeafExpression().addConstrain(makeAttributeIdentifier(pair), comp, value);
+        if(dbAttributeContainer.getAttributeContainer().getSearchShardAnnotation() != null){
+            if(dbAttributeContainer.getAttributeContainer().getSearchShardAnnotationAttribute().getAttributeName().equals(pair.getSecond())){
+                expression.setSharding(true);
+            }
+        }
         return new NoSQLConstraint(expression, joints);
     }
 
