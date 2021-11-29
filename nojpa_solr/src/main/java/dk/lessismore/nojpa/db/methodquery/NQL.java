@@ -1349,7 +1349,7 @@ public class NQL {
             s = s.replaceAll("\"", " ").replaceAll("!", " ").replaceAll("\\|", " ").replaceAll("'", " ").replaceAll("\\^", " ")
                     .replaceAll("$", " ").replaceAll("§", " ").replaceAll("#", " ").replaceAll(":", " ").replaceAll("_", " ")
                     .replaceAll("/", " ").replaceAll(";", " ").replaceAll("€", " ").replaceAll("%", " ").replaceAll("/", " ")
-                    .replaceAll("\\?", " ").replaceAll("\\(", " ").replaceAll("\\)", " ").replaceAll("\\{", " ").replaceAll("\\}", " ")
+                    .replaceAll("\\(", " ").replaceAll("\\)", " ").replaceAll("\\{", " ").replaceAll("\\}", " ")
                     .replaceAll("\\[", " ").replaceAll("\\]", " ")
                     .replaceAll("<", " ").replaceAll(">", " ").replaceAll("^", " ").replaceAll("~", " ").replaceAll("\\+", " ").replaceAll("-", " ")
                     .trim();
