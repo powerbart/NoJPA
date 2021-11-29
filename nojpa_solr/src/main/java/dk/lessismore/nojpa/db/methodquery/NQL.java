@@ -2,14 +2,12 @@ package dk.lessismore.nojpa.db.methodquery;
 
 import dk.lessismore.nojpa.reflection.db.DbClassReflector;
 import dk.lessismore.nojpa.reflection.db.annotations.DbStrip;
-import dk.lessismore.nojpa.reflection.db.annotations.SearchIndex;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttribute;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttributeContainer;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectSearchService;
 import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLResponse;
 import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLService;
-import dk.lessismore.nojpa.reflection.db.model.solr.SolrResponseWrapper;
 import dk.lessismore.nojpa.utils.Pair;
 import org.apache.commons.lang.StringUtils;
 import org.apache.solr.common.SolrDocument;
@@ -17,7 +15,6 @@ import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -1023,7 +1020,7 @@ public class NQL {
                 value = "\"" + value + "\"";
             }
         } else {
-            value = value.startsWith("\"") && value.contains("\"~") ? value : (attributeName.endsWith("ID") && (dbStripAnnotation != null && !dbStripAnnotation.stripItHard() && dbStripAnnotation.stripItSoft()) ? value : createSearchString(value));
+            value = value.startsWith("\"") && (value.contains("\"~") || value.endsWith("\"")) ? value : (attributeName.endsWith("ID") && (dbStripAnnotation != null && !dbStripAnnotation.stripItHard() && dbStripAnnotation.stripItSoft()) ? value : createSearchString(value));
             if(comp == Comp.EQUAL && !value.startsWith("\"") && !value.equals("*")){
                 value = "\"" + value + "\"";
             }
