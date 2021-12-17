@@ -1,7 +1,6 @@
 package dk.lessismore.nojpa.reflection.db.model.solr;
 
 import dk.lessismore.nojpa.db.methodquery.NQL;
-import dk.lessismore.nojpa.utils.Pair;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.params.HighlightParams;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
@@ -9,9 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
-import java.util.*;
-
-import static dk.lessismore.nojpa.db.methodquery.NQL.makeAttributeIdentifier;
+import java.util.Calendar;
+import java.util.TimeZone;
 
 public class SolrSearchQuery extends NQL.SearchQuery{
 
@@ -40,11 +38,12 @@ public class SolrSearchQuery extends NQL.SearchQuery{
 
     private String buildSubQuery(NQL.NoSQLExpression expression, NQL.Constraint constraint){
         if(expression instanceof NQL.NoSQLNegatingExpression){
-            StringBuilder builder = new StringBuilder("*:* -");
+            StringBuilder builder = new StringBuilder("(*:* -");
             String subQuery = buildSubQuery(((NQL.NoSQLNegatingExpression) expression).getExpression(), constraint);
             if(subQuery != null){
-                builder.append(subQuery);
+                builder.append(subQuery.trim());
             }
+            builder.append(")");
             return builder.toString();
         } else if(expression instanceof NQL.NoSQLContainerExpression) {
             NQL.NoSQLContainerExpression root = (NQL.NoSQLContainerExpression) expression;
@@ -54,6 +53,10 @@ public class SolrSearchQuery extends NQL.SearchQuery{
                 Integer condition = root.getConditions().get(i);
                 String subQuery = buildSubQuery(exp, constraint);
 //                log.debug("Will add subQuery("+ subQuery +") with " + NQL.NoSQLOperator.name(condition));
+                boolean containsOrOrAnd = subQuery.contains(" OR ") || subQuery.contains(" AND ");
+                if (containsOrOrAnd) {
+                    subQuery = "(" + subQuery + ")";
+                }
                 builder.append(subQuery);
                 if(root.getExpressions().size() > 1 && i + 1 < root.getExpressions().size()){
                     builder.append(" " + NQL.NoSQLOperator.name(condition) + " ");
