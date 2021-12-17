@@ -27,17 +27,22 @@
         <repository>
             <id>nojpaRepo</id>
             <name>NoJPA Repository</name>
-            <url>http://maven.less-is-more.dk</url>
+            <url>https://maven.less-is-more.dk</url>
         </repository>
         <repository>
             <id>publicmaven</id>
             <name>Public Repository</name>
-            <url>http://repo1.maven.org/maven2</url>
+            <url>https://repo1.maven.org/maven2</url>
         </repository>
-	 <repository>
+        <repository>
             <id>mvnrepository</id>
             <name>mvnrepository</name>
-            <url>http://www.mvnrepository.com</url>
+            <url>https://www.mvnrepository.com</url>
+         </repository>
+        <repository>
+            <id>restlet</id>
+            <name>restlet</name>
+            <url>https://maven.restlet.org</url>
          </repository>
     </repositories>
 
