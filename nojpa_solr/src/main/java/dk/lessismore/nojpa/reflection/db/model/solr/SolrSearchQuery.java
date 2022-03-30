@@ -100,7 +100,7 @@ public class SolrSearchQuery extends NQL.SearchQuery{
                     SimpleDateFormat xmlDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'"); //2011-11-28T18:30:30Z
                     xmlDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
                     //solrObj.addField(solrAttributeName, xmlDateFormat.format(((Calendar) value).getTime()));
-                    statementValue = xmlDateFormat.format(((Calendar) expression.getValue()).getTime());
+                    statementValue = "\"" + xmlDateFormat.format(((Calendar) expression.getValue()).getTime()) + "\"";
                 } else if(expression.getValueClazz().equals(Integer.class) || expression.getValueClazz().equals(Float.class) || expression.getValueClazz().equals(Long.class) || expression.getValueClazz().equals(Double.class) || expression.getValueClazz().equals(Number.class) ){
                     statementValue = "" + expression.getValue();
                 }
