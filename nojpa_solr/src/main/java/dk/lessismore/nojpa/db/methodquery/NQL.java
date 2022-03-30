@@ -1186,8 +1186,16 @@ public class NQL {
     }
 
     public static Constraint has(String query) {
+        return has(query, 0);
+    }
+
+    public static Constraint has(String query, int boost) {
         NoSQLExpression expression = new NoSQLExpression();
         expression.addConstrain(query);
+        if(boost > 0){
+            log.debug("Adding boost function");
+            expression.addFunction(new Boost(boost));
+        }
         return new NoSQLConstraint(expression, new ArrayList<>());
     }
 
