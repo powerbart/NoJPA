@@ -149,6 +149,11 @@ public class NQL {
             return this;
         }
 
+        public SearchQuery<T>  searchCircle(String mockValue, String latitude, String longitude, double distanceInKM) {
+            rootConstraints.add(hasCircle(mockValue, latitude, longitude, distanceInKM));
+            return this;
+        }
+
 
         public SearchQuery<T> search(int mockValue, Comp comp, int value) {
             rootConstraints.add(has(mockValue, comp, value));
@@ -989,6 +994,20 @@ public class NQL {
      * all, any, has expressions (constraints) interface
      */
 
+    public static Constraint hasCircle(String mockValue, String latitude, String longitude, double distanceInKM) {
+        List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
+        Pair<Class, String> pair = getSourceAttributePair();
+        clearMockCallSequence();
+        NoSQLExpression expression = newLeafExpression().addConstrainCircle(makeAttributeIdentifier(pair), latitude, longitude, distanceInKM);
+        DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(pair.getFirst());
+        if(dbAttributeContainer.getAttributeContainer().getSearchShardAnnotation() != null){
+            if(dbAttributeContainer.getAttributeContainer().getSearchShardAnnotationAttribute().getAttributeName().equals(pair.getSecond())){
+                expression.setSharding(true);
+            }
+        }
+        return new NoSQLConstraint(expression, joints);
+    }
+
     public static Constraint has(int mockValue, Comp comp, int value) {
         List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
         Pair<Class, String> pair = getSourceAttributePair();
@@ -1540,6 +1559,7 @@ public class NQL {
 
         protected String attr = null;
         protected Object value = null;
+        protected Double distance = null;
         protected Class valueClazz = null;
         protected boolean isNotNull = false;
         protected boolean isNull = false;
@@ -1583,6 +1603,16 @@ public class NQL {
             return this;
         }
 
+        public NoSQLExpression addConstrainCircle(String attributeName, String latitude, String longitude, double distanceInKM) {
+            log.trace("addConstrainCircle:distance("+ distance +")");
+            this.attr = attributeName;
+            this.value = latitude + "," + longitude;
+            this.distance = distanceInKM;
+            this.valueClazz = Integer.class;
+            this.comparator = Comp.EQUAL_OR_LESS;
+            return this;
+        }
+
         public NoSQLExpression addConstrain(String attributeName, NQL.Comp comparator, int value) {
             log.trace("addConstrain:int("+ value +")");
             this.attr = attributeName;
@@ -1622,6 +1652,10 @@ public class NQL {
             log.trace("addConstrain:("+ query+")");
             raw = query;
             return this;
+        }
+
+        public Double getDistance() {
+            return distance;
         }
 
         public String getRaw() {

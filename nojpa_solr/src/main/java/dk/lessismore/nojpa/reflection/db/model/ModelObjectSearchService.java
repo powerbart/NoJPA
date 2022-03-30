@@ -238,7 +238,20 @@ public class ModelObjectSearchService {
                     Object value = null;
                     value = dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
                     //log.debug("addAttributesToDocument:X5");
-                    addAttributeValueToStatement(dbAttribute, inputDocument, value, prefix);
+                    if (dbAttribute.isLocation() && value != null) {
+                        Object lgn = null;
+                        if (dbAttributeContainer.getDbAttributes().get("longitude") != null) {
+                            lgn = dbAttributeContainer.getAttributeValue(modelObject, dbAttributeContainer.getDbAttributes().get("longitude"));
+                        } else if (dbAttributeContainer.getDbAttributes().get("lng") != null) {
+                            lgn = dbAttributeContainer.getAttributeValue(modelObject, dbAttributeContainer.getDbAttributes().get("longitude"));
+                        } else {
+                            throw new RuntimeException("Can't find a attribute with name longitude or lng ");
+                        }
+                        value = value + "," + lgn;
+                        addAttributeValueToStatement(dbAttribute, inputDocument, value, prefix);
+                    } else {
+                        addAttributeValueToStatement(dbAttribute, inputDocument, value, prefix);
+                    }
                     //log.debug("addAttributesToDocument:X6");
                 } else if (!dbAttribute.isMultiAssociation()) {
                     //log.debug("addAttributesToDocument:X7");

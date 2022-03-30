@@ -3,6 +3,7 @@ package dk.lessismore.nojpa.reflection.db.attributes;
 import dk.lessismore.nojpa.reflection.attributes.*;
 import dk.lessismore.nojpa.reflection.db.annotations.DbInline;
 import dk.lessismore.nojpa.reflection.db.annotations.DontFollowField;
+import dk.lessismore.nojpa.reflection.db.annotations.SearchField;
 import dk.lessismore.nojpa.reflection.db.model.*;
 import dk.lessismore.nojpa.db.*;
 
@@ -74,11 +75,16 @@ public class DbAttribute implements Serializable {
      */
     private boolean association = false;
 
+    private boolean isLocation = false;
+
     //private int columnIndex = -1;
 
     public DbAttribute() {
     }
 
+    public boolean isLocation() {
+        return isLocation;
+    }
 
     public String getTableName() {
         return tableName;
@@ -154,6 +160,9 @@ public class DbAttribute implements Serializable {
                       if(as[i] instanceof Column){
                         Column c = (Column) as[i];
                         setNrOfCharacters(c.length());
+                      } else if(as[i] instanceof SearchField){
+                        SearchField c = (SearchField) as[i];
+                        isLocation = c.isLatitude();
                       }
                   }
                 }
@@ -266,7 +275,9 @@ public class DbAttribute implements Serializable {
 
 
     public String toDefaultSolrType(){
-        if(isMultiAssociation()){
+        if (isLocation) {
+            return "LOC";
+        } else if(isMultiAssociation()){
             return "TXT_ARRAY";
         } else {
             switch(dbDataType.getType()) {

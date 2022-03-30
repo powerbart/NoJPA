@@ -2,7 +2,9 @@ package dk.lessismore.nojpa.reflection.db.model.solr;
 
 import dk.lessismore.nojpa.db.methodquery.NQL;
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.HighlightParams;
+import org.apache.solr.common.params.SpatialParams;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -146,13 +148,22 @@ public class SolrSearchQuery extends NQL.SearchQuery{
             for (int i = 0; i < rootConstraints.size(); i++) {
                 NQL.Constraint constraint = (NQL.Constraint) rootConstraints.get(i);
                 NQL.NoSQLExpression expression = constraint.getExpression();
-                String subQuery = buildSubQuery(expression, constraint);
-                if (subQuery != null && subQuery.length() > 0) {
-                    if (builder.length() > 1) {
-                        builder.append(" AND ");
+                if (expression.getDistance() != null) {
+                    String solrAttributeName = NQL.createFinalSolrAttributeName(expression.getJoints(), expression.getAttr());
+                    solrQuery.set(SpatialParams.FIELD, solrAttributeName);
+                    solrQuery.set(SpatialParams.POINT, "" + expression.getValue());
+                    solrQuery.set(SpatialParams.DISTANCE, "" + expression.getDistance());
+                    solrQuery.setParam(CommonParams.FQ, "{!geofilt sfield="+ solrAttributeName +"}");
+                } else {
+                    String subQuery = buildSubQuery(expression, constraint);
+                    if (subQuery != null && subQuery.length() > 0) {
+                        if (builder.length() > 1) {
+                            builder.append(" AND ");
+                        }
+                        builder.append(subQuery);
                     }
-                    builder.append(subQuery);
                 }
+
             }
             String query = builder.toString();
             if (query == null || query.length() < 2) {
