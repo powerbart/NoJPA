@@ -1008,6 +1008,10 @@ public class NQL {
     }
 
     public static Constraint has(String mockValue, Comp comp, String value) {
+        return has(mockValue, comp, value, 0);
+    }
+
+    public static Constraint has(String mockValue, Comp comp, String value, int boost) {
         List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
         Pair<Class, String> pair = getSourceAttributePair();
         clearMockCallSequence();
@@ -1036,6 +1040,10 @@ public class NQL {
             if(dbAttributeContainer.getAttributeContainer().getSearchShardAnnotationAttribute().getAttributeName().equals(pair.getSecond())){
                 expression.setSharding(true);
             }
+        }
+        if(boost > 0){
+            log.debug("Adding boost function");
+            expression.addFunction(new Boost(boost));
         }
         return new NoSQLConstraint(expression, joints);
     }

@@ -27,7 +27,7 @@
         <repository>
             <id>nojpaRepo</id>
             <name>NoJPA Repository</name>
-            <url>http://maven.less-is-more.dk</url>
+            <url>https://maven.less-is-more.dk</url>
         </repository>
         <repository>
             <id>publicmaven</id>

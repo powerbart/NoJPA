@@ -176,6 +176,7 @@ public class SQLStatementExecutor {
             ConnectionPoolFactory.getPool().putBackInPool(connection);
             return true;
         } catch (Exception e) {
+            // TODO if we have a @IndexField(unique = true) this may fail
             log.warn("Update/Insert sql execution failed (will try to recover) \nstmt=" + sqlStatement, e);
             if(e.toString() != null && !e.toString().contains("ConstraintViolation")) {
                 try {
