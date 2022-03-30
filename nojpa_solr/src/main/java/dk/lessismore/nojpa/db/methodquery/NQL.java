@@ -1108,6 +1108,10 @@ public class NQL {
     }
 
     public static Constraint has(Calendar mockValue, Comp comp, Calendar value) {
+        return has(mockValue, comp, value, 0);
+    }
+
+    public static Constraint has(Calendar mockValue, Comp comp, Calendar value, int boost) {
         List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
         Pair<Class, String> pair = getSourceAttributePair();
         clearMockCallSequence();
@@ -1122,6 +1126,10 @@ public class NQL {
             } else if(comp == Comp.EQUAL_OR_LESS){
                 expression.setTo(value);
             }
+        }
+        if(boost > 0){
+            log.debug("Adding boost function");
+            expression.addFunction(new Boost(boost));
         }
         return new NoSQLConstraint(expression, joints);
     }
