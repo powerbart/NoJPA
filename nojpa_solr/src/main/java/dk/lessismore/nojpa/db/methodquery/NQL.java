@@ -655,6 +655,7 @@ public class NQL {
         }
 
         private NList<T> selectObjectsFromDb(float scoreAbove, String postShardName) {
+            long startMain = System.currentTimeMillis();
 //            TimerWithPrinter timer = new TimerWithPrinter("selectObjectsFromDb", "/tmp/luuux-timer-getPosts.log");
 //            log.debug("DEBUG-TRACE", new Exception("DEBUG"));
             List<T> toReturn = new ArrayList<T>();
@@ -678,7 +679,9 @@ public class NQL {
 //                }
 //                noSqlQuery.setParam("bf", "sum(_Post_pageViewCounter__ID_Counter_count__LONG,8)");
                 long start = System.currentTimeMillis();
+                long startQuery = System.currentTimeMillis();
                 NoSQLResponse queryResponse = noSQLService.query(this, postShardName);
+                long endQuery = System.currentTimeMillis();
                 log.info("[{}ms size: {}] Will query: {}", System.currentTimeMillis() - start, queryResponse.getNumFound(), toStringDebugQuery());
 //                log.info("[{}ms size: {}] Will solr query: {}", System.currentTimeMillis() - start, queryResponse.getResults().getNumFound(), toStringDebugQuery());
 //                timer.markLap("3");
@@ -731,7 +734,8 @@ public class NQL {
                     }
                 }
 //                timer.markLap("5");
-                log.debug("Returns the size of Nlist.size() -> " + toReturn.size() + " .... size("+ size +")");
+                long end = System.currentTimeMillis();
+                log.debug("TIME-AND-RESULT: Total("+ (end - startMain) +"),Solr("+ (endQuery - startQuery) +"), MySQL("+ (end - endQuery) +")   Nlist.size() -> " + toReturn.size() + " .... size("+ size +")");
                 return (NList<T>) Proxy.newProxyInstance(
                         this.getClass().getClassLoader(),
                         new Class[]{NList.class},

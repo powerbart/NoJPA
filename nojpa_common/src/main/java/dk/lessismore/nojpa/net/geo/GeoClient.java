@@ -62,7 +62,11 @@ public class GeoClient {
             }
         }
         JSONObject json = new JSONObject(s);
-        Geo geo = new Geo(json.getString("city"), json.getString("country"), json.getString("continent"));
+        Geo geo = new Geo(
+                !json.isNull("city") ? json.getString("city") : null,
+                !json.isNull("country") ? json.getString("country") : null,
+                !json.isNull("continent") ? json.getString("continent") : null
+        );
         synchronized (lookupCache) {
             lookupCache.put(ip, geo);
         }

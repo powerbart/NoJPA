@@ -17,6 +17,7 @@ public @interface SearchField {
 
     public boolean translate() default false;
     public boolean searchReverse() default false;
+    public boolean isLatitude() default false;
     public float boostFactor() default 3f;
     public float reverseBoostFactor() default 0.3f;
     public String dynamicSolrPostName() default NULL;
