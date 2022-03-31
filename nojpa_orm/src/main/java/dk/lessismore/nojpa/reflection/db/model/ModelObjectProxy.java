@@ -452,7 +452,9 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
         }
 
         ObjectCache objectCacheForArrayClass = ObjectCacheFactory.getInstance().getObjectCache(arrayClass);
+        log.debug("objectCacheForArrayClass for ("+ arrayClass +") is -> " + objectCacheForArrayClass);
         for (int i = 0; i < array.length; i++) {
+            log.debug("objectCacheForArrayClass for ("+ arrayClass +") addListener for objectID("+ array[i] +") ");
             boolean result = objectCacheForArrayClass.addListener(array[i].getObjectID(), this, fieldName);
             if (!result) {
 //          log.debug("putArrayInCache: one addListener returned false -> removeListener");
