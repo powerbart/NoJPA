@@ -26,8 +26,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.*;
 
-import static dk.lessismore.nojpa.reflection.db.model.ModelObjectProxy.charFilter;
-import static dk.lessismore.nojpa.reflection.db.model.ModelObjectProxy.setFirstCharacter;
+import static dk.lessismore.nojpa.reflection.db.model.ModelObjectProxy.*;
 
 /**
  * Method Query - A sugar shell wrapping reusable queries.
@@ -39,6 +38,10 @@ public class MQL {
 
     public static String filter(String in) {
         return charFilter(setFirstCharacter(in)).replace("``", "`");
+    }
+
+    public static String filterSoft(String in) {
+        return charFilterSoft(in).replace("``", "`");
     }
 
     public static <T extends ModelObjectInterface,S extends ModelObjectInterface> boolean isNull(T realModelObject, T sourceMock, S[] arrayMock) {
