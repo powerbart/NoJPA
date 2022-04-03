@@ -469,7 +469,7 @@ public class DbObjectWriter {
 
                     }
                 } else {
-                    if (dbAttribute.isMultiAssociation() && hasBeenChanged) {
+                    if (dbAttribute.isMultiAssociation() && modelObject.isDirty() && !modelObject.isNew()) {
                         //The value of the association was null; and the object is dirty.
                         //We must drop all associations from the association table if its an multiassociation.
                         deleteAssociations(modelObject.getPrimaryKeyValue(), dbAttributeContainer, dbAttribute);
