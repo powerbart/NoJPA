@@ -26,6 +26,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.*;
 
+import static dk.lessismore.nojpa.reflection.db.model.ModelObjectProxy.charFilter;
+import static dk.lessismore.nojpa.reflection.db.model.ModelObjectProxy.setFirstCharacter;
+
 /**
  * Method Query - A sugar shell wrapping reusable queries.
  * Currently only select queries are supported
@@ -33,6 +36,10 @@ import java.util.*;
 public class MQL {
 
     private static final Logger log = LoggerFactory.getLogger(MQL.class);
+
+    public static String filter(String in) {
+        return charFilter(setFirstCharacter(in)).replace("``", "`");
+    }
 
     public static <T extends ModelObjectInterface,S extends ModelObjectInterface> boolean isNull(T realModelObject, T sourceMock, S[] arrayMock) {
         List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
