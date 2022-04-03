@@ -17,6 +17,7 @@ public @interface DbStrip {
      * stripItHard = true || no DbStrip over the set method : replaceAll('|\"", "`").replaceAll("/|&|'|<|>|;|\\\\", "")) + first char to upper case 
      * @return
      */
+    public boolean urlEncode() default false;
     public boolean stripItHard() default true;
     public boolean stripItSoft() default false;
 }

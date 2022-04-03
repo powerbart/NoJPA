@@ -8,6 +8,7 @@ import dk.lessismore.nojpa.db.statements.SQLStatementFactory;
 import dk.lessismore.nojpa.db.statements.SelectSQLStatement;
 import dk.lessismore.nojpa.db.statements.WhereSQLStatement;
 import dk.lessismore.nojpa.reflection.db.annotations.DbInline;
+import dk.lessismore.nojpa.reflection.db.annotations.DbStrip;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttribute;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttributeContainer;
 import dk.lessismore.nojpa.reflection.db.model.ModelObject;
@@ -15,6 +16,9 @@ import dk.lessismore.nojpa.reflection.db.model.ModelObjectProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.sql.ResultSet;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -345,6 +349,12 @@ public class DbObjectReader {
                     value = readObjectFromResultSet(dbAttribute, resultSet);
 //                    log.debug("Adding to object("+ objectToFillInto +")." + dbAttribute.getAttributeName() + "("+ value +")");
                     if (value != null && !("" + value).equals("null")) {
+                        DbStrip dbStripAnnotation = dbAttribute.getAttribute().getDbStripAnnotation();
+                        if (value != null && dbStripAnnotation != null && dbStripAnnotation.urlEncode()) {
+                            try {
+                                value = URLDecoder.decode((String) value, "UTF-8");
+                            } catch (UnsupportedEncodingException e) { }
+                        }
                         if (dbAttributeContainer.setAttributeValue(objectToFillInto, dbAttribute, value)) {
                             //log.debug("Read attribute="+attributeName);
                         } else {

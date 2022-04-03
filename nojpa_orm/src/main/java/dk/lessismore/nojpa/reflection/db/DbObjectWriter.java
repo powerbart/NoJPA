@@ -13,6 +13,7 @@ import dk.lessismore.nojpa.db.statements.UpdateSQLStatement;
 import dk.lessismore.nojpa.db.statements.WhereSQLStatement;
 import dk.lessismore.nojpa.reflection.attributeconverters.AttributeConverter;
 import dk.lessismore.nojpa.reflection.attributeconverters.AttributeConverterFactory;
+import dk.lessismore.nojpa.reflection.db.annotations.DbStrip;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttribute;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttributeContainer;
 import dk.lessismore.nojpa.reflection.db.model.ModelObject;
@@ -21,6 +22,8 @@ import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.sql.ResultSet;
 import java.util.*;
 
@@ -293,6 +296,12 @@ public class DbObjectWriter {
                     dbAttributeContainer.setAttributeValue(modelObject.getProxyObject(), dbAttribute, value);
                 } else {
                     value = dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
+                }
+                DbStrip dbStripAnnotation = dbAttribute.getAttribute().getDbStripAnnotation();
+                if (value != null && dbStripAnnotation != null && dbStripAnnotation.urlEncode()) {
+                    try {
+                        value = URLEncoder.encode((String) value, "UTF-8");
+                    } catch (UnsupportedEncodingException e) { }
                 }
                 addAttributeValueToStatement(dbAttribute, insertSQLStatement, value);
             }
