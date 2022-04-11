@@ -2,6 +2,10 @@ package dk.lessismore.nojpa.serialization;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
+import com.thoughtworks.xstream.security.AnyTypePermission;
+import com.thoughtworks.xstream.security.NoTypePermission;
+import com.thoughtworks.xstream.security.NullPermission;
+import com.thoughtworks.xstream.security.PrimitiveTypePermission;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +29,9 @@ public class XmlSerializer implements Serializer {
     public XmlSerializer() {
         //XStream xstream = new XStream(new DomDriver());
         xstream.registerConverter(new ModelConverter(xstream.getMapper()));
+        xstream.addPermission(AnyTypePermission.ANY);
+        xstream .addPermission(NullPermission.NULL);   // allow "null"
+        xstream .addPermission(PrimitiveTypePermission.PRIMITIVES);
     }
 
     public String serialize(Object object) {

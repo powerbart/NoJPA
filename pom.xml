@@ -15,8 +15,17 @@
         <module>nojpa_orm</module>
         <module>nojpa_solr</module>
         <module>nojpa_spring</module>
+	<module>nojpa_master_app</module>
         <module>nojpa_translate</module>
     </modules>
+
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>1.5.19.RELEASE</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
 
     <properties>
         <org.springframework.version>4.2.5.RELEASE</org.springframework.version>
