@@ -15,7 +15,7 @@
         <module>nojpa_orm</module>
         <module>nojpa_solr</module>
         <module>nojpa_spring</module>
-	<module>nojpa_master_app</module>
+<!--	<module>nojpa_master_app</module> -->
         <module>nojpa_translate</module>
     </modules>
 
