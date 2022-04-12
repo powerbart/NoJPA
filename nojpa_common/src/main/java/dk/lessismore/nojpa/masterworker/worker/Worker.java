@@ -95,10 +95,10 @@ public class Worker {
     public void run() {
         String host = properties.getHost();
         int port = properties.getWorkerPort();
-
-        while (!stop && !stopAfterOneCall()) {
+        boolean firstTime = true;
+        while (!stop && (firstTime || !stopAfterOneCall())) {
             //final ClientLink clientLink;
-
+            firstTime = false;
             if (linkAndThreads.clientLink == null) {
                 log.debug("1/2:Worker trying to establish connection to Master on " + host + ":" + port);
                 long start = System.currentTimeMillis();
