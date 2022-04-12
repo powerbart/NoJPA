@@ -96,7 +96,7 @@ public class Worker {
         String host = properties.getHost();
         int port = properties.getWorkerPort();
 
-        while (!stop) {
+        while (!stop && !stopAfterOneCall()) {
             //final ClientLink clientLink;
 
             if (linkAndThreads.clientLink == null) {
@@ -229,6 +229,8 @@ public class Worker {
         log.debug("Exiting!-2");
         System.exit(-1);
     }
+
+    protected boolean stopAfterOneCall() { return false; }
 
     private Executor<?, ?> loadExecutor(JobMessage jobMessage) {
         try {
