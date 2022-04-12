@@ -93,6 +93,7 @@ public class Worker {
      * It is supposed to be run in a loop (probably a batch script) that restarts it when it quits.
      */
     public void run() {
+        log.debug("Starting worker version 1.0.1");
         String host = properties.getHost();
         int port = properties.getWorkerPort();
         boolean firstTime = true;
