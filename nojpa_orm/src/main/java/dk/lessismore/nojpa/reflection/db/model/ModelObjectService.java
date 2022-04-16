@@ -165,7 +165,7 @@ public class ModelObjectService {
                         try {
                             synchronized (this){
                                 long start = System.currentTimeMillis();
-                                this.wait(10_000);
+                                this.wait(50);
                             }
                         } catch (Exception e) {
                         }
