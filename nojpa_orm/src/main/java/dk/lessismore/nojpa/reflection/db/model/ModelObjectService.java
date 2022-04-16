@@ -137,14 +137,15 @@ public class ModelObjectService {
     protected static class SaveLaterQueueForSure {
 
         final Object toSync = new Object();
-        Thread lazyThread = null;
+        List<Thread> lazyThreads = null;
         protected final dk.lessismore.nojpa.pool.Queue<ModelObjectInterface> objectsToSave = new dk.lessismore.nojpa.pool.Queue<>();
 
         public SaveLaterQueueForSure(){
             for (int i = 0; i < 5; i++) {
-                lazyThread = makeThread();
+                Thread lazyThread = makeThread();
                 lazyThread.setName("lazyThread-" + i);
                 lazyThread.start();
+                lazyThreads.add(lazyThread);
             }
         }
 
@@ -164,7 +165,6 @@ public class ModelObjectService {
                         }
                         try {
                             synchronized (this){
-                                long start = System.currentTimeMillis();
                                 this.wait(50);
                             }
                         } catch (Exception e) {
@@ -183,7 +183,9 @@ public class ModelObjectService {
                 }
                 objectsToSave.push(m);
                 synchronized (this){
-                    lazyThread.notifyAll();
+                    for(Thread t : lazyThreads) {
+                        t.notify();
+                    }
                 }
             } catch (Exception e){
             }
@@ -200,10 +202,10 @@ public class ModelObjectService {
             saveLaterQueueForSure = new SaveLaterQueueForSure();
         }
         saveLaterQueueForSure.add(object);
-        while(saveLaterQueueForSure.objectsToSave.size() > 100) {
+        while(saveLaterQueueForSure.objectsToSave.size() > 1000) {
             try {
                 log.debug("Waiting to save objects... " + saveLaterQueueForSure.objectsToSave.size());
-                Thread.sleep(3);
+                Thread.sleep(5);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
