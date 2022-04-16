@@ -183,7 +183,7 @@ public class ModelObjectService {
                 }
                 objectsToSave.push(m);
                 synchronized (this){
-                    lazyThread.notify();
+                    lazyThread.notifyAll();
                 }
             } catch (Exception e){
             }
