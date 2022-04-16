@@ -4,7 +4,7 @@ package dk.lessismore.nojpa.pool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Queue {
+public class Queue<T> {
 
 	private static final Logger log = LoggerFactory.getLogger(Queue.class);
 
@@ -13,10 +13,10 @@ public class Queue {
 
     class QueueElement {
 	QueueElement after = null;
-	Object myObject = null;
+	T myObject = null;
     }
 
-    public void push(Object o){
+    public void push(T o){
 	synchronized(this){
 		QueueElement q = new QueueElement();
 		q.myObject = o;
@@ -27,9 +27,9 @@ public class Queue {
 	}
     }
 
-    public Object pop(){
+    public T pop(){
 	synchronized(this){
-	    Object objectToReturn = firstElement.myObject;
+	    T objectToReturn = firstElement.myObject;
 	    firstElement = firstElement.after;
 	    countOfElements--;
 	    //log.debug("POP: " + countOfElements);

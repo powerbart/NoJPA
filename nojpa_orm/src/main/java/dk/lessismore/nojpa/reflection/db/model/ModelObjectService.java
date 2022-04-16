@@ -132,6 +132,84 @@ public class ModelObjectService {
         saveLaterQueue.add(object);
     }
 
+
+
+    protected static class SaveLaterQueueForSure {
+
+        final Object toSync = new Object();
+        Thread lazyThread = null;
+        protected final dk.lessismore.nojpa.pool.Queue<ModelObjectInterface> objectsToSave = new dk.lessismore.nojpa.pool.Queue<>();
+
+        public SaveLaterQueueForSure(){
+            for (int i = 0; i < 5; i++) {
+                lazyThread = makeThread();
+                lazyThread.setName("lazyThread-" + i);
+                lazyThread.start();
+            }
+        }
+
+        Thread makeThread() {
+            return new Thread(new Runnable() {
+                @Override
+                public void run() {
+
+                    while (true){
+                        try {
+                            ModelObjectInterface m = null;
+                            while((m = objectsToSave.pop()) != null){
+                                save(m);
+                            }
+                        } catch (Exception e){
+                            log.error("Some error in LazyThread: " + e, e);
+                        }
+                        try {
+                            synchronized (this){
+                                long start = System.currentTimeMillis();
+                                this.wait(10_000);
+                            }
+                        } catch (Exception e) {
+                        }
+                    }
+
+                }
+            });
+        }
+
+        int counter = 0;
+        public void add(ModelObjectInterface m){
+            try{
+                if (++counter % 100 == 0) {
+                    log.debug("LazyQueue is " + objectsToSave.size());
+                }
+                objectsToSave.push(m);
+                synchronized (this){
+                    lazyThread.notify();
+                }
+            } catch (Exception e){
+            }
+        }
+
+
+    }
+
+    private static SaveLaterQueueForSure saveLaterQueueForSure = null;
+
+
+    public static <T extends ModelObjectInterface> void saveLazy(T object) {
+        if(saveLaterQueueForSure == null){
+            saveLaterQueueForSure = new SaveLaterQueueForSure();
+        }
+        while(saveLaterQueueForSure.objectsToSave.size() > 100) {
+            try {
+                log.debug("Waiting to save objects... ");
+                Thread.sleep(3);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        saveLaterQueue.add(object);
+    }
+
     public static <T extends ModelObjectInterface> void delete(T object) {
         if (object != null) {
             ModelObjectLifeCycleListener annotation = ((ModelObject) object).getInterface().getAnnotation(ModelObjectLifeCycleListener.class);
