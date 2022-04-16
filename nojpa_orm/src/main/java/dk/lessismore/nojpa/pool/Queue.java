@@ -28,7 +28,9 @@ public class Queue<T> {
     }
 
     public T pop(){
+
 	synchronized(this){
+		if (firstElement == null) return null;
 	    T objectToReturn = firstElement.myObject;
 	    firstElement = firstElement.after;
 	    countOfElements--;

@@ -137,7 +137,7 @@ public class ModelObjectService {
     protected static class SaveLaterQueueForSure {
 
         final Object toSync = new Object();
-        List<Thread> lazyThreads = null;
+        List<Thread> lazyThreads = new ArrayList<>();
         protected final dk.lessismore.nojpa.pool.Queue<ModelObjectInterface> objectsToSave = new dk.lessismore.nojpa.pool.Queue<>();
 
         public SaveLaterQueueForSure(){
