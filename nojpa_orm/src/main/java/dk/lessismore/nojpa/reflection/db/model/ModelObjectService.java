@@ -199,6 +199,7 @@ public class ModelObjectService {
         if(saveLaterQueueForSure == null){
             saveLaterQueueForSure = new SaveLaterQueueForSure();
         }
+        saveLaterQueueForSure.add(object);
         while(saveLaterQueueForSure.objectsToSave.size() > 100) {
             try {
                 log.debug("Waiting to save objects... ");
@@ -207,7 +208,6 @@ public class ModelObjectService {
                 e.printStackTrace();
             }
         }
-        saveLaterQueueForSure.add(object);
     }
 
     public static <T extends ModelObjectInterface> void delete(T object) {
