@@ -207,7 +207,7 @@ public class ModelObjectService {
                 e.printStackTrace();
             }
         }
-        saveLaterQueue.add(object);
+        saveLaterQueueForSure.add(object);
     }
 
     public static <T extends ModelObjectInterface> void delete(T object) {
