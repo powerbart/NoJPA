@@ -202,7 +202,7 @@ public class ModelObjectService {
         saveLaterQueueForSure.add(object);
         while(saveLaterQueueForSure.objectsToSave.size() > 100) {
             try {
-                log.debug("Waiting to save objects... ");
+                log.debug("Waiting to save objects... " + saveLaterQueueForSure.objectsToSave.size());
                 Thread.sleep(3);
             } catch (InterruptedException e) {
                 e.printStackTrace();
