@@ -3,6 +3,7 @@ package dk.lessismore.nojpa.masterworker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.management.ManagementFactory;
@@ -44,6 +45,9 @@ public class SystemHealth {
      */
     public static Map<String, Double> getDiskUsages() {
         Map<String, Double> diskUsages = new HashMap<String, Double>();
+        if (!new File("/bin/df").exists()) {
+            return diskUsages;
+        }
 
         try {
             byte[] bytes = new byte[1024];

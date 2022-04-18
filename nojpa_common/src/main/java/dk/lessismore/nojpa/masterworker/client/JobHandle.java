@@ -45,7 +45,7 @@ public class JobHandle<O> {
         String tmpObjectID = GuidFactory.getInstance().makeGuid();
         try{
             Method getIDMethod = jobData.getClass().getMethod("getID");
-            Object id =  getIDMethod.invoke(jobData, null);
+            Object id = getIDMethod  == null ? null : getIDMethod.invoke(jobData, null);
             if(id != null && (("" + id).length() > 2)){
                 tmpObjectID = "" + id;
             }
