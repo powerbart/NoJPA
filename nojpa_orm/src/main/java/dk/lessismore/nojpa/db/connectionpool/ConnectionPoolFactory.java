@@ -33,7 +33,7 @@ public class ConnectionPoolFactory  {
     public static synchronized ResourcePool getPool() {
 
         if (connectionPool == null) {
-            log.debug("making new pool, maybe from resources("+ resources +") ");
+            log.debug("making new pool, maybe from resources("+ resources +") ....  ");
             if (resources == null) {
                 resources = new PropertyResources("db");
             }
