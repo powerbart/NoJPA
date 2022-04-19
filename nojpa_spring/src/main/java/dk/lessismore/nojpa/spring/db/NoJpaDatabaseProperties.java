@@ -1,5 +1,8 @@
 package dk.lessismore.nojpa.spring.db;
 
+import dk.lessismore.nojpa.rest.NoJpaSerializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.core.env.Environment;
 
@@ -11,6 +14,8 @@ import java.util.Properties;
  * Created by seb on 10/9/14.
  */
 public class NoJpaDatabaseProperties {
+
+    private static final Logger log = LoggerFactory.getLogger(NoJpaDatabaseProperties.class);
 
     /*
     driverName=com.mysql.jdbc.Driver
@@ -36,9 +41,11 @@ spring.datasource.nrOfPoolConnections=10
     public static Properties from(Environment env, String name) throws Exception {
         Properties props = new Properties();
         String driverName = env.getProperty(name + ".datasource.driverClassName");
+        log.debug("Having db-driverName="+ driverName);
         props.setProperty("driverName", driverName);
 
         props.setProperty("user", env.getProperty(name + ".datasource.username"));
+        log.debug("Having db-user="+ env.getProperty(name + ".datasource.username"));
         props.setProperty("password", env.getProperty(name + ".datasource.password"));
         props.setProperty("nrOfPoolConnections", env.getProperty(name + ".datasource.nrOfPoolConnections"));
 
