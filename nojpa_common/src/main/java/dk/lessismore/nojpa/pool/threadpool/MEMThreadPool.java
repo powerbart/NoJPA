@@ -27,10 +27,16 @@ public class MEMThreadPool<E extends ThreadPoolJob> {
     protected boolean running = true;
     protected Thread[] myWorkers = null;
     protected long maxRunningTimeInMillis = 0;
+    protected Object[] argsForWorker = null;
 
 
     int numberOfRunningThread = 0;
 
+
+    public MEMThreadPool(Class<? extends ThreadPoolWorker> workerClazz, int countOfWorkers, long maxRunningTimeInMillis, Object... argsForWorker){
+        this(workerClazz, countOfWorkers, maxRunningTimeInMillis);
+        this.argsForWorker = argsForWorker;
+    }
 
     public MEMThreadPool(Class<? extends ThreadPoolWorker> workerClazz, int countOfWorkers, long maxRunningTimeInMillis){
         this.workerClazz = workerClazz;
@@ -160,7 +166,11 @@ public class MEMThreadPool<E extends ThreadPoolJob> {
                             watchWorker.start();
                         }
                         log.debug("Do work - STARTS " + getName());
-                        workerClazz.newInstance().doWork(job);
+                        if (argsForWorker == null) {
+                            workerClazz.newInstance().doWork(job);
+                        } else {
+                            ((ThreadPoolWorker) workerClazz.getDeclaredConstructors()[0].newInstance(argsForWorker)).doWork(job);
+                        }
                         log.debug("Do work - ENDS "  + getName());
                     } catch (java.lang.OutOfMemoryError e) {
                         log.error("Some error OutOfMemoryError:: " +e, e);
