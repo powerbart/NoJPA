@@ -148,12 +148,24 @@ public class SolrSearchQuery extends NQL.SearchQuery{
             for (int i = 0; i < rootConstraints.size(); i++) {
                 NQL.Constraint constraint = (NQL.Constraint) rootConstraints.get(i);
                 NQL.NoSQLExpression expression = constraint.getExpression();
-                if (expression.getDistance() != null) {
+                if (expression.getGeoForm() != null) {
                     String solrAttributeName = NQL.createFinalSolrAttributeName(expression.getJoints(), expression.getAttr());
-                    solrQuery.set(SpatialParams.FIELD, solrAttributeName);
-                    solrQuery.set(SpatialParams.POINT, "" + expression.getValue());
-                    solrQuery.set(SpatialParams.DISTANCE, "" + expression.getDistance());
-                    solrQuery.setParam(CommonParams.FQ, "{!geofilt sfield="+ solrAttributeName +"}");
+                    if (expression.getGeoForm() == NQL.NoSQLExpression.GeoForm.CIRCLE) {
+                        solrQuery.set(SpatialParams.FIELD, solrAttributeName);
+                        solrQuery.set(SpatialParams.POINT, "" + expression.getValue());
+                        solrQuery.set(SpatialParams.DISTANCE, "" + expression.getDistance());
+                        solrQuery.setParam(CommonParams.FQ, "{!geofilt sfield="+ solrAttributeName +"}");
+                    } else if (expression.getGeoForm() == NQL.NoSQLExpression.GeoForm.BOX){
+                        solrQuery.set(SpatialParams.FIELD, solrAttributeName);
+                        solrQuery.set(SpatialParams.POINT, "" + expression.getValue());
+                        solrQuery.set(SpatialParams.DISTANCE, "" + expression.getDistance());
+                        solrQuery.setParam(CommonParams.FQ, "{!bbox sfield="+ solrAttributeName +"}");
+                    } else if (expression.getGeoForm() == NQL.NoSQLExpression.GeoForm.RECTANGLE){
+                        solrQuery.set(SpatialParams.FIELD, solrAttributeName);
+//                        solrQuery.set(SpatialParams.POINT, "" + expression.getValue());
+//                        solrQuery.set(SpatialParams.DISTANCE, "" + expression.getDistance());
+                        solrQuery.setParam(CommonParams.FQ, solrAttributeName +":" + expression.getValue());
+                    }
                 } else {
                     String subQuery = buildSubQuery(expression, constraint);
                     if (subQuery != null && subQuery.length() > 0) {
