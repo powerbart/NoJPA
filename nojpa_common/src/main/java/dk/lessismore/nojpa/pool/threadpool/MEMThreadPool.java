@@ -174,16 +174,7 @@ public class MEMThreadPool<E extends ThreadPoolJob> {
                         log.debug("Do work - ENDS "  + getName());
                     } catch (java.lang.OutOfMemoryError e) {
                         log.error("Some error OutOfMemoryError:: " +e, e);
-                        shouldRun = false;
-                        for(int i = 0; i < myWorkers.length; i++){
-                            if (this.equals(myWorkers[i])) {
-                                myWorkers[i] = new MyWorker();
-                                myWorkers[i].start();
-                                this.setName("Killed-it-" + this.getName());
-                                this.shouldRun = false;
-                                break;
-                            }
-                        }
+                        System.exit(-1);
                     } catch (Exception e) {
                         log.error("Some error :: " +e, e);
                     } finally {

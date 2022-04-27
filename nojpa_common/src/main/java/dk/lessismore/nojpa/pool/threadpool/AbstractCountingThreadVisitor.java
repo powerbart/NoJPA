@@ -46,7 +46,7 @@ public class AbstractCountingThreadVisitor<T extends ModelObjectInterface> imple
         counter++;
         while(pool.size() > poolMaxSize) {
             try {
-                Thread.sleep(100);
+                Thread.sleep(500);
             } catch (Exception e) {}
         }
         AbstractCountingThreadPoolJob job = new AbstractCountingThreadPoolJob();
