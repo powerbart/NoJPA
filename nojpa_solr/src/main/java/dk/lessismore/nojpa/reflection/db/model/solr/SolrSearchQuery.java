@@ -1,6 +1,7 @@
 package dk.lessismore.nojpa.reflection.db.model.solr;
 
 import dk.lessismore.nojpa.db.methodquery.NQL;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.HighlightParams;
@@ -10,7 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.List;
 import java.util.TimeZone;
 
 public class SolrSearchQuery extends NQL.SearchQuery{
@@ -160,10 +163,13 @@ public class SolrSearchQuery extends NQL.SearchQuery{
                         solrQuery.set(SpatialParams.POINT, "" + expression.getValue());
                         solrQuery.set(SpatialParams.DISTANCE, "" + expression.getDistance());
                         solrQuery.setParam(CommonParams.FQ, "{!bbox sfield="+ solrAttributeName +"}");
+                    } else if (expression.getGeoForm() == NQL.NoSQLExpression.GeoForm.POLYGON){
+                        List<NQL.NLatLon> polygon = (List<NQL.NLatLon>) expression.getValue();
+                        String s = StringUtils.join(polygon, ", ");
+                        solrQuery.set(SpatialParams.FIELD, solrAttributeName + "__LOC_RPT");
+                        solrQuery.setParam(CommonParams.FQ, "{!field f="+ solrAttributeName +"}Intersects(POLYGON(("+ s +")))");
                     } else if (expression.getGeoForm() == NQL.NoSQLExpression.GeoForm.RECTANGLE){
                         solrQuery.set(SpatialParams.FIELD, solrAttributeName);
-//                        solrQuery.set(SpatialParams.POINT, "" + expression.getValue());
-//                        solrQuery.set(SpatialParams.DISTANCE, "" + expression.getDistance());
                         solrQuery.setParam(CommonParams.FQ, solrAttributeName +":" + expression.getValue());
                     }
                 } else {

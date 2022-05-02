@@ -247,8 +247,10 @@ public class ModelObjectSearchService {
                         } else {
                             throw new RuntimeException("Can't find a attribute with name longitude or lng ");
                         }
-                        value = value + "," + lgn;
-                        addAttributeValueToStatement(dbAttribute, inputDocument, value, prefix);
+                        String newValue = value + "," + lgn;
+
+                        addAttributeValueToStatement(dbAttribute, inputDocument, newValue, prefix);
+                        addAttributeValueToStatement(dbAttribute, inputDocument, ""+ value +","+ lgn +"", prefix, dbAttribute.getSolrAttributeName(prefix) + "__LOC_RPT");
                     } else {
                         addAttributeValueToStatement(dbAttribute, inputDocument, value, prefix);
                     }
@@ -422,12 +424,12 @@ public class ModelObjectSearchService {
     }
 
 
-
-
-
     private static void addAttributeValueToStatement(DbAttribute dbAttribute, NoSQLInputDocument solrObj, Object value, String prefix) {
-        String attributeName = dbAttribute.getAttributeName();
         String solrAttributeName = dbAttribute.getSolrAttributeName(prefix);
+        addAttributeValueToStatement(dbAttribute, solrObj, value, prefix, solrAttributeName);
+    }
+
+    private static void addAttributeValueToStatement(DbAttribute dbAttribute, NoSQLInputDocument solrObj, Object value, String prefix, String solrAttributeName) {
         if(value != null && value instanceof Calendar){
             log.trace("Will add solrAttributeName(" + solrAttributeName + ") with value(" + ((Calendar) value).getTime() + ")");
         } else {

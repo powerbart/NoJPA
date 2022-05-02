@@ -31,6 +31,22 @@ public class NQL {
 
     public static boolean DEBUG_EXPLAIN = false;
 
+    public static class NLatLon {
+
+        public double lat;
+        public double lon;
+
+        public NLatLon(){}
+        public NLatLon(double lat, double lon){
+            this.lat = lat;
+            this.lon = lon;
+        }
+
+        @Override
+        public String toString() {
+            return lat + " " + lon;
+        }
+    }
 
     public enum Comp {EQUAL, EQUAL_OR_GREATER, EQUAL_OR_LESS, NOT_EQUAL, LIKE}
     public enum Order {ASC, DESC}
@@ -156,6 +172,11 @@ public class NQL {
 
         public SearchQuery<T>  searchRectangle(String mockValue, String latitude1, String longitude1, String latitude2, String longitude2) {
             rootConstraints.add(hasRectangle(mockValue, latitude1, longitude1, latitude2, longitude2));
+            return this;
+        }
+
+        public SearchQuery<T>  searchPolygon(String mockValue, List<NQL.NLatLon> polygon) {
+            rootConstraints.add(hasPolygon(mockValue, polygon));
             return this;
         }
 
@@ -1032,6 +1053,20 @@ public class NQL {
         return new NoSQLConstraint(expression, joints);
     }
 
+    public static Constraint hasPolygon(String mockValue, List<NQL.NLatLon> polygon) {
+        List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
+        Pair<Class, String> pair = getSourceAttributePair();
+        clearMockCallSequence();
+        NoSQLExpression expression = newLeafExpression().addConstrainPolygon(makeAttributeIdentifier(pair), polygon);
+        DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(pair.getFirst());
+        if(dbAttributeContainer.getAttributeContainer().getSearchShardAnnotation() != null){
+            if(dbAttributeContainer.getAttributeContainer().getSearchShardAnnotationAttribute().getAttributeName().equals(pair.getSecond())){
+                expression.setSharding(true);
+            }
+        }
+        return new NoSQLConstraint(expression, joints);
+    }
+
     public static Constraint hasBox(String mockValue, String latitude, String longitude, double distanceInKM) {
         List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
         Pair<Class, String> pair = getSourceAttributePair();
@@ -1619,7 +1654,7 @@ public class NQL {
 
         private static final Logger log = LoggerFactory.getLogger(NQL.class);
 
-        public static enum GeoForm {CIRCLE, BOX, RECTANGLE};
+        public static enum GeoForm {CIRCLE, BOX, RECTANGLE, POLYGON};
 
         protected String attr = null;
         protected Object value = null;
@@ -1674,6 +1709,16 @@ public class NQL {
             this.value = latitude + "," + longitude;
             this.distance = distanceInKM;
             this.geoForm = GeoForm.CIRCLE;
+            this.valueClazz = Integer.class;
+            this.comparator = Comp.EQUAL_OR_LESS;
+            return this;
+        }
+
+        public NoSQLExpression addConstrainPolygon(String attributeName, List<NQL.NLatLon> polygon) {
+            log.trace("addConstrainCircle:distance("+ distance +")");
+            this.attr = attributeName;
+            this.value = polygon;
+            this.geoForm = GeoForm.POLYGON;
             this.valueClazz = Integer.class;
             this.comparator = Comp.EQUAL_OR_LESS;
             return this;
