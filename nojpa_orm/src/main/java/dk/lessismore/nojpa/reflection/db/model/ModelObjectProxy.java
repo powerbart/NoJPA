@@ -1,5 +1,6 @@
 package dk.lessismore.nojpa.reflection.db.model;
 
+import com.google.common.collect.Lists;
 import dk.lessismore.nojpa.cache.ObjectArrayCache;
 import dk.lessismore.nojpa.cache.ObjectCache;
 import dk.lessismore.nojpa.cache.ObjectCacheFactory;
@@ -1107,7 +1108,7 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
                 if (obj1.length != obj2.length) {
                     isDirty = true;
                 } else {
-                    List<Enum> enums = Arrays.asList(obj2);
+                    List<Enum> enums = Lists.newArrayList(obj2);
                     for (int i = 0; i < obj1.length; i++) {
                         enums.remove(obj1[i]);
                     }
