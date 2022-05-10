@@ -180,6 +180,11 @@ public class NQL {
             return this;
         }
 
+        public SearchQuery<T>  searchRectangle(double mockValue, double latitude1, double longitude1, double latitude2, double longitude2) {
+            rootConstraints.add(hasRectangle(mockValue, latitude1, longitude1, latitude2, longitude2));
+            return this;
+        }
+
         public SearchQuery<T>  searchPolygon(String mockValue, List<NQL.NLatLon> polygon) {
             rootConstraints.add(hasPolygon(mockValue, polygon));
             return this;
@@ -1072,6 +1077,20 @@ public class NQL {
         return new NoSQLConstraint(expression, joints);
     }
 
+    public static Constraint hasRectangle(double mockValue, double latitude1, double longitude1, double latitude2, double longitude2) {
+        List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
+        Pair<Class, String> pair = getSourceAttributePair();
+        clearMockCallSequence();
+        NoSQLExpression expression = newLeafExpression().addConstrainRectangle(makeAttributeIdentifier(pair), latitude1, longitude1, latitude2, longitude2);
+        DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(pair.getFirst());
+        if(dbAttributeContainer.getAttributeContainer().getSearchShardAnnotation() != null){
+            if(dbAttributeContainer.getAttributeContainer().getSearchShardAnnotationAttribute().getAttributeName().equals(pair.getSecond())){
+                expression.setSharding(true);
+            }
+        }
+        return new NoSQLConstraint(expression, joints);
+    }
+
     public static Constraint hasPolygon(String mockValue, List<NQL.NLatLon> polygon) {
         List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
         Pair<Class, String> pair = getSourceAttributePair();
@@ -1773,6 +1792,16 @@ public class NQL {
         }
 
         public NoSQLExpression addConstrainRectangle(String attributeName, String latitude1, String longitude1, String latitude2, String longitude2) {
+            log.trace("addConstrainCircle:distance("+ distance +")");
+            this.attr = attributeName;
+            this.value = "[" + latitude1 + "," + longitude1 + " TO " + latitude2 + "," + longitude2 + "]";
+            this.geoForm = GeoForm.RECTANGLE;
+            this.valueClazz = Integer.class;
+            this.comparator = Comp.EQUAL_OR_LESS;
+            return this;
+        }
+
+        public NoSQLExpression addConstrainRectangle(String attributeName, double latitude1, double longitude1, double latitude2, double longitude2) {
             log.trace("addConstrainCircle:distance("+ distance +")");
             this.attr = attributeName;
             this.value = "[" + latitude1 + "," + longitude1 + " TO " + latitude2 + "," + longitude2 + "]";
