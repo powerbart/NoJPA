@@ -474,8 +474,14 @@ public class DatabaseCreator {
         subTypesList.addAll(reflections.getSubTypesOf(ModelObjectInterface.class));
         log.debug("getSubtypes: removing because it's annotated with @IgnoreFromTableCreation clazz = " + annoList);
         subTypesList.removeAll(annoList);
-        log.debug("getSubtypes: found types: " + subTypesList);
-        return subTypesList;
+        ArrayList<Class> response = new ArrayList<>();
+        for (Class aClass : subTypesList) {
+            if (aClass.getPackage().getName().startsWith(rootClass.getPackage().getName())) {
+                response.add(aClass);
+            }
+        }
+        log.debug("getSubtypes: found types: " + response);
+        return response;
     }
 
 
