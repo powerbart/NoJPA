@@ -44,7 +44,7 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
         return getExecutor().getThreadPoolExecutor().getQueue().size();
     }
 
-    private static MaxSizeMaxTimeMap<String> visitedMap = new MaxSizeMaxTimeMap<String>(20000, 600);
+    private static MaxSizeMaxTimeMap<String> visitedMap = new MaxSizeMaxTimeMap<String>(20000, 6000);
 
     int sameCount = 0;
     int currentEnd = 0;
@@ -88,7 +88,7 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
             int beforeQSize = getCurrentQueueSize();
 
 
-            for (int i = 0; i < 30; i++) {
+            for (int i = 0; i < 60 * 3; i++) {
                 log.debug("WorkQueue-checking: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +") sameCount: " + sameCount);
                 if(getCurrentQueueSize() < getMinimumQueueSize()){
                     numberOfLoops++;
@@ -108,7 +108,7 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
 
                 }
             }
-            if(numberOfLoops > 5 || sameCount > 110){
+            if(numberOfLoops > 8 || sameCount > 900){
                 log.debug("WorkQueue-has-not-changed-for-long-time: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +") sameCount: " + sameCount);
                 log.info("Will now try to force a shutdown... ");
                 break;
@@ -118,7 +118,7 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
 
         //Waiting for 60 secs more ....
         int beforeQSize = getCurrentQueueSize();
-        for (int i = 0; i < 60 || (getCurrentQueueSize() > 0 && i < 90); i++) {
+        for (int i = 0; i < 120 || (getCurrentQueueSize() > 0 && i < 180); i++) {
             log.debug("WorkQueue-WAITING-FOR-FINISH: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +") sameCount: " + sameCount);
             try {
                 Thread.sleep(1_000);
