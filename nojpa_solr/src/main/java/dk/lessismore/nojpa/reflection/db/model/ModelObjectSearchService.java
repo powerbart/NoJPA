@@ -121,9 +121,16 @@ public class ModelObjectSearchService {
 //                    String from = translateModelService.getSourceLanguage(object);
 //                    List<String> languages = translateModelService.getLanguages(object);
 //                    for (String language : languages) {
-//                        T translated = translateModelService.translate(object, from, language);
+//                        T translated = translateModelService.translateFull(object, from, language);
+//                        if (translated == null) {
+//                            for()
+//                            translateModelService.translateSingle(object, objectTo, attributeName, from, language);
+//                        }
 //
-//                        noSQLService.index(translated, suffix = language);
+//                        NoSQLInputDocument translatedDoc = noSQLService.createInputDocument(getInterfaceClass(object), object);
+//                        translatedDoc.addPostfixShardName((postfixShardName != null ? postfixShardName + "_" : "") + language);
+//                        addAttributesToDocument(object, "", new HashMap<>(), key, translatedDoc);
+//                        noSQLService.index(translatedDoc);
 //                    }
 //                }
                 noSQLService.index(inDoc);
