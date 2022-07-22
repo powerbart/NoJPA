@@ -12,6 +12,7 @@ import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLInputDocument;
 import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLService;
 import dk.lessismore.nojpa.reflection.db.model.solr.SolrService;
 import dk.lessismore.nojpa.reflection.db.model.solr.SolrServiceImpl;
+import dk.lessismore.nojpa.reflection.translate.TranslateModelService;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrInputDocument;
@@ -22,11 +23,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.TimeZone;
+import java.util.*;
 
 /**
  * Created : with IntelliJ IDEA.
@@ -106,7 +103,7 @@ public class ModelObjectSearchService {
         return noSQLServices.get(aClass.getSimpleName());
     }
 
-    public static <T extends ModelObjectInterface> void put(T object, String postfixShardName) {
+    public static <T extends ModelObjectInterface> void put(T object, String postfixShardName) { // , TranslateModelService<T> translateModelService
         try{
             ModelObject modelObject = (ModelObject) object;
 
@@ -119,6 +116,16 @@ public class ModelObjectSearchService {
             inDoc.addPostfixShardName(postfixShardName);
             addAttributesToDocument(object, "", new HashMap<>(), key, inDoc);
             try {
+                // translation related
+//                if (isAnnotated(object, SearchTranslate.class) && translateModelService != null) {
+//                    String from = translateModelService.getSourceLanguage(object);
+//                    List<String> languages = translateModelService.getLanguages(object);
+//                    for (String language : languages) {
+//                        T translated = translateModelService.translate(object, from, language);
+//
+//                        noSQLService.index(translated, suffix = language);
+//                    }
+//                }
                 noSQLService.index(inDoc);
             } catch (Exception e) {
                 log.error("Some io error when adding document ... " + e, e);
