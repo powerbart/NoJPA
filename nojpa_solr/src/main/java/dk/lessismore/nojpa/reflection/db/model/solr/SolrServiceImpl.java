@@ -133,6 +133,11 @@ public abstract class SolrServiceImpl implements SolrService {
     }
 
     @Override
+    public void delete(String id, String shard) {
+        delete(id); // TODO use the shard
+    }
+
+    @Override
     public void deleteAll() {
         try {
             server.deleteByQuery("*:*");

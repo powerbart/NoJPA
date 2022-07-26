@@ -19,6 +19,7 @@ public interface NoSQLService {
     void commit();
     void optimize();
     void delete(String id);
+    void delete(String id, String shard);
     void destroy() throws IOException;
     void deleteAll();
 

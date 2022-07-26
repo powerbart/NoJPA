@@ -92,7 +92,10 @@ public class ModelObjectSearchService {
     public static <T extends ModelObjectInterface> void delete(T object) {
         String key = serverKey(object);
         try {
-             noSQLServices.get(key).delete(object.getObjectID());
+            NoSQLService noSQLService = noSQLServices.get(key);
+            NoSQLInputDocument inDoc = noSQLService.createInputDocument(getInterfaceClass(object), object);
+            addAttributesToDocument(object, "", new HashMap<>(), key, inDoc);
+            noSQLServices.get(key).delete(object.getObjectID(), inDoc.getShard());
         } catch (Exception e) {
             log.error("Some error when adding document ... " + e, e);
         }

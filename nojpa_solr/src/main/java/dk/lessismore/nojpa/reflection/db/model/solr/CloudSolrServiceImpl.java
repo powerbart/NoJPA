@@ -146,6 +146,17 @@ public class CloudSolrServiceImpl extends SolrServiceImpl {
     }
 
     @Override
+    public void delete(String id, String shard) {
+        try {
+            server.deleteById(collectionName + (shard != null ? "_" + shard.replaceAll("\"", "") : ""), id, AUTO_COMMIT_MS);
+        } catch (SolrServerException e) {
+            log.error("[ void: (" + collectionName + ")deleteByID(" + id + ") ]: SolrServerException deleteByID index: " + e.getMessage(), e);
+        } catch (IOException e) {
+            log.error("[ void: (" + collectionName + ")deleteByID(" + id + ") ]: IOException deleteByID index: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
     public void deleteAll() {
         try {
             server.deleteByQuery(collectionName, "*:*", AUTO_COMMIT_MS);

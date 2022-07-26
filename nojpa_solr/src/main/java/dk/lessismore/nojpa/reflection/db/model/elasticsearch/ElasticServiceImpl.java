@@ -222,6 +222,11 @@ public class ElasticServiceImpl implements ElasticService {
     }
 
     @Override
+    public void delete(String id, String shard) {
+        delete(id); // TODO use the shard
+    }
+
+    @Override
     public void deleteAll() {
         // TODO implement
 //        try {
