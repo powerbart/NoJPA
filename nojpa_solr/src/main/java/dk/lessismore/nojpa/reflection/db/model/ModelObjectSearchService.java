@@ -13,6 +13,7 @@ import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLService;
 import dk.lessismore.nojpa.reflection.db.model.solr.SolrService;
 import dk.lessismore.nojpa.reflection.db.model.solr.SolrServiceImpl;
 import dk.lessismore.nojpa.reflection.translate.TranslateModelService;
+import dk.lessismore.nojpa.reflection.translate.TranslateModelServiceFactory;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrInputDocument;
@@ -115,18 +116,28 @@ public class ModelObjectSearchService {
                 throw new RuntimeException("Cant find a noSQLServices for class("+ modelObject.getInterface().getSimpleName() +")");
             }
             NoSQLService noSQLService = noSQLServices.get(key);
-            NoSQLInputDocument inDoc = noSQLService.createInputDocument(getInterfaceClass(object), object);
+            Class<? extends ModelObjectInterface> modelClass = getInterfaceClass(object);
+            NoSQLInputDocument inDoc = noSQLService.createInputDocument(modelClass, object);
             inDoc.addPostfixShardName(postfixShardName);
             addAttributesToDocument(object, "", new HashMap<>(), key, inDoc);
             try {
                 // translation related
-//                if (isAnnotated(object, SearchTranslate.class) && translateModelService != null) {
+//                TranslateModelService<? extends ModelObjectInterface> translateModelService = TranslateModelServiceFactory.getInstance(modelClass);
+//                if (translateModelService != null) {
 //                    String from = translateModelService.getSourceLanguage(object);
-//                    List<String> languages = translateModelService.getLanguages(object);
+//                    List<String> languages = translateModelService.getLanguages();
 //                    for (String language : languages) {
-//                        T translated = translateModelService.translate(object, from, language);
+//                        ModelObjectInterface objectTo = ModelObjectService.cloneDeep(object);
+//                        T translated = translateModelService.translateFull(object, objectTo, from, language);
+//                        if (translated == null) {
+//                            for()
+//                            translateModelService.translateSingle(object, objectTo, attributeName, attributeValue, from, language);
+//                        }
 //
-//                        noSQLService.index(translated, suffix = language);
+//                        NoSQLInputDocument translatedDoc = noSQLService.createInputDocument(getInterfaceClass(object), object);
+//                        translatedDoc.addPostfixShardName((postfixShardName != null ? postfixShardName + "_" : "") + language);
+//                        addAttributesToDocument(object, "", new HashMap<>(), key, translatedDoc);
+//                        noSQLService.index(translatedDoc);
 //                    }
 //                }
                 noSQLService.index(inDoc);
