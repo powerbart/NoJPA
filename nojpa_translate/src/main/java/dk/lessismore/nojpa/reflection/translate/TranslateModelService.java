@@ -25,7 +25,7 @@ public abstract class TranslateModelService<T extends ModelObjectInterface> {
         return null;
     }
 
-    public abstract <T extends ModelObjectInterface> String getSourceLanguage(T object);
+    public abstract String getSourceLanguage(T object);
 
     public abstract List<String> getLanguages();
 }

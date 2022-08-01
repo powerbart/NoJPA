@@ -107,7 +107,7 @@ public class ModelObjectSearchService {
         return noSQLServices.get(aClass.getSimpleName());
     }
 
-    public static <T extends ModelObjectInterface> void put(T object, String postfixShardName) { // , TranslateModelService<T> translateModelService
+    public static <T extends ModelObjectInterface> void put(T object, String postfixShardName) {
         try{
             ModelObject modelObject = (ModelObject) object;
 
@@ -116,34 +116,35 @@ public class ModelObjectSearchService {
                 throw new RuntimeException("Cant find a noSQLServices for class("+ modelObject.getInterface().getSimpleName() +")");
             }
             NoSQLService noSQLService = noSQLServices.get(key);
-            Class<? extends ModelObjectInterface> modelClass = getInterfaceClass(object);
+            Class<T> modelClass = (Class<T>)getInterfaceClass(object);
             NoSQLInputDocument inDoc = noSQLService.createInputDocument(modelClass, object);
             inDoc.addPostfixShardName(postfixShardName);
             addAttributesToDocument(object, "", new HashMap<>(), key, inDoc);
             try {
-                // translation related
-//                TranslateModelService<? extends ModelObjectInterface> translateModelService = TranslateModelServiceFactory.getInstance(modelClass);
-//                if (translateModelService != null) {
-//                    String from = translateModelService.getSourceLanguage(object);
-//                    List<String> languages = translateModelService.getLanguages();
-//                    for (String language : languages) {
-//                        ModelObjectInterface objectTo = ModelObjectService.cloneDeep(object);
-//                        T translated = translateModelService.translateFull(object, objectTo, from, language);
-//                        if (translated == null) {
-//                            for()
-//                            translateModelService.translateSingle(object, objectTo, attributeName, attributeValue, from, language);
-//                        }
-//
-//                        NoSQLInputDocument translatedDoc = noSQLService.createInputDocument(getInterfaceClass(object), object);
-//                        translatedDoc.addPostfixShardName((postfixShardName != null ? postfixShardName + "_" : "") + language);
-//                        addAttributesToDocument(object, "", new HashMap<>(), key, translatedDoc);
-//                        noSQLService.index(translatedDoc);
-//                    }
-//                }
                 noSQLService.index(inDoc);
             } catch (Exception e) {
                 log.error("Some io error when adding document ... " + e, e);
             }
+//
+//            // translation related
+//            TranslateModelService<T> translateModelService = TranslateModelServiceFactory.<T>getInstance(modelClass);
+//            if (translateModelService != null) {
+//                String from = translateModelService.getSourceLanguage(object);
+//                List<String> languages = translateModelService.getLanguages();
+//                for (String language : languages) {
+//                    T translated = translateModelService.translateFull(object, from, language);
+//                    if (translated == null) {
+//                        translated = ModelObjectService.cloneDeep(object);
+//                        translateRecursive(object, translateModelService, from, language);
+//                        translateModelService.translateSingle(object, translated, attributeName, attributeValue, from, language);
+//                    }
+//
+//                    NoSQLInputDocument translatedDoc = noSQLService.createInputDocument(getInterfaceClass(translated), translated);
+//                    translatedDoc.addPostfixShardName((postfixShardName != null ? postfixShardName + "_" : "") + language);
+//                    addAttributesToDocument(translated, "", new HashMap<>(), key, translatedDoc, );
+//                    noSQLService.index(translatedDoc);
+//                }
+//            }
         } catch (Exception e){
             log.error("put:_ Some error in put-1 " + e, e);
             throw new RuntimeException(e);
@@ -447,6 +448,7 @@ public class ModelObjectSearchService {
 
     private static void addAttributeValueToStatement(DbAttribute dbAttribute, NoSQLInputDocument solrObj, Object value, String prefix) {
         String solrAttributeName = dbAttribute.getSolrAttributeName(prefix);
+//        value =
         addAttributeValueToStatement(dbAttribute, solrObj, value, prefix, solrAttributeName);
     }
 
