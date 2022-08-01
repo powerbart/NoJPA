@@ -125,26 +125,21 @@ public class ModelObjectSearchService {
             } catch (Exception e) {
                 log.error("Some io error when adding document ... " + e, e);
             }
-//
+//          $class-objectID-attribute
+//          NQL.getListFromNoSQL(xxx) - no cache ...
 //            // translation related
-//            TranslateModelService<T> translateModelService = TranslateModelServiceFactory.<T>getInstance(modelClass);
-//            if (translateModelService != null) {
-//                String from = translateModelService.getSourceLanguage(object);
-//                List<String> languages = translateModelService.getLanguages();
-//                for (String language : languages) {
-//                    T translated = translateModelService.translateFull(object, from, language);
-//                    if (translated == null) {
-//                        translated = ModelObjectService.cloneDeep(object);
-//                        translateRecursive(object, translateModelService, from, language);
-//                        translateModelService.translateSingle(object, translated, attributeName, attributeValue, from, language);
-//                    }
-//
-//                    NoSQLInputDocument translatedDoc = noSQLService.createInputDocument(getInterfaceClass(translated), translated);
-//                    translatedDoc.addPostfixShardName((postfixShardName != null ? postfixShardName + "_" : "") + language);
-//                    addAttributesToDocument(translated, "", new HashMap<>(), key, translatedDoc, );
-//                    noSQLService.index(translatedDoc);
-//                }
-//            }
+            TranslateModelService<T> translateModelService = TranslateModelServiceFactory.<T>getInstance(modelClass);
+            if (translateModelService != null) {
+                String from = translateModelService.getSourceLanguage(object);
+                List<String> languages = translateModelService.getLanguages();
+                for (String language : languages) {
+//                    translateModelService.translateSingle(object, translated, from, language);
+                    NoSQLInputDocument translatedDoc = noSQLService.createInputDocument(getInterfaceClass(object), object);
+                    translatedDoc.addPostfixShardName((postfixShardName != null ? postfixShardName + "_" : "") + language);
+                    addAttributesToDocument(object, "", new HashMap<>(), key, translatedDoc, translateModelService, from, language);
+                    noSQLService.index(translatedDoc);
+                }
+            }
         } catch (Exception e){
             log.error("put:_ Some error in put-1 " + e, e);
             throw new RuntimeException(e);
@@ -233,6 +228,10 @@ public class ModelObjectSearchService {
     }
 
     private static <T extends ModelObjectInterface> void addAttributesToDocument(T object, String prefix, HashMap<String, String> storedObjects, String key, NoSQLInputDocument inputDocument) {
+        addAttributesToDocument(object, prefix, storedObjects, key, inputDocument, null, null, null);
+    }
+
+    private static <T extends ModelObjectInterface> void addAttributesToDocument(T object, String prefix, HashMap<String, String> storedObjects, String key, NoSQLInputDocument inputDocument,  TranslateModelService translateModelService, String fromLang, String toLang) {
         //log.debug("addAttributesToDocument:X0");
         ModelObject modelObject = (ModelObject) object;
         DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(modelObject.getInterface());
@@ -271,17 +270,17 @@ public class ModelObjectSearchService {
                         }
                         String newValue = value + "," + lgn;
 
-                        addAttributeValueToStatement(dbAttribute, inputDocument, newValue, prefix);
-                        addAttributeValueToStatement(dbAttribute, inputDocument, ""+ value +","+ lgn +"", prefix, dbAttribute.getSolrAttributeName(prefix) + "__LOC_RPT");
+                        addAttributeValueToStatement(object, dbAttribute, inputDocument, newValue, prefix, translateModelService, fromLang, toLang);
+                        addAttributeValueToStatement(object, dbAttribute, inputDocument, ""+ value +","+ lgn +"", prefix, dbAttribute.getSolrAttributeName(prefix) + "__LOC_RPT", translateModelService, fromLang, toLang);
                     } else {
-                        addAttributeValueToStatement(dbAttribute, inputDocument, value, prefix);
+                        addAttributeValueToStatement(object, dbAttribute, inputDocument, value, prefix, translateModelService, fromLang, toLang);
                     }
                     //log.debug("addAttributesToDocument:X6");
                 } else if (!dbAttribute.isMultiAssociation()) {
                     //log.debug("addAttributesToDocument:X7");
                     ModelObjectInterface value = (ModelObjectInterface) dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
                     //log.debug("addAttributesToDocument:X8");
-                    addAttributeValueToStatement(dbAttribute, inputDocument, value, prefix);
+                    addAttributeValueToStatement(object, dbAttribute, inputDocument, value, prefix, translateModelService, fromLang, toLang);
                     //log.debug("addAttributesToDocument:X9");
                     if(value != null && !storedObjects.containsKey(storedObjectsKey(prefix, value.getObjectID(), dbAttribute))){
 //                    if(value != null && !storedObjects.containsKey(((ModelObject) value).getInterface() + ":" + value.getObjectID())){
@@ -446,13 +445,13 @@ public class ModelObjectSearchService {
     }
 
 
-    private static void addAttributeValueToStatement(DbAttribute dbAttribute, NoSQLInputDocument solrObj, Object value, String prefix) {
+    private static void addAttributeValueToStatement(ModelObjectInterface object, DbAttribute dbAttribute, NoSQLInputDocument solrObj, Object value, String prefix, TranslateModelService translateModelService, String fromLang, String toLang) {
         String solrAttributeName = dbAttribute.getSolrAttributeName(prefix);
 //        value =
-        addAttributeValueToStatement(dbAttribute, solrObj, value, prefix, solrAttributeName);
+        addAttributeValueToStatement(object, dbAttribute, solrObj, value, prefix, solrAttributeName, translateModelService, fromLang, toLang);
     }
 
-    private static void addAttributeValueToStatement(DbAttribute dbAttribute, NoSQLInputDocument solrObj, Object value, String prefix, String solrAttributeName) {
+    private static void addAttributeValueToStatement(ModelObjectInterface object, DbAttribute dbAttribute, NoSQLInputDocument solrObj, Object value, String prefix, String solrAttributeName, TranslateModelService translateModelService, String fromLang, String toLang) {
         if(value != null && value instanceof Calendar){
             log.trace("Will add solrAttributeName(" + solrAttributeName + ") with value(" + ((Calendar) value).getTime() + ")");
         } else {
@@ -471,7 +470,13 @@ public class ModelObjectSearchService {
                 case DbDataType.DB_VARCHAR:
                     String valueStr = null;
                     if (value instanceof String) {
-                        valueStr = (String) value;
+                        if (translateModelService != null && dbAttribute.getAttribute().getSearchFieldAnnotation().translate() && !fromLang.equals(toLang)) {
+                            Class modelClass = (Class)getInterfaceClass(object);
+                            valueStr = translateModelService.translate(modelClass, object, dbAttribute.getAttributeName(), (String) value, fromLang, toLang);
+                        } else {
+                            valueStr = (String) value;
+                        }
+
                     } else {
                         //This attribute is not a string; but we have to save it as one in the
                         //database. We must convert the object to a string!
