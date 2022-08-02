@@ -28,10 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.*;
 
 /**
  * Created by seb on 7/23/14.
@@ -241,6 +238,7 @@ public class ElasticServiceImpl implements ElasticService {
 
     public static class ElasticInputDocumentWrapper implements NoSQLInputDocument {
 
+        Set<String> translatedFields = new HashSet<>();
         final Class<? extends ModelObjectInterface> clazz;
         final ObjectMapper objectMapper;
         final ObjectNode node;
@@ -324,6 +322,31 @@ public class ElasticServiceImpl implements ElasticService {
         @Override
         public String getPostfixShardName() {
             return null;
+        }
+
+        @Override
+        public void addTranslatedFieldName(String solrAttributeName) {
+            // TODO
+        }
+
+        @Override
+        public Set<String> getTranslateFields() {
+            return null; // TODO
+        }
+
+        @Override
+        public Set<String> getAllFields() {
+            return null; // TODO
+        }
+
+        @Override
+        public Object getValue(String f) {
+            return node.get(f);
+        }
+
+        @Override
+        public void setField(String varName, Object values) {
+            // TODO
         }
 
 //        @Override
