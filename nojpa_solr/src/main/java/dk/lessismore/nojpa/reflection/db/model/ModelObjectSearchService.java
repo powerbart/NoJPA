@@ -134,9 +134,21 @@ public class ModelObjectSearchService {
                 List<String> languages = translateModelService.getLanguages();
                 for (String language : languages) {
 //                    translateModelService.translateSingle(object, translated, from, language);
-                    NoSQLInputDocument translatedDoc = noSQLService.createInputDocument(getInterfaceClass(object), object);
+                    NoSQLInputDocument translatedDoc = noSQLService.createInputDocument(getInterfaceClass(object), object); //TODO: Clone inDoc
+                    T translatedObjectOrNull = translateModelService.getTranslatedObjectOrNull(object, language);
+                    if (translatedObjectOrNull == null) {
+                        addAttributesToDocument(object, "", new HashMap<>(), key, translatedDoc, translateModelService, from, language);
+                    } else {
+                        addAttributesToDocument(translatedObjectOrNull, "", new HashMap<>(), key, translatedDoc);
+                        Set<String> translateFields = inDoc.getTranslateFields();
+                        Set<String> fieldNames = inDoc.getAllFields();
+                        for(String f : fieldNames) {
+                            if (!translateFields.contains(f)) {
+                                translatedDoc.setField(f, inDoc.getValue(f));
+                            }
+                        }
+                    }
                     translatedDoc.addPostfixShardName((postfixShardName != null ? postfixShardName + "_" : "") + language);
-                    addAttributesToDocument(object, "", new HashMap<>(), key, translatedDoc, translateModelService, from, language);
                     noSQLService.index(translatedDoc);
                 }
             }
@@ -273,6 +285,9 @@ public class ModelObjectSearchService {
                         addAttributeValueToStatement(object, dbAttribute, inputDocument, newValue, prefix, translateModelService, fromLang, toLang);
                         addAttributeValueToStatement(object, dbAttribute, inputDocument, ""+ value +","+ lgn +"", prefix, dbAttribute.getSolrAttributeName(prefix) + "__LOC_RPT", translateModelService, fromLang, toLang);
                     } else {
+                        if (searchField.translate()) {
+                            inputDocument.addTranslatedFieldName(dbAttribute.getSolrAttributeName(prefix));
+                        }
                         addAttributeValueToStatement(object, dbAttribute, inputDocument, value, prefix, translateModelService, fromLang, toLang);
                     }
                     //log.debug("addAttributesToDocument:X6");

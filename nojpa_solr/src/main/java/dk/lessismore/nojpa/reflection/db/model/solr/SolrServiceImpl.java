@@ -16,7 +16,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by seb on 7/23/14.
@@ -150,6 +152,7 @@ public abstract class SolrServiceImpl implements SolrService {
 
         SolrInputDocument document = new SolrInputDocument();
 
+        Set<String> translatedFields = new HashSet<>();
         String shard = null;
         String postfixShardName = null;
 
@@ -211,6 +214,31 @@ public abstract class SolrServiceImpl implements SolrService {
         @Override
         public String getPostfixShardName() {
             return postfixShardName;
+        }
+
+        @Override
+        public void addTranslatedFieldName(String solrAttributeName) {
+            translatedFields.add(solrAttributeName);
+        }
+
+        @Override
+        public Set<String> getTranslateFields() {
+            return translatedFields;
+        }
+
+        @Override
+        public Set<String> getAllFields() {
+            return document.keySet();
+        }
+
+        @Override
+        public Object getValue(String f) {
+            return document.getFieldValue(f);
+        }
+
+        @Override
+        public void setField(String varName, Object values) {
+            document.addField(varName, values);
         }
 //
 //        @Override
