@@ -1782,7 +1782,7 @@ public class NQL {
         }
 
         public NoSQLExpression addConstrainPolygon(String attributeName, List<NQL.NLatLon> polygon) {
-            log.trace("addConstrainCircle:distance("+ distance +")");
+            log.trace("addConstrainCircle:addConstrainPolygon with size("+ polygon.size() +")");
             this.attr = attributeName;
             this.value = polygon;
             this.geoForm = GeoForm.POLYGON;
