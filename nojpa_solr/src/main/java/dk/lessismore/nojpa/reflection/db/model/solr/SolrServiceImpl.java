@@ -238,7 +238,7 @@ public abstract class SolrServiceImpl implements SolrService {
 
         @Override
         public void setField(String varName, Object values) {
-            document.addField(varName, values);
+            document.setField(varName, values);
         }
 //
 //        @Override

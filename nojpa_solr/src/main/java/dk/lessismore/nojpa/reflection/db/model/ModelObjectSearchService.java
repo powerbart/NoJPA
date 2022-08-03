@@ -10,18 +10,13 @@ import dk.lessismore.nojpa.reflection.db.attributes.DbAttribute;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttributeContainer;
 import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLInputDocument;
 import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLService;
-import dk.lessismore.nojpa.reflection.db.model.solr.SolrService;
-import dk.lessismore.nojpa.reflection.db.model.solr.SolrServiceImpl;
 import dk.lessismore.nojpa.reflection.translate.TranslateModelService;
 import dk.lessismore.nojpa.reflection.translate.TranslateModelServiceFactory;
-import org.apache.solr.client.solrj.SolrClient;
-import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.common.SolrInputDocument;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -134,21 +129,23 @@ public class ModelObjectSearchService {
                 List<String> languages = translateModelService.getLanguages();
                 for (String language : languages) {
 //                    translateModelService.translateSingle(object, translated, from, language);
-                    NoSQLInputDocument translatedDoc = noSQLService.createInputDocument(getInterfaceClass(object), object); //TODO: Clone inDoc
+                    NoSQLInputDocument translatedDoc = noSQLService.createInputDocument(getInterfaceClass(object), object);
+                    translatedDoc.addShard(language);
                     T translatedObjectOrNull = translateModelService.getTranslatedObjectOrNull(object, language);
                     if (translatedObjectOrNull == null) {
                         addAttributesToDocument(object, "", new HashMap<>(), key, translatedDoc, translateModelService, from, language);
                     } else {
                         addAttributesToDocument(translatedObjectOrNull, "", new HashMap<>(), key, translatedDoc);
                         Set<String> translateFields = inDoc.getTranslateFields();
+                        // TODO nas the inclusions here are 3, but references in the doc is 1
                         Set<String> fieldNames = inDoc.getAllFields();
-                        for(String f : fieldNames) {
-                            if (!translateFields.contains(f)) {
+                        for(String f : fieldNames) { // _Product_inclusions__TXT_ARRAY_ProductFeature_description__ID_ProductFeatureDescription_content__TXT_ARRAY
+                            if (!(translateFields.contains(f) || translateFields.contains(StringUtils.removeEnd(f, "_ARRAY")))) {
                                 translatedDoc.setField(f, inDoc.getValue(f));
                             }
                         }
                     }
-                    translatedDoc.addPostfixShardName((postfixShardName != null ? postfixShardName + "_" : "") + language);
+                    translatedDoc.addPostfixShardName(postfixShardName);
                     noSQLService.index(translatedDoc);
                 }
             }
@@ -322,7 +319,7 @@ public class ModelObjectSearchService {
                             ModelObjectInterface value = vs[i];
                             if(value != null && !storedObjects.containsKey(storedObjectsKey(prefix, value.getObjectID(), dbAttribute))){
                                 storedObjects.put(storedObjectsKey(prefix, value.getObjectID(), dbAttribute), value.getObjectID());
-                                getSearchValues(value, dbAttribute.getSolrAttributeName(prefix), storedObjects, values);
+                                getSearchValues(value, dbAttribute.getSolrAttributeName(prefix), storedObjects, values, inputDocument);
                             }
                         }
                         Iterator<String> nameIterator = values.keySet().iterator();
@@ -342,7 +339,7 @@ public class ModelObjectSearchService {
         }
     }
 
-    private static  <T extends ModelObjectInterface> void getSearchValues(T object, String prefix, HashMap<String, String> storedObjects, HashMap<String, ArrayList<Object>> values){
+    private static  <T extends ModelObjectInterface> void getSearchValues(T object, String prefix, HashMap<String, String> storedObjects, HashMap<String, ArrayList<Object>> values, NoSQLInputDocument inputDocument){
         ModelObject modelObject = (ModelObject) object;
         DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(modelObject.getInterface());
         String objectIDInSolr = (prefix.length() == 0 ? "" : prefix + "_") + "objectID" + (prefix.length() == 0 ? "" : "__ID");
@@ -361,13 +358,16 @@ public class ModelObjectSearchService {
                     Object value = null;
                     value = dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
                     if(value != null){
+                        if (searchField.translate()) {
+                            inputDocument.addTranslatedFieldName(dbAttribute.getSolrAttributeName(prefix));
+                        }
                         addAttributeValueToMap(dbAttribute, value, prefix, values);
                     }
                 } else if (!dbAttribute.isMultiAssociation()) {
                     ModelObjectInterface value = (ModelObjectInterface) dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
                     if(value != null && !storedObjects.containsKey(storedObjectsKey(prefix, value.getObjectID(), dbAttribute))){
                         storedObjects.put(storedObjectsKey(prefix, value.getObjectID(), dbAttribute), value.getObjectID());
-                        getSearchValues(value, dbAttribute.getSolrAttributeName(prefix), storedObjects, values);
+                        getSearchValues(value, dbAttribute.getSolrAttributeName(prefix), storedObjects, values, inputDocument);
                     }
                 } else {
                     ModelObjectInterface[] vs = (ModelObjectInterface[]) dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
@@ -375,7 +375,7 @@ public class ModelObjectSearchService {
                         ModelObjectInterface value = vs[i];
                         if(value != null && !storedObjects.containsKey(storedObjectsKey(prefix, value.getObjectID(), dbAttribute))){
                             storedObjects.put(storedObjectsKey(prefix, value.getObjectID(), dbAttribute), value.getObjectID());
-                            getSearchValues(value, dbAttribute.getSolrAttributeName(prefix), storedObjects, values);
+                            getSearchValues(value, dbAttribute.getSolrAttributeName(prefix), storedObjects, values, inputDocument);
                         }
                     }
                 }
