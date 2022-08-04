@@ -165,9 +165,9 @@ public class SolrSearchQuery extends NQL.SearchQuery{
                         solrQuery.setParam(CommonParams.FQ, "{!bbox sfield="+ solrAttributeName +"}");
                     } else if (expression.getGeoForm() == NQL.NoSQLExpression.GeoForm.POLYGON){
                         List<NQL.NLatLon> polygon = (List<NQL.NLatLon>) expression.getValue();
-                        String s = StringUtils.join(polygon, ", ");
+                        String s = StringUtils.join(polygon, ",");
                         solrQuery.set(SpatialParams.FIELD, solrAttributeName + "__LOC_RPT");
-                        solrQuery.setParam(CommonParams.FQ, "{!field f="+ solrAttributeName +"}Intersects(POLYGON(("+ s +")))");
+                        solrQuery.setParam(CommonParams.FQ, "{!field f="+ solrAttributeName +"__LOC_RPT}Intersects(POLYGON("+ s +"))");
                     } else if (expression.getGeoForm() == NQL.NoSQLExpression.GeoForm.RECTANGLE){
                         solrQuery.set(SpatialParams.FIELD, solrAttributeName);
                         solrQuery.setParam(CommonParams.FQ, solrAttributeName +":" + expression.getValue());
