@@ -130,7 +130,6 @@ public class ModelObjectSearchService {
                 for (String language : languages) {
 //                    translateModelService.translateSingle(object, translated, from, language);
                     NoSQLInputDocument translatedDoc = noSQLService.createInputDocument(getInterfaceClass(object), object);
-                    translatedDoc.addShard(language);
                     T translatedObjectOrNull = translateModelService.getTranslatedObjectOrNull(object, language);
                     if (translatedObjectOrNull == null) {
                         addAttributesToDocument(object, "", new HashMap<>(), key, translatedDoc, translateModelService, from, language);
@@ -146,13 +145,13 @@ public class ModelObjectSearchService {
                         }
                     }
                     translatedDoc.addPostfixShardName(postfixShardName);
+                    translatedDoc.addShard(language);
                     noSQLService.index(translatedDoc);
                 }
             }
         } catch (Exception e){
             log.error("put:_ Some error in put-1 " + e, e);
             throw new RuntimeException(e);
-
         }
     }
 
