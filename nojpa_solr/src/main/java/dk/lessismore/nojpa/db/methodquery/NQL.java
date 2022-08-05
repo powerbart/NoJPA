@@ -878,6 +878,9 @@ public class NQL {
                 return queryResponse.getDateRangeFacet();
             } else if (methodName.equals("getAggregations")) {
                 return queryResponse.getAggregations();
+            } else if (methodName.equals("getRawResponse")) {
+                int i = (int) args[0];
+                return queryResponse.getRaw(i);
             }
             return method.invoke(resultList, args);
         }
