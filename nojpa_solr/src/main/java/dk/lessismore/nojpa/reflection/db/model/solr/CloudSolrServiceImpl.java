@@ -78,6 +78,7 @@ public class CloudSolrServiceImpl extends SolrServiceImpl {
                 String shard = solrSearchQuery.getShard();
                 SolrQuery solrQuery = ((SolrSearchQuery) query).getSolrQuery();
                 String colName = collectionName + (shard != null ? "_" + shard.replaceAll("\"", "") : "") + (postShardName != null ? postShardName : "");
+                log.debug("Will start on collation("+ collectionName +") with {"+ solrQuery +"}");
                 QueryResponse queryResponse = server.query(colName, solrQuery, SolrRequest.METHOD.POST);
                 return new SolrResponseWrapper(queryResponse, System.currentTimeMillis() - start);
             } else {

@@ -46,6 +46,11 @@ public class NQL {
         public String toString() {
             return lat + " " + lon;
         }
+
+
+        public String toStringRev() {
+            return lon + " " + lat;
+        }
     }
 
     public enum Comp {EQUAL, EQUAL_OR_GREATER, EQUAL_OR_LESS, NOT_EQUAL, LIKE}
