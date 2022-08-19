@@ -28,7 +28,7 @@ public interface Person extends ModelObjectInterface {
     void setName(String name);
 
 
-    @Column(length = 512)
+    @Column(length = 240)
     SEX[] getPartners();
     void setPartners(SEX[] partners);
 
