@@ -28,5 +28,5 @@ public interface NList<C extends ModelObjectInterface> extends List<C> {
 
     Object getImpl();
 
-
+    Object getRawResponse(int i);
 }

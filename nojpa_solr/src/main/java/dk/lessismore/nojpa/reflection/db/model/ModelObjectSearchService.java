@@ -130,14 +130,12 @@ public class ModelObjectSearchService {
                 for (String language : languages) {
 //                    translateModelService.translateSingle(object, translated, from, language);
                     NoSQLInputDocument translatedDoc = noSQLService.createInputDocument(getInterfaceClass(object), object);
-                    translatedDoc.addShard(language);
                     T translatedObjectOrNull = translateModelService.getTranslatedObjectOrNull(object, language);
                     if (translatedObjectOrNull == null) {
                         addAttributesToDocument(object, "", new HashMap<>(), key, translatedDoc, translateModelService, from, language);
                     } else {
                         addAttributesToDocument(translatedObjectOrNull, "", new HashMap<>(), key, translatedDoc);
                         Set<String> translateFields = inDoc.getTranslateFields();
-                        // TODO nas the inclusions here are 3, but references in the doc is 1
                         Set<String> fieldNames = inDoc.getAllFields();
                         for(String f : fieldNames) { // _Product_inclusions__TXT_ARRAY_ProductFeature_description__ID_ProductFeatureDescription_content__TXT_ARRAY
                             if (!(translateFields.contains(f) || translateFields.contains(StringUtils.removeEnd(f, "_ARRAY")))) {
@@ -146,13 +144,14 @@ public class ModelObjectSearchService {
                         }
                     }
                     translatedDoc.addPostfixShardName(postfixShardName);
+                    translatedDoc.addShard(language);
                     noSQLService.index(translatedDoc);
+                    translateModelService.finish(object, translatedObjectOrNull, translatedDoc, language);
                 }
             }
         } catch (Exception e){
             log.error("put:_ Some error in put-1 " + e, e);
             throw new RuntimeException(e);
-
         }
     }
 
