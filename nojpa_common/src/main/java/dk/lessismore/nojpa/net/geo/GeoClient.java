@@ -61,6 +61,7 @@ public class GeoClient {
                 throw ee;
             }
         }
+        log.debug(ip + "->" + s);
         JSONObject json = new JSONObject(s);
         Geo geo = new Geo(
                 !json.isNull("city") ? json.getString("city") : null,

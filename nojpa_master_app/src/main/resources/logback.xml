@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+
+
+    <variable name="log_pattern" value="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n" />
+    <variable name="log_pattern_with_date" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n" />
+    <variable name="app_name" value="dotii-masterworker" />
+    <variable name="log_file_location" value="./logs/masterworker" />
+
+
+    <appender name="SENTRY" class="com.getsentry.raven.logback.SentryAppender">
+        <dsn>https://afe4078fbfd54b72ad9294c96ae92d49:996aef72de4c4c4eb0702b11f065afa1@sentry.io/1127679</dsn>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>WARN</level>
+        </filter>
+    </appender>
+
+    <appender name="SYSLOG" class="ch.qos.logback.classic.net.SyslogAppender">
+        <syslogHost>10.0.0.130</syslogHost>
+        <facility>LOCAL7</facility>
+        <port>514</port>
+        <suffixPattern>masterworker ${HOSTNAME} %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n \n</suffixPattern>
+        <stackTracePattern>masterworker ${HOSTNAME} \t</stackTracePattern>
+    </appender>
+
+    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>10.0.0.130:5000</destination>
+
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <mdc/> <!-- MDC variables on the Thread will be written as JSON fields-->
+                <context/> <!--Outputs entries from logback's context -->
+                <version/> <!-- Logstash json format version, the @version field in the output-->
+                <logLevel/>
+                <loggerName/>
+
+                <pattern>
+                    <pattern>
+                        {
+                        <!-- we can add some custom fields to be sent with all the log entries.-->
+                        <!--make filtering easier in Logstash-->
+                        "appName": "master",
+                        "appVersion": "1.0",
+                        "tags": ["logback"]
+                        }
+                    </pattern>
+                </pattern>
+
+                <threadName/>
+                <message/>
+
+                <logstashMarkers/> <!-- Useful so we can add extra information for specific log lines as Markers-->
+                <arguments/> <!--or through StructuredArguments-->
+
+                <stackTrace/>
+            </providers>
+        </encoder>
+    </appender>
+
+
+
+    <appender name="console_appender" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${log_pattern}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="console" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="console_appender"/>
+        <includeCallerData>true</includeCallerData>
+        <queueSize>500</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+    </appender>
+
+
+    <appender name="nojpa_file_appender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log_file_location}/nojpa.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>${log_file_location}/nojpa.%i.log.zip</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>2</maxIndex>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>3000MB</maxFileSize>
+        </triggeringPolicy>
+        <encoder>
+            <pattern>${log_pattern_with_date}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="nojpa_file" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="nojpa_file_appender"/>
+        <queueSize>500</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+    </appender>
+
+
+    <!--stdout log-->
+    <appender name="stdout_file_appender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log_file_location}/stdout.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+            <fileNamePattern>${log_file_location}/stdout.%i.log.zip</fileNamePattern>
+            <minIndex>1</minIndex>
+            <maxIndex>2</maxIndex>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <maxFileSize>3000MB</maxFileSize>
+        </triggeringPolicy>
+        <encoder>
+            <pattern>${log_pattern_with_date}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="stdout_file" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="stdout_file_appender"/>
+        <queueSize>500</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+    </appender>
+
+    <!-- Loggers -->
+
+    <logger name="dk.lessismore.nojpa" level="DEBUG" additivity="false">
+        <appender-ref ref="console"/>
+        <appender-ref ref="nojpa_file"/>
+        <appender-ref ref="stdout_file"/>
+    </logger>
+
+    <logger name="dk.dotii" level="DEBUG"/>
+
+
+    <logger name="dk.lessismore" level="DEBUG"/>
+    <logger name="dk.dotii" level="DEBUG"/>
+
+    <logger name="org.apache.solr" level="WARN"/>
+    <logger name="org.apache.solr.update.DirectUpdateHandler2" level="INFO"/>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="SYSLOG" />
+        <appender-ref ref="SENTRY" />
+        <appender-ref ref="LOGSTASH" />
+    </root>
+
+</configuration>
