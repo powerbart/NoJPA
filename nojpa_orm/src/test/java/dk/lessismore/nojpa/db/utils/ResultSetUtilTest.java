@@ -1,8 +1,15 @@
 package dk.lessismore.nojpa.db.utils;
 
+import dk.lessismore.nojpa.db.methodquery.MQL;
+import dk.lessismore.nojpa.db.model.DbStripTest;
+import dk.lessismore.nojpa.reflection.db.DatabaseCreator;
+import dk.lessismore.nojpa.reflection.db.model.ModelObjectService;
 import org.junit.Test;
 
-import static junit.framework.Assert.assertEquals;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.*;
 
 /**
  * Created : by IntelliJ IDEA.
@@ -29,6 +36,53 @@ public class ResultSetUtilTest {
     @Test
     public void testFun() throws Exception {
         assertEquals(1, 1);
+
+    }
+
+    @Test
+    public void testStrips() throws Exception {
+        List<Class> classes = new ArrayList<>();
+        classes.add(DbStripTest.class);
+        DatabaseCreator.createDatabase(classes, new Class[0]);
+
+        DbStripTest strip = ModelObjectService.create(DbStripTest.class);
+        String str = "nasko|<>/\\&?.";
+        strip.setMyString(str);
+        strip.setNonStripped(str);
+        strip.setOneUrl(str);
+
+
+        assertFalse(strip.isDirty());
+        assertTrue(strip.isNew());
+
+        ModelObjectService.save(strip);
+
+        assertEquals("Nasko|`?.", strip.getMyString());
+        assertEquals("nasko|<>/`&?.", strip.getNonStripped());
+        assertEquals(str, strip.getOneUrl());
+
+        strip.setMyString(str);
+        strip.setNonStripped(str);
+        strip.setOneUrl(str);
+
+        assertFalse(strip.isDirty());
+        assertFalse(strip.isNew());
+
+        assertEquals("Nasko|`?.", strip.getMyString());
+        assertEquals("nasko|<>/`&?.", strip.getNonStripped());
+        assertEquals(str, strip.getOneUrl());
+
+        ModelObjectService.save(strip);
+
+        assertEquals("Nasko|`?.", strip.getMyString());
+        assertEquals("nasko|<>/`&?.", strip.getNonStripped());
+        assertEquals(str, strip.getOneUrl());
+
+        DbStripTest strip2 = MQL.selectByID(DbStripTest.class, strip.getObjectID());
+
+        assertEquals("Nasko|`?.", strip2.getMyString());
+        assertEquals("nasko|<>/`&?.", strip2.getNonStripped());
+        assertEquals(str, strip2.getOneUrl());
 
     }
 
