@@ -62,7 +62,9 @@ public class DbObjectWriter {
     }
 
 
-    private static final int DEFAULT_DEEP = 2;
+    public static final int DEFAULT_DEEP = 2;
+
+    public static final int DEFAULT_MAX_DEEP_ASSOCIATION = 64;
 
     private static boolean writeProtected = false;
 
@@ -452,7 +454,7 @@ public class DbObjectWriter {
                             //}
                         }
                     } else {
-                        if (association instanceof ModelObjectInterface[] && (((ModelObjectInterface[]) association).length < 64)) {
+                        if (association instanceof ModelObjectInterface[] && (((ModelObjectInterface[]) association).length < DEFAULT_MAX_DEEP_ASSOCIATION)) {
                             ModelObjectInterface[] associations = (ModelObjectInterface[]) association;
                             //log.debug("saveAssociations :. attributePath = " + attributePath);
                             //log.debug("saveAssociations :. newAttributePath = " + newAttributePath);
