@@ -62,9 +62,9 @@ public class DbObjectWriter {
     }
 
 
-    public static final int DEFAULT_DEEP = 2;
+    public static int DEFAULT_DEEP = 2;
 
-    public static final int DEFAULT_MAX_DEEP_ASSOCIATION = 64;
+    public static int DEFAULT_MAX_DEEP_ASSOCIATION = 64;
 
     private static boolean writeProtected = false;
 
