@@ -826,6 +826,13 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
             s.append(singleAssociations.get(key));
             s.append(delim);
         }
+        for (Iterator iterator = multiAssociations.keySet().iterator(); iterator.hasNext();) {
+            Object key = iterator.next();
+            s.append(key);
+            s.append('=');
+            s.append(multiAssociations.get(key));
+            s.append(delim);
+        }
         return s.toString();
     }
 
