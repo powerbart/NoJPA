@@ -19,6 +19,7 @@ public interface WhereSQLStatement {
     public static final int NOT_EQUAL = 5;
     public static final int LIKE = 6;
     public static final int NOT_LIKE = 7;
+    public static final int IN = 8;
     public static final String[] comparatorAsStr = {
             "=",
             ">=",
@@ -27,7 +28,8 @@ public interface WhereSQLStatement {
             "<",
             "!=",
             "LIKE",
-            "NOT LIKE"
+            "NOT LIKE",
+            "IN",
     };
 
     /**

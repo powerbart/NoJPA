@@ -41,6 +41,13 @@ public class MySqlLeafExpression implements LeafExpression {
         return this;
     }
 
+    public LeafExpression addConstrainUnsafe(String attributeName, int comparator, String value) {
+        statement = attributeName + " " + WhereSQLStatement.comparatorAsStr[comparator] + " " + value;
+        preparedStatement = attributeName + " " + WhereSQLStatement.comparatorAsStr[comparator] + " ?";
+        preparedValue = value;
+        return this;
+    }
+
     public LeafExpression addConstrainOwnAttribute(String leftAttributeName, int comparator, String rightAttributeName) {
         statement = leftAttributeName + " " + WhereSQLStatement.comparatorAsStr[comparator] + " " + rightAttributeName;
         preparedStatement = leftAttributeName + " " + WhereSQLStatement.comparatorAsStr[comparator] + " " + rightAttributeName;

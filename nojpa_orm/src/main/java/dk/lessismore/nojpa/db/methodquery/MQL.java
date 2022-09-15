@@ -124,7 +124,7 @@ public class MQL {
         return MQL.select(aClass).whereIn(MQL.mock(aClass).getObjectID(), objectIDs).getList();
     }
 
-    public enum Comp {EQUAL, EQUAL_OR_GREATER, EQUAL_OR_LESS, GREATER, LESS, NOT_EQUAL, LIKE, NOT_LIKE}
+    public enum Comp {EQUAL, EQUAL_OR_GREATER, EQUAL_OR_LESS, GREATER, LESS, NOT_EQUAL, LIKE, NOT_LIKE, IN}
     public enum Order {ASC, DESC}
     public static final int ANY = 0;
     public enum NoCache {NO_CACHE}
@@ -1195,6 +1195,11 @@ public class MQL {
         Expression expression = newLeafExpression().addConstrain(makeAttributeIdentifier(modelInterface, attributeName), compToNum(comp), value);
         return new ExpressionConstraint(expression, Collections.<Pair<Class, String>>emptyList());
     }
+    // This is only needed for reflection
+    public static Constraint hasTotallyUnsafe(Class<? extends ModelObjectInterface> modelInterface, String attributeName, Comp comp, String value) {
+        Expression expression = newLeafExpression().addConstrainUnsafe(makeAttributeIdentifier(modelInterface, attributeName), compToNum(comp), value);
+        return new ExpressionConstraint(expression, Collections.<Pair<Class, String>>emptyList());
+    }
 
     public static Constraint hasOwnAttribute(String leftAttributeName, Comp comp, String rightAttributeName) {
         Expression expression = newLeafExpression().addConstrainOwnAttribute(leftAttributeName, compToNum(comp), rightAttributeName);
@@ -1368,6 +1373,7 @@ public class MQL {
             case NOT_EQUAL        : return  WhereSQLStatement.NOT_EQUAL;
             case LIKE             : return  WhereSQLStatement.LIKE;
             case NOT_LIKE         : return  WhereSQLStatement.NOT_LIKE;
+            case IN               : return  WhereSQLStatement.IN;
             default               : throw new RuntimeException("Case expression not exhaustive");
         }
     }
