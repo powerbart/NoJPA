@@ -70,16 +70,6 @@ public class GoogleTranslateServiceImpl implements TranslateService {
 
 
         JsonNode jsonNode = new ObjectMapper().reader().readTree(cache.toString());
-
-        int statusCode = jsonNode.get("code").intValue();
-        if(statusCode == 403){
-            log.warn("Google dont like us anymore ... :-( " + cache);
-            return null;
-        } else {
-            if (log.isTraceEnabled()) {
-                log.trace("Translated text '" + originalText + "', response: " + cache);
-            }
-        }
         String translatedText = jsonNode.get("data").get("translations").get(0).get("translatedText").textValue();
 
         totalCharactersTranslated = totalCharactersTranslated + originalText.length();
