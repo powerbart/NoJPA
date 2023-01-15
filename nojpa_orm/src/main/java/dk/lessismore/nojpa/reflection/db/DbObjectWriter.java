@@ -230,8 +230,9 @@ public class DbObjectWriter {
 
                     //Remove cache entry from other hosts
                     //TODO: PropertyTest if this works :-)
-
+                    log.debug("ObjectCacheRemote.removeFromRemoteCache("+ modelObject +"): START");
                     ObjectCacheRemote.removeFromRemoteCache(modelObject);
+                    log.debug("ObjectCacheRemote.removeFromRemoteCache("+ modelObject +"): END");
                 }
 
                 insertSQLStatement.addTableName(dbAttributeContainer.getTableName());
