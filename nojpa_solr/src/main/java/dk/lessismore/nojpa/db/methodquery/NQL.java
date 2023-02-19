@@ -1,13 +1,22 @@
 package dk.lessismore.nojpa.db.methodquery;
 
+import dk.lessismore.nojpa.db.DbDataType;
+import dk.lessismore.nojpa.reflection.attributeconverters.AttributeConverter;
+import dk.lessismore.nojpa.reflection.attributeconverters.AttributeConverterFactory;
+import dk.lessismore.nojpa.reflection.db.AssociationConstrain;
 import dk.lessismore.nojpa.reflection.db.DbClassReflector;
 import dk.lessismore.nojpa.reflection.db.annotations.DbStrip;
+import dk.lessismore.nojpa.reflection.db.annotations.SearchField;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttribute;
 import dk.lessismore.nojpa.reflection.db.attributes.DbAttributeContainer;
+import dk.lessismore.nojpa.reflection.db.model.ModelObject;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectInterface;
+import dk.lessismore.nojpa.reflection.db.model.ModelObjectProxy;
 import dk.lessismore.nojpa.reflection.db.model.ModelObjectSearchService;
+import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLInputDocument;
 import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLResponse;
 import dk.lessismore.nojpa.reflection.db.model.nosql.NoSQLService;
+import dk.lessismore.nojpa.reflection.translate.TranslateModelService;
 import dk.lessismore.nojpa.utils.Pair;
 import org.apache.commons.lang.StringUtils;
 import org.apache.solr.common.SolrDocument;
@@ -15,10 +24,13 @@ import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.net.URLDecoder;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -370,17 +382,37 @@ public class NQL {
         }
 
         public NList<T> getList(float scoreAbove) {
-            NList<T> list = selectObjectsFromDb(scoreAbove, null);
+            NList<T> list = selectObjectsFromDb(scoreAbove, null, false);
             return list;
         }
 
         public NList<T> getList(String postShardName) {
-            NList<T> list = selectObjectsFromDb(-1, postShardName);
+            NList<T> list = selectObjectsFromDb(-1, postShardName, false);
             return list;
         }
 
         public NList<T> getList(float scoreAbove, String postShardName) {
-            NList<T> list = selectObjectsFromDb(scoreAbove, postShardName);
+            NList<T> list = selectObjectsFromDb(scoreAbove, postShardName, false);
+            return list;
+        }
+
+        public NList<T> getListRaw() {
+            NList<T> list = selectObjectsRaw();
+            return list;
+        }
+
+        public NList<T> getListRaw(float scoreAbove) {
+            NList<T> list = selectObjectsFromDb(scoreAbove, null, true);
+            return list;
+        }
+
+        public NList<T> getListRaw(String postShardName) {
+            NList<T> list = selectObjectsFromDb(-1, postShardName, true);
+            return list;
+        }
+
+        public NList<T> getListRaw(float scoreAbove, String postShardName) {
+            NList<T> list = selectObjectsFromDb(scoreAbove, postShardName, true);
             return list;
         }
 
@@ -687,6 +719,9 @@ public class NQL {
 
 
         protected abstract void buildQuery();
+
+        protected abstract void buildQueryRaw();
+
         protected abstract String toStringDebugQuery();
 
 
@@ -702,10 +737,14 @@ public class NQL {
 
         @SuppressWarnings("unchecked")
         private NList<T> selectObjectsFromDb() {
-            return selectObjectsFromDb(-1, null);
+            return selectObjectsFromDb(-1, null, false);
         }
 
-        private NList<T> selectObjectsFromDb(float scoreAbove, String postShardName) {
+        private NList<T> selectObjectsRaw() {
+            return selectObjectsFromDb(-1, null, true);
+        }
+
+        private NList<T> selectObjectsFromDb(float scoreAbove, String postShardName, boolean raw) {
             long startMain = System.currentTimeMillis();
 //            TimerWithPrinter timer = new TimerWithPrinter("selectObjectsFromDb", "/tmp/luuux-timer-getPosts.log");
 //            log.debug("DEBUG-TRACE", new Exception("DEBUG"));
@@ -713,7 +752,11 @@ public class NQL {
             List<Float> scoresList = new ArrayList<Float>();
             try {
 
-                buildQuery();
+                if (raw) {
+                    buildQueryRaw();
+                } else {
+                    buildQuery();
+                }
 
 //                timer.markLap("1");
                 NoSQLService noSQLService = ModelObjectSearchService.noSQLService(selectClass);
@@ -776,7 +819,16 @@ public class NQL {
 
                     if(loadObject) {
                         loadedObjects++;
-                        T t = MQL.selectByID(selectClass, objectID);
+                        T t = null;
+                        if (raw && queryResponse.getRaw(i) instanceof SolrDocument) {
+                            t = MQL.readObjectFromCache(selectClass, objectID);
+                            if (t == null) {
+                                SolrDocument entries = (SolrDocument) queryResponse.getRaw(i);
+                                t = readRaw(entries, selectClass, objectID);
+                            }
+                        } else {
+                            t = MQL.selectByID(selectClass, objectID);
+                        }
                         if (t == null) {
                             log.error("We have a problem with the sync between the DB & Solr ... Can't find objectID(" + objectID + ") class(" + selectClass + ")", new Exception("Sync problem"));
                         } else {
@@ -797,6 +849,236 @@ public class NQL {
             }
             return null;
         }
+
+        private static <T extends ModelObjectInterface> T readRaw(SolrDocument entries, Class<T> selectClass, String objectID) {
+            T modelObject = ModelObjectProxy.createRaw(selectClass);
+            modelObject.setObjectID(objectID);
+            readAttributesToObject(modelObject, entries, "", selectClass);
+            return modelObject;
+        }
+
+        private static void readAttributesToObject(ModelObjectInterface object, SolrDocument entries, String prefix, Class<? extends ModelObjectInterface> selectClass) {
+            DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(selectClass);
+            List<String> allIDs = new ArrayList<>();
+            List<String> allAtts = new ArrayList<>();
+            for (String s : entries.getFieldNames()) {
+                if (s.startsWith(prefix) && !s.equals(prefix)) {
+                    if (s.endsWith("__ID") || s.endsWith("__ID_ARRAY")) {
+                        allIDs.add(s);
+                    } else {
+                        allAtts.add(s);
+                    }
+                }
+            }
+            Comparator<String> llCom = new Comparator<String>() {
+                @Override
+                public int compare(String o1, String o2) {
+                    return o1.length() - o2.length();
+                }
+
+                @Override
+                public boolean equals(Object obj) {
+                    return false;
+                }
+            };
+            allIDs.sort(llCom);
+            for(String attName : allIDs) {
+                String directAttName = attName.substring(prefix.length());
+                if (directAttName.endsWith("_ARRAY")) {
+                    directAttName = directAttName.substring(0, directAttName.length() - "_ARRAY".length());
+                }
+                DbAttribute solrDbAttribute = dbAttributeContainer.getSolrDbAttribute(directAttName);
+                if (solrDbAttribute != null) {
+                    if (solrDbAttribute.isMultiAssociation()) {
+                        if (attName.endsWith("__ID_ARRAY")) {
+                            List<String> ids = (List<String>) entries.get(attName);
+                            List inArray = new ArrayList();
+
+                            for(String attObjectID : ids) {
+                                ModelObjectInterface modelObject = MQL.readObjectFromCache(solrDbAttribute.getAttributeClass(), attObjectID);
+                                if (modelObject == null){
+                                    modelObject = ModelObjectProxy.createRaw(solrDbAttribute.getAttributeClass());
+                                    modelObject.setObjectID(attObjectID);
+                                    readAttributesToObject(modelObject, entries, solrDbAttribute.getSolrAttributeName(prefix), solrDbAttribute.getAttributeClass());
+                                }
+                                inArray.add(modelObject);
+                            }
+                            ModelObjectInterface[] o = (ModelObjectInterface[]) Array.newInstance(
+                                    solrDbAttribute.getAttributeClass(),
+                                    inArray.size());
+                            solrDbAttribute.getAttribute().setAttributeValue(object, inArray.toArray(o));
+
+                        }
+                    } else if (solrDbAttribute.isAssociation()) {
+                        String attObjectID = (String) entries.get(attName);
+                        ModelObjectInterface modelObject = MQL.readObjectFromCache(solrDbAttribute.getAttributeClass(), attObjectID);
+                        if (modelObject == null){
+                            modelObject = ModelObjectProxy.createRaw(solrDbAttribute.getAttributeClass());
+                            modelObject.setObjectID(attObjectID);
+                            readAttributesToObject(modelObject, entries, solrDbAttribute.getSolrAttributeName(prefix), solrDbAttribute.getAttributeClass());
+                        }
+                        solrDbAttribute.getAttribute().setAttributeValue(object, modelObject);
+                    } else {
+                        readAttributeValueToObject(object, solrDbAttribute, entries, attName);
+                    }
+                }
+            }
+            for(String attName : allAtts) {
+                String directAttName = attName.substring(prefix.length());
+                if (directAttName.endsWith("_ARRAY")) {
+                    directAttName = directAttName.substring(0, directAttName.length() - "_ARRAY".length());
+                }
+                DbAttribute solrDbAttribute = dbAttributeContainer.getSolrDbAttribute(directAttName);
+                if (solrDbAttribute != null) {
+                    readAttributeValueToObject(object, solrDbAttribute, entries, attName);
+                }
+            }
+        }
+
+
+
+//        private static <T extends ModelObjectInterface> void readAttributesToObject(T object, String prefix, SolrDocument entries, Class<T> selectClass, String objectID) {
+//            //log.debug("addAttributesToDocument:X0");
+//            ModelObject modelObject = (ModelObject) object;
+//            DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(modelObject.getInterface());
+//            String objectIDVarName = (prefix.length() == 0 ? "" : prefix + "_") + "objectID" + (prefix.length() == 0 ? "" : "__ID");
+//            object.setObjectID((String) entries.get(objectIDVarName));
+//            //log.debug("addAttributesToDocument:X1");
+//            for (Iterator iterator = dbAttributeContainer.getDbAttributes().values().iterator(); iterator.hasNext();) {
+//                //log.debug("addAttributesToDocument:X2");
+//                DbAttribute dbAttribute = (DbAttribute) iterator.next();
+//                SearchField searchField = dbAttribute.getAttribute().getAnnotation(SearchField.class);
+//                if(searchField != null && dbAttribute.getInlineAttributeName() == null) {
+//                    if(!dbAttribute.isAssociation()) {
+//                        Object value = null;
+//                        value = dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
+//                        if (dbAttribute.isLocation() && value != null) {
+//                            //TODO
+//                        } else {
+//                            readAttributeValueToObject(object, dbAttribute, entries, value, prefix);
+//                        }
+//                        //log.debug("addAttributesToDocument:X6");
+//                    } else if (!dbAttribute.isMultiAssociation()) {
+//                        //log.debug("addAttributesToDocument:X7");
+//                        ModelObjectInterface value = MQL.readObjectFromCache(dbAttribute.getAttributeClass(), dbAttribute.getSolrAttributeName(prefix));
+//
+//                        if (value == null) {
+//                            value = ModelObjectProxy.createRaw(dbAttribute.getAttributeClass());
+//                            readAttributesToObject((T) value, dbAttribute.getSolrAttributeName(prefix), entries, dbAttribute.getAttributeClass(), objectID);
+//                        }
+//                        dbAttribute.getAttribute().setAttributeValue(object, value);
+//                    } else { //isMultiAssociation
+//                        if(dbAttribute.getAttributeClass().isEnum() || dbAttribute.getAttributeClass().isPrimitive()){
+//                            throw new RuntimeException("This is not implemented ... and should not be used... ");
+//                        } else {
+//                            throw new RuntimeException("This is not implemented ... and should not YET be used... ");
+////                            HashMap<String, ArrayList<Object>> values = new HashMap<String, ArrayList<Object>>();
+////                            for(int i = 0; vs != null && i < vs.length; i++){
+////                                ModelObjectInterface value = vs[i];
+////                                if(value != null && !storedObjects.containsKey(storedObjectsKey(prefix, value.getObjectID(), dbAttribute))){
+////                                    storedObjects.put(storedObjectsKey(prefix, value.getObjectID(), dbAttribute), value.getObjectID());
+////                                    getSearchValues(value, dbAttribute.getSolrAttributeName(prefix), storedObjects, values, inputDocument);
+////                                }
+////                            }
+////                            Iterator<String> nameIterator = values.keySet().iterator();
+////                            for(int i = 0; nameIterator.hasNext(); i++){
+////                                String name = nameIterator.next();
+////                                ArrayList<Object> objects = values.get(name);
+////                                String solrArrayName = name + "_ARRAY";
+////                                log.trace("Adding_to_array.size " + solrArrayName + "("+ (objects == null ? "-1" : (objects.size() == 1 ? ""+ objects.get(0) : ""+ objects.size())) +")");
+////                                if(!solrArrayName.contains("creationDate")) {
+////                                    inputDocument.addField(solrArrayName, objects);
+////                                }
+////                            }
+////                            //log.debug("addAttributesToDocument:X16");
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//
+
+
+        private static void readAttributeValueToObject(ModelObjectInterface object, DbAttribute dbAttribute, SolrDocument entries, Object value, String prefix) {
+            String solrAttributeName = dbAttribute.getSolrAttributeName(prefix);
+            readAttributeValueToObject(object, dbAttribute, entries, solrAttributeName);
+        }
+
+        private static void readAttributeValueToObject(ModelObjectInterface object, DbAttribute dbAttribute, SolrDocument entries, String solrAttributeName) {
+            try {
+                int type = dbAttribute.getDataType().getType();
+                switch (type) {
+                    case DbDataType.DB_LONG:
+                        Long valueLong = (Long) entries.get(solrAttributeName);
+                        dbAttribute.getAttribute().setAttributeValue(object, valueLong);
+                        break;
+                    case DbDataType.DB_CHAR:
+                    case DbDataType.DB_VARCHAR:
+                        if(dbAttribute.getAttribute().getAttributeClass().isEnum()) {
+                            if (dbAttribute.isMultiAssociation()) {
+                                String s = (String) entries.get(solrAttributeName);
+                                if(s != null){
+                                    List result = new ArrayList();
+                                    StringTokenizer toks = new StringTokenizer(s, " ,[]");
+                                    for(; toks.hasMoreTokens() ;){
+                                        result.add(Enum.valueOf(dbAttribute.getAttributeClass(), toks.nextToken()));
+                                    }
+                                    Enum[] valueEnums = (Enum[]) result.toArray((Enum[]) java.lang.reflect.Array.newInstance(
+                                            dbAttribute.getAttributeClass(),
+                                            result.size()));
+                                    dbAttribute.getAttribute().setAttributeValue(object, valueEnums);
+                                }
+                            } else {
+                                String eStr = (String) entries.get(solrAttributeName);
+                                Enum e = Enum.valueOf(dbAttribute.getAttributeClass(), eStr);
+                                dbAttribute.getAttribute().setAttributeValue(object, e);
+                            }
+                        } else {
+                            Object v = entries.get(solrAttributeName);
+                            if (v instanceof ArrayList && ((ArrayList) v).size() == 1 && !dbAttribute.isMultiAssociation()) {
+                                dbAttribute.getAttribute().setAttributeValue(object, ((ArrayList) v).get(0));
+                            } else if (v instanceof String) {
+                                dbAttribute.getAttribute().setAttributeValue(object, v);
+                                //TODO
+                                //Read: _Article_analyzed__ID_ArticleAnalyzed_entities__TXT_ARRAY_Entity_name__TXT_ARRAY
+                            } else {
+                                log.warn("Dont know what to do with solrAttributeName(" + solrAttributeName + ") -> " + v);
+                            }
+
+                        }
+                        break;
+                    case DbDataType.DB_INT:
+                        Integer valueInt = (Integer) entries.get(solrAttributeName);
+                        dbAttribute.getAttribute().setAttributeValue(object, valueInt);
+                        break;
+                    case DbDataType.DB_DOUBLE:
+                        Double valueDouble = new Double("" + entries.get(solrAttributeName));
+                        dbAttribute.getAttribute().setAttributeValue(object, valueDouble);
+                        break;
+                    case DbDataType.DB_FLOAT:
+                        Float valueFloat = new Float("" + entries.get(solrAttributeName));
+                        dbAttribute.getAttribute().setAttributeValue(object, valueFloat);
+                        break;
+                    case DbDataType.DB_BOOLEAN:
+                        Boolean valueBoolean = (Boolean) entries.get(solrAttributeName);
+                        dbAttribute.getAttribute().setAttributeValue(object, valueBoolean);
+                        break;
+                    case DbDataType.DB_DATE:
+                        //log.debug("***TimeWrite: " + attributeName + " " + (value != null ? ((Calendar) value).getTime() : "null"));
+//                        SimpleDateFormat xmlDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'"); //2011-11-28T18:30:30Z
+//                        xmlDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                        Calendar vc = Calendar.getInstance();
+                        vc.setTime((Date) entries.get(solrAttributeName));
+//                        Calendar valueCalendar = ;
+                        dbAttribute.getAttribute().setAttributeValue(object, vc);
+                        //solrObj.addField(solrAttributeName, xmlDateFormat.format(((Calendar) value).getTime()));
+                        break;
+                }
+            } catch (Exception e) {
+                log.error("Some error in readAttributeValueToObject:" + e, e);
+            }
+        }
+
 
         public SearchQuery<T> search(String query) {
             rootConstraints.add(has(query));

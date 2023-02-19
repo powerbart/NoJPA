@@ -175,6 +175,10 @@ public class ElasticSearchQuery extends NQL.SearchQuery{
     }
 
 
+    protected void buildQueryRaw(){
+        throw new RuntimeException("Unimplemented: buildQueryRaw");
+    }
+
     protected void buildQuery(){
         BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
 //        for(int i = 0; i < root.getExpressions().size(); i++) {

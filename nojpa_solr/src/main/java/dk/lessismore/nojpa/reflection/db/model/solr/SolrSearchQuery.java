@@ -145,7 +145,14 @@ public class SolrSearchQuery extends NQL.SearchQuery{
     }
 
 
+    public void buildQueryRaw(){
+        buildQueryInternal(true);
+    }
     public void buildQuery(){
+        buildQueryInternal(false);
+    }
+
+    private void buildQueryInternal(boolean raw){
         {
             StringBuilder builder = new StringBuilder();
             solrQuery.setQuery("*:*");
@@ -293,7 +300,7 @@ public class SolrSearchQuery extends NQL.SearchQuery{
             if(facetLimit > 0) {
                 solrQuery.setFacetLimit(facetLimit);
             }
-        } else {
+        } else if (!raw){
             solrQuery.setFields("objectID,score");
         }
 
