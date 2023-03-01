@@ -34,9 +34,9 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
-* Created : with IntelliJ IDEA.
-* User: seb
-*/
+ * Created : with IntelliJ IDEA.
+ * User: seb
+ */
 public class NQL {
 
     private static final Logger log = LoggerFactory.getLogger(NQL.class);
@@ -143,7 +143,7 @@ public class NQL {
         protected final Class<T> selectClass;
         protected ArrayList<Constraint> rootConstraints;
         protected ArrayList<Constraint> filterConstraints;
-//        protected NoSQLQuery noSqlQuery;
+        //        protected NoSQLQuery noSqlQuery;
         protected NoSQLService noSQLService;
         protected String orderByAttribute;
         protected Order orderByORDER = Order.ASC;
@@ -311,7 +311,7 @@ public class NQL {
 //        }
 //
 
-//        /**
+        //        /**
 //         * Set order by
 //         * @param mockValue this value is ignored, but actual parameter is expected to be a mock call
 //         * @param order ascending, descending.
@@ -418,6 +418,14 @@ public class NQL {
 
         public T getFirst() {
             NList<T> list = limit(1).getList();
+            if (list.size() > 0) {
+                return list.get(0);
+            }
+            return null;
+        }
+
+        public T getFirstRaw() {
+            NList<T> list = limit(1).getListRaw();
             if (list.size() > 0) {
                 return list.get(0);
             }
@@ -786,6 +794,11 @@ public class NQL {
                 int size = queryResponse.size();
 //                timer.markLap("4");
                 boolean loadObject = true;
+                timeSort = 0;
+                timeSetValue = 0;
+                timeCache = 0;
+                timeCreate = 0;
+
                 int loadedObjects = this.startLimit;
                 for(int i = 0; i < size; i++){
 //                    SolrDocument entries = queryResponse.getResults().get(i);
@@ -795,7 +808,7 @@ public class NQL {
 
                     if(DEBUG_EXPLAIN && queryResponse.getRaw(i) instanceof SolrDocument) {
                         SolrDocument entries = (SolrDocument) queryResponse.getRaw(i);
-                        if (i == 0) {
+                        if (false && i == 0) {
                             Iterator<String> iterator = entries.getFieldNames().iterator();
                             for (; iterator.hasNext(); ) {
                                 String next = iterator.next();
@@ -825,6 +838,7 @@ public class NQL {
                             if (t == null) {
                                 SolrDocument entries = (SolrDocument) queryResponse.getRaw(i);
                                 t = readRaw(entries, selectClass, objectID);
+                                ((ModelObject) t).setRawInitDone(true);
                             }
                         } else {
                             t = MQL.selectByID(selectClass, objectID);
@@ -836,6 +850,9 @@ public class NQL {
                         }
                     }
                 }
+
+
+
 //                timer.markLap("5");
                 long end = System.currentTimeMillis();
                 log.debug("TIME-AND-RESULT: Total("+ (end - startMain) +"),Solr("+ (endQuery - startQuery) +"), MySQL("+ (end - endQuery) +")   Nlist.size() -> " + toReturn.size() + " .... size("+ size +")");
@@ -853,35 +870,87 @@ public class NQL {
         private static <T extends ModelObjectInterface> T readRaw(SolrDocument entries, Class<T> selectClass, String objectID) {
             T modelObject = ModelObjectProxy.createRaw(selectClass);
             modelObject.setObjectID(objectID);
-            readAttributesToObject(modelObject, entries, "", selectClass);
+            long start = System.nanoTime();
+            readAttributesToObject(modelObject, entries, "", selectClass, null);
+            long end = System.nanoTime();
+            System.out.println("READ-RAW: " + (end - start) + " for " + entries.size() + " raw objects .... timeSort("+ timeSort +") timeSetValue("+ timeSetValue +") timeCache("+ timeCache +") timeCreate("+ timeCreate +")");
             return modelObject;
         }
 
-        private static void readAttributesToObject(ModelObjectInterface object, SolrDocument entries, String prefix, Class<? extends ModelObjectInterface> selectClass) {
+        static long timeSort = 0;
+        static long timeSetValue = 0;
+        static long timeCache = 0;
+        static long timeCreate = 0;
+
+        private static HashMap<String, Pair<List<String>, List<String>>> attLists = new HashMap<>();
+
+        private static Pair<List<String>, List<String>> getListsOfIDsAndAtt(String prefix, Class<? extends ModelObjectInterface> selectClass, SolrDocument entries) {
+            String key = selectClass.getSimpleName() + "_" + prefix;
+//            log.debug("getListsOfIDsAndAtt with key("+ key +")");
+            Pair<List<String>, List<String>> toReturn = attLists.get(key);
+            if (toReturn == null) {
+                List<String> allIDs = new ArrayList<>();
+                List<String> allAtts = new ArrayList<>();
+                List<String> all = new ArrayList<>();
+                makeFullIDList(selectClass, prefix, all, 0);
+                for (String s : all) {
+                    if (s.startsWith(prefix) && !s.equals(prefix)) {
+                        if (s.endsWith("__ID") || s.endsWith("__ID_ARRAY")) {
+                            allIDs.add(s);
+                        } else {
+                            allAtts.add(s);
+                        }
+                    }
+                }
+                Comparator<String> llCom = new Comparator<String>() {
+                    @Override
+                    public int compare(String o1, String o2) {
+                        return o1.length() - o2.length();
+                    }
+
+                    @Override
+                    public boolean equals(Object obj) {
+                        return false;
+                    }
+                };
+                allIDs.sort(llCom);
+
+                toReturn = new Pair<>(allIDs, allAtts);
+                log.debug("getListsOfIDsAndAtt MAKING key("+ key +") -> ("+ allIDs.size() +","+ allAtts.size() +")");
+                attLists.put(key, toReturn);
+            }
+            return toReturn;
+        }
+
+        private static void makeFullIDList(Class<? extends ModelObjectInterface> selectClass, String prefix, List<String> ids, int deep) {
+            if(deep > 10) {
+                return;
+            }
+
             DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(selectClass);
-            List<String> allIDs = new ArrayList<>();
-            List<String> allAtts = new ArrayList<>();
-            for (String s : entries.getFieldNames()) {
-                if (s.startsWith(prefix) && !s.equals(prefix)) {
-                    if (s.endsWith("__ID") || s.endsWith("__ID_ARRAY")) {
-                        allIDs.add(s);
-                    } else {
-                        allAtts.add(s);
+            Collection<DbAttribute> dbAttributes = dbAttributeContainer.getDbAttributes().values();
+            for(Iterator<DbAttribute> iterator = dbAttributes.iterator(); iterator.hasNext(); ) {
+                DbAttribute dbAttribute = iterator.next();
+                if (dbAttribute.getAttribute().getSearchFieldAnnotation() != null) {
+                    ids.add(dbAttribute.getSolrAttributeName(prefix));
+                    if (dbAttribute.isAssociation() || dbAttribute.isMultiAssociation()) {
+                        makeFullIDList(dbAttribute.getAttributeClass(), dbAttribute.getSolrAttributeName(prefix), ids, deep+1);
                     }
                 }
             }
-            Comparator<String> llCom = new Comparator<String>() {
-                @Override
-                public int compare(String o1, String o2) {
-                    return o1.length() - o2.length();
-                }
+        }
 
-                @Override
-                public boolean equals(Object obj) {
-                    return false;
-                }
-            };
-            allIDs.sort(llCom);
+        private static void readAttributesToObject(ModelObjectInterface object, SolrDocument entries, String prefix, Class<? extends ModelObjectInterface> selectClass, List<ModelObjectInterface> objectInterfaceList) {
+            long timeSortIn = System.nanoTime();
+            DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(selectClass);
+            List<String> allIDs = null;
+            List<String> allAtts = null;
+
+            Pair<List<String>, List<String>> listPair = getListsOfIDsAndAtt(prefix, selectClass, entries);
+            allIDs = listPair.getFirst();
+            allAtts = listPair.getSecond();
+
+            timeSort = timeSort + (System.nanoTime() - timeSortIn);
             for(String attName : allIDs) {
                 String directAttName = attName.substring(prefix.length());
                 if (directAttName.endsWith("_ARRAY")) {
@@ -889,23 +958,31 @@ public class NQL {
                 }
                 DbAttribute solrDbAttribute = dbAttributeContainer.getSolrDbAttribute(directAttName);
                 if (solrDbAttribute != null) {
-                    if (solrDbAttribute.isMultiAssociation()) {
+                    if (entries.get(attName) == null) {
+                        //Do nothing ....
+                    } else if (solrDbAttribute.isMultiAssociation()) {
                         if (attName.endsWith("__ID_ARRAY")) {
                             List<String> ids = (List<String>) entries.get(attName);
-                            List inArray = new ArrayList();
+                            List<ModelObjectInterface> inArray = new ArrayList();
 
                             for(String attObjectID : ids) {
+                                long c = System.nanoTime();
                                 ModelObjectInterface modelObject = MQL.readObjectFromCache(solrDbAttribute.getAttributeClass(), attObjectID);
+                                timeCache = timeCache + (System.nanoTime() - c);
                                 if (modelObject == null){
+                                    long t = System.nanoTime();
                                     modelObject = ModelObjectProxy.createRaw(solrDbAttribute.getAttributeClass());
                                     modelObject.setObjectID(attObjectID);
-                                    readAttributesToObject(modelObject, entries, solrDbAttribute.getSolrAttributeName(prefix), solrDbAttribute.getAttributeClass());
+                                    timeCreate = timeCreate + (System.nanoTime() - t);
                                 }
                                 inArray.add(modelObject);
                             }
+                            readAttributesToObject(null, entries, solrDbAttribute.getSolrAttributeName(prefix), solrDbAttribute.getAttributeClass(), inArray);
+                            long t = System.nanoTime();
                             ModelObjectInterface[] o = (ModelObjectInterface[]) Array.newInstance(
                                     solrDbAttribute.getAttributeClass(),
                                     inArray.size());
+                            timeCreate = timeCreate + (System.nanoTime() - t);
                             solrDbAttribute.getAttribute().setAttributeValue(object, inArray.toArray(o));
 
                         }
@@ -913,13 +990,15 @@ public class NQL {
                         String attObjectID = (String) entries.get(attName);
                         ModelObjectInterface modelObject = MQL.readObjectFromCache(solrDbAttribute.getAttributeClass(), attObjectID);
                         if (modelObject == null){
+                            long t = System.nanoTime();
                             modelObject = ModelObjectProxy.createRaw(solrDbAttribute.getAttributeClass());
                             modelObject.setObjectID(attObjectID);
-                            readAttributesToObject(modelObject, entries, solrDbAttribute.getSolrAttributeName(prefix), solrDbAttribute.getAttributeClass());
+                            timeCreate = timeCreate + (System.nanoTime() - t);
+                            readAttributesToObject(modelObject, entries, solrDbAttribute.getSolrAttributeName(prefix), solrDbAttribute.getAttributeClass(), objectInterfaceList);
                         }
                         solrDbAttribute.getAttribute().setAttributeValue(object, modelObject);
                     } else {
-                        readAttributeValueToObject(object, solrDbAttribute, entries, attName);
+                        readAttributeValueToObject(object, solrDbAttribute, entries, attName, objectInterfaceList);
                     }
                 }
             }
@@ -930,81 +1009,13 @@ public class NQL {
                 }
                 DbAttribute solrDbAttribute = dbAttributeContainer.getSolrDbAttribute(directAttName);
                 if (solrDbAttribute != null) {
-                    readAttributeValueToObject(object, solrDbAttribute, entries, attName);
+                    readAttributeValueToObject(object, solrDbAttribute, entries, attName, objectInterfaceList);
                 }
             }
         }
 
-
-
-//        private static <T extends ModelObjectInterface> void readAttributesToObject(T object, String prefix, SolrDocument entries, Class<T> selectClass, String objectID) {
-//            //log.debug("addAttributesToDocument:X0");
-//            ModelObject modelObject = (ModelObject) object;
-//            DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(modelObject.getInterface());
-//            String objectIDVarName = (prefix.length() == 0 ? "" : prefix + "_") + "objectID" + (prefix.length() == 0 ? "" : "__ID");
-//            object.setObjectID((String) entries.get(objectIDVarName));
-//            //log.debug("addAttributesToDocument:X1");
-//            for (Iterator iterator = dbAttributeContainer.getDbAttributes().values().iterator(); iterator.hasNext();) {
-//                //log.debug("addAttributesToDocument:X2");
-//                DbAttribute dbAttribute = (DbAttribute) iterator.next();
-//                SearchField searchField = dbAttribute.getAttribute().getAnnotation(SearchField.class);
-//                if(searchField != null && dbAttribute.getInlineAttributeName() == null) {
-//                    if(!dbAttribute.isAssociation()) {
-//                        Object value = null;
-//                        value = dbAttributeContainer.getAttributeValue(modelObject, dbAttribute);
-//                        if (dbAttribute.isLocation() && value != null) {
-//                            //TODO
-//                        } else {
-//                            readAttributeValueToObject(object, dbAttribute, entries, value, prefix);
-//                        }
-//                        //log.debug("addAttributesToDocument:X6");
-//                    } else if (!dbAttribute.isMultiAssociation()) {
-//                        //log.debug("addAttributesToDocument:X7");
-//                        ModelObjectInterface value = MQL.readObjectFromCache(dbAttribute.getAttributeClass(), dbAttribute.getSolrAttributeName(prefix));
-//
-//                        if (value == null) {
-//                            value = ModelObjectProxy.createRaw(dbAttribute.getAttributeClass());
-//                            readAttributesToObject((T) value, dbAttribute.getSolrAttributeName(prefix), entries, dbAttribute.getAttributeClass(), objectID);
-//                        }
-//                        dbAttribute.getAttribute().setAttributeValue(object, value);
-//                    } else { //isMultiAssociation
-//                        if(dbAttribute.getAttributeClass().isEnum() || dbAttribute.getAttributeClass().isPrimitive()){
-//                            throw new RuntimeException("This is not implemented ... and should not be used... ");
-//                        } else {
-//                            throw new RuntimeException("This is not implemented ... and should not YET be used... ");
-////                            HashMap<String, ArrayList<Object>> values = new HashMap<String, ArrayList<Object>>();
-////                            for(int i = 0; vs != null && i < vs.length; i++){
-////                                ModelObjectInterface value = vs[i];
-////                                if(value != null && !storedObjects.containsKey(storedObjectsKey(prefix, value.getObjectID(), dbAttribute))){
-////                                    storedObjects.put(storedObjectsKey(prefix, value.getObjectID(), dbAttribute), value.getObjectID());
-////                                    getSearchValues(value, dbAttribute.getSolrAttributeName(prefix), storedObjects, values, inputDocument);
-////                                }
-////                            }
-////                            Iterator<String> nameIterator = values.keySet().iterator();
-////                            for(int i = 0; nameIterator.hasNext(); i++){
-////                                String name = nameIterator.next();
-////                                ArrayList<Object> objects = values.get(name);
-////                                String solrArrayName = name + "_ARRAY";
-////                                log.trace("Adding_to_array.size " + solrArrayName + "("+ (objects == null ? "-1" : (objects.size() == 1 ? ""+ objects.get(0) : ""+ objects.size())) +")");
-////                                if(!solrArrayName.contains("creationDate")) {
-////                                    inputDocument.addField(solrArrayName, objects);
-////                                }
-////                            }
-////                            //log.debug("addAttributesToDocument:X16");
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//
-
-
-        private static void readAttributeValueToObject(ModelObjectInterface object, DbAttribute dbAttribute, SolrDocument entries, Object value, String prefix) {
-            String solrAttributeName = dbAttribute.getSolrAttributeName(prefix);
-            readAttributeValueToObject(object, dbAttribute, entries, solrAttributeName);
-        }
-
-        private static void readAttributeValueToObject(ModelObjectInterface object, DbAttribute dbAttribute, SolrDocument entries, String solrAttributeName) {
+        private static void readAttributeValueToObject(ModelObjectInterface object, DbAttribute dbAttribute, SolrDocument entries, String solrAttributeName, List<ModelObjectInterface> objectInterfaceList) {
+            long timeSetValueIn = System.nanoTime();
             try {
                 int type = dbAttribute.getDataType().getType();
                 switch (type) {
@@ -1035,12 +1046,19 @@ public class NQL {
                             }
                         } else {
                             Object v = entries.get(solrAttributeName);
-                            if (v instanceof ArrayList && ((ArrayList) v).size() == 1 && !dbAttribute.isMultiAssociation()) {
+                            if (v != null && objectInterfaceList == null && v instanceof ArrayList && ((ArrayList) v).size() == 1 && !dbAttribute.isMultiAssociation()) {
                                 dbAttribute.getAttribute().setAttributeValue(object, ((ArrayList) v).get(0));
-                            } else if (v instanceof String) {
+                            } else if (v != null && v instanceof String) {
                                 dbAttribute.getAttribute().setAttributeValue(object, v);
+                            } else if (v != null && v instanceof ArrayList && objectInterfaceList != null) {
+                                ArrayList va = (ArrayList) v;
+                                for (int i = 0; i < objectInterfaceList.size(); i++) {
+                                    dbAttribute.getAttribute().setAttributeValue(objectInterfaceList.get(i), va.get(i));
+                                }
                                 //TODO
                                 //Read: _Article_analyzed__ID_ArticleAnalyzed_entities__TXT_ARRAY_Entity_name__TXT_ARRAY
+                            } else if (v == null) {
+
                             } else {
                                 log.warn("Dont know what to do with solrAttributeName(" + solrAttributeName + ") -> " + v);
                             }
@@ -1052,30 +1070,40 @@ public class NQL {
                         dbAttribute.getAttribute().setAttributeValue(object, valueInt);
                         break;
                     case DbDataType.DB_DOUBLE:
+                        if (entries.get(solrAttributeName) instanceof ArrayList) {
+                            //TODO: Implement lat,lon
+                            break;
+                        }
                         Double valueDouble = new Double("" + entries.get(solrAttributeName));
-                        dbAttribute.getAttribute().setAttributeValue(object, valueDouble);
+                        if (valueDouble != null) {
+                            dbAttribute.getAttribute().setAttributeValue(object, valueDouble);
+                        }
                         break;
                     case DbDataType.DB_FLOAT:
                         Float valueFloat = new Float("" + entries.get(solrAttributeName));
-                        dbAttribute.getAttribute().setAttributeValue(object, valueFloat);
+                        if (valueFloat != null) {
+                            dbAttribute.getAttribute().setAttributeValue(object, valueFloat);
+                        }
                         break;
                     case DbDataType.DB_BOOLEAN:
                         Boolean valueBoolean = (Boolean) entries.get(solrAttributeName);
-                        dbAttribute.getAttribute().setAttributeValue(object, valueBoolean);
+                        if (valueBoolean != null) {
+                            dbAttribute.getAttribute().setAttributeValue(object, valueBoolean);
+                        }
                         break;
                     case DbDataType.DB_DATE:
-                        //log.debug("***TimeWrite: " + attributeName + " " + (value != null ? ((Calendar) value).getTime() : "null"));
-//                        SimpleDateFormat xmlDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'"); //2011-11-28T18:30:30Z
-//                        xmlDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-                        Calendar vc = Calendar.getInstance();
-                        vc.setTime((Date) entries.get(solrAttributeName));
-//                        Calendar valueCalendar = ;
-                        dbAttribute.getAttribute().setAttributeValue(object, vc);
-                        //solrObj.addField(solrAttributeName, xmlDateFormat.format(((Calendar) value).getTime()));
+                        Object vv = entries.get(solrAttributeName);
+                        if (vv != null) {
+                            Calendar vc = Calendar.getInstance();
+                            vc.setTime((Date) vv);
+                            dbAttribute.getAttribute().setAttributeValue(object, vc);
+                        }
                         break;
                 }
             } catch (Exception e) {
-                log.error("Some error in readAttributeValueToObject:" + e, e);
+                log.error("Some error in readAttributeValueToObject(" + solrAttributeName+ "):" + e, e);
+            } finally {
+                timeSetValueIn = timeSetValueIn + (System.nanoTime() - timeSetValueIn);
             }
         }
 

@@ -69,6 +69,11 @@ public class DbObjectReader {
         return readObjectFromDb(objectId, targetClass, map, associationConstrain, "", true);
     }
 
+    public static Object readObjectFromCache(String objectId, Class targetClass) {
+        ModelObject modelObject = (ModelObject) ObjectCacheFactory.getInstance().getObjectCache(targetClass).getFromCache(objectId);
+        return modelObject;
+    }
+
 //    public static <T extends ModelObject> T  readObjectFromDb(String objectId, Class<T> targetClass) {
 //        AssociationConstrain associationConstrain = new AssociationConstrain();
 //        HashMap map = new HashMap();
@@ -135,14 +140,6 @@ public class DbObjectReader {
             if (objectId == null || objectId.equals("null")) {
                 log.warn("objectId == null ... returning null  ... targetClass("+ targetClass +") ", new Exception());
                 return null;
-            } else {
-//                if(targetClass.toString().endsWith("LimUser")){
-//                    StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
-//                    for(int i = 0; i < stackTraceElements.length; i++){
-//                        log.debug("StackTraceElement["+ i +"]" + stackTraceElements[i].getClassName() + "_" + stackTraceElements[i].getMethodName() + ":" + stackTraceElements[i].getLineNumber());
-//                    }
-//
-//                }
             }
             //Does the object exists in the cache.
             ModelObject modelObject = (ModelObject) ObjectCacheFactory.getInstance().getObjectCache(targetClass).getFromCache(objectId);
@@ -154,8 +151,6 @@ public class DbObjectReader {
 //                log.debug("readObjectFromDb::NOT found object in cache(" + objectId + ") targetClass("+ targetClass +")");
             }
 //            log.debug("readObjectFromDb:1 "  + objectId);
-
-
 
             DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(targetClass);
             if (dbAttributeContainer == null) {
@@ -174,22 +169,51 @@ public class DbObjectReader {
             if(targetClass.getAnnotation(DbInline.class) != null){
                 return null;
             }
-            //log.debug("readObjectFromDb:3 "  + objectId);
-            //Construct an instance of the modelObject.
             try {
                 modelObject = ModelObjectProxy.create(targetClass);
+                readIntoObjectFromDb(objectId, modelObject, targetClass, modelObjects, associationConstrain, attributePath, cache, posibleResultSet);
             } catch (Exception e) {
                 log.error("Fatal error ... not Java-Bean constructor for class = " + targetClass.getName());
             }
-            //log.debug("readObjectFromDb:4");
 
-            if (modelObject == null) {
-                //Its not possible to make an instance => we return null;
+            return (T) modelObject;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally{
+            try{
+                if(limSet != null && posibleResultSet == null){
+                    limSet.close();
+                    limSet = null;
+                }
+            } catch(Exception e){}
+
+        }
+    }
+
+    public static <T extends ModelObject> T readIntoObjectFromDb(String objectId, ModelObject modelObject, Class<T> targetClass, Map modelObjects, AssociationConstrain associationConstrain, String attributePath, boolean cache, LimResultSet posibleResultSet) {
+        LimResultSet limSet = null;
+        try {
+
+            DbAttributeContainer dbAttributeContainer = DbClassReflector.getDbAttributeContainer(targetClass);
+            if (dbAttributeContainer == null) {
+                log.error("We do not have a container that match this class. We can not continue." , new Exception());
                 return null;
             }
-            //log.debug("readObjectFromDb:5 " + posibleResultSet);
-            //The object should be put into the model object map; so that we dont read this
-            //object more than one time.
+            //log.debug("readObjectFromDb:2 "  + objectId);
+            //Have we been here before =>
+            ModelObject modelObjectFromMethodCache = (ModelObject) modelObjects.get(dbAttributeContainer.getClassName() + ":" + objectId);
+            if (modelObjectFromMethodCache != null) {
+                log.debug("readObjectFromDb: We have been here before; and can safely return this model object.");
+                //log.debug("Loop found. using allready created object. ");
+                return (T) modelObjectFromMethodCache;
+            }
+
+            if(targetClass.getAnnotation(DbInline.class) != null){
+                return null;
+            }
+            //log.debug("readObjectFromDb:3 "  + objectId);
+            //Construct an instance of the modelObject.
             modelObjects.put(dbAttributeContainer.getClassName() + ":" + objectId, modelObject);
 
             //Make the select statement which selects the tupel from the database.
@@ -198,7 +222,7 @@ public class DbObjectReader {
             try {
                 limSet = (posibleResultSet != null ? posibleResultSet : SQLStatementExecutor.doQuery(selectStatement));
                 ResultSet resultSet = limSet.getResultSet();
-                
+
                 if (resultSet != null) {
                     //log.debug("readObjectFromDb:6.1 " + objectId);
                     boolean isPosNotNull = posibleResultSet != null;
@@ -231,17 +255,15 @@ public class DbObjectReader {
             }
             modelObject.setNew(false);
             modelObject.setDirty(false);
-            if (cache && modelObject.isCachable()) {
-                //This model object has been fully loaded, with associations. And can be cached.
-                if (modelObject.getPrimaryKeyValue() != null) {
-//                    log.debug("Adding in cache: "+ modelObject.getClass() + ":" + modelObject.getPrimaryKeyValue());
-                    ObjectCacheFactory.getInstance().getObjectCache(modelObject).putInCache(modelObject.getPrimaryKeyValue(), modelObject);
-                } else {
-                    log.warn("Problem!!! modelObject.getPrimaryKeyValue() = " + modelObject.getPrimaryKeyValue());
-                }
-            } else {
-                log.warn("NOT USING CACHE : cache("+ cache +") && modelObject.isCachable("+ modelObject.isCachable() +") ");
-            }
+//            if (cache && modelObject.isCachable()) {
+//                //This model object has been fully loaded, with associations. And can be cached.
+//                if (modelObject.getPrimaryKeyValue() != null) {
+////                    log.debug("Adding in cache: "+ modelObject.getClass() + ":" + modelObject.getPrimaryKeyValue());
+//                    ObjectCacheFactory.getInstance().getObjectCache(modelObject).putInCache(modelObject.getPrimaryKeyValue(), modelObject);
+//                } else {
+//                    log.warn("Problem!!! modelObject.getPrimaryKeyValue() = " + modelObject.getPrimaryKeyValue());
+//                }
+//            }
             return (T) modelObject;
         } catch (Exception e) {
             e.printStackTrace();

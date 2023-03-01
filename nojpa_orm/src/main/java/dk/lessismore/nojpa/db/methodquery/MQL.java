@@ -81,6 +81,11 @@ public class MQL {
         return (T) DbObjectReader.readObjectFromDb(objectID, aClass);
     }
 
+    public static <T  extends ModelObjectInterface> T readObjectFromCache(Class<T> aClass, String objectID) {
+//        return MQ.select(aClass).where(MQ.mock(aClass).getObjectID(), MQ.Comp.EQUAL, objectID).getFirst();
+        return (T) DbObjectReader.readObjectFromCache(objectID, aClass);
+    }
+
 
     public static <T  extends ModelObjectInterface> T selectByFirstUnique(T sourceMock, Constraint constraint) {
         T firstUnique = MQL.select(sourceMock).getFirstUnique(constraint);

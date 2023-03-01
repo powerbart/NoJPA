@@ -53,6 +53,7 @@ public class DbAttributeContainer {
      * (key = attributeName, value=DbAttribute)
      */
     private Map<String, DbAttribute> dbAttributes = new HashMap<String, DbAttribute>();
+    private Map<String, DbAttribute> solrDbAttributes = new HashMap<String, DbAttribute>();
 
     private String sqlNameQuery = null;
 
@@ -79,6 +80,10 @@ public class DbAttributeContainer {
         return dbAttributes;
     }
 
+
+    public DbAttribute getSolrDbAttribute(String solrAttributeName) {
+        return solrDbAttributes.get(solrAttributeName);
+    }
 
     public DbAttribute getDbAttribute(String attributeName) {
         Map dbAttributes2 = getDbAttributes();
@@ -147,6 +152,16 @@ public class DbAttributeContainer {
                 }
 
                 getDbAttributes().put(attribute.getInlineAttributeName() != null ? attribute.getInlineAttributeName() : attribute.getAttributeName(), dbAttribute);
+
+                if(attribute.getSearchFieldAnnotation() != null) {
+                    solrDbAttributes.put(dbAttribute.getSolrAttributeName(""), dbAttribute);
+                    if (dbAttribute.isMultiAssociation()) {
+                        solrDbAttributes.put(dbAttribute.getSolrAttributeName("") + DbClassReflector.getDbAttributeContainer(dbAttribute.getAttributeClass()).getDbAttributes().get("objectID").getSolrAttributeName(""), dbAttribute);
+                        //dbAttributeContainer.getSolrDbAttribute("_ArticleDownloaded_authors__ID").getSolrAttributeName(prefix) + DbClassReflector.getDbAttributeContainer(Author.class).getDbAttributes().get("objectID").getSolrAttributeName("")
+                    }
+                }
+
+
             }
         }
 

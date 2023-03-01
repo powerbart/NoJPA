@@ -38,6 +38,14 @@ public interface ModelObject extends Serializable, ModelObjectInterface, Compara
 
     public void setNew(boolean isNew);
 
+    public boolean isRaw();
+
+    public void setRaw(boolean isRaw);
+
+    public boolean isRawInitDone();
+
+    public void setRawInitDone(boolean isNew);
+
     public void removeAllListnersForFieldName(String fieldName);
 
     public void removeAllListeners();

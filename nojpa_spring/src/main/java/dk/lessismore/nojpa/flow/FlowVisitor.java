@@ -46,6 +46,7 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
 
     private static MaxSizeMaxTimeMap<String> visitedMap = new MaxSizeMaxTimeMap<String>(20000, 6000);
 
+    protected int MAX_SAME_COUNT = 900;
     int sameCount = 0;
     int currentEnd = 0;
     int numberOfLoops = 0;
@@ -108,7 +109,7 @@ public abstract class FlowVisitor<T extends ModelObjectInterface> {
 
                 }
             }
-            if(numberOfLoops > 8 || sameCount > 900){
+            if(numberOfLoops > 8 || sameCount > MAX_SAME_COUNT){
                 log.debug("WorkQueue-has-not-changed-for-long-time: getCurrentQueueSize("+ getCurrentQueueSize() +"), getMinimumQueueSize("+ getMinimumQueueSize() +") sameCount: " + sameCount);
                 log.info("Will now try to force a shutdown... ");
                 break;

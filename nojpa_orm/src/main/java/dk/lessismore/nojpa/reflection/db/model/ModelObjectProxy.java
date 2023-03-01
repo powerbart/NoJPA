@@ -35,6 +35,8 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
 
     private final Class<? extends ModelObjectInterface> interfaceClass;
     private boolean doRemoteCache = true;
+    private boolean raw = false;
+    private boolean rawInitDone = true;
     private Object proxyObject;
     private String objectID = GuidFactory.getInstance().makeGuid();
     private final static HashMap<String, String> methodListenerMap = new HashMap<String, String>();
@@ -52,6 +54,35 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
         return toReturn;
     }
 
+    public static <T extends ModelObjectInterface> T createRaw(Class<T> interfaceClass) {
+        ModelObjectProxy object = new ModelObjectProxy(interfaceClass);
+        object.setRaw(true);
+        object.setRawInitDone(false);
+        object.proxyObject = Proxy.newProxyInstance(
+	        interfaceClass.getClassLoader(),
+	        new Class<?>[] { interfaceClass, ModelObject.class, },
+            object);
+        T toReturn = (T) object.proxyObject;
+//     log.info("Making new object of type " + interfaceClass + " with objectID("+ toReturn +") ", new Exception("THIS_IS_NOT_AN_EXCEPTION__JUST_DEBUG"));
+
+        return toReturn;
+    }
+
+    public boolean isRaw() {
+        return raw;
+    }
+
+    public void setRaw(boolean raw) {
+        this.raw = raw;
+    }
+
+    public boolean isRawInitDone() {
+        return rawInitDone;
+    }
+
+    public void setRawInitDone(boolean rawInitDone) {
+        this.rawInitDone = rawInitDone;
+    }
 
     public Object invoke(Object object, Method method, Object[] objects) throws Throwable {
         String name = method.getName();
@@ -125,6 +156,13 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
             if(dbAttribute.getAttribute().getAnnotation(Id.class) != null){
                 setObjectID("" + objects[0]);
             }
+
+            //
+            if (raw && rawInitDone) {
+                DbObjectReader.readIntoObjectFromDb(getObjectID(), (ModelObject) proxyObject, (Class<? extends ModelObject>) interfaceClass, new HashMap(), new AssociationConstrain(), "", false, null);
+                raw = false;
+            }
+
             setAssociation(method, objects[0]);
 
             if(methodListener != null){
@@ -252,6 +290,7 @@ public class ModelObjectProxy implements ModelObject, InvocationHandler {
 
     public void setObjectID(String objectID) {
         newPrimaryKey(this.objectID, objectID);
+        ObjectCacheFactory.getInstance().getObjectCache(interfaceClass).putInCache(objectID, proxyObject);
         this.objectID = objectID;
     }
 
