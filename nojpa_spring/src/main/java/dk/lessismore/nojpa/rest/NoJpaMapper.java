@@ -16,4 +16,13 @@ public class NoJpaMapper extends ObjectMapper {
         this.registerModule(new NoJpaModule());
 //        this.registerModule(new Jackson2HalModule());
     }
+
+
+    @Override
+    public ObjectMapper copy() {
+        ObjectMapper copy = super.copy();
+        copy.setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
+        copy.registerModule(new NoJpaModule());
+        return copy;
+    }
 }
