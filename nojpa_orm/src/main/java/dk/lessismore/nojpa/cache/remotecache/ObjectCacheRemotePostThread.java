@@ -101,7 +101,7 @@ public class ObjectCacheRemotePostThread extends Thread {
                 outputStream = null;
                 try {
                     if(errorCounter > 120){
-                        errorCounter = 0;
+                        errorCounter = 120;
                     }
                     if(errorCounter < 5 || errorCounter % 10 == 0) log.info("Will now sleep in " + errorCounter + " sec. And the retry...");
                     this.sleep((errorCounter) * 1000); // Will sleep for max 5 mins
