@@ -330,7 +330,7 @@ public class SolrSearchQuery extends NQL.SearchQuery{
 
     @Override
     protected String toStringDebugQuery() {
-        return solrQuery.toString().replace('+', ' ');
+        return solrQuery.toString().replace('+', ' ') + " ON SHARD("+ getShard() +")";
     }
 
 
