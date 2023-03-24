@@ -1,7 +1,5 @@
 package dk.lessismore.nojpa.reflection.db.model;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import java.io.Serializable;
 import java.util.*;
 
@@ -19,7 +17,6 @@ import java.util.*;
  * @author LESS-IS-MORE
  * @version 1.0 21-5-2
  */
-@XmlAccessorType(XmlAccessType.NONE)
 public interface ModelObject extends Serializable, ModelObjectInterface, Comparable {
 
     public Class<? extends ModelObjectInterface> getInterface();
