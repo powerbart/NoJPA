@@ -171,7 +171,7 @@ public class DbObjectReader {
             }
             try {
                 modelObject = ModelObjectProxy.create(targetClass);
-                readIntoObjectFromDb(objectId, modelObject, targetClass, modelObjects, associationConstrain, attributePath, cache, posibleResultSet);
+                modelObject = readIntoObjectFromDb(objectId, modelObject, targetClass, modelObjects, associationConstrain, attributePath, cache, posibleResultSet);
             } catch (Exception e) {
                 log.error("Fatal error ... not Java-Bean constructor for class = " + targetClass.getName());
             }
