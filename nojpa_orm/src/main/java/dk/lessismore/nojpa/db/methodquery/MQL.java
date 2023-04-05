@@ -50,7 +50,7 @@ public class MQL {
         clearMockCallSequence();
 
         if(joints.size() != 1){
-            throw new RuntimeException("We can only handle to ask one level down on an array");
+            throw new RuntimeException("We can only handle to ask one level down on an array...");
         }
 
         Pair<Class, String> joint = joints.get(0);
