@@ -879,11 +879,11 @@ public class MQL {
     }
 
 
-    private interface MockExtra {
+    public interface MockExtra {
         public <C extends ModelObjectInterface> Class<C> mockExtra_getSourceClass();
     }
 
-    private static class MockInvocationHandler implements InvocationHandler {
+    public static class MockInvocationHandler implements InvocationHandler {
 
         private final Class<? extends ModelObjectInterface> sourceClass;
 
