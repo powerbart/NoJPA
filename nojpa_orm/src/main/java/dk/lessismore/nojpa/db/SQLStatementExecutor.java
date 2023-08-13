@@ -224,7 +224,7 @@ public class SQLStatementExecutor {
             connection = (Connection) ConnectionPoolFactory.getPool().getFromPool();
             long start = System.currentTimeMillis();
             statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-//            log.debug("doQuery::Will run: " + sqlStatement.replaceAll("\n", " "));
+            log.debug("doQuery::Will run: " + sqlStatement.replaceAll("\n", " "));
 
             resultSet = statement.executeQuery(sqlStatement);
             long end = System.currentTimeMillis();
