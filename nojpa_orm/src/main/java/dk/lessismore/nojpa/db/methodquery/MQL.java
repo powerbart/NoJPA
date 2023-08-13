@@ -850,6 +850,17 @@ public class MQL {
             }
         }
 
+        public void visitAndDie(DbObjectVisitor visitor, int interval, int skip){
+            log.debug("Will run: DbObjectSelector.iterateObjectsFromDb(selectClass, statement, visitor)");
+            statement.addExpression(getExpressionAddJoins());
+            int count = Integer.MAX_VALUE;
+            for(int i = skip; i < count && !visitor.getDone(); ) {
+                this.limit(i, i + interval);
+                DbObjectSelector.iterateObjectsFromDb(selectClass, statement, visitor);
+                i = i + interval;
+            }
+        }
+
         public void visit(DbObjectVisitor visitor, int interval){
             visit(visitor, interval, 0);
         }
