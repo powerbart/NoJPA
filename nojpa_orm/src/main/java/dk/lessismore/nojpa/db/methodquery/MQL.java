@@ -551,6 +551,22 @@ public class MQL {
             return DbObjectSelector.maxFromDbAsLong(sumAtt, statement);
         }
 
+        public Calendar getMax(Calendar mock){
+            List<Pair<Class, String>> joints = getJoinsByMockCallSequence();
+            log.debug("************************ joints " + joints.size());
+
+            Pair<Class, String> pair = getSourceAttributePair();
+            String attribute = makeAttributeIdentifier(pair);
+            if(joints.size() > 0){
+                Expression expression = newLeafExpression();
+                rootConstraints.add(new ExpressionConstraint(expression, joints));
+            }
+            statement.addExpression(getExpressionAddJoins());
+            String sumAtt = creator.makeAttributeIdentifier(pair.getFirst(), pair.getSecond());
+            clearMockCallSequence();
+            return DbObjectSelector.maxFromDbAsCalendar(sumAtt, statement);
+        }
+
         public int getMax(int mock){
             return (int) getMax(0L);
         }

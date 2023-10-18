@@ -13,10 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * This class can execute an select sql statement; and load each of the objects which
@@ -416,6 +414,65 @@ public class DbObjectSelector {
                 log.warn("Resultset was null");
                 return 0;
             }
+        } catch(Exception e){
+            log.error("countSumFromDb: "+ e, e);
+            e.printStackTrace();
+            throw new RuntimeException("countSumFromDb:" +  e);
+        } finally {
+            if(limSet != null) limSet.close();
+        }
+    }
+
+    public static Calendar maxFromDbAsCalendar(String sumAttribute, SelectSQLStatement selectSqlStatement) {
+        LimResultSet limSet = null;
+        try{
+            String countAttribute = "max("+ sumAttribute +") as nr";
+            selectSqlStatement.addAttributeName(countAttribute);
+            limSet = SQLStatementExecutor.doQuery(selectSqlStatement);
+            ResultSet resultSet = limSet.getResultSet();
+            selectSqlStatement.removeAttributeName(countAttribute);
+            if(resultSet != null && resultSet.next()) {
+                try {
+                    String name = "nr";
+                    String strValue = resultSet.getString(name);
+                    if (strValue != null) {
+                        if (!strValue.equals("0000-00-00")) {
+                            try {
+                                if (resultSet.getTime(name) != null) {
+                                    if (resultSet.getDate(name) != null) {
+                                        Calendar time = Calendar.getInstance();
+                                        Calendar date = Calendar.getInstance();
+
+                                        time.setTime(resultSet.getTime(name));
+                                        date.setTime(resultSet.getDate(name));
+                                        date.set(Calendar.HOUR_OF_DAY, time.get(Calendar.HOUR_OF_DAY));
+                                        date.set(Calendar.MINUTE, time.get(Calendar.MINUTE));
+                                        date.set(Calendar.SECOND, time.get(Calendar.SECOND));
+                                        //log.debug("*** Time " + name + ":" + date.getTime());
+                                        return date;
+                                    }
+                                }
+                            } catch (java.sql.SQLException msg){
+                                if(msg.toString().contains("Bad format for Time")){
+                                    final Date parse = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(strValue);
+                                    Calendar c = Calendar.getInstance();
+                                    c.setTime(parse);
+                                    return c;
+                                } else {
+                                    throw  msg;
+                                }
+                            }
+                        }
+                    }
+                }catch(Exception e) {
+                    log.error("Count objects failed", e);
+                    return null;
+                }
+            } else {
+                log.warn("Resultset was null");
+                return null;
+            }
+            return null;
         } catch(Exception e){
             log.error("countSumFromDb: "+ e, e);
             e.printStackTrace();
