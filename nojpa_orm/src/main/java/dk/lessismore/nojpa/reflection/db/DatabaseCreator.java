@@ -279,7 +279,7 @@ public class DatabaseCreator {
 
         if (limSet == null) {
             log.debug("No table for this class ... Creating new " + targetClass);
-            List list = makeTableFromClass(targetClass, Collections.emptyMap());
+            List list = makeTableFromClass(targetClass);
             Iterator iterator = list.iterator();
             for (int i = 0; iterator.hasNext(); i++) {
                 String tableStr = ((SQLStatement) iterator.next()).makeStatement();
